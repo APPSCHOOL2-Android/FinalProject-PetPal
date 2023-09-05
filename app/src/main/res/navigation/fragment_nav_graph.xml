@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/fragment_nav_graph.xml"
-    app:startDestination="@id/item_shop">
+    app:startDestination="@id/item_walk">
 
     <fragment
         android:id="@+id/item_shop"
@@ -22,12 +22,30 @@
         tools:layout="@layout/fragment_walk" />
     <fragment
         android:id="@+id/item_chat"
-        android:name="com.petpal.mungmate.ChatFragment"
+        android:name="com.petpal.mungmate.ui.chatting.ChatFragment"
         android:label="fragment_chat"
-        tools:layout="@layout/fragment_chat" />
+        tools:layout="@layout/fragment_chat" >
+        <action
+            android:id="@+id/action_item_chat_to_item_chat_room"
+            app:destination="@id/item_chat_room" />
+    </fragment>
     <fragment
         android:id="@+id/item_mypage"
         android:name="com.petpal.mungmate.MyPageFragment"
         android:label="fragment_my_page"
         tools:layout="@layout/fragment_my_page" />
+    <fragment
+        android:id="@+id/item_chat_room"
+        android:name="com.petpal.mungmate.ui.chatting.ChatRoomFragment"
+        android:label="fragment_chat_room"
+        tools:layout="@layout/fragment_chat_room" >
+        <action
+            android:id="@+id/action_item_chat_room_to_item_walk_mate_request"
+            app:destination="@id/item_walk_mate_request" />
+    </fragment>
+    <fragment
+        android:id="@+id/item_walk_mate_request"
+        android:name="com.petpal.mungmate.ui.chatting.WalkMateRequestFragment"
+        android:label="fragment_walk_mate_request"
+        tools:layout="@layout/fragment_walk_mate_request" />
 </navigation>

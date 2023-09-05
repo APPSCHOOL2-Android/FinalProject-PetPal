@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 채팅방 아직 읽지 않은 메시지 개수 TextView 빨간 동그라미 배경-->
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <solid android:color="@color/md_theme_dark_errorContainer"/>
+    <corners android:radius="100dp"/>
+    <size
+        android:width="20dp"
+        android:height="20dp"
+    />
+</shape>
