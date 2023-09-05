@@ -29,6 +29,7 @@ class MainFragment : Fragment() {
         }
 
         return fragmentMainBinding.root
+
     }
 
 }

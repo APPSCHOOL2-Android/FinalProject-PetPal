@@ -31,6 +31,7 @@ android {
         jvmTarget = '1.8'
     }
 
+
     viewBinding {
         enabled = true
     }
@@ -49,4 +50,17 @@ dependencies {
     // Kotlin
     implementation("androidx.navigation:navigation-fragment-ktx:2.5.3")
     implementation("androidx.navigation:navigation-ui-ktx:2.5.3")
+
+
+    //Kakao Map
+    //implementation 'net.daum.mf.map.android:map-view:1.0.0'
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation files('libs/libDaumMapAndroid.jar')
+
+    //Kakao Map Search
+    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
+
+    //Circle Image View
+    implementation 'de.hdodenhof:circleimageview:3.1.0' 
 }

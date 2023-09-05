@@ -2,7 +2,17 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-permission android:name="android.permission.INTERNET">
+    </uses-permission>
+
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION">
+    </uses-permission>
+
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION">
+    </uses-permission>
+
     <application
+        android:usesCleartextTraffic="true"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -19,8 +29,12 @@
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
+
             </intent-filter>
         </activity>
+        <!-- 예시 -->
+        <meta-data android:name="com.kakao.sdk.AppKey" android:value="f4864fa3e86dfae5492b164a3053a125"/>
     </application>
+
 
 </manifest>
