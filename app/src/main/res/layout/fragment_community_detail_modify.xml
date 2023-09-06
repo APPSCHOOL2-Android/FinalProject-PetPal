@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".community.CommunityDetailModifyFragment">
+
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/communityModifyToolbar"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:minHeight="?attr/actionBarSize"
+        android:theme="?attr/actionBarTheme"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:title="@string/community_modify" />
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/communityPostModifyTitleTextInputLayout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:hint="@string/community_post_title"
+        android:padding="@dimen/common_padding"
+        app:endIconMode="clear_text"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/communityModifyToolbar">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/communityPostWritingTitleTextInputEditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:maxLength="30" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/communityPostModifyCategory"
+        style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/common_padding"
+        android:layout_marginEnd="@dimen/common_padding"
+        android:hint="@string/community_post_writing_category"
+        app:layout_constraintEnd_toEndOf="@id/communityPostModifyTitleTextInputLayout"
+        app:layout_constraintStart_toStartOf="@id/communityPostModifyTitleTextInputLayout"
+        app:layout_constraintTop_toBottomOf="@id/communityPostModifyTitleTextInputLayout">
+
+        <AutoCompleteTextView
+            android:id="@+id/categoryItem"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="none" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/communityPostModifyContentTextInputLayout"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginBottom="@dimen/common_padding"
+        android:gravity="top"
+        android:padding="@dimen/common_padding"
+        app:hintEnabled="false"
+        app:layout_constraintBottom_toTopOf="@id/communityModifyPostImageHorizontalScrollView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/communityPostModifyCategory">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/communityPostModifyContentTextInputEditText"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="top"
+            android:hint="@string/community_post_writing_contentText"
+            android:maxLength="300" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <androidx.appcompat.widget.AppCompatImageButton
+        android:id="@+id/communityModifyImageButton"
+        style="@style/Widget.AppCompat.Button"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:src="@drawable/add"
+        android:layout_marginStart="@dimen/common_padding"
+        app:layout_constraintStart_toStartOf="@id/communityPostModifyContentTextInputLayout"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginBottom="@dimen/common_padding"
+        app:layout_constraintEnd_toStartOf="@id/communityModifyPostImageHorizontalScrollView"
+        app:layout_constraintTop_toBottomOf="@id/communityPostModifyContentTextInputLayout" />
+
+
+    <HorizontalScrollView
+        android:id="@+id/communityModifyPostImageHorizontalScrollView"
+        style="@style/Widget.MaterialComponents.TimePicker.ImageButton"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_margin="@dimen/common_padding"
+        app:layout_constraintBottom_toBottomOf="@id/communityModifyImageButton"
+        app:layout_constraintStart_toEndOf="@id/communityModifyImageButton">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginEnd="@dimen/common_padding"
+                android:src="@mipmap/ic_launcher" />
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/common_padding"
+                android:src="@mipmap/ic_launcher" />
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/common_padding"
+                android:src="@mipmap/ic_launcher" />
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/common_padding"
+                android:src="@mipmap/ic_launcher" />
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/common_padding"
+                android:src="@mipmap/ic_launcher" />
+
+        </LinearLayout>
+    </HorizontalScrollView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
