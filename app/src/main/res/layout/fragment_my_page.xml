@@ -179,15 +179,14 @@
                                     android:textAppearance="@style/TextAppearance.Material3.LabelSmall" />
                             </LinearLayout>
 
-                            <ImageView
+                            <de.hdodenhof.circleimageview.CircleImageView
                                 android:id="@+id/imageViewMatchProfile"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginStart="12dp"
-                                android:background="@drawable/circular_shape"
                                 android:clickable="true"
                                 android:focusable="true"
-                                android:padding="4dp"
+                                android:padding="0dp"
                                 android:src="@drawable/pets_24px" />
 
                             <LinearLayout
