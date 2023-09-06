@@ -24,5 +24,6 @@
     <string name="walk_record_title">산책기록</string>
     <string name="today_walking_record">오늘 산책 기록</string>
     <string name="monthly_walking_record">이달의 산책 기록</string>
+    <string name="place_date_distinction">·</string>
 
 </resources>

@@ -54,6 +54,10 @@
         android:label="fragment_my_page"
         tools:layout="@layout/fragment_my_page" />
     <fragment
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes
         android:id="@+id/communityWritingFragment"
         android:name="com.petpal.mungmate.community.CommunityWritingFragment"
         android:label="fragment_community_writing"
@@ -99,4 +103,23 @@
             app:popEnterAnim="@anim/from_right"
             app:popExitAnim="@anim/to_left" />
     </fragment>
+<<<<<<< Updated upstream
+=======
+    <fragment
+        android:id="@+id/item_chat_room"
+        android:name="com.petpal.mungmate.ui.chatting.ChatRoomFragment"
+        android:label="fragment_chat_room"
+        tools:layout="@layout/fragment_chat_room" >
+        <action
+            android:id="@+id/action_item_chat_room_to_item_walk_mate_request"
+            app:destination="@id/item_walk_mate_request" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/item_walk_mate_request"
+        android:name="com.petpal.mungmate.ui.chatting.WalkMateRequestFragment"
+        android:label="fragment_walk_mate_request"
+        tools:layout="@layout/fragment_walk_mate_request" />
+
+>>>>>>> Stashed changes
 </navigation>

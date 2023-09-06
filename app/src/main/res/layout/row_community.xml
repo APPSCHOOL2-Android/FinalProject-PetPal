@@ -59,11 +59,9 @@
             android:id="@+id/communityPostDateCreated"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingStart="@dimen/common_padding"
-            android:paddingEnd="@dimen/common_padding"
-            android:text="30분전"
+            android:text="@string/place_date_distinction"
             android:textAppearance="@style/TextAppearance.AppCompat.Small"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/communityUserPlace"
             app:layout_constraintTop_toBottomOf="@id/communityUserNickName" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
@@ -142,6 +140,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/common_padding"
+        android:layout_marginStart="@dimen/common_margin"
+        android:layout_marginEnd="@dimen/common_margin"
         app:dividerColor="@color/dividerColor"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
