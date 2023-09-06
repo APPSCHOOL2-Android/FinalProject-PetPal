@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--채팅방 메시지 배경-->
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <stroke
+        android:color="@color/seed"
+        android:width="1dp"
+    />
+    <solid android:color="@color/md_theme_light_background"/>
+    <corners android:radius="20dp"/>
+</shape>
