@@ -47,7 +47,7 @@
         android:id="@+id/item_chat"
         android:name="com.petpal.mungmate.ui.chatting.ChatFragment"
         android:label="fragment_chat"
-        tools:layout="@layout/fragment_chat" >
+        tools:layout="@layout/fragment_chat">
         <action
             android:id="@+id/action_item_chat_to_item_chat_room"
             app:destination="@id/item_chat_room" />
@@ -58,7 +58,6 @@
         android:label="fragment_my_page"
         tools:layout="@layout/fragment_my_page" />
     <fragment
-<<<<<<< HEAD
         android:id="@+id/communityWritingFragment"
         android:name="com.petpal.mungmate.community.CommunityWritingFragment"
         android:label="fragment_community_writing"
@@ -92,7 +91,8 @@
         android:id="@+id/communityDetailModifyFragment"
         android:name="com.petpal.mungmate.community.CommunityDetailModifyFragment"
         android:label="fragment_community_detail_modify"
-        tools:layout="@layout/fragment_community_detail_modify" >
+        tools:layout="@layout/fragment_community_detail_modify">
+
         <action
             android:id="@+id/action_communityDetailModifyFragment_to_item_community"
             app:destination="@id/item_community" />
@@ -104,19 +104,22 @@
             app:popEnterAnim="@anim/from_right"
             app:popExitAnim="@anim/to_left" />
     </fragment>
-=======
+
+
+    <fragment
         android:id="@+id/item_chat_room"
         android:name="com.petpal.mungmate.ui.chatting.ChatRoomFragment"
         android:label="fragment_chat_room"
-        tools:layout="@layout/fragment_chat_room" >
+        tools:layout="@layout/fragment_chat_room">
         <action
             android:id="@+id/action_item_chat_room_to_item_walk_mate_request"
             app:destination="@id/item_walk_mate_request" />
     </fragment>
+
     <fragment
         android:id="@+id/item_walk_mate_request"
         android:name="com.petpal.mungmate.ui.chatting.WalkMateRequestFragment"
         android:label="fragment_walk_mate_request"
         tools:layout="@layout/fragment_walk_mate_request" />
->>>>>>> 55379ed6e163d6bc126321866848deac4a13f532
+
 </navigation>

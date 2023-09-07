@@ -23,7 +23,6 @@ class CommunityDetailCommentAdapter(private val context: Context) :
         RecyclerView.ViewHolder(item.root) {
         val communityCommentMenuImageButton: ImageButton = item.communityCommentMenuImageButton
         val communityProfileImage: ImageView = item.communityCommentProfileImage
-        val communityPostTitle: TextView = item.communityCommentPostTitle
         val communityUserNickName: TextView = item.communityCommentUserNickName
         val communityUserPlace: TextView = item.communityCommentUserPlace
         val communityPostDateCreated: TextView = item.communityCommentPostDateCreated
@@ -54,9 +53,10 @@ class CommunityDetailCommentAdapter(private val context: Context) :
             .centerCrop()
             .into(holder.communityProfileImage)
 
-        holder.communityPostTitle.text = "귀여운 강아지 사진"
+
         holder.communityUserNickName.text = "리트리버군"
-        holder.communityUserPlace.text = "제주특별자치도 제주시 애월읍"
+        holder.communityUserPlace.text = "제주시 애월읍"
+
         holder.communityPostDateCreated.text = "30분전"
         holder.communityContent.text =
             "귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다."
