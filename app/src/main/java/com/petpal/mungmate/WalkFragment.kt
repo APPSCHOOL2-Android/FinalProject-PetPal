@@ -11,6 +11,8 @@ import androidx.core.view.GravityCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.google.android.material.shape.CornerFamily
+import com.google.android.material.shape.ShapeAppearanceModel
 import com.petpal.mungmate.databinding.FragmentWalkBinding
 
 
@@ -23,17 +25,21 @@ class WalkFragment : Fragment() {
     ): View? {
        fragmentWalkBinding= FragmentWalkBinding.inflate(layoutInflater)
         fragmentWalkBinding.buttonWalk.setOnClickListener {
-            val bottomSheetView = layoutInflater.inflate(R.layout.row_walk_bottom_sheet_place, null)
+            val bottomSheetView = layoutInflater.inflate(R.layout.row_walk_bottom_sheet_user, null)
             val bottomSheetDialog = BottomSheetDialog(requireActivity())
             bottomSheetDialog.setContentView(bottomSheetView)
             bottomSheetDialog.show()
 //            fragmentWalkBinding.LinearLayoutOffWalk.visibility=View.GONE
 //            fragmentWalkBinding.LinearLayoutOnWalk.visibility=View.VISIBLE
         }
+
         fragmentWalkBinding.chipMapFilter.setOnClickListener {
 
             fragmentWalkBinding.drawerLayout.setScrimColor(Color.parseColor("#FFFFFF"))
             fragmentWalkBinding.drawerLayout.openDrawer(GravityCompat.END);
+        }
+        fragmentWalkBinding.buttonFilterSubmit.setOnClickListener {
+            fragmentWalkBinding.drawerLayout.closeDrawer(GravityCompat.END)
         }
 
         fragmentWalkBinding.buttonStopWalk.setOnClickListener {
