@@ -1,0 +1,50 @@
+<resources>
+    <!-- User Filters -->
+    <string-array name="distance_array">
+        <item>전체</item>
+        <item>1km</item>
+        <item>2km</item>
+        <item>3km</item>
+        <item>4km</item>
+    </string-array>
+
+    <string-array name="gender_array">
+        <item>전체</item>
+        <item>남자</item>
+        <item>여자</item>
+        <item>밝히고 싶지 않음</item>
+    </string-array>
+
+    <string-array name="age_array">
+        <item>전체</item>
+        <item>10대</item>
+        <item>20대</item>
+        <item>30대</item>
+        <item>40대</item>
+    </string-array>
+
+    <string-array name="breed_array">
+        <item>전체</item>
+        <item>대형견</item>
+        <item>중형견</item>
+        <item>소형견</item>
+    </string-array>
+
+    <string-array name="temperament_array">
+        <item>전체</item>
+        <item>온순함</item>
+        <item>활발함</item>
+    </string-array>
+
+    <string-array name="pet_gender_array">
+        <item>전체</item>
+        <item>남아</item>
+        <item>여아</item>
+    </string-array>
+
+    <string-array name="neutered_array">
+        <item>전체</item>
+        <item>중성화 완료</item>
+        <item>중성화 전</item>
+    </string-array>
+</resources>
