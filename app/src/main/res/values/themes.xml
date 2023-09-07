@@ -30,6 +30,29 @@
     </style>
 
 
+
+    </style>
+
+    <style name="CustomChipChoice" parent="@style/Widget.MaterialComponents.Chip.Filter">
+
+        <item name="chipBackgroundColor">@color/slecte_checked_chip</item>
+
+        <item name="android:textColor">@color/slecte_checked_chip_text</item>
+
+    </style>
+
+    <style name="BottomNavigationView">
+        <item name="colorSecondaryContainer">@color/seed</item>
+    </style>
+
+    <style name="BottomNavigationTitle">
+        <item name="android:textSize">12sp</item>
+    </style>
+
+    <style name="MyTextSize" parent="TextAppearance.AppCompat">
+        <item name="android:textSize">12sp</item>
+    </style>
+
     <style name="Theme.MungMate.SplashScreen" parent="Theme.MungMate" />
 
     <!--    Splash Screen Theme-->
@@ -40,5 +63,6 @@
         <item name="postSplashScreenTheme">@style/Theme.MungMate.SplashScreen</item>
 
     </style>
+
 
 </resources>

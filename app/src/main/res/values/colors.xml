@@ -65,5 +65,6 @@
     <color name="white">#ffffff</color>
     <color name="black">#000000</color>
 
+    <color name="bottom_navigation_state_checked_false">#33000000</color>
 
 </resources>
