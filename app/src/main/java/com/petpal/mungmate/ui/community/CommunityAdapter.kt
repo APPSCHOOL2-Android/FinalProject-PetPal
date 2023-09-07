@@ -10,6 +10,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.airbnb.lottie.LottieAnimationView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.faltenreich.skeletonlayout.Skeleton
+import com.faltenreich.skeletonlayout.createSkeleton
 import com.petpal.mungmate.databinding.RowCommunityBinding
 
 class CommunityAdapter(private val context: Context) :
@@ -26,7 +28,6 @@ class CommunityAdapter(private val context: Context) :
         val communityPostImage: ImageView = item.communityPostImage
         val communityContent: TextView = item.communityContent
         val communityCommentTextView: TextView = item.communityCommentTextView
-
         val communityFavoriteLottie: LottieAnimationView = item.communityFavoriteLottie
 
         init {
@@ -93,6 +94,6 @@ class CommunityAdapter(private val context: Context) :
 
         }
 
-    }
 
+    }
 }
