@@ -21,6 +21,8 @@
         android:id="@+id/communityChipGroup"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/common_margin"
+        android:layout_marginEnd="@dimen/common_margin"
         app:checkedChip="@id/allChip"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -29,36 +31,36 @@
 
         <com.google.android.material.chip.Chip
             android:id="@+id/allChip"
+            style="@style/CustomChipChoice"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/chip_all"
-            style="@style/CustomChipChoice"
             android:textAppearance="@style/TextAppearance.AppCompat.Small"
             app:checkedIcon="@null"
             app:checkedIconVisible="false" />
 
         <com.google.android.material.chip.Chip
             android:id="@+id/dailyChip"
+            style="@style/CustomChipChoice"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/chip_daily"
-            style="@style/CustomChipChoice"
             android:textAppearance="@style/TextAppearance.AppCompat.Small"
             app:checkedIcon="@null"
             app:checkedIconVisible="false" />
 
         <com.google.android.material.chip.Chip
             android:id="@+id/walkLogChip"
+            style="@style/CustomChipChoice"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/chip_walk_log"
-            style="@style/CustomChipChoice"
             android:textAppearance="@style/TextAppearance.AppCompat.Small"
             app:checkedIcon="@null"
             app:checkedIconVisible="false" />
 
         <com.google.android.material.chip.Chip
-            android:id="@+id/place_review"
+            android:id="@+id/placeReviewChip"
             style="@style/CustomChipChoice"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -84,12 +86,12 @@
         android:id="@+id/communityPostWritingFab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:clickable="true"
         android:layout_margin="@dimen/common_padding"
+        android:clickable="true"
+        android:focusable="true"
         android:src="@drawable/edit"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:focusable="true" />
+        app:layout_constraintEnd_toEndOf="parent" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

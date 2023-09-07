@@ -3,6 +3,7 @@ package com.petpal.mungmate.ui.community
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -13,6 +14,8 @@ import com.faltenreich.skeletonlayout.Skeleton
 import com.faltenreich.skeletonlayout.applySkeleton
 import com.faltenreich.skeletonlayout.createSkeleton
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.android.material.chip.Chip
+import com.google.android.material.snackbar.Snackbar
 import com.petpal.mungmate.R
 import com.petpal.mungmate.databinding.FragmentCommunityBinding
 
@@ -29,12 +32,50 @@ class CommunityFragment : Fragment() {
 
         bottomNavigationViewVISIBLE()
         communityBinding.run {
+            communityToolbar.run {
+                inflateMenu(R.menu.community_category_menu)
 
+                setOnMenuItemClickListener {
+                    when (it?.itemId) {
+                        R.id.item_category -> {
+                            findNavController()
+                                .navigate(R.id.action_item_community_to_communityCategoryListFragment)
+                        }
 
+                    }
+                    false
+                }
+            }
 
-            communityRecyclerView()
+            //Chip 이벤트 처리
+            communityChipGroup.setOnCheckedStateChangeListener { group, checkedId ->
+
+                val selectedChip = group.findViewById<Chip>(group.checkedChipId)
+                val selectedCategory = selectedChip.text.toString()
+                Log.d("확인", selectedCategory)
+                when (selectedCategory) {
+                    "전체보기" -> {
+                        communityRecyclerView()
+                    }
+
+                    "일상보기" -> {
+
+                    }
+
+                    "산책일지" -> {
+
+                    }
+
+                    "장소후기" -> {
+
+                    }
+
+                }
+            }
+
             communityPostWritingFab.setOnClickListener {
-              it.findNavController().navigate(R.id.action_item_community_to_communityWritingFragment)
+                it.findNavController()
+                    .navigate(R.id.action_item_community_to_communityWritingFragment)
             }
 
         }
@@ -50,7 +91,6 @@ class CommunityFragment : Fragment() {
 
     private fun FragmentCommunityBinding.communityRecyclerView() {
         communityPostRecyclerView.run {
-
             val communityAdapter = CommunityAdapter(requireContext())
             adapter = communityAdapter
             setHasFixedSize(true)
