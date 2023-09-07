@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical">
 
     <FrameLayout
@@ -15,30 +15,52 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
 
-        <EditText
-            android:id="@+id/searchUser"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="top|start"
-            android:layout_marginStart="8dp"
-            android:layout_marginLeft="8dp"
-            android:layout_marginTop="8dp"
-            android:background="@android:drawable/editbox_background"
-            android:drawableStart="@drawable/menu_24px"
-            android:drawableEnd="@drawable/search_24px"
-            android:hint="검색어를 입력하세요"
-            android:padding="12dp" />
+            android:layout_height="match_parent"
+            android:orientation="vertical">
 
-        <ToggleButton
-            android:id="@+id/toggleWalk"
-            android:layout_width="100dp"
-            android:layout_height="30dp"
-            android:layout_gravity="top|start"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="65dp"
-            android:background="@drawable/toggle_button_animated_background"
-            android:textOff="산책중아님"
-            android:textOn="산책중" />
+            <EditText
+                android:id="@+id/searchUser"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="top|start"
+                android:layout_marginStart="8dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginTop="8dp"
+                android:background="@android:drawable/editbox_background"
+                android:drawableStart="@drawable/menu_24px"
+                android:drawableEnd="@drawable/search_24px"
+                android:hint="검색어를 입력하세요"
+                android:padding="12dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal">
+
+                <ToggleButton
+                    android:id="@+id/toggleWalk"
+                    android:layout_width="100dp"
+                    android:layout_height="30dp"
+                    android:layout_gravity="top|start"
+                    android:layout_marginStart="16dp"
+                    android:background="@drawable/toggle_button_animated_background"
+                    android:textOff="산책중아님"
+                    android:textOn="산책중" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipMapFilter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="필터" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+
     </FrameLayout>
 
     <LinearLayout
