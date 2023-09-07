@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/fragment_nav_graph.xml"
-    app:startDestination="@id/item_walk">
+    app:startDestination="@id/item_FAQ">
 
     <fragment
         android:id="@+id/item_shop"
@@ -48,4 +48,27 @@
         android:name="com.petpal.mungmate.ui.chatting.WalkMateRequestFragment"
         android:label="fragment_walk_mate_request"
         tools:layout="@layout/fragment_walk_mate_request" />
+    <fragment
+        android:id="@+id/item_FAQ"
+        android:name="com.petpal.mungmate.ui.customercenter.FAQFragment"
+        android:label="fragment_f_a_q"
+        tools:layout="@layout/fragment_f_a_q" >
+        <action
+            android:id="@+id/action_item_FAQ_to_item_contact_us"
+            app:destination="@id/item_contact_us" />
+    </fragment>
+    <fragment
+        android:id="@+id/item_inquiry"
+        android:name="com.petpal.mungmate.ui.customercenter.InquiryFragment"
+        android:label="fragment_inquiry"
+        tools:layout="@layout/fragment_inquiry" >
+        <action
+            android:id="@+id/action_item_inquiry_to_item_contact_us"
+            app:destination="@id/item_contact_us" />
+    </fragment>
+    <fragment
+        android:id="@+id/item_contact_us"
+        android:name="com.petpal.mungmate.ui.customercenter.ContactUsFragment"
+        android:label="fragment_contact_us"
+        tools:layout="@layout/fragment_contact_us" />
 </navigation>
