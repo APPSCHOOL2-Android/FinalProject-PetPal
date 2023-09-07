@@ -24,9 +24,9 @@ class MainFragment : Fragment() {
         val navController = navHostFragment.navController
 
         fragmentMainBinding.run {
-            bottomNavigation.setOnItemSelectedListener { item ->
 
-                NavigationUI.onNavDestinationSelected(item, navController)
+            bottomNavigation.setOnItemSelectedListener {
+                NavigationUI.onNavDestinationSelected(it,navController)
 
                 return@setOnItemSelectedListener true
             }
