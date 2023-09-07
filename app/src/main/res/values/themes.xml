@@ -29,4 +29,14 @@
         <item name="colorPrimaryInverse">@color/md_theme_light_inversePrimary</item>
     </style>
 
+    <style name="Theme.MungMate.SplashScreen" parent="Theme.MungMate" />
+
+    <!--    Splash Screen Theme-->
+    <style name="AppTheme.Splash" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">#FFFFFF</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/petpal_splash_animation</item>
+        <item name="windowSplashScreenAnimationDuration">1000</item>
+        <item name="postSplashScreenTheme">@style/Theme.MungMate.SplashScreen</item>
+    </style>
+
 </resources>
