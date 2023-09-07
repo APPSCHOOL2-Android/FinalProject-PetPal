@@ -58,7 +58,6 @@
         android:label="fragment_my_page"
         tools:layout="@layout/fragment_my_page" />
     <fragment
-
         android:id="@+id/communityWritingFragment"
         android:name="com.petpal.mungmate.community.CommunityWritingFragment"
         android:label="fragment_community_writing"
@@ -93,6 +92,7 @@
         android:name="com.petpal.mungmate.community.CommunityDetailModifyFragment"
         android:label="fragment_community_detail_modify"
         tools:layout="@layout/fragment_community_detail_modify">
+
         <action
             android:id="@+id/action_communityDetailModifyFragment_to_item_community"
             app:destination="@id/item_community" />
@@ -104,6 +104,7 @@
             app:popEnterAnim="@anim/from_right"
             app:popExitAnim="@anim/to_left" />
     </fragment>
+
 
     <fragment
         android:id="@+id/item_chat_room"

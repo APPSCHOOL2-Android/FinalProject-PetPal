@@ -69,6 +69,7 @@
 
     </com.google.android.material.chip.ChipGroup>
 
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/communityPostRecyclerView"
         android:layout_width="match_parent"

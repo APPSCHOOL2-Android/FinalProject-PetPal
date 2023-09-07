@@ -66,7 +66,9 @@ class CommunityAdapter(private val context: Context) :
 
         holder.communityPostTitle.text = "귀여운 강아지 사진"
         holder.communityUserNickName.text = "리트리버군"
+
         holder.communityUserPlace.text = "제주시 애월읍"
+
         holder.communityPostDateCreated.text = "30분전"
         holder.communityContent.text = "귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다."
         holder.communityFavoriteTextView.text = "좋아요 7"
