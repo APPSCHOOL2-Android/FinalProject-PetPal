@@ -26,11 +26,12 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:layout_marginTop="8dp"
                 android:clipToPadding="false"
                 android:orientation="vertical"
                 android:paddingStart="16dp"
                 android:paddingEnd="16dp"
-                android:paddingBottom="24dp">
+                android:paddingBottom="4dp">
 
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/cardViewProfile"
@@ -221,6 +222,121 @@
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingStart="8dp"
+                android:paddingTop="24dp"
+                android:paddingEnd="8dp"
+                android:paddingBottom="24dp">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:gravity="center_horizontal"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/textView14"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="누적 산책 시간"
+                        android:textAppearance="@style/TextAppearance.Material3.LabelMedium" />
+
+                    <TextView
+                        android:id="@+id/textViewTotalWalkTime"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="46"
+                        android:textAppearance="?attr/textAppearanceLabelLarge" />
+
+                    <TextView
+                        android:id="@+id/textView15"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="시간"
+                        android:textAppearance="@style/TextAppearance.Material3.LabelSmall" />
+                </LinearLayout>
+
+                <View
+                    android:id="@+id/divider5"
+                    android:layout_width="1dp"
+                    android:layout_height="match_parent"
+                    android:background="?android:attr/listDivider" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:gravity="center_horizontal"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/textView16"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="누적 산책 거리"
+                        android:textAppearance="@style/TextAppearance.Material3.LabelMedium" />
+
+                    <TextView
+                        android:id="@+id/textViewTotalWalkDist"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="161"
+                        android:textAppearance="?attr/textAppearanceLabelLarge" />
+
+                    <TextView
+                        android:id="@+id/textView17"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="km"
+                        android:textAppearance="@style/TextAppearance.Material3.LabelSmall" />
+                </LinearLayout>
+
+                <View
+                    android:id="@+id/divider"
+                    android:layout_width="1dp"
+                    android:layout_height="match_parent"
+                    android:background="?android:attr/listDivider" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:gravity="center_horizontal"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/textView18"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="발바닥 점수"
+                        android:textAppearance="@style/TextAppearance.Material3.LabelMedium" />
+
+                    <TextView
+                        android:id="@+id/textViewUserRating"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="4.8"
+                        android:textAppearance="?attr/textAppearanceLabelLarge" />
+
+                    <TextView
+                        android:id="@+id/textView19"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="발바닥"
+                        android:textAppearance="@style/TextAppearance.Material3.LabelSmall" />
+                </LinearLayout>
             </LinearLayout>
 
             <View

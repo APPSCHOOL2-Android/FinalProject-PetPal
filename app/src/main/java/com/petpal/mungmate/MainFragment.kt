@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.ui.NavigationUI
 import androidx.navigation.ui.setupWithNavController
 import com.petpal.mungmate.databinding.FragmentMainBinding
 
@@ -23,8 +24,9 @@ class MainFragment : Fragment() {
         val navController = navHostFragment.navController
 
         fragmentMainBinding.run {
-            bottomNavigation.run {
-                setupWithNavController(navController)
+            bottomNavigation.setOnItemSelectedListener {
+                NavigationUI.onNavDestinationSelected(it,navController)
+                return@setOnItemSelectedListener true
             }
         }
 
