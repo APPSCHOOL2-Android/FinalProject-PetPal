@@ -5,7 +5,7 @@
     <color name="md_theme_light_onPrimary">#FFFFFF</color>
     <color name="md_theme_light_primaryContainer">#FFDF9B</color>
     <color name="md_theme_light_onPrimaryContainer">#251A00</color>
-    <color name="md_theme_light_secondary">#9C4145</color>
+    <color name="md_theme_light_secondary">#FFD166</color>
     <color name="md_theme_light_onSecondary">#FFFFFF</color>
     <color name="md_theme_light_secondaryContainer">#FFDAD9</color>
     <color name="md_theme_light_onSecondaryContainer">#400009</color>
@@ -64,4 +64,6 @@
     <color name="dividerColor">#33000000</color>
     <color name="white">#ffffff</color>
     <color name="black">#000000</color>
+
+
 </resources>
