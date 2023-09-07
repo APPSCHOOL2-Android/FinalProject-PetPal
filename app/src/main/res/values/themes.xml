@@ -30,6 +30,7 @@
     </style>
 
 
+
     </style>
 
     <style name="CustomChipChoice" parent="@style/Widget.MaterialComponents.Chip.Filter">
@@ -52,7 +53,6 @@
         <item name="android:textSize">12sp</item>
     </style>
 
-
     <style name="Theme.MungMate.SplashScreen" parent="Theme.MungMate" />
 
     <!--    Splash Screen Theme-->
@@ -61,6 +61,7 @@
         <item name="windowSplashScreenAnimatedIcon">@drawable/petpal_splash_animation</item>
         <item name="windowSplashScreenAnimationDuration">1000</item>
         <item name="postSplashScreenTheme">@style/Theme.MungMate.SplashScreen</item>
+
     </style>
 
 
