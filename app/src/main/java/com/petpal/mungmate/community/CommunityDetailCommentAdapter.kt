@@ -53,8 +53,10 @@ class CommunityDetailCommentAdapter(private val context: Context) :
             .centerCrop()
             .into(holder.communityProfileImage)
 
+
         holder.communityUserNickName.text = "리트리버군"
         holder.communityUserPlace.text = "제주시 애월읍"
+
         holder.communityPostDateCreated.text = "30분전"
         holder.communityContent.text =
             "귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다."
