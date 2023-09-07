@@ -37,4 +37,17 @@
         <item name="android:textColor">@color/slecte_checked_chip_text</item>
 
     </style>
+
+    <style name="BottomNavigationView">
+        <item name="colorSecondaryContainer">@color/seed</item>
+    </style>
+
+    <style name="BottomNavigationTitle">
+        <item name="android:textSize">12sp</item>
+    </style>
+
+    <style name="MyTextSize" parent="TextAppearance.AppCompat">
+        <item name="android:textSize">12sp</item>
+    </style>
+
 </resources>
