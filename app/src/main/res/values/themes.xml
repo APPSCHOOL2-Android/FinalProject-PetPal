@@ -29,6 +29,10 @@
         <item name="colorPrimaryInverse">@color/md_theme_light_inversePrimary</item>
     </style>
 
+
+
+ 
+
     <style name="CustomChipChoice" parent="@style/Widget.MaterialComponents.Chip.Filter">
 
         <item name="chipBackgroundColor">@color/slecte_checked_chip</item>
@@ -59,5 +63,6 @@
         <item name="postSplashScreenTheme">@style/Theme.MungMate.SplashScreen</item>
 
     </style>
+
 
 </resources>

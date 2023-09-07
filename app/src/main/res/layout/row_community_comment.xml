@@ -107,27 +107,33 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/communityCommentContent">
 
+        <com.airbnb.lottie.LottieAnimationView
+            android:id="@+id/communityCommentFavoriteLottie"
+            android:layout_width="30dp"
+            android:layout_height="40dp"
+            android:scaleType="centerCrop"
+            app:lottie_rawRes="@raw/favorite" />
+
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/communityCommentFavoriteTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:drawableStart="@drawable/favorite_border"
-            android:drawablePadding="@dimen/common_small_padding"
-            android:text="@string/favorite"
-            android:textAppearance="@style/TextAppearance.AppCompat.Small" />
+            android:layout_gravity="center"
+            android:text="좋아요 7"
+            android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1" />
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/communityCommentCommentTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/common_padding"
+            android:layout_gravity="center"
             android:drawableStart="@drawable/comment"
             android:drawablePadding="@dimen/common_small_padding"
             android:text="@string/comment"
-            android:textAppearance="@style/TextAppearance.AppCompat.Small" />
+            android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1" />
 
     </LinearLayout>
-
 
     <com.google.android.material.divider.MaterialDivider
         android:id="@+id/communityCommentDivider"
