@@ -56,7 +56,34 @@
         android:id="@+id/item_mypage"
         android:name="com.petpal.mungmate.MyPageFragment"
         android:label="fragment_my_page"
-        tools:layout="@layout/fragment_my_page" />
+        tools:layout="@layout/fragment_my_page" >
+        <action
+            android:id="@+id/action_item_mypage_to_managePetFragment"
+            app:destination="@id/managePetFragment" />
+        <action
+            android:id="@+id/action_item_mypage_to_walkHistoryFragment"
+            app:destination="@id/walkHistoryFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/managePetFragment"
+        android:name="com.petpal.mungmate.ManagePetFragment"
+        android:label="fragment_manage_pet"
+        tools:layout="@layout/fragment_manage_pet" />
+    <fragment
+        android:id="@+id/walkHistoryFragment"
+        android:name="com.petpal.mungmate.WalkHistoryFragment"
+        android:label="fragment_walk_history"
+        tools:layout="@layout/fragment_walk_history" >
+        <action
+            android:id="@+id/action_walkHistoryFragment_to_walkHistoryDetailFragment"
+            app:destination="@id/walkHistoryDetailFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/walkHistoryDetailFragment"
+        android:name="com.petpal.mungmate.WalkHistoryDetailFragment"
+        android:label="fragment_walk_history_detail"
+        tools:layout="@layout/fragment_walk_history_detail" />
+
     <fragment
         android:id="@+id/communityWritingFragment"
         android:name="com.petpal.mungmate.community.CommunityWritingFragment"
