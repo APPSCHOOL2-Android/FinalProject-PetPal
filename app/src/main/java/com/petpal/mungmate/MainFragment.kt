@@ -25,11 +25,7 @@ class MainFragment : Fragment() {
 
         fragmentMainBinding.run {
 
-            bottomNavigation.setOnItemSelectedListener {
-                NavigationUI.onNavDestinationSelected(it,navController)
-
-                return@setOnItemSelectedListener true
-            }
+            bottomNavigation.setupWithNavController(navController)
         }
 
         return fragmentMainBinding.root
