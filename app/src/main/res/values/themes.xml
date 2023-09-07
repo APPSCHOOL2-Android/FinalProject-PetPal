@@ -32,9 +32,8 @@
 
     <style name="CustomChipChoice" parent="@style/Widget.MaterialComponents.Chip.Filter">
 
-        <item name="chipBackgroundColor">@color/slecte_checked_chip</item>
-
-        <item name="android:textColor">@color/slecte_checked_chip_text</item>
+        <item name="chipBackgroundColor">@color/select_checked_chip</item>
+        <item name="android:textColor">@color/black</item>
 
     </style>
 </resources>
