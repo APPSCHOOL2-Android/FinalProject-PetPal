@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/layoutFaq"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:clickable="true"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:padding="16dp">
+
+        <TextView
+            android:id="@+id/textViewFaqCategory"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:text="포인트"
+            android:textColor="@color/md_theme_light_outline" />
+
+        <TextView
+            android:id="@+id/textViewFaqQuestion"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:layout_weight="1"
+            android:text="포인트는 어떻게 얻나요?" />
+
+        <ImageView
+            android:id="@+id/imageViewFaqExpand"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:srcCompat="@drawable/expand_more_24px" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/textViewFaqAnswer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/md_theme_light_surfaceVariant"
+        android:padding="16dp"
+        android:text="포인트가 적립되는 경우는 아래와 같습니다.\n\n- 혼자 산책 : 10포인트\n- 같이 산책 : 20포인트\n- 후기 5점 만점 보너스 : 5포인트\n- 일주일 연속 산책 : 50포인트" />
+
+</LinearLayout>

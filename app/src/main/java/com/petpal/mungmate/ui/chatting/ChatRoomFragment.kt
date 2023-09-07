@@ -16,7 +16,7 @@ class ChatRoomFragment : Fragment() {
     private var _fragmentChatRoomBinding : FragmentChatRoomBinding? = null
     private val fragmentChatRoomBinding get() = _fragmentChatRoomBinding!!
 
-    val messageList = mutableListOf<Message>()
+    private var messageList = mutableListOf<Message>()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -49,7 +49,7 @@ class ChatRoomFragment : Fragment() {
     }
 
     private fun setSampleData() {
-        messageList.addAll(arrayOf(
+        messageList = mutableListOf(
             Message("안녕하세요!", "오후 10:00", false),
             Message("멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍장문테스트멍멍멍멍멍멍멍멍멍멍", "오후 10:01", true),
             Message("같이 산책하실래요?", "오후 10:02", false),
@@ -57,6 +57,6 @@ class ChatRoomFragment : Fragment() {
             Message("그럼 몇시에 만날까요?", "오후 10:04", true),
             Message("테스트메시지입니다.", "오후 10:05", false),
             Message("테스트메시지입니다.", "오후 10:06", false)
-        ))
+        )
     }
 }
