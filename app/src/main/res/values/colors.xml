@@ -61,4 +61,8 @@
     <color name="md_theme_dark_surfaceTint">#F1C048</color>
     <color name="md_theme_dark_outlineVariant">#4D4639</color>
     <color name="md_theme_dark_scrim">#000000</color>
+
+    <!-- login button colors -->
+    <color name="kakao_login_btn_backgroundTint">#FEE500</color>
+    <color name="google_login_btn_backgroundTint">#FFFFFF</color>
 </resources>

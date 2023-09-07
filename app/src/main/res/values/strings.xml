@@ -2,4 +2,12 @@
     <string name="app_name">MungMate</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <!-- start page Strings -->
+    <string name="kakao_login">카카오로 시작하기</string>
+    <string name="google_login">Google로 시작하기</string>
+    <string name="mate_main">멍메이트</string>
+    <string name="mate_description">반려동물 산책 매칭 플랫폼</string>
+    <string name="copyright">Copyright &#169; Petpal</string>
+
 </resources>
