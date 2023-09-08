@@ -8,6 +8,8 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageButton
+import android.widget.TextView
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.faltenreich.skeletonlayout.Skeleton
@@ -15,6 +17,9 @@ import com.faltenreich.skeletonlayout.applySkeleton
 import com.faltenreich.skeletonlayout.createSkeleton
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.chip.Chip
+import com.google.android.material.sidesheet.SideSheetBehavior
+import com.google.android.material.sidesheet.SideSheetCallback
+import com.google.android.material.sidesheet.SideSheetDialog
 import com.google.android.material.snackbar.Snackbar
 import com.petpal.mungmate.R
 import com.petpal.mungmate.databinding.FragmentCommunityBinding
@@ -34,12 +39,16 @@ class CommunityFragment : Fragment() {
         communityBinding.run {
             communityToolbar.run {
                 inflateMenu(R.menu.community_category_menu)
-
                 setOnMenuItemClickListener {
                     when (it?.itemId) {
-                        R.id.item_category -> {
+
+                        R.id.item_community_search->{
                             findNavController()
-                                .navigate(R.id.action_item_community_to_communityCategoryListFragment)
+                                .navigate(R.id.action_item_community_to_communitySearchFragment)
+                        }
+
+                        R.id.item_community_category -> {
+                            showSideSheet()
                         }
 
                     }
@@ -47,37 +56,11 @@ class CommunityFragment : Fragment() {
                 }
             }
 
-            //Chip 이벤트 처리
-            communityChipGroup.setOnCheckedStateChangeListener { group, checkedId ->
-
-                val selectedChip = group.findViewById<Chip>(group.checkedChipId)
-                val selectedCategory = selectedChip.text.toString()
-                Log.d("확인", selectedCategory)
-                when (selectedCategory) {
-                    "전체보기" -> {
-                        communityRecyclerView()
-                    }
-
-                    "일상보기" -> {
-
-                    }
-
-                    "산책일지" -> {
-
-                    }
-
-                    "장소후기" -> {
-
-                    }
-
-                }
-            }
-
             communityPostWritingFab.setOnClickListener {
                 it.findNavController()
                     .navigate(R.id.action_item_community_to_communityWritingFragment)
             }
-
+            communityRecyclerView()
         }
 
         return communityBinding.root
@@ -101,6 +84,33 @@ class CommunityFragment : Fragment() {
                 skeleton.showOriginal()
             }, 3000)
         }
+    }
+
+    private fun showSideSheet() {
+        val sideSheetDialog = SideSheetDialog(requireContext())
+
+        sideSheetDialog.behavior.addCallback(object : SideSheetCallback() {
+            override fun onStateChanged(sheet: View, newState: Int) {
+                if (newState == SideSheetBehavior.STATE_DRAGGING) {
+                    sideSheetDialog.behavior.state = SideSheetBehavior.STATE_EXPANDED
+                }
+            }
+
+            override fun onSlide(sheet: View, slideOffset: Float) {
+            }
+        })
+
+        val inflater = layoutInflater.inflate(R.layout.community_side_sheet_behavior, null)
+        val communityCategoryAll = inflater.findViewById<TextView>(R.id.communityCategoryAll)
+
+        communityCategoryAll.setOnClickListener {
+            Snackbar.make(communityCategoryAll,"전체", Snackbar.LENGTH_SHORT)
+                .show()
+        }
+        sideSheetDialog.setCancelable(false)
+        sideSheetDialog.setCanceledOnTouchOutside(true)
+        sideSheetDialog.setContentView(inflater)
+        sideSheetDialog.show()
     }
 
 }

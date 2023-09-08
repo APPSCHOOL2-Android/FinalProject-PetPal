@@ -33,13 +33,17 @@
 
  
 
-    <style name="CustomChipChoice" parent="@style/Widget.MaterialComponents.Chip.Filter">
+    <style name="CustomChipChoice" parent="@style/Widget.Material3.Chip.Filter">
 
         <item name="chipBackgroundColor">@color/slecte_checked_chip</item>
 
         <item name="android:textColor">@color/slecte_checked_chip_text</item>
 
     </style>
+
+
+
+
 
     <style name="BottomNavigationView">
         <item name="colorSecondaryContainer">@color/seed</item>

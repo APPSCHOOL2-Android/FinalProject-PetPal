@@ -27,6 +27,8 @@
 
     <string name="place_date_distinction">·</string>
     <string name="category">카테고리</string>
+    <string name="search">검색</string>
+    <string name="search_hint">검색어를 입력해주세요</string>
 
 
 </resources>
