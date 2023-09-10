@@ -6,6 +6,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -46,9 +47,14 @@ class ChatRoomFragment : Fragment() {
                         R.id.menu_item_block -> {
                             val builder = MaterialAlertDialogBuilder(requireContext())
                                 .setTitle("차단하기")
-                                .setMessage("차단한 사용자와는 채팅할 수 없습니다.")
+                                .setMessage("차단한 사용자와는 채팅을 할 수 없으며 산책 메이트를 요청할 수 없습니다.")
                                 .setPositiveButton("차단하기"){ dialogInterface: DialogInterface, i: Int ->
-                                    // TODO 사용자 차단
+                                    // TODO 사용자 차단 -> 채팅 상대 차단 상태 정보 가져와서 적용하도록 수정 예정
+                                    // 산책 메이트 요청, 채팅 불가
+                                    buttonRequestWalkMate.isEnabled = false
+                                    textInputLayoutMessage.endIconDrawable = AppCompatResources.getDrawable(requireContext(), R.drawable.person_off_24px)
+                                    textInputEditTextMessage.hint = "차단한 사용자와는 채팅할 수 없습니다."
+                                    textInputEditTextMessage.isEnabled = false
                                 }
                                 .setNegativeButton("취소", null)
                                 .create()
@@ -59,9 +65,13 @@ class ChatRoomFragment : Fragment() {
                         R.id.menu_item_unblock -> {
                             val builder = MaterialAlertDialogBuilder(requireContext())
                                 .setTitle("차단해제")
-                                .setMessage("차단을 해제하면 다시 채팅을 주고받을 수 있습니다.")
+                                .setMessage("차단을 해제하면 다시 채팅을 주고받을 수 있으며 산책 메이트 요청이 가능해집니다.")
                                 .setPositiveButton("해제하기"){ dialogInterface: DialogInterface, i: Int ->
                                     // TODO 사용자 차단 해제
+                                    buttonRequestWalkMate.isEnabled = true
+                                    textInputLayoutMessage.endIconDrawable = AppCompatResources.getDrawable(requireContext(), R.drawable.send_24px)
+                                    textInputEditTextMessage.hint = "메시지를 입력하세요."
+                                    textInputEditTextMessage.isEnabled = true
                                 }
                                 .setNegativeButton("취소", null)
                                 .create()
@@ -77,9 +87,10 @@ class ChatRoomFragment : Fragment() {
                         R.id.menu_item_exit -> {
                             val builder = MaterialAlertDialogBuilder(requireContext())
                                 .setTitle("채팅방 나가기")
-                                .setMessage("나가기를 하면 대화내용이 모두 삭제되고 채팅목록에서도 삭제됩니다.")
+                                .setMessage("채팅방을 나가면 대화내용이 모두 삭제되고 채팅목록에서도 삭제됩니다.")
                                 .setPositiveButton("나가기"){ dialogInterface: DialogInterface, i: Int ->
                                     // TODO 채팅방 나가기
+                                    findNavController().popBackStack()
                                 }
                                 .setNegativeButton("취소", null)
                                 .create()

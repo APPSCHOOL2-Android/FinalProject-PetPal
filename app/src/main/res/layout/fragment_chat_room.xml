@@ -138,13 +138,14 @@
             android:id="@+id/textInputLayoutMessage"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            app:endIconDrawable="@drawable/send_24px"
+            app:endIconMode="custom"
             app:hintEnabled="false">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/textInputEditTextMessage"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:drawableEnd="@drawable/send_24px"
                 android:hint="메시지를 입력하세요." />
 
         </com.google.android.material.textfield.TextInputLayout>
