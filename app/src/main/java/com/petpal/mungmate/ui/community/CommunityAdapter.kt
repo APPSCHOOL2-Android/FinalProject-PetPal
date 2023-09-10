@@ -1,4 +1,4 @@
-package com.petpal.mungmate.community
+package com.petpal.mungmate.ui.community
 
 import android.content.Context
 import android.view.LayoutInflater
@@ -7,9 +7,13 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.RecyclerView
+import com.airbnb.lottie.LottieAnimationView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.faltenreich.skeletonlayout.Skeleton
+import com.faltenreich.skeletonlayout.createSkeleton
 import com.petpal.mungmate.databinding.RowCommunityBinding
+
 class CommunityAdapter(private val context: Context) :
     RecyclerView.Adapter<CommunityAdapter.ViewHolder>() {
 
@@ -23,13 +27,16 @@ class CommunityAdapter(private val context: Context) :
         val communityPostDateCreated: TextView = item.communityPostDateCreated
         val communityPostImage: ImageView = item.communityPostImage
         val communityContent: TextView = item.communityContent
-        val communityFavoriteTextView:TextView = item.communityFavoriteTextView
-        val communityCommentTextView:TextView=item.communityCommentTextView
+        val communityCommentTextView: TextView = item.communityCommentTextView
+        val communityFavoriteLottie: LottieAnimationView = item.communityFavoriteLottie
 
         init {
             item.root.setOnClickListener {
 
-                val action =CommunityFragmentDirections.actionItemCommunityToCommunityPostDetailFragment(adapterPosition)
+                val action =
+                    CommunityFragmentDirections.actionItemCommunityToCommunityPostDetailFragment(
+                        adapterPosition
+                    )
                 item.root.findNavController().navigate(action)
             }
         }
@@ -70,12 +77,23 @@ class CommunityAdapter(private val context: Context) :
         holder.communityUserPlace.text = "제주시 애월읍"
 
         holder.communityPostDateCreated.text = "30분전"
-        holder.communityContent.text = "귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다."
-        holder.communityFavoriteTextView.text = "좋아요 7"
+        holder.communityContent.text =
+            "귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다."
         holder.communityCommentTextView.text = "댓글 2"
 
+        var isClicked = false
+        holder.communityFavoriteLottie.setOnClickListener {
+            isClicked = !isClicked // 클릭할 때마다 변수를 반전시킴
+            if (isClicked) {
+                holder.communityFavoriteLottie.playAnimation()
+
+            } else {
+                holder.communityFavoriteLottie.cancelAnimation()
+                holder.communityFavoriteLottie.progress = 0f
+            }
+
+        }
 
 
     }
-
 }

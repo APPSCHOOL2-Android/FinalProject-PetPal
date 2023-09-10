@@ -1,4 +1,4 @@
-package com.petpal.mungmate.community
+package com.petpal.mungmate.ui.community
 
 
 import android.os.Bundle

@@ -7,7 +7,7 @@
 
     <fragment
         android:id="@+id/item_community"
-        android:name="com.petpal.mungmate.community.CommunityFragment"
+        android:name="com.petpal.mungmate.ui.community.CommunityFragment"
         tools:layout="@layout/fragment_community"
         android:label="fragment_community">
 
@@ -35,7 +35,7 @@
     </fragment>
     <fragment
         android:id="@+id/communityWritingFragment"
-        android:name="com.petpal.mungmate.community.CommunityWritingFragment"
+        android:name="com.petpal.mungmate.ui.community.CommunityWritingFragment"
         tools:layout="@layout/fragment_community_writing"
         android:label="fragment_community_writing">
         <action
@@ -46,7 +46,7 @@
     </fragment>
     <fragment
         android:id="@+id/communityPostDetailFragment"
-        android:name="com.petpal.mungmate.community.CommunityPostDetailFragment"
+        android:name="com.petpal.mungmate.ui.community.CommunityPostDetailFragment"
         android:label="CommunityPostDetailFragment">
         <action
             android:id="@+id/action_communityPostDetailFragment_to_item_community"
@@ -65,7 +65,7 @@
     </fragment>
     <fragment
         android:id="@+id/communityDetailModifyFragment"
-        android:name="com.petpal.mungmate.community.CommunityDetailModifyFragment"
+        android:name="com.petpal.mungmate.ui.community.CommunityDetailModifyFragment"
         tools:layout="@layout/fragment_community_detail_modify"
         android:label="fragment_community_detail_modify">
 

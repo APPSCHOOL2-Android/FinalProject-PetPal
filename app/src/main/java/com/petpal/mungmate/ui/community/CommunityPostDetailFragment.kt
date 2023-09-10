@@ -1,4 +1,4 @@
-package com.petpal.mungmate.community
+package com.petpal.mungmate.ui.community
 
 import android.os.Bundle
 import androidx.fragment.app.Fragment
@@ -16,6 +16,7 @@ import com.petpal.mungmate.databinding.FragmentCommunityPostDetailBinding
 class CommunityPostDetailFragment : Fragment() {
 
     private lateinit var communityPostDetailBinding: FragmentCommunityPostDetailBinding
+    var isClicked = false
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -25,9 +26,24 @@ class CommunityPostDetailFragment : Fragment() {
         communityPostDetailBinding.run {
             toolbar()
             communityDetailRecyclerView()
+            lottie()
         }
 
         return communityPostDetailBinding.root
+    }
+
+    private fun FragmentCommunityPostDetailBinding.lottie() {
+        communityPostDetailFavoriteLottie.setOnClickListener {
+            isClicked = !isClicked // 클릭할 때마다 변수를 반전시킴
+            if (isClicked) {
+                communityPostDetailFavoriteLottie.playAnimation()
+
+            } else {
+                communityPostDetailFavoriteLottie.cancelAnimation()
+                communityPostDetailFavoriteLottie.progress = 0f
+            }
+
+        }
     }
 
     private fun bottomNavigationViewGone() {
