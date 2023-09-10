@@ -8,6 +8,7 @@
     android:orientation="vertical">
 
     <LinearLayout
+        android:id="@+id/layoutFaqHeader"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
@@ -38,7 +39,7 @@
     </LinearLayout>
 
     <TextView
-        android:id="@+id/textViewFaqAnswer"
+        android:id="@+id/textViewFaqBody"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/md_theme_light_surfaceVariant"

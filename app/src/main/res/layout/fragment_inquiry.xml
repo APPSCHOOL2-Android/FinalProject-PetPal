@@ -33,13 +33,15 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="8dp"
-                android:src="@drawable/info_24px" />
+                android:src="@drawable/info_24px"
+                app:tint="@color/md_theme_light_primary" />
 
             <TextView
                 android:id="@+id/textView7"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="6개월 이내의 문의내역만 확인하실 수 있습니다." />
+                android:text="6개월 이내의 문의 내역만 확인하실 수 있습니다."
+                android:textAppearance="@style/TextAppearance.Material3.BodyMedium" />
         </LinearLayout>
 
         <androidx.recyclerview.widget.RecyclerView

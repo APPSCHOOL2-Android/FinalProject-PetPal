@@ -65,6 +65,20 @@
                         style="@style/Widget.Material3.Chip.Filter.Elevated"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:text="포인트"
+                        app:checkedIconEnabled="false" />
+
+                    <com.google.android.material.chip.Chip
+                        style="@style/Widget.Material3.Chip.Filter.Elevated"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="쇼핑"
+                        app:checkedIconEnabled="false" />
+
+                    <com.google.android.material.chip.Chip
+                        style="@style/Widget.Material3.Chip.Filter.Elevated"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
                         android:text="커뮤니티"
                         app:checkedIconEnabled="false" />
 
@@ -73,13 +87,6 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="채팅"
-                        app:checkedIconEnabled="false" />
-
-                    <com.google.android.material.chip.Chip
-                        style="@style/Widget.Material3.Chip.Filter.Elevated"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="쇼핑"
                         app:checkedIconEnabled="false" />
 
                     <com.google.android.material.chip.Chip

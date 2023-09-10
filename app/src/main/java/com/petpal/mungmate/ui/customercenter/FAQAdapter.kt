@@ -22,14 +22,14 @@ class FAQAdapter(private val faqList: List<FAQ>): RecyclerView.Adapter<FAQAdapte
         fun bind(faq: FAQ) {
             rowBinding.textViewFaqCategory.text = faq.category
             rowBinding.textViewFaqQuestion.text = faq.question
-            rowBinding.textViewFaqAnswer.text = faq.answer      // 확장될 서브뷰
+            rowBinding.textViewFaqBody.text = faq.answer      // 확장될 서브뷰
 
             // 클릭 상태에 따라 UI 변경 - RecyclerView 스크롤해도 상태 유지
             if (expendedItems.get(adapterPosition)) {
-                rowBinding.textViewFaqAnswer.visibility = View.VISIBLE
+                rowBinding.textViewFaqBody.visibility = View.VISIBLE
                 rowBinding.imageViewFaqExpand.setImageResource(R.drawable.expand_less_24px)
             } else {
-                rowBinding.textViewFaqAnswer.visibility = View.GONE
+                rowBinding.textViewFaqBody.visibility = View.GONE
                 rowBinding.imageViewFaqExpand.setImageResource(R.drawable.expand_more_24px)
             }
 
