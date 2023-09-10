@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
+import android.widget.Button
 import android.widget.Spinner
 import androidx.core.view.GravityCompat
 import androidx.fragment.app.Fragment
@@ -25,10 +26,14 @@ class WalkFragment : Fragment() {
     ): View? {
        fragmentWalkBinding= FragmentWalkBinding.inflate(layoutInflater)
         fragmentWalkBinding.buttonWalk.setOnClickListener {
-            val bottomSheetView = layoutInflater.inflate(R.layout.row_walk_bottom_sheet_user, null)
+            val bottomSheetView = layoutInflater.inflate(R.layout.row_walk_bottom_sheet_place, null)
             val bottomSheetDialog = BottomSheetDialog(requireActivity())
             bottomSheetDialog.setContentView(bottomSheetView)
             bottomSheetDialog.show()
+            bottomSheetView.findViewById<Button>(R.id.buttonSubmitReview).setOnClickListener {
+                findNavController().navigate(R.id.action_item_walk_to_placeReviewFragment)
+                bottomSheetDialog.dismiss()
+            }
 //            fragmentWalkBinding.LinearLayoutOffWalk.visibility=View.GONE
 //            fragmentWalkBinding.LinearLayoutOnWalk.visibility=View.VISIBLE
         }

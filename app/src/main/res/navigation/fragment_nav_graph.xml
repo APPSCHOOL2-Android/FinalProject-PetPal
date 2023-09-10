@@ -42,7 +42,17 @@
         android:id="@+id/item_walk"
         android:name="com.petpal.mungmate.WalkFragment"
         android:label="fragment_walk"
-        tools:layout="@layout/fragment_walk" />
+        tools:layout="@layout/fragment_walk">
+
+        <action
+            android:id="@+id/action_item_walk_to_placeReviewFragment"
+            app:destination="@id/placeReviewFragment" />
+
+    </fragment>
+
+
+
+
     <fragment
         android:id="@+id/item_chat"
         android:name="com.petpal.mungmate.ui.chatting.ChatFragment"
@@ -149,5 +159,11 @@
         android:name="com.petpal.mungmate.ui.chatting.WalkMateRequestFragment"
         android:label="fragment_walk_mate_request"
         tools:layout="@layout/fragment_walk_mate_request" />
+
+    <fragment
+        android:id="@+id/placeReviewFragment"
+        android:name="com.petpal.mungmate.PlaceReviewFragment"
+        android:label="fragment_place_review"
+        tools:layout="@layout/fragment_place_review"/>
 
 </navigation>

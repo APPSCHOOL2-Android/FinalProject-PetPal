@@ -128,11 +128,10 @@
 
                 <TextView
                     android:id="@+id/textViewBottomPetName"
-                    android:layout_width="70dp"
+                    android:layout_width="100dp"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="8dp"
                     android:layout_marginTop="8dp"
-                    android:layout_weight="1"
                     android:text="이름 : 초코"
                     android:textAppearance="@style/TextAppearance.AppCompat.Small" />
 
@@ -142,7 +141,6 @@
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="8dp"
                     android:layout_marginTop="8dp"
-                    android:layout_weight="1"
                     android:text="나이 : 3세" />
             </LinearLayout>
 
@@ -154,10 +152,9 @@
 
                 <TextView
                     android:id="@+id/textViewBottomPetBreed"
-                    android:layout_width="70dp"
+                    android:layout_width="100dp"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="8dp"
-                    android:layout_weight="1"
                     android:text="견종 : 보더콜리"
                     android:textAppearance="@style/TextAppearance.AppCompat.Small" />
 
@@ -166,7 +163,6 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="8dp"
-                    android:layout_weight="1"
                     android:text="성향 : 활발함" />
             </LinearLayout>
 
@@ -177,11 +173,10 @@
 
                 <TextView
                     android:id="@+id/textViewBottomPetGender"
-                    android:layout_width="wrap_content"
+                    android:layout_width="100dp"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="8dp"
                     android:layout_marginTop="8dp"
-                    android:layout_weight="1"
                     android:text="성별 : 여아" />
 
                 <TextView
@@ -190,7 +185,6 @@
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="8dp"
                     android:layout_marginTop="8dp"
-                    android:layout_weight="1"
                     android:text="중성화 여부 : O" />
             </LinearLayout>
 
@@ -215,6 +209,7 @@
             android:id="@+id/buttonBottomBlock"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginLeft="8dp"
             android:layout_weight="1"
             android:text="차단하기" />
 
