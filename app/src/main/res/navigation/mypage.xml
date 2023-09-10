@@ -7,15 +7,12 @@
 
     <fragment
         android:id="@+id/walkHistoryDetailFragment"
-        android:name="com.petpal.mungmate.WalkHistoryDetailFragment"
+        android:name="com.petpal.mungmate.ui.walkhistory.WalkHistoryDetailFragment"
         android:label="fragment_walk_history_detail"
         tools:layout="@layout/fragment_walk_history_detail" />
-    <action
-        android:id="@+id/action_to_managePetFragment"
-        app:destination="@id/managePetFragment" />
     <fragment
         android:id="@+id/walkHistoryFragment"
-        android:name="com.petpal.mungmate.WalkHistoryFragment"
+        android:name="com.petpal.mungmate.ui.walkhistory.WalkHistoryFragment"
         android:label="fragment_walk_history"
         tools:layout="@layout/fragment_walk_history">
         <action
@@ -27,9 +24,6 @@
         android:name="com.petpal.mungmate.ManagePetFragment"
         android:label="fragment_manage_pet"
         tools:layout="@layout/fragment_manage_pet" />
-    <action
-        android:id="@+id/action_to_walkHistoryFragment"
-        app:destination="@id/walkHistoryFragment" />
     <fragment
         android:id="@+id/item_mypage"
         android:name="com.petpal.mungmate.MyPageFragment"
@@ -41,5 +35,21 @@
         <action
             android:id="@+id/action_to_walkHistoryFragment"
             app:destination="@id/walkHistoryFragment" />
+        <action
+            android:id="@+id/action_item_mypage_to_matchHistoryFragment"
+            app:destination="@id/matchHistoryFragment" />
+        <action
+            android:id="@+id/action_item_mypage_to_manageBlockFragment"
+            app:destination="@id/manageBlockFragment" />
     </fragment>
+    <fragment
+        android:id="@+id/matchHistoryFragment"
+        android:name="com.petpal.mungmate.ui.matchhistory.MatchHistoryFragment"
+        android:label="fragment_match_history"
+        tools:layout="@layout/fragment_match_history" />
+    <fragment
+        android:id="@+id/manageBlockFragment"
+        android:name="com.petpal.mungmate.ui.manageblock.ManageBlockFragment"
+        android:label="fragment_manage_block"
+        tools:layout="@layout/fragment_manage_block" />
 </navigation>

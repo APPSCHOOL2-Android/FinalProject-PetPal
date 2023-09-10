@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/fragment_nav_graph.xml"
     app:startDestination="@id/walk">
+
     <fragment
         android:id="@+id/item_shop"
         android:name="com.petpal.mungmate.ShopFragment"
