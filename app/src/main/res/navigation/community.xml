@@ -32,6 +32,9 @@
         <action
             android:id="@+id/action_item_community_to_communityDetailModifyFragment"
             app:destination="@id/communityDetailModifyFragment" />
+        <action
+            android:id="@+id/action_item_community_to_communitySearchFragment"
+            app:destination="@id/communitySearchFragment" />
     </fragment>
     <fragment
         android:id="@+id/communityWritingFragment"
@@ -79,5 +82,14 @@
             app:exitAnim="@anim/to_right"
             app:popEnterAnim="@anim/from_right"
             app:popExitAnim="@anim/to_left" />
+    </fragment>
+    <fragment
+        android:id="@+id/communitySearchFragment"
+        android:name="com.petpal.mungmate.ui.community.CommunitySearchFragment"
+        android:label="fragment_community_search"
+        tools:layout="@layout/fragment_community_search" >
+        <action
+            android:id="@+id/action_communitySearchFragment_to_item_community"
+            app:destination="@id/item_community" />
     </fragment>
 </navigation>
