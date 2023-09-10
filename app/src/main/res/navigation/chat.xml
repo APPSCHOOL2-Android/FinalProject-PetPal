@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/chat"
+    app:startDestination="@id/item_chat">
+
+    <fragment
+        android:id="@+id/item_chat"
+        android:name="com.petpal.mungmate.ui.chatting.ChatFragment"
+        android:label="fragment_chat"
+        tools:layout="@layout/fragment_chat">
+        <action
+            android:id="@+id/action_item_chat_to_item_chat_room"
+            app:destination="@id/item_chat_room" />
+    </fragment>
+    <fragment
+        android:id="@+id/item_walk_mate_request"
+        android:name="com.petpal.mungmate.ui.chatting.WalkMateRequestFragment"
+        android:label="fragment_walk_mate_request"
+        tools:layout="@layout/fragment_walk_mate_request" />
+    <fragment
+        android:id="@+id/item_chat_room"
+        android:name="com.petpal.mungmate.ui.chatting.ChatRoomFragment"
+        android:label="fragment_chat_room"
+        tools:layout="@layout/fragment_chat_room">
+        <action
+            android:id="@+id/action_item_chat_room_to_item_walk_mate_request"
+            app:destination="@id/item_walk_mate_request" />
+    </fragment>
+</navigation>

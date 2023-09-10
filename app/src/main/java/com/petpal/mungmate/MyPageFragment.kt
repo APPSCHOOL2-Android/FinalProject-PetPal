@@ -20,11 +20,11 @@ class MyPageFragment : Fragment() {
 
         fragmentMyPageBinding.run {
             buttonManagePet.setOnClickListener {
-                findNavController().navigate(R.id.action_item_mypage_to_managePetFragment)
+                findNavController().navigate(R.id.action_to_managePetFragment)
             }
 
             buttonWalkHistory.setOnClickListener {
-                findNavController().navigate(R.id.action_item_mypage_to_walkHistoryFragment)
+                findNavController().navigate(R.id.action_to_walkHistoryFragment)
             }
         }
         return fragmentMyPageBinding.root
