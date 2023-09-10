@@ -13,7 +13,7 @@
         android:layout_height="wrap_content"
         android:minHeight="?attr/actionBarSize"
         android:theme="?attr/actionBarTheme"
-        app:menu="@menu/menu_chat_room"
+        app:menu="@menu/chat_room_menu"
         app:navigationIcon="@drawable/arrow_back_24px">
 
         <LinearLayout

@@ -45,7 +45,7 @@ class FAQFragment : Fragment() {
             }
 
             buttonInquiry.setOnClickListener {
-                findNavController().navigate(R.id.action_item_FAQ_to_item_contact_us)
+                findNavController().navigate(R.id.action_FAQFragment_to_contactUsFragment)
             }
         }
     }

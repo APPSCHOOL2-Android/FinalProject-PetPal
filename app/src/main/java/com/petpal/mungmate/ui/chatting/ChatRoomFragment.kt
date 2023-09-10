@@ -80,7 +80,7 @@ class ChatRoomFragment : Fragment() {
                         }
                         R.id.menu_item_report -> {
                             // TODO 신고하기 화면 이동 (채팅 상대 UID 전달)
-                            findNavController().navigate(R.id.action_item_chat_room_to_item_report_user)
+                            findNavController().navigate(R.id.action_chatRoomFragment_to_reportUserFragment)
 
                             true
                         }
@@ -105,12 +105,12 @@ class ChatRoomFragment : Fragment() {
 
             // 산책 메이트 요청
             buttonRequestWalkMate.setOnClickListener {
-                findNavController().navigate(R.id.action_item_chat_room_to_item_walk_mate_request)
+                findNavController().navigate(R.id.action_chatRoomFragment_to_walkMateRequestFragment)
             }
 
             // 채팅방 메시지 목록
             recyclerViewMessage.run {
-                adapter = MessageListAdapter(messageList)
+                adapter = ChatMessageAdapter(messageList)
                 layoutManager = LinearLayoutManager(requireContext())
             }
         }
