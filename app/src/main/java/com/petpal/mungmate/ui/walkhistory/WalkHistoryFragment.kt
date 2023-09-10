@@ -1,4 +1,4 @@
-package com.petpal.mungmate
+package com.petpal.mungmate.ui.walkhistory
 
 import android.os.Bundle
 import androidx.fragment.app.Fragment
@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.navigation.fragment.findNavController
+import com.petpal.mungmate.R
 import com.petpal.mungmate.databinding.FragmentWalkHistoryBinding
 
 class WalkHistoryFragment : Fragment() {
