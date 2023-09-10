@@ -1,170 +1,271 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/cl_layout_container"
     style="@style/Widget.Material3.SideSheet.Modal"
     android:layout_width="wrap_content"
     android:layout_height="match_parent">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/communitySideSheetToolbar"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/communitySideSheetTitle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="@dimen/common_padding"
-            android:text="@string/category"
-            android:textAppearance="@style/TextAppearance.Material3.TitleLarge"
-            android:textColor="@color/black"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <com.google.android.material.divider.MaterialDivider
-        android:id="@+id/communitySideSheetMaterialDivider"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/communitySideSheetToolbar" />
-
-    <LinearLayout
-        android:id="@+id/communitySideSheetCategoryList"
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/communitySideSheetToolbar">
+        android:layout_height="match_parent">
 
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/communityCategoryAll"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/common_margin"
-            android:layout_marginTop="@dimen/common_margin"
-            android:text="전체"
-            android:textAppearance="@style/TextAppearance.Material3.TitleMedium" />
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
-        <androidx.appcompat.widget.AppCompatTextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/common_margin"
-            android:layout_marginTop="@dimen/common_small_margin"
-            android:text="일상"
-            android:textAppearance="@style/TextAppearance.Material3.TitleMedium" />
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/communitySideSheetToolbar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
 
-        <androidx.appcompat.widget.AppCompatTextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/common_margin"
-            android:layout_marginTop="@dimen/common_small_margin"
-            android:text="산책일지"
-            android:textAppearance="@style/TextAppearance.Material3.TitleMedium" />
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/communitySideSheetTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="@dimen/common_padding"
+                    android:text="@string/category"
+                    android:textAppearance="@style/TextAppearance.Material3.TitleLarge"
+                    android:textColor="@color/black"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
 
-        <androidx.appcompat.widget.AppCompatTextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/common_margin"
-            android:layout_marginTop="@dimen/common_small_margin"
-            android:text="산책메이트 구해요"
-            android:textAppearance="@style/TextAppearance.Material3.TitleMedium" />
 
-        <androidx.appcompat.widget.AppCompatTextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/common_margin"
-            android:layout_marginTop="@dimen/common_small_margin"
-            android:text="장소 후기"
-            android:textAppearance="@style/TextAppearance.Material3.TitleMedium" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <androidx.appcompat.widget.AppCompatTextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/common_margin"
-            android:layout_marginTop="@dimen/common_small_margin"
-            android:text="애견용품 후기"
-            android:textAppearance="@style/TextAppearance.Material3.TitleMedium" />
+            <com.google.android.material.divider.MaterialDivider
+                android:id="@+id/communitySideSheetMaterialDivider"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/communitySideSheetToolbar" />
 
-        <androidx.appcompat.widget.AppCompatTextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/common_margin"
-            android:layout_marginTop="@dimen/common_small_margin"
-            android:text="귀여운 시츄 아지트🎀"
-            android:textAppearance="@style/TextAppearance.Material3.TitleMedium" />
+            <LinearLayout
+                android:id="@+id/communitySideSheetCategoryList"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/communitySideSheetToolbar">
 
-        <androidx.appcompat.widget.AppCompatTextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/common_margin"
-            android:layout_marginTop="@dimen/common_small_margin"
-            android:text="애교쟁이 푸들 아지트🐩"
-            android:textAppearance="@style/TextAppearance.Material3.TitleMedium" />
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/communityCategoryAll"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/common_margin"
+                    android:layout_marginTop="@dimen/common_small_margin"
+                    android:layout_marginBottom="@dimen/common_small_margin"
+                    android:text="전체"
+                    android:textAppearance="@style/TextAppearance.Material3.TitleMedium" />
 
-        <androidx.appcompat.widget.AppCompatTextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/common_margin"
-            android:layout_marginTop="@dimen/common_small_margin"
-            android:text="앙증맞은 포메라니안 아지트🌞"
-            android:textAppearance="@style/TextAppearance.Material3.TitleMedium" />
+                <com.google.android.material.divider.MaterialDivider
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/common_small_margin" />
 
-        <androidx.appcompat.widget.AppCompatTextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/common_margin"
-            android:layout_marginTop="@dimen/common_small_margin"
-            android:text="작고 소중한 치와와 아지트😍"
-            android:textAppearance="@style/TextAppearance.Material3.TitleMedium" />
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/common_margin"
+                    android:layout_marginTop="@dimen/common_small_margin"
+                    android:layout_marginBottom="@dimen/common_small_margin"
+                    android:text="일상"
+                    android:textAppearance="@style/TextAppearance.Material3.TitleMedium" />
 
-        <androidx.appcompat.widget.AppCompatTextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/common_margin"
-            android:layout_marginTop="@dimen/common_small_margin"
-            android:text="뽀얗고 새하얀 몰티즈 아지트☃"
-            android:textAppearance="@style/TextAppearance.Material3.TitleMedium" />
+                <com.google.android.material.divider.MaterialDivider
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/common_small_margin" />
 
-        <androidx.appcompat.widget.AppCompatTextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/common_margin"
-            android:layout_marginTop="@dimen/common_small_margin"
-            android:text="용맹한 진돗개 아지트⭐"
-            android:textAppearance="@style/TextAppearance.Material3.TitleMedium" />
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/common_margin"
+                    android:layout_marginTop="@dimen/common_small_margin"
+                    android:layout_marginBottom="@dimen/common_small_margin"
+                    android:text="산책일지"
+                    android:textAppearance="@style/TextAppearance.Material3.TitleMedium" />
 
-        <androidx.appcompat.widget.AppCompatTextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/common_margin"
-            android:layout_marginTop="@dimen/common_small_margin"
-            android:text="사랑스러운 리트리버 아지트💛"
-            android:textAppearance="@style/TextAppearance.Material3.TitleMedium" />
+                <com.google.android.material.divider.MaterialDivider
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/common_small_margin" />
 
-        <androidx.appcompat.widget.AppCompatTextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/common_margin"
-            android:layout_marginTop="@dimen/common_small_margin"
-            android:text="식빵 궁둥이 웰시 코기 아지트🍞"
-            android:textAppearance="@style/TextAppearance.Material3.TitleMedium" />
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/common_margin"
+                    android:layout_marginTop="@dimen/common_small_margin"
+                    android:layout_marginBottom="@dimen/common_small_margin"
+                    android:text="산책 메이트 구해요"
+                    android:textAppearance="@style/TextAppearance.Material3.TitleMedium" />
 
-        <androidx.appcompat.widget.AppCompatTextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/common_margin"
-            android:layout_marginTop="@dimen/common_small_margin"
-            android:text="귀여움 한도 초과 아이들 아지트🌈"
-            android:textAppearance="@style/TextAppearance.Material3.TitleMedium" />
-    </LinearLayout>
+                <com.google.android.material.divider.MaterialDivider
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/common_small_margin" />
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/common_margin"
+                    android:layout_marginTop="@dimen/common_small_margin"
+                    android:layout_marginBottom="@dimen/common_small_margin"
+                    android:text="장소 후기"
+                    android:textAppearance="@style/TextAppearance.Material3.TitleMedium" />
+
+                <com.google.android.material.divider.MaterialDivider
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/common_small_margin" />
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/common_margin"
+                    android:layout_marginTop="@dimen/common_small_margin"
+                    android:layout_marginBottom="@dimen/common_small_margin"
+                    android:text="애견용품 후기"
+                    android:textAppearance="@style/TextAppearance.Material3.TitleMedium" />
+
+                <com.google.android.material.divider.MaterialDivider
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/common_small_margin" />
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/common_margin"
+                    android:layout_marginTop="@dimen/common_small_margin"
+                    android:layout_marginBottom="@dimen/common_small_margin"
+                    android:text="시츄 아지트🎀"
+                    android:textAppearance="@style/TextAppearance.Material3.TitleMedium" />
+
+                <com.google.android.material.divider.MaterialDivider
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/common_small_margin" />
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/common_margin"
+                    android:layout_marginTop="@dimen/common_small_margin"
+                    android:layout_marginBottom="@dimen/common_small_margin"
+                    android:text="푸들 아지트🐩"
+                    android:textAppearance="@style/TextAppearance.Material3.TitleMedium" />
+
+                <com.google.android.material.divider.MaterialDivider
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/common_small_margin" />
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/common_margin"
+                    android:layout_marginTop="@dimen/common_small_margin"
+                    android:layout_marginBottom="@dimen/common_small_margin"
+                    android:text="포메라니안 아지트🌞"
+                    android:textAppearance="@style/TextAppearance.Material3.TitleMedium" />
+
+                <com.google.android.material.divider.MaterialDivider
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/common_small_margin" />
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/common_margin"
+                    android:layout_marginTop="@dimen/common_small_margin"
+                    android:layout_marginBottom="@dimen/common_small_margin"
+                    android:text="치와와 아지트😍"
+                    android:textAppearance="@style/TextAppearance.Material3.TitleMedium" />
+
+                <com.google.android.material.divider.MaterialDivider
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/common_small_margin" />
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/common_margin"
+                    android:layout_marginTop="@dimen/common_small_margin"
+                    android:layout_marginBottom="@dimen/common_small_margin"
+                    android:text="몰티즈 아지트☃"
+                    android:textAppearance="@style/TextAppearance.Material3.TitleMedium" />
+
+                <com.google.android.material.divider.MaterialDivider
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/common_small_margin" />
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/common_margin"
+                    android:layout_marginTop="@dimen/common_small_margin"
+                    android:layout_marginBottom="@dimen/common_small_margin"
+                    android:text="진돗개 아지트⭐"
+                    android:textAppearance="@style/TextAppearance.Material3.TitleMedium" />
+
+                <com.google.android.material.divider.MaterialDivider
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/common_small_margin" />
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/common_margin"
+                    android:layout_marginTop="@dimen/common_small_margin"
+                    android:layout_marginBottom="@dimen/common_small_margin"
+                    android:text="리트리버 아지트💛"
+                    android:textAppearance="@style/TextAppearance.Material3.TitleMedium" />
+
+                <com.google.android.material.divider.MaterialDivider
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/common_small_margin"
+                    android:layout_marginBottom="@dimen/common_small_margin" />
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/common_margin"
+                    android:layout_marginTop="@dimen/common_small_margin"
+                    android:text="웰시 코기 아지트🍞"
+                    android:textAppearance="@style/TextAppearance.Material3.TitleMedium" />
+
+                <com.google.android.material.divider.MaterialDivider
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/common_small_margin"
+                    android:layout_marginBottom="@dimen/common_small_margin" />
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/common_margin"
+                    android:layout_marginTop="@dimen/common_small_margin"
+                    android:text="나머지 아이들 아지트🐶"
+                    android:textAppearance="@style/TextAppearance.Material3.TitleMedium" />
+
+                <com.google.android.material.divider.MaterialDivider
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/common_small_margin"
+                    android:layout_marginBottom="@dimen/common_small_margin" />
+            </LinearLayout>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </ScrollView>
 </androidx.constraintlayout.widget.ConstraintLayout>
