@@ -6,8 +6,7 @@
         android:title="차단하기" />
     <item
         android:id="@+id/menu_item_unblock"
-        android:title="차단해제"
-        android:visible="false" />
+        android:title="차단해제" />
     <item
         android:id="@+id/menu_item_report"
         android:title="신고하기" />

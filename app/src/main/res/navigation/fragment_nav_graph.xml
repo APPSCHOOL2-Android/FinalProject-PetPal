@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/fragment_nav_graph.xml"
-    app:startDestination="@id/item_FAQ">
+    app:startDestination="@id/item_walk">
 
     <fragment
         android:id="@+id/item_shop"
@@ -42,6 +42,9 @@
         <action
             android:id="@+id/action_item_chat_room_to_item_walk_mate_request"
             app:destination="@id/item_walk_mate_request" />
+        <action
+            android:id="@+id/action_item_chat_room_to_item_report_user"
+            app:destination="@id/item_report_user" />
     </fragment>
     <fragment
         android:id="@+id/item_walk_mate_request"
@@ -71,4 +74,9 @@
         android:name="com.petpal.mungmate.ui.customercenter.ContactUsFragment"
         android:label="fragment_contact_us"
         tools:layout="@layout/fragment_contact_us" />
+    <fragment
+        android:id="@+id/item_report_user"
+        android:name="com.petpal.mungmate.ui.chatting.ReportUserFragment"
+        android:label="fragment_report_user"
+        tools:layout="@layout/fragment_report_user" />
 </navigation>

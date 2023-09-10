@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
+import androidx.navigation.fragment.findNavController
 import com.petpal.mungmate.databinding.FragmentReportUserBinding
 
 class ReportUserFragment : Fragment() {
@@ -27,8 +28,18 @@ class ReportUserFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         fragmentReportUserBinding.run {
+            toolbarReportUser.setNavigationOnClickListener {
+                findNavController().popBackStack()
+            }
+
             val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, reportCategoryArray)
             textViewReportCategory.setAdapter(adapter)
+
+            editTextReportNickname.setText("멍멍이네")
+
+            buttonReport.setOnClickListener {
+                findNavController().popBackStack()
+            }
         }
     }
 }

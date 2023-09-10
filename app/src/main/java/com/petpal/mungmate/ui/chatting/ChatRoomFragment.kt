@@ -1,5 +1,6 @@
 package com.petpal.mungmate.ui.chatting
 
+import android.content.DialogInterface
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -8,7 +9,6 @@ import android.view.ViewGroup
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.divider.MaterialDividerItemDecoration
 import com.petpal.mungmate.R
 import com.petpal.mungmate.databinding.FragmentChatRoomBinding
 import com.petpal.mungmate.model.Message
@@ -39,6 +39,57 @@ class ChatRoomFragment : Fragment() {
                     findNavController().popBackStack()
                 }
 
+                // toolbar 메뉴 이벤트 리스너
+                setOnMenuItemClickListener { menuItem ->
+                    when(menuItem.itemId) {
+                        // 차단 상태가 아닐때만 보이는 메뉴
+                        R.id.menu_item_block -> {
+                            val builder = MaterialAlertDialogBuilder(requireContext())
+                                .setTitle("차단하기")
+                                .setMessage("차단한 사용자와는 채팅할 수 없습니다.")
+                                .setPositiveButton("차단하기"){ dialogInterface: DialogInterface, i: Int ->
+                                    // TODO 사용자 차단
+                                }
+                                .setNegativeButton("취소", null)
+                                .create()
+                            builder.show()
+                            true
+                        }
+                        // 차단 상태에서만 보이는 메뉴
+                        R.id.menu_item_unblock -> {
+                            val builder = MaterialAlertDialogBuilder(requireContext())
+                                .setTitle("차단해제")
+                                .setMessage("차단을 해제하면 다시 채팅을 주고받을 수 있습니다.")
+                                .setPositiveButton("해제하기"){ dialogInterface: DialogInterface, i: Int ->
+                                    // TODO 사용자 차단 해제
+                                }
+                                .setNegativeButton("취소", null)
+                                .create()
+                            builder.show()
+                            true
+                        }
+                        R.id.menu_item_report -> {
+                            // TODO 신고하기 화면 이동 (채팅 상대 UID 전달)
+                            findNavController().navigate(R.id.action_item_chat_room_to_item_report_user)
+
+                            true
+                        }
+                        R.id.menu_item_exit -> {
+                            val builder = MaterialAlertDialogBuilder(requireContext())
+                                .setTitle("채팅방 나가기")
+                                .setMessage("나가기를 하면 대화내용이 모두 삭제되고 채팅목록에서도 삭제됩니다.")
+                                .setPositiveButton("나가기"){ dialogInterface: DialogInterface, i: Int ->
+                                    // TODO 채팅방 나가기
+                                }
+                                .setNegativeButton("취소", null)
+                                .create()
+                            builder.show()
+
+                            true
+                        }
+                        else -> false
+                    }
+                }
             }
 
             // 산책 메이트 요청
