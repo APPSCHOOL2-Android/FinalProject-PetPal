@@ -19,7 +19,7 @@
             android:orientation="horizontal">
 
             <TextView
-                android:id="@+id/textViewInquirySubject"
+                android:id="@+id/textViewInquiryTitle"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="8dp"
@@ -47,7 +47,7 @@
         </LinearLayout>
 
         <TextView
-            android:id="@+id/textViewInquiryCreateDate"
+            android:id="@+id/text_view_inquiry_date_created"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="2023.09.10 10:04" />

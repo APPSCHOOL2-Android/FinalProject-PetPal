@@ -16,9 +16,9 @@ class InquiryAdapter(private val dataList: List<Inquiry>): RecyclerView.Adapter<
     inner class ViewHolder(private val rowBinding: RowInquiryBinding): RecyclerView.ViewHolder(rowBinding.root){
         fun bind(inquiry: Inquiry) {
             rowBinding.run {
-                textViewInquirySubject.text = inquiry.subject
+                textViewInquiryTitle.text = "[${inquiry.category}]${inquiry.title}"
                 textViewInquiryQuestion.text = inquiry.question
-                textViewInquiryCreateDate.text = inquiry.createDate
+                textViewInquiryDateCreated.text = inquiry.dateCreated
 
                 // 확장 여부에 따라 UI 변경 (RecyclerView 재활용 시 리셋 방지)
                 if (expendedItems.get(absoluteAdapterPosition)) {

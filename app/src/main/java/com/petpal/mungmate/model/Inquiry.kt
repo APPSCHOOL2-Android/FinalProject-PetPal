@@ -3,10 +3,10 @@ package com.petpal.mungmate.model
 // test
 data class Inquiry(
     var category: String,
-    var subject: String,
+    var title: String,
     var question: String,
     var answer: String?,
     var questionAuthor: String,
-    var createDate: String,
+    var dateCreated: String,
     var state: Boolean
 )

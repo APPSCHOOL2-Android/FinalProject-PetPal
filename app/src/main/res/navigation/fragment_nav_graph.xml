@@ -151,29 +151,4 @@
     <include app:graph="@navigation/mypage" />
     <include app:graph="@navigation/community" />
 
-    <!-- 충돌 방지 & 테스트로 잠시 빼뒀습니다. 마이페이지에서 진입하도록 연결 필요 -->
-    <fragment
-        android:id="@+id/FAQFragment"
-        android:name="com.petpal.mungmate.ui.customercenter.FAQFragment"
-        android:label="fragment_f_a_q"
-        tools:layout="@layout/fragment_f_a_q" >
-        <action
-            android:id="@+id/action_FAQFragment_to_contactUsFragment"
-            app:destination="@id/contactUsFragment" />
-    </fragment>
-    <fragment
-        android:id="@+id/inquiryFragment"
-        android:name="com.petpal.mungmate.ui.customercenter.InquiryFragment"
-        android:label="fragment_inquiry"
-        tools:layout="@layout/fragment_inquiry" >
-        <action
-            android:id="@+id/action_inquiryFragment_to_contactUsFragment"
-            app:destination="@id/contactUsFragment" />
-    </fragment>
-    <fragment
-        android:id="@+id/contactUsFragment"
-        android:name="com.petpal.mungmate.ui.customercenter.ContactUsFragment"
-        android:label="fragment_contact_us"
-        tools:layout="@layout/fragment_contact_us" />
-
 </navigation>
