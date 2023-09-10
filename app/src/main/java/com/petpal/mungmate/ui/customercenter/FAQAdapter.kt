@@ -35,7 +35,7 @@ class FAQAdapter(private val faqList: List<FAQ>): RecyclerView.Adapter<FAQAdapte
 
             // 헤더 클릭시 답변 확장
             rowBinding.root.setOnClickListener {
-
+                // todo absoluteAdapterPosition 으로 바꾸기
                 if (expendedItems.get(adapterPosition)) {
                     // 펼쳐진 아이템 클릭 시
                     expendedItems.delete(adapterPosition)

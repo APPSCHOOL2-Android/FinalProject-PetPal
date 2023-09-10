@@ -29,11 +29,12 @@
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chipInquiryState"
-                style="@style/Widget.Material3.Chip.Assist"
+                style="@style/Widget.Material3.Chip.Suggestion"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="8dp"
                 android:clickable="false"
+                android:focusable="false"
                 android:text="답변완료"
                 app:chipMinTouchTargetSize="32dp" />
 
@@ -46,7 +47,7 @@
         </LinearLayout>
 
         <TextView
-            android:id="@+id/textViewInquiryTimestamp"
+            android:id="@+id/textViewInquiryCreateDate"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="2023.09.10 10:04" />
@@ -61,7 +62,7 @@
         android:orientation="vertical">
 
         <TextView
-            android:id="@+id/textViewInquiryContent"
+            android:id="@+id/text_view_inquiry_question"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="16dp"
@@ -72,6 +73,7 @@
             android:layout_height="wrap_content" />
 
         <LinearLayout
+            android:id="@+id/layoutInquiryAnswer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
