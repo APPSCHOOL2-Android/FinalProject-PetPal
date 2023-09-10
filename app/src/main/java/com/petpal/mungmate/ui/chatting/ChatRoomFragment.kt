@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.divider.MaterialDividerItemDecoration
 import com.petpal.mungmate.R
 import com.petpal.mungmate.databinding.FragmentChatRoomBinding
@@ -29,11 +30,15 @@ class ChatRoomFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // 임시 데이터 세팅
         setSampleData()
 
         fragmentChatRoomBinding.run {
-            toolbarChatRoom.setNavigationOnClickListener {
-                findNavController().popBackStack()
+            toolbarChatRoom.run {
+                setNavigationOnClickListener {
+                    findNavController().popBackStack()
+                }
+
             }
 
             // 산책 메이트 요청
@@ -41,6 +46,7 @@ class ChatRoomFragment : Fragment() {
                 findNavController().navigate(R.id.action_item_chat_room_to_item_walk_mate_request)
             }
 
+            // 채팅방 메시지 목록
             recyclerViewMessage.run {
                 adapter = MessageListAdapter(messageList)
                 layoutManager = LinearLayoutManager(requireContext())

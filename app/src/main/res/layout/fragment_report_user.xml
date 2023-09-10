@@ -5,16 +5,16 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".ui.customercenter.ContactUsFragment" >
+    tools:context=".ui.chatting.ReportUserFragment" >
 
     <com.google.android.material.appbar.MaterialToolbar
-        android:id="@+id/toolbarContactUs"
+        android:id="@+id/materialToolbar2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:minHeight="?attr/actionBarSize"
         android:theme="?attr/actionBarTheme"
         app:navigationIcon="@drawable/arrow_back_24px"
-        app:title="문의하기" />
+        app:title="사용자 신고" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -23,13 +23,27 @@
         android:padding="16dp">
 
         <com.google.android.material.textfield.TextInputLayout
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/editTextReportNickname"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:enabled="false"
+                android:hint="사용자 닉네임"
+                android:inputType="text" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense.ExposedDropdownMenu"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="문의유형">
+            android:layout_marginTop="8dp"
+            android:hint="신고 유형">
 
             <com.google.android.material.textfield.MaterialAutoCompleteTextView
-                android:id="@+id/textViewInquiryCategory"
+                android:id="@+id/textViewReportCategory"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="none" />
@@ -39,42 +53,24 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:hint="제목">
+            android:hint="신고 내용">
 
             <com.google.android.material.textfield.TextInputEditText
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="text" />
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:hint="내용">
-
-            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/editTextReportContent"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="top"
                 android:inputType="text|textMultiLine"
-                android:minLines="5" />
+                android:minLines="3" />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <TextView
-            android:id="@+id/textView6"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="문의하신 내용에 대한 답변은 앱의 [마이페이지 > 1:1문의]에서 확인하실 수 있습니다." />
-
         <Button
-            android:id="@+id/button4"
+            android:id="@+id/buttonReport"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="문의하기" />
+            android:text="신고하기" />
+
 
     </LinearLayout>
-
 </LinearLayout>

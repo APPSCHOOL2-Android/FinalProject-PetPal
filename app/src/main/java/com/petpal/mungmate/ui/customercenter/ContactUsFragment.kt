@@ -6,7 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
-import com.petpal.mungmate.R
+import androidx.navigation.fragment.findNavController
 import com.petpal.mungmate.databinding.FragmentContactUsBinding
 
 class ContactUsFragment : Fragment() {
@@ -14,7 +14,7 @@ class ContactUsFragment : Fragment() {
     private var _fragmentContactUsBinding: FragmentContactUsBinding? = null
     private val fragmentContactUsBinding get() = _fragmentContactUsBinding!!
 
-    val inquiryItems = arrayOf( "회원정보", "산책", "포인트", "쇼핑", "커뮤니티", "채팅", "기타" )
+    private val inquiryCategoryArray = arrayOf( "회원정보", "산책", "포인트", "쇼핑", "커뮤니티", "채팅", "기타" )
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -28,7 +28,11 @@ class ContactUsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         fragmentContactUsBinding.run {
-            val adapter = ArrayAdapter<String>(requireContext(),android.R.layout.simple_dropdown_item_1line, inquiryItems)
+            toolbarContactUs.setNavigationOnClickListener {
+                findNavController().popBackStack()
+            }
+
+            val adapter = ArrayAdapter<String>(requireContext(),android.R.layout.simple_dropdown_item_1line, inquiryCategoryArray)
             textViewInquiryCategory.setAdapter(adapter)
         }
 
