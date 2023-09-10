@@ -10,7 +10,7 @@ import com.petpal.mungmate.R
 import com.petpal.mungmate.databinding.RowChatRoomBinding
 import com.petpal.mungmate.model.ChatRoom
 
-class ChatRoomListAdapter(private val chatRoomList: List<ChatRoom>):RecyclerView.Adapter<ChatRoomListAdapter.ViewHolder>() {
+class ChatRoomAdapter(private val chatRoomList: List<ChatRoom>):RecyclerView.Adapter<ChatRoomAdapter.ViewHolder>() {
 
     inner class ViewHolder(private val rowBinding: RowChatRoomBinding): RecyclerView.ViewHolder(rowBinding.root){
         fun bind(chatRoom: ChatRoom) {

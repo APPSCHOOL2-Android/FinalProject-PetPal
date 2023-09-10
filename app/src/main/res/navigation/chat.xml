@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/chat"
+    app:startDestination="@id/item_chat">
+
+    <fragment
+        android:id="@+id/item_chat"
+        android:name="com.petpal.mungmate.ui.chatting.ChatFragment"
+        android:label="fragment_chat"
+        tools:layout="@layout/fragment_chat">
+        <action
+            android:id="@+id/action_item_chat_to_item_chat_room"
+            app:destination="@id/chatRoomFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/walkMateRequestFragment"
+        android:name="com.petpal.mungmate.ui.chatting.WalkMateRequestFragment"
+        android:label="산책 메이트 요청"
+        tools:layout="@layout/fragment_walk_mate_request" />
+    <fragment
+        android:id="@+id/chatRoomFragment"
+        android:name="com.petpal.mungmate.ui.chatting.ChatRoomFragment"
+        android:label="채팅방"
+        tools:layout="@layout/fragment_chat_room" >
+        <action
+            android:id="@+id/action_chatRoomFragment_to_walkMateRequestFragment"
+            app:destination="@id/walkMateRequestFragment" />
+        <action
+            android:id="@+id/action_chatRoomFragment_to_reportUserFragment"
+            app:destination="@id/reportUserFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/reportUserFragment"
+        android:name="com.petpal.mungmate.ui.chatting.ReportUserFragment"
+        android:label="사용자 신고"
+        tools:layout="@layout/fragment_report_user" />
+</navigation>

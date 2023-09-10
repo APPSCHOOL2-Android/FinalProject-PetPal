@@ -1,15 +1,14 @@
-package com.petpal.mungmate.community
+package com.petpal.mungmate.ui.community
 
 import android.content.Context
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.PopupMenu
 import android.widget.TextView
-
 import androidx.recyclerview.widget.RecyclerView
+import com.airbnb.lottie.LottieAnimationView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.google.android.material.snackbar.Snackbar
@@ -27,7 +26,8 @@ class CommunityDetailCommentAdapter(private val context: Context) :
         val communityUserPlace: TextView = item.communityCommentUserPlace
         val communityPostDateCreated: TextView = item.communityCommentPostDateCreated
         val communityContent: TextView = item.communityCommentContent
-        val communityFavoriteTextView: TextView = item.communityCommentFavoriteTextView
+        val communityCommentFavoriteTextView: TextView = item.communityCommentFavoriteTextView
+        val communityCommentFavoriteLottie: LottieAnimationView = item.communityCommentFavoriteLottie
         val communityCommentTextView: TextView = item.communityCommentCommentTextView
 
     }
@@ -60,7 +60,7 @@ class CommunityDetailCommentAdapter(private val context: Context) :
         holder.communityPostDateCreated.text = "30분전"
         holder.communityContent.text =
             "귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다."
-        holder.communityFavoriteTextView.text = "좋아요 7"
+        holder.communityCommentFavoriteTextView.text = "좋아요 7"
         holder.communityCommentTextView.text = "댓글 2"
 
         holder.communityCommentMenuImageButton.setOnClickListener { view ->
@@ -80,6 +80,18 @@ class CommunityDetailCommentAdapter(private val context: Context) :
             popupMenu.show()
         }
 
+        var isClicked = false
+        holder.communityCommentFavoriteLottie.setOnClickListener {
+            isClicked = !isClicked // 클릭할 때마다 변수를 반전시킴
+            if (isClicked) {
+                holder.communityCommentFavoriteLottie.playAnimation()
+
+            } else {
+                holder.communityCommentFavoriteLottie.cancelAnimation()
+                holder.communityCommentFavoriteLottie.progress = 0f
+            }
+
+        }
 
     }
 

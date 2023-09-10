@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mypage"
+    app:startDestination="@id/item_mypage">
+
+    <fragment
+        android:id="@+id/walkHistoryDetailFragment"
+        android:name="com.petpal.mungmate.ui.walkhistory.WalkHistoryDetailFragment"
+        android:label="fragment_walk_history_detail"
+        tools:layout="@layout/fragment_walk_history_detail" />
+    <fragment
+        android:id="@+id/walkHistoryFragment"
+        android:name="com.petpal.mungmate.ui.walkhistory.WalkHistoryFragment"
+        android:label="fragment_walk_history"
+        tools:layout="@layout/fragment_walk_history">
+        <action
+            android:id="@+id/action_walkHistoryFragment_to_walkHistoryDetailFragment"
+            app:destination="@id/walkHistoryDetailFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/managePetFragment"
+        android:name="com.petpal.mungmate.ManagePetFragment"
+        android:label="fragment_manage_pet"
+        tools:layout="@layout/fragment_manage_pet" />
+    <fragment
+        android:id="@+id/item_mypage"
+        android:name="com.petpal.mungmate.MyPageFragment"
+        android:label="fragment_my_page"
+        tools:layout="@layout/fragment_my_page">
+        <action
+            android:id="@+id/action_to_managePetFragment"
+            app:destination="@id/managePetFragment" />
+        <action
+            android:id="@+id/action_to_walkHistoryFragment"
+            app:destination="@id/walkHistoryFragment" />
+        <action
+            android:id="@+id/action_item_mypage_to_matchHistoryFragment"
+            app:destination="@id/matchHistoryFragment" />
+        <action
+            android:id="@+id/action_item_mypage_to_manageBlockFragment"
+            app:destination="@id/manageBlockFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/matchHistoryFragment"
+        android:name="com.petpal.mungmate.ui.matchhistory.MatchHistoryFragment"
+        android:label="fragment_match_history"
+        tools:layout="@layout/fragment_match_history" />
+    <fragment
+        android:id="@+id/manageBlockFragment"
+        android:name="com.petpal.mungmate.ui.manageblock.ManageBlockFragment"
+        android:label="fragment_manage_block"
+        tools:layout="@layout/fragment_manage_block" />
+  
+    <!-- 고객센터 -->
+    <fragment
+        android:id="@+id/FAQFragment"
+        android:name="com.petpal.mungmate.ui.customercenter.FAQFragment"
+        android:label="fragment_f_a_q"
+        tools:layout="@layout/fragment_f_a_q" >
+        <action
+            android:id="@+id/action_FAQFragment_to_contactUsFragment"
+            app:destination="@id/contactUsFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/inquiryFragment"
+        android:name="com.petpal.mungmate.ui.customercenter.InquiryFragment"
+        android:label="fragment_inquiry"
+        tools:layout="@layout/fragment_inquiry" >
+        <action
+            android:id="@+id/action_inquiryFragment_to_contactUsFragment"
+            app:destination="@id/contactUsFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/contactUsFragment"
+        android:name="com.petpal.mungmate.ui.customercenter.ContactUsFragment"
+        android:label="fragment_contact_us"
+        tools:layout="@layout/fragment_contact_us" />
+    <fragment
+        android:id="@+id/announcementFragment"
+        android:name="com.petpal.mungmate.ui.customercenter.AnnouncementFragment"
+        android:label="AnnouncementFragment" >
+        <action
+            android:id="@+id/action_announcementFragment_to_announcementDetailFragment"
+            app:destination="@id/announcementDetailFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/announcementDetailFragment"
+        android:name="com.petpal.mungmate.ui.customercenter.AnnouncementDetailFragment"
+        android:label="fragment_announcement_detail"
+        tools:layout="@layout/fragment_announcement_detail" />
+
+</navigation>

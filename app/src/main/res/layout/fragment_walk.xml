@@ -192,14 +192,28 @@
         android:layout_width="420dp"
         android:layout_height="match_parent"
         android:layout_gravity="end"
-        android:orientation="vertical"
-        android:padding="16dp">
+        android:orientation="vertical">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/materialPlaceReviewToolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="?attr/actionBarSize"
+            android:theme="?attr/actionBarTheme"
+            app:title="필터" />
+
+        <com.google.android.material.divider.MaterialDivider
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
 
         <LinearLayout
             android:id="@+id/userFilters"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="0.45"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/common_margin"
+            android:layout_marginLeft="@dimen/common_margin"
+            android:layout_marginEnd="@dimen/common_margin"
+            android:layout_marginRight="@dimen/common_margin"
             android:orientation="vertical"
             android:visibility="visible">
 
@@ -343,8 +357,11 @@
         <LinearLayout
             android:id="@+id/petFilters"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="0.45"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/common_margin"
+            android:layout_marginLeft="@dimen/common_margin"
+            android:layout_marginEnd="@dimen/common_margin"
+            android:layout_marginRight="@dimen/common_margin"
             android:orientation="vertical"
             android:visibility="visible">
 
@@ -486,12 +503,6 @@
                 </com.google.android.material.chip.ChipGroup>
 
             </LinearLayout>
-
-
-            <com.google.android.material.divider.MaterialDivider
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp" />
 
 
         </LinearLayout>

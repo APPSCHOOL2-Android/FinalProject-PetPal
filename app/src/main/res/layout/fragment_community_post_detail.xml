@@ -143,24 +143,32 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/communityPostDetailContent">
 
+                <com.airbnb.lottie.LottieAnimationView
+                    android:id="@+id/communityPostDetailFavoriteLottie"
+                    android:layout_width="30dp"
+                    android:layout_height="40dp"
+                    android:scaleType="centerCrop"
+                    app:lottie_rawRes="@raw/favorite" />
+
                 <androidx.appcompat.widget.AppCompatTextView
                     android:id="@+id/communityPostDetailFavoriteTextView"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:drawableStart="@drawable/favorite_border"
-                    android:drawablePadding="@dimen/common_small_padding"
-                    android:text="@string/favorite"
-                    android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1" />
+                    android:layout_gravity="center"
+                    android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1"
+                    android:text="좋아요 7"/>
 
                 <androidx.appcompat.widget.AppCompatTextView
                     android:id="@+id/communityPostDetailCommentTextView"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/common_padding"
+                    android:layout_gravity="center"
                     android:drawableStart="@drawable/comment"
                     android:drawablePadding="@dimen/common_small_padding"
                     android:text="@string/comment"
                     android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1" />
+
 
             </LinearLayout>
 
@@ -172,7 +180,6 @@
                 android:layout_marginStart="@dimen/common_margin"
                 android:layout_marginTop="@dimen/common_padding"
                 android:layout_marginEnd="@dimen/common_margin"
-                app:dividerColor="@color/dividerColor"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/communityPostDetailBottomLinerLayout" />

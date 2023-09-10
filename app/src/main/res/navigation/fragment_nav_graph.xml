@@ -3,8 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/fragment_nav_graph.xml"
-    app:startDestination="@id/item_walk">
-
+    app:startDestination="@id/walk">
     <fragment
         android:id="@+id/item_shop"
         android:name="com.petpal.mungmate.ShopFragment"
@@ -12,7 +11,7 @@
         tools:layout="@layout/fragment_shop" />
     <fragment
         android:id="@+id/item_community"
-        android:name="com.petpal.mungmate.community.CommunityFragment"
+        android:name="com.petpal.mungmate.ui.community.CommunityFragment"
         android:label="fragment_community"
         tools:layout="@layout/fragment_community">
 
@@ -37,44 +36,31 @@
         <action
             android:id="@+id/action_item_community_to_communityDetailModifyFragment"
             app:destination="@id/communityDetailModifyFragment" />
+        <action
+            android:id="@+id/action_item_community_to_communitySearchFragment"
+            app:destination="@id/communitySearchFragment"
+            app:enterAnim="@anim/from_right"
+            app:exitAnim="@anim/to_left"
+            app:popEnterAnim="@anim/from_left"
+            app:popExitAnim="@anim/to_right" />
     </fragment>
     <fragment
         android:id="@+id/item_walk"
         android:name="com.petpal.mungmate.WalkFragment"
         android:label="fragment_walk"
-        tools:layout="@layout/fragment_walk">
-
-        <action
-            android:id="@+id/action_item_walk_to_placeReviewFragment"
-            app:destination="@id/placeReviewFragment" />
-
-    </fragment>
-
-
-
-
-    <fragment
-        android:id="@+id/item_chat"
-        android:name="com.petpal.mungmate.ui.chatting.ChatFragment"
-        android:label="fragment_chat"
-        tools:layout="@layout/fragment_chat">
-        <action
-            android:id="@+id/action_item_chat_to_item_chat_room"
-            app:destination="@id/item_chat_room" />
-    </fragment>
+        tools:layout="@layout/fragment_walk" />
     <fragment
         android:id="@+id/item_mypage"
         android:name="com.petpal.mungmate.MyPageFragment"
         android:label="fragment_my_page"
         tools:layout="@layout/fragment_my_page" >
-
-    </fragment>
         <action
             android:id="@+id/action_item_mypage_to_managePetFragment"
             app:destination="@id/managePetFragment" />
         <action
             android:id="@+id/action_item_mypage_to_walkHistoryFragment"
             app:destination="@id/walkHistoryFragment" />
+    </fragment>
     <fragment
         android:id="@+id/managePetFragment"
         android:name="com.petpal.mungmate.ManagePetFragment"
@@ -82,7 +68,7 @@
         tools:layout="@layout/fragment_manage_pet" />
     <fragment
         android:id="@+id/walkHistoryFragment"
-        android:name="com.petpal.mungmate.WalkHistoryFragment"
+        android:name="com.petpal.mungmate.ui.walkhistory.WalkHistoryFragment"
         android:label="fragment_walk_history"
         tools:layout="@layout/fragment_walk_history" >
         <action
@@ -91,13 +77,13 @@
     </fragment>
     <fragment
         android:id="@+id/walkHistoryDetailFragment"
-        android:name="com.petpal.mungmate.WalkHistoryDetailFragment"
+        android:name="com.petpal.mungmate.ui.walkhistory.WalkHistoryDetailFragment"
         android:label="fragment_walk_history_detail"
         tools:layout="@layout/fragment_walk_history_detail" />
 
     <fragment
         android:id="@+id/communityWritingFragment"
-        android:name="com.petpal.mungmate.community.CommunityWritingFragment"
+        android:name="com.petpal.mungmate.ui.community.CommunityWritingFragment"
         android:label="fragment_community_writing"
         tools:layout="@layout/fragment_community_writing">
         <action
@@ -108,7 +94,7 @@
     </fragment>
     <fragment
         android:id="@+id/communityPostDetailFragment"
-        android:name="com.petpal.mungmate.community.CommunityPostDetailFragment"
+        android:name="com.petpal.mungmate.ui.community.CommunityPostDetailFragment"
         android:label="CommunityPostDetailFragment">
         <action
             android:id="@+id/action_communityPostDetailFragment_to_item_community"
@@ -127,7 +113,7 @@
     </fragment>
     <fragment
         android:id="@+id/communityDetailModifyFragment"
-        android:name="com.petpal.mungmate.community.CommunityDetailModifyFragment"
+        android:name="com.petpal.mungmate.ui.community.CommunityDetailModifyFragment"
         android:label="fragment_community_detail_modify"
         tools:layout="@layout/fragment_community_detail_modify">
 
@@ -145,25 +131,22 @@
 
 
     <fragment
-        android:id="@+id/item_chat_room"
-        android:name="com.petpal.mungmate.ui.chatting.ChatRoomFragment"
-        android:label="fragment_chat_room"
-        tools:layout="@layout/fragment_chat_room">
+        android:id="@+id/communitySearchFragment"
+        android:name="com.petpal.mungmate.ui.community.CommunitySearchFragment"
+        android:label="fragment_community_search"
+        tools:layout="@layout/fragment_community_search" >
         <action
-            android:id="@+id/action_item_chat_room_to_item_walk_mate_request"
-            app:destination="@id/item_walk_mate_request" />
+            android:id="@+id/action_communitySearchFragment_to_item_community"
+            app:destination="@id/item_community"
+            app:enterAnim="@anim/from_left"
+            app:exitAnim="@anim/to_right"
+            app:popEnterAnim="@anim/from_right"
+            app:popExitAnim="@anim/to_left" />
     </fragment>
 
-    <fragment
-        android:id="@+id/item_walk_mate_request"
-        android:name="com.petpal.mungmate.ui.chatting.WalkMateRequestFragment"
-        android:label="fragment_walk_mate_request"
-        tools:layout="@layout/fragment_walk_mate_request" />
-
-    <fragment
-        android:id="@+id/placeReviewFragment"
-        android:name="com.petpal.mungmate.PlaceReviewFragment"
-        android:label="fragment_place_review"
-        tools:layout="@layout/fragment_place_review"/>
-
+    <include app:graph="@navigation/walk" />
+    <include app:graph="@navigation/shop" />
+    <include app:graph="@navigation/chat" />
+    <include app:graph="@navigation/mypage" />
+    <include app:graph="@navigation/community" />
 </navigation>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/item_community_search"
+        android:title="@string/category"
+        android:icon="@drawable/search"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/item_community_category"
+        android:title="@string/category"
+        android:icon="@drawable/dehaze"
+        app:showAsAction="always" />
+
+</menu>

@@ -31,7 +31,7 @@ class WalkFragment : Fragment() {
             bottomSheetDialog.setContentView(bottomSheetView)
             bottomSheetDialog.show()
             bottomSheetView.findViewById<Button>(R.id.buttonSubmitReview).setOnClickListener {
-                findNavController().navigate(R.id.action_item_walk_to_placeReviewFragment)
+               // findNavController().navigate(R.id.action_item_walk_to_placeReviewFragment)
                 bottomSheetDialog.dismiss()
             }
 //            fragmentWalkBinding.LinearLayoutOffWalk.visibility=View.GONE
