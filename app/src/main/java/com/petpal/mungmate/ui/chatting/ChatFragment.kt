@@ -28,7 +28,7 @@ class ChatFragment : Fragment() {
 
         fragmentChatBinding.run {
             recyclerViewChatRoom.run {
-                adapter = ChatRoomListAdapter(getSampleData())
+                adapter = ChatRoomAdapter(getSampleData())
                 layoutManager = LinearLayoutManager(requireContext())
                 addItemDecoration(
                     MaterialDividerItemDecoration(

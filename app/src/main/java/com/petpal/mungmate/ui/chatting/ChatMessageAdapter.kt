@@ -9,7 +9,7 @@ import com.petpal.mungmate.model.Message
 import java.lang.IllegalArgumentException
 
 // Recyceler.ViewHolder를 상속받는 자식 클래스 ViewHolder들로 이루어진 리스트를 하나의 RecyclerView로 표시
-class MessageListAdapter(private val messageList: List<Message>): RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+class ChatMessageAdapter(private val messageList: List<Message>): RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     // 메시지 뷰 식별용 상수
     companion object {
         const val SEND_MESSAGE_VIEW_TYPE = 1

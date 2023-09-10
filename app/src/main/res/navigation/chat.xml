@@ -12,20 +12,28 @@
         tools:layout="@layout/fragment_chat">
         <action
             android:id="@+id/action_item_chat_to_item_chat_room"
-            app:destination="@id/item_chat_room" />
+            app:destination="@id/chatRoomFragment" />
     </fragment>
     <fragment
-        android:id="@+id/item_walk_mate_request"
+        android:id="@+id/walkMateRequestFragment"
         android:name="com.petpal.mungmate.ui.chatting.WalkMateRequestFragment"
-        android:label="fragment_walk_mate_request"
+        android:label="산책 메이트 요청"
         tools:layout="@layout/fragment_walk_mate_request" />
     <fragment
-        android:id="@+id/item_chat_room"
+        android:id="@+id/chatRoomFragment"
         android:name="com.petpal.mungmate.ui.chatting.ChatRoomFragment"
-        android:label="fragment_chat_room"
-        tools:layout="@layout/fragment_chat_room">
+        android:label="채팅방"
+        tools:layout="@layout/fragment_chat_room" >
         <action
-            android:id="@+id/action_item_chat_room_to_item_walk_mate_request"
-            app:destination="@id/item_walk_mate_request" />
+            android:id="@+id/action_chatRoomFragment_to_walkMateRequestFragment"
+            app:destination="@id/walkMateRequestFragment" />
+        <action
+            android:id="@+id/action_chatRoomFragment_to_reportUserFragment"
+            app:destination="@id/reportUserFragment" />
     </fragment>
+    <fragment
+        android:id="@+id/reportUserFragment"
+        android:name="com.petpal.mungmate.ui.chatting.ReportUserFragment"
+        android:label="사용자 신고"
+        tools:layout="@layout/fragment_report_user" />
 </navigation>

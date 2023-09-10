@@ -2,16 +2,15 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:id="@+id/item_block"
+        android:id="@+id/menu_item_block"
         android:title="차단하기" />
     <item
-        android:id="@+id/item_unblock"
-        android:title="차단해제"
-        android:visible="false" />
+        android:id="@+id/menu_item_unblock"
+        android:title="차단해제" />
     <item
-        android:id="@+id/item_report"
+        android:id="@+id/menu_item_report"
         android:title="신고하기" />
     <item
-        android:id="@+id/item_exit"
+        android:id="@+id/menu_item_exit"
         android:title="나가기" />
 </menu>
