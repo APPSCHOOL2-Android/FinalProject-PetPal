@@ -26,6 +26,14 @@ class MyPageFragment : Fragment() {
             buttonWalkHistory.setOnClickListener {
                 findNavController().navigate(R.id.action_to_walkHistoryFragment)
             }
+
+            buttonGoToMatchHistory.setOnClickListener {
+                findNavController().navigate(R.id.action_item_mypage_to_matchHistoryFragment)
+            }
+
+            buttonGoToManageBlock.setOnClickListener {
+                findNavController().navigate(R.id.action_item_mypage_to_manageBlockFragment)
+            }
         }
         return fragmentMyPageBinding.root
     }
