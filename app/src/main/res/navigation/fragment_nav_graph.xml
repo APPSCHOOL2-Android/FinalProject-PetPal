@@ -3,8 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/fragment_nav_graph.xml"
-    app:startDestination="@id/item_walk">
-
+    app:startDestination="@id/walk">
     <fragment
         android:id="@+id/item_shop"
         android:name="com.petpal.mungmate.ShopFragment"
@@ -168,5 +167,12 @@
             app:popEnterAnim="@anim/from_right"
             app:popExitAnim="@anim/to_left" />
     </fragment>
+
+
+    <include app:graph="@navigation/walk" />
+    <include app:graph="@navigation/shop" />
+    <include app:graph="@navigation/chat" />
+    <include app:graph="@navigation/mypage" />
+    <include app:graph="@navigation/community" />
 
 </navigation>
