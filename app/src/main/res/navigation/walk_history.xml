@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/walk_history"
+    app:startDestination="@id/walkHistoryFragment">
+
+    <fragment
+        android:id="@+id/walkHistoryFragment"
+        android:name="com.petpal.mungmate.ui.walkhistory.WalkHistoryFragment"
+        tools:layout="@layout/fragment_walk_history"
+        android:label="fragment_walk_history">
+        <action
+            android:id="@+id/action_walkHistoryFragment_to_walkHistoryDetailFragment"
+            app:destination="@id/walkHistoryDetailFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/walkHistoryDetailFragment"
+        android:name="com.petpal.mungmate.ui.walkhistory.WalkHistoryDetailFragment"
+        tools:layout="@layout/fragment_walk_history_detail"
+        android:label="fragment_walk_history_detail" />
+</navigation>
