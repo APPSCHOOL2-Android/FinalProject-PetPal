@@ -59,7 +59,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="32dp"
-        android:backgroundTint="@color/google_login_btn_backgroundTint"
+        android:backgroundTint="@color/white"
         android:drawableLeft="@drawable/google_logo_18"
         style="@style/Widget.Material3.Button.ElevatedButton"
         android:text="@string/google_login"
