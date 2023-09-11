@@ -50,11 +50,16 @@ dependencies {
     implementation("androidx.navigation:navigation-fragment-ktx:2.5.3")
     implementation("androidx.navigation:navigation-ui-ktx:2.5.3")
 
-    // material3
-
-    // roundImage
+    // Circle ImageView
     implementation 'de.hdodenhof:circleimageview:3.1.0'
 
+    // Glide
+    implementation 'com.github.bumptech.glide:glide:4.12.0'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.12.0'
+
     // lottie
-    implementation 'com.airbnb.android:lottie:5.0.2'
+    implementation "com.airbnb.android:lottie:6.1.0"
+
+    // skeletonlayout
+    implementation 'com.faltenreich:skeletonlayout:5.0.0'
 }
