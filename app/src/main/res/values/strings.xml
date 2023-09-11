@@ -35,6 +35,7 @@
     <string name="mate_main">멍메이트</string>
     <string name="mate_description">반려동물 산책 매칭 플랫폼</string>
     <string name="copyright">Copyright &#169; Petpal</string>
+    <string name="error_nickname">8자 이내의 닉네임을 사용해주세요.</string>
 
 
 </resources>
