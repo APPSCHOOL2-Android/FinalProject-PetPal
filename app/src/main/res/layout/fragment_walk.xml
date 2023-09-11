@@ -9,6 +9,7 @@
     android:orientation="vertical">
 
     <FrameLayout
+        android:id="@+id/mapViewContainer"
         android:layout_width="match_parent"
         android:layout_height="500dp"
         android:layout_weight="0.6">
@@ -42,7 +43,7 @@
                 <!-- weight 속성을 사용해 빈 공간을 채워넣는 View 추가 -->
 
                 <ImageView
-                    android:id="@+id/imageView10"
+                    android:id="@+id/imageViewWalkToggle"
                     android:layout_width="50dp"
                     android:layout_height="50dp"
                     app:srcCompat="@drawable/dog_home" />
@@ -189,47 +190,45 @@
 
     <LinearLayout
         android:id="@+id/DrawerLinear"
-        android:layout_width="420dp"
+        android:layout_width="400dp"
         android:layout_height="match_parent"
         android:layout_gravity="end"
+        android:padding="@dimen/common_padding"
         android:orientation="vertical">
 
-        <com.google.android.material.appbar.MaterialToolbar
-            android:id="@+id/materialPlaceReviewToolbar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:minHeight="?attr/actionBarSize"
-            android:theme="?attr/actionBarTheme"
-            app:title="필터" />
-
-        <com.google.android.material.divider.MaterialDivider
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
 
         <LinearLayout
             android:id="@+id/userFilters"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/common_margin"
-            android:layout_marginLeft="@dimen/common_margin"
-            android:layout_marginEnd="@dimen/common_margin"
-            android:layout_marginRight="@dimen/common_margin"
             android:orientation="vertical"
             android:visibility="visible">
 
 
-            <TextView
-                android:id="@+id/textViewFilterUser"
-                android:layout_width="match_parent"
+            <androidx.cardview.widget.CardView
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="유저"
-                android:textAppearance="@style/TextAppearance.AppCompat.Large" />
+                app:cardElevation="4dp"
+                app:cardCornerRadius="8dp"
+                app:cardBackgroundColor="#FFDF9B">
+
+                <TextView
+                    android:id="@+id/textViewFilterUser"
+                    android:layout_width="50dp"
+                    android:paddingTop="4dp"
+                    android:paddingBottom="4dp"
+                    android:gravity="center"
+                    android:text="유저"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Large"  android:layout_height="match_parent"/>
+
+            </androidx.cardview.widget.CardView>
+
 
             <TextView
                 android:id="@+id/textViewFilterDistance"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="@dimen/common_margin"
                 android:text="거리"
                 android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
 
@@ -358,26 +357,32 @@
             android:id="@+id/petFilters"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/common_margin"
-            android:layout_marginLeft="@dimen/common_margin"
-            android:layout_marginEnd="@dimen/common_margin"
-            android:layout_marginRight="@dimen/common_margin"
             android:orientation="vertical"
             android:visibility="visible">
 
-
-            <TextView
-                android:id="@+id/textViewFilterPet"
-                android:layout_width="match_parent"
+            <androidx.cardview.widget.CardView
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="반려동물"
-                android:textAppearance="@style/TextAppearance.AppCompat.Large" />
+                android:layout_marginTop="8dp"
+                app:cardElevation="4dp"
+                app:cardCornerRadius="8dp"
+                app:cardBackgroundColor="#FFDF9B">
 
+                <TextView
+                    android:id="@+id/textViewFilterPet"
+                    android:layout_width="100dp"
+                    android:paddingTop="4dp"
+                    android:paddingBottom="4dp"
+                    android:gravity="center"
+                    android:text="반려동물"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Large"  android:layout_height="match_parent"/>
+
+            </androidx.cardview.widget.CardView>
             <TextView
                 android:id="@+id/textViewFilterPetGender"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="@dimen/common_margin"
                 android:text="성별"
                 android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
 
@@ -465,18 +470,18 @@
 
             </com.google.android.material.chip.ChipGroup>
 
+            <TextView
+                android:id="@+id/textViewFilterNeuterStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="중성화 여부"
+                android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
-
-                <TextView
-                    android:id="@+id/textViewFilterNeuterStatus"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:text="중성화 여부"
-                    android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
 
                 <com.google.android.material.chip.ChipGroup
                     android:id="@+id/filterNeuterStatusGroup"
@@ -489,7 +494,6 @@
                         style="@style/Widget.Material3.Chip.Suggestion"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginLeft="8dp"
                         android:text="중성화 전" />
 
                     <com.google.android.material.chip.Chip
@@ -498,7 +502,6 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="중성화 완료" />
-
 
                 </com.google.android.material.chip.ChipGroup>
 
@@ -510,13 +513,14 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginRight="@dimen/common_margin"
             android:layout_weight="0.">
 
             <Button
                 android:id="@+id/buttonFilterReset"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_gravity="start"
                 android:layout_weight="1"
                 android:text="초기화" />
 

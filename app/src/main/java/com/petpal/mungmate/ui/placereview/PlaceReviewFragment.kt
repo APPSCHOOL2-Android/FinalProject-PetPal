@@ -1,4 +1,4 @@
-package com.petpal.mungmate
+package com.petpal.mungmate.ui.placereview
 
 import android.os.Bundle
 import android.util.Log
@@ -12,6 +12,7 @@ import android.widget.RatingBar
 import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.petpal.mungmate.R
 import com.petpal.mungmate.databinding.FragmentPlaceReviewBinding
 import com.petpal.mungmate.databinding.RowPlaceReviewBinding
 
@@ -32,9 +33,15 @@ class PlaceReviewFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         fragmentPlaceReviewBinding = FragmentPlaceReviewBinding.inflate(layoutInflater)
+
+        fragmentPlaceReviewBinding.placeReviewDetailToolbar.run{
+            setNavigationIcon(androidx.appcompat.R.drawable.abc_ic_ab_back_material)
+            setNavigationOnClickListener {
+            }
+        }
+
         fragmentPlaceReviewBinding.reviewsRecyclerView.adapter = ReviewAdapter(reviews)
         fragmentPlaceReviewBinding.reviewsRecyclerView.layoutManager=LinearLayoutManager(requireContext())
-        Log.d("PlaceReviewFragment", "Number of reviews: ${reviews.size}")
 
 
         return fragmentPlaceReviewBinding.root
@@ -58,6 +65,7 @@ class PlaceReviewFragment : Fragment() {
                 commentTextView=rowBinding.textView4
                 reviewImageView=rowBinding.imageView11
             }
+            //온클릭이 있어야 하나 ?
             override fun onClick(v: View?) {
                 TODO("Not yet implemented")
             }

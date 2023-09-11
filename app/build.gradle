@@ -54,7 +54,6 @@ dependencies {
 
 
     //Kakao Map
-    //implementation 'net.daum.mf.map.android:map-view:1.0.0'
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation files('libs/libDaumMapAndroid.jar')
 

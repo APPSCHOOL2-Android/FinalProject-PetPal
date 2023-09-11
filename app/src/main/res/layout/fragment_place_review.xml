@@ -3,18 +3,17 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="16dp">
+    android:orientation="vertical">
 
 
     <com.google.android.material.appbar.MaterialToolbar
-        android:id="@+id/communityModifyToolbar"
+        android:id="@+id/placeReviewDetailToolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:gravity="start"
         android:minHeight="?attr/actionBarSize"
         android:theme="?attr/actionBarTheme"
-
-        app:title="상세 리뷰" />
+        app:title="장소 리뷰" />
 
 
     <LinearLayout
@@ -26,7 +25,9 @@
             android:id="@+id/textViewPlaceReviewTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/common_margin"
             android:layout_marginBottom="8dp"
+            android:paddingLeft="16dp"
             android:text="부천 동물병원"
             android:textSize="25sp"
             android:textStyle="bold" />
@@ -48,6 +49,8 @@
         android:layout_width="match_parent"
         android:layout_height="200dp"
         android:layout_marginBottom="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
         app:srcCompat="@drawable/storefront_24px" />
 
     <androidx.recyclerview.widget.RecyclerView

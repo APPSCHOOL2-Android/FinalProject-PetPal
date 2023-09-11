@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:layout_margin="@dimen/common_margin"
     android:orientation="vertical"
-    tools:context=".WritePlaceReviewFragment">
+    tools:context=".ui.placereview.WritePlaceReviewFragment">
 
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/materialPlaceReviewToolbar"
@@ -14,7 +14,7 @@
         android:layout_height="wrap_content"
         android:minHeight="?attr/actionBarSize"
         android:theme="?attr/actionBarTheme"
-        app:title="장소리뷰" />
+        app:title="장소 리뷰 작성" />
 
     <TextView
         android:id="@+id/textViewplaceReviewName"
