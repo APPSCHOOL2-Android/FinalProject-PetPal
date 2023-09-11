@@ -60,7 +60,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="32dp"
-        android:backgroundTint="#FFFFFF"
+        android:backgroundTint="@color/white"
         android:drawableLeft="@drawable/google_logo_18"
         android:text="@string/google_login"
         android:textColor="#000000" />
