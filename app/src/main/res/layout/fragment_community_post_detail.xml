@@ -84,24 +84,18 @@
                 <androidx.appcompat.widget.AppCompatTextView
                     android:textAppearance="@style/TextAppearance.AppCompat.Small"
                     app:layout_constraintEnd_toEndOf="parent"
-                    android:id="@+id/placeDateDistinction"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:paddingStart="@dimen/common_small_padding"
-                    android:paddingEnd="@dimen/common_small_padding"
-                    android:text="@string/place_date_distinction"
                     app:layout_constraintEnd_toStartOf="@id/communityPostDateCreated"
                     app:layout_constraintStart_toEndOf="@id/communityPostUserPlace"
                     app:layout_constraintTop_toBottomOf="@id/communityPostDetailUserNickName" />
 
-                <androidx.appcompat.widget.AppCompatTextView
-                    android:id="@+id/communityPostDateCreated"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="30분전"
-                    android:textAppearance="@style/TextAppearance.AppCompat.Small"
-                    app:layout_constraintStart_toEndOf="@id/placeDateDistinction"
-                    app:layout_constraintTop_toBottomOf="@id/communityPostDetailUserNickName" />
+<!--                <androidx.appcompat.widget.AppCompatTextView-->
+<!--                    android:id="@+id/communityPostDateCreated"-->
+<!--                    android:layout_width="wrap_content"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:text="30분전"-->
+<!--                    android:textAppearance="@style/TextAppearance.AppCompat.Small"-->
+<!--                    app:layout_constraintStart_toEndOf="@id/placeDateDistinction"-->
+<!--                    app:layout_constraintTop_toBottomOf="@id/communityPostDetailUserNickName" />-->
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
