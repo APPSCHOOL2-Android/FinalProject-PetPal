@@ -6,42 +6,45 @@
     android:layout_height="match_parent"
     tools:context=".ui.community.CommunitySearchFragment">
 
-    <com.google.android.material.appbar.MaterialToolbar
-        android:id="@+id/communitySearchToolbar"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:minHeight="?attr/actionBarSize"
-        android:theme="?attr/actionBarTheme"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:title="@string/search" />
-
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/communitySearchToolbar">
+        app:layout_constraintTop_toTopOf="parent">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
+
+            <com.google.android.material.appbar.MaterialToolbar
+                android:id="@+id/communitySearchToolbar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minHeight="?attr/actionBarSize"
+                android:theme="?attr/actionBarTheme"
+                app:layout_constraintEnd_toStartOf="@id/communitySearchAppBarLayout"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
             <com.google.android.material.appbar.AppBarLayout
                 android:id="@+id/communitySearchAppBarLayout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                style="@style/Widget.Material3.AppBarLayout"
+                android:layout_width="0dp"
+                android:layout_height="?attr/actionBarSize"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintStart_toEndOf="@id/communitySearchToolbar"
                 app:layout_constraintTop_toTopOf="parent">
 
                 <com.google.android.material.search.SearchBar
-                    android:id="@+id/search_bar"
+                    android:id="@+id/searchBar"
+                    style="@style/TextAppearance.Material3.SearchBar"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:hint="@string/search_hint" />
+
             </com.google.android.material.appbar.AppBarLayout>
 
             <androidx.core.widget.NestedScrollView
@@ -57,98 +60,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent">
 
-                    <TextView
-                        android:id="@+id/communitySearchRecentSearchesTextView"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="@dimen/common_margin"
-                        android:text="최근 검색어"
-                        android:textAppearance="@style/TextAppearance.Material3.TitleLarge"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
 
-                    <HorizontalScrollView
-                        android:id="@+id/communitySearchRecentSearchesHorizontalScrollView"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="@dimen/common_margin"
-                        android:scrollbars="none"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/communitySearchRecentSearchesTextView">
-
-                        <com.google.android.material.chip.ChipGroup
-                            android:id="@+id/communitySearchRecentSearchesChipGroup"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginEnd="@dimen/common_margin"
-                            app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toBottomOf="@id/communityToolbar"
-                            app:singleSelection="true">
-
-                            <com.google.android.material.chip.Chip
-                                android:id="@+id/communitySearchRecentSearchesChip1"
-                                style="@style/Widget.Material3.Chip.Input"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="최근 검색어1"
-                                app:chipBackgroundColor="@color/md_theme_light_onPrimary"
-                                android:textAppearance="@style/TextAppearance.AppCompat.Small"
-                                app:checkedIcon="@null"
-                                app:closeIconEnabled="true"
-                                app:checkedIconVisible="false" />
-
-                            <com.google.android.material.chip.Chip
-                                android:id="@+id/communitySearchRecentSearchesChip2"
-                                style="@style/Widget.Material3.Chip.Input"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="최근 검색어1"
-                                app:chipBackgroundColor="@color/md_theme_light_onPrimary"
-                                android:textAppearance="@style/TextAppearance.AppCompat.Small"
-                                app:checkedIcon="@null"
-                                app:closeIconEnabled="true"
-                                app:checkedIconVisible="false" />
-
-                            <com.google.android.material.chip.Chip
-                                android:id="@+id/communitySearchRecentSearchesChip3"
-                                style="@style/Widget.Material3.Chip.Input"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="최근 검색어1"
-                                app:chipBackgroundColor="@color/md_theme_light_onPrimary"
-                                android:textAppearance="@style/TextAppearance.AppCompat.Small"
-                                app:checkedIcon="@null"
-                                app:closeIconEnabled="true"
-                                app:checkedIconVisible="false" />
-
-                            <com.google.android.material.chip.Chip
-                                android:id="@+id/communitySearchRecentSearchesChip4"
-                                style="@style/Widget.Material3.Chip.Input"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="최근 검색어1"
-                                app:chipBackgroundColor="@color/md_theme_light_onPrimary"
-                                android:textAppearance="@style/TextAppearance.AppCompat.Small"
-                                app:checkedIcon="@null"
-                                app:closeIconEnabled="true"
-                                app:checkedIconVisible="false" />
-
-                            <com.google.android.material.chip.Chip
-                                android:id="@+id/communitySearchRecentSearchesChip5"
-                                style="@style/Widget.Material3.Chip.Input"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                app:chipBackgroundColor="@color/md_theme_light_onPrimary"
-                                android:text="최근 검색어1"
-                                android:textAppearance="@style/TextAppearance.AppCompat.Small"
-                                app:checkedIcon="@null"
-                                app:closeIconEnabled="true"
-                                app:checkedIconVisible="false" />
-
-                        </com.google.android.material.chip.ChipGroup>
-                    </HorizontalScrollView>
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </androidx.core.widget.NestedScrollView>
         </androidx.constraintlayout.widget.ConstraintLayout>
@@ -157,8 +69,24 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:hint="@string/search_hint"
-            app:layout_anchor="@id/search_bar">
+            app:layout_anchor="@id/searchBar">
 
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:id="@+id/communitySearchRecentSearchesTextView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="@dimen/common_margin"
+                    android:text="최근 검색어"
+                    android:textAppearance="@style/TextAppearance.Material3.TitleLarge"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+            </LinearLayout>
         </com.google.android.material.search.SearchView>
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
