@@ -103,14 +103,15 @@
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/communityContent"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:ellipsize="end"
         android:maxLines="4"
         android:padding="@dimen/common_padding"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/communityBottomLinerLayout"
+        app:layout_constraintEnd_toEndOf="@id/communityPostCardView"
+        app:layout_constraintStart_toStartOf="@id/communityPostCardView"
         app:layout_constraintTop_toBottomOf="@id/communityPostCardView"
         tools:text="rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrdddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddrrrrrrrrrrrrrrrrrrrrrrrrrrrrr" />
 
@@ -136,15 +137,15 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1"
-            android:text="좋아요 7"/>
+            android:text="좋아요 7"
+            android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1" />
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/communityCommentTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/common_padding"
             android:layout_gravity="center"
+            android:layout_marginStart="@dimen/common_padding"
             android:drawableStart="@drawable/comment"
             android:drawablePadding="@dimen/common_small_padding"
             android:text="@string/comment"
