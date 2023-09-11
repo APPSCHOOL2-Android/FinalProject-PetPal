@@ -3,20 +3,26 @@ package com.petpal.mungmate.ui.chatting
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.os.bundleOf
 import androidx.navigation.Navigation
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.petpal.mungmate.MainActivity
 import com.petpal.mungmate.R
 import com.petpal.mungmate.databinding.RowChatRoomBinding
 import com.petpal.mungmate.model.ChatRoom
 
-class ChatRoomAdapter(private val chatRoomList: List<ChatRoom>):RecyclerView.Adapter<ChatRoomAdapter.ViewHolder>() {
+class ChatRoomAdapter(
+    private val chatRoomList: List<ChatRoom>,
+    private val activity: MainActivity,
+) : RecyclerView.Adapter<ChatRoomAdapter.ViewHolder>() {
 
-    inner class ViewHolder(private val rowBinding: RowChatRoomBinding): RecyclerView.ViewHolder(rowBinding.root){
+    inner class ViewHolder(private val rowBinding: RowChatRoomBinding) :
+        RecyclerView.ViewHolder(rowBinding.root) {
         fun bind(chatRoom: ChatRoom) {
             rowBinding.run {
                 textViewRoomName.text = chatRoom.roomName
-                textViewLastMessageText.text= chatRoom.lastMessageText
+                textViewLastMessageText.text = chatRoom.lastMessageText
                 textViewLastMessageTime.text = chatRoom.lastMessageTime
                 if (chatRoom.unReadCount < 1) {
                     textViewUnreadCount.visibility = View.GONE
@@ -31,8 +37,7 @@ class ChatRoomAdapter(private val chatRoomList: List<ChatRoom>):RecyclerView.Ada
 
             rowBinding.root.setOnClickListener {
                 // 채팅방 이동 (roomId 전달 필요)
-                val navController = Navigation.findNavController(itemView)
-                navController!!.navigate(R.id.action_item_chat_to_item_chat_room)
+                activity.navigate(R.id.action_mainFragment_to_chat, bundleOf("position" to adapterPosition))
             }
         }
     }

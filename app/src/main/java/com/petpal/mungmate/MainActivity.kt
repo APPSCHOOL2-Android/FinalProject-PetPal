@@ -1,7 +1,7 @@
 package com.petpal.mungmate
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
 import android.util.Log
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.navigation.NavController
@@ -21,5 +21,9 @@ class MainActivity : AppCompatActivity() {
         navController = navHostFragment.navController
 
 
+    }
+
+    fun navigate(id: Int, arg: Bundle? = null) {
+        navController.navigate(id, arg)
     }
 }

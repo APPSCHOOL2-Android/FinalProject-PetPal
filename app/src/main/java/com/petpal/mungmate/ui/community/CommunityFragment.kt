@@ -21,6 +21,7 @@ import com.google.android.material.sidesheet.SideSheetBehavior
 import com.google.android.material.sidesheet.SideSheetCallback
 import com.google.android.material.sidesheet.SideSheetDialog
 import com.google.android.material.snackbar.Snackbar
+import com.petpal.mungmate.MainActivity
 import com.petpal.mungmate.R
 import com.petpal.mungmate.databinding.FragmentCommunityBinding
 
@@ -29,22 +30,42 @@ class CommunityFragment : Fragment() {
 
     lateinit var communityBinding: FragmentCommunityBinding
     private lateinit var skeleton: Skeleton
+    private lateinit var mainActivity: MainActivity
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        Log.d("community onCreate", "onCreate")
+
+        communityBinding = FragmentCommunityBinding.inflate(layoutInflater)
+        mainActivity = activity as MainActivity
+
+        communityBinding.communityPostRecyclerView.run {
+            val communityAdapter = CommunityAdapter(requireContext(), mainActivity)
+            adapter = communityAdapter
+            setHasFixedSize(true)
+            layoutManager = LinearLayoutManager(requireContext())
+            skeleton = applySkeleton(R.layout.row_community, 10).apply { showSkeleton() }
+
+            Handler(Looper.getMainLooper()).postDelayed({
+                skeleton.showOriginal()
+            }, 3000)
+        }
+    }
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View? {
-        communityBinding = FragmentCommunityBinding.inflate(inflater)
 
-        bottomNavigationViewVISIBLE()
+
+//        bottomNavigationViewVISIBLE()
         communityBinding.run {
             communityToolbar.run {
-                inflateMenu(R.menu.community_category_menu)
                 setOnMenuItemClickListener {
                     when (it?.itemId) {
 
                         R.id.item_community_search->{
-                            findNavController()
-                                .navigate(R.id.action_item_community_to_communitySearchFragment)
+                            mainActivity
+                                .navigate(R.id.action_mainFragment_to_communitySearchFragment)
                         }
 
                         R.id.item_community_category -> {
@@ -57,10 +78,10 @@ class CommunityFragment : Fragment() {
             }
 
             communityPostWritingFab.setOnClickListener {
-                it.findNavController()
-                    .navigate(R.id.action_item_community_to_communityWritingFragment)
+                mainActivity
+                    .navigate(R.id.action_mainFragment_to_communityWritingFragment)
             }
-            communityRecyclerView()
+//            communityRecyclerView()
         }
 
         return communityBinding.root
@@ -74,7 +95,7 @@ class CommunityFragment : Fragment() {
 
     private fun FragmentCommunityBinding.communityRecyclerView() {
         communityPostRecyclerView.run {
-            val communityAdapter = CommunityAdapter(requireContext())
+            val communityAdapter = CommunityAdapter(requireContext(), mainActivity)
             adapter = communityAdapter
             setHasFixedSize(true)
             layoutManager = LinearLayoutManager(requireContext())
