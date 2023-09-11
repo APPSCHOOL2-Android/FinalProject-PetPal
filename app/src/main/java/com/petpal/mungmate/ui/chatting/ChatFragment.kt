@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.divider.MaterialDividerItemDecoration
+import com.petpal.mungmate.MainActivity
 import com.petpal.mungmate.databinding.FragmentChatBinding
 import com.petpal.mungmate.model.ChatRoom
 
@@ -28,7 +29,7 @@ class ChatFragment : Fragment() {
 
         fragmentChatBinding.run {
             recyclerViewChatRoom.run {
-                adapter = ChatRoomAdapter(getSampleData())
+                adapter = ChatRoomAdapter(getSampleData(), activity as MainActivity)
                 layoutManager = LinearLayoutManager(requireContext())
                 addItemDecoration(
                     MaterialDividerItemDecoration(

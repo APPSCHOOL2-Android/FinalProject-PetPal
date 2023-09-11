@@ -24,14 +24,14 @@ class WalkFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View? {
-       fragmentWalkBinding= FragmentWalkBinding.inflate(layoutInflater)
+        fragmentWalkBinding = FragmentWalkBinding.inflate(layoutInflater)
         fragmentWalkBinding.buttonWalk.setOnClickListener {
             val bottomSheetView = layoutInflater.inflate(R.layout.row_walk_bottom_sheet_place, null)
             val bottomSheetDialog = BottomSheetDialog(requireActivity())
             bottomSheetDialog.setContentView(bottomSheetView)
             bottomSheetDialog.show()
             bottomSheetView.findViewById<Button>(R.id.buttonSubmitReview).setOnClickListener {
-               // findNavController().navigate(R.id.action_item_walk_to_placeReviewFragment)
+                // findNavController().navigate(R.id.action_item_walk_to_placeReviewFragment)
                 bottomSheetDialog.dismiss()
             }
 //            fragmentWalkBinding.LinearLayoutOffWalk.visibility=View.GONE
@@ -48,8 +48,8 @@ class WalkFragment : Fragment() {
         }
 
         fragmentWalkBinding.buttonStopWalk.setOnClickListener {
-            fragmentWalkBinding.LinearLayoutOffWalk.visibility=View.VISIBLE
-            fragmentWalkBinding.LinearLayoutOnWalk.visibility=View.GONE
+            fragmentWalkBinding.LinearLayoutOffWalk.visibility = View.VISIBLE
+            fragmentWalkBinding.LinearLayoutOnWalk.visibility = View.GONE
 
         }
 
