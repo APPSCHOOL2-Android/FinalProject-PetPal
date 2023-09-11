@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".MainFragment" >
+    tools:context=".MainFragment">
 
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/fragmentMainContainerView"
@@ -14,17 +14,22 @@
         android:layout_height="0dp"
         android:layout_weight="1"
         app:defaultNavHost="true"
-        app:navGraph="@navigation/fragment_nav_graph"
-        />
+        app:navGraph="@navigation/fragment_nav_graph" />
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNavigation"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:layout_gravity="bottom"
-        app:layout_insetEdge="bottom"
+        app:itemPaddingTop="5dp"
+        android:layout_weight="0.12"
+        android:theme="@style/BottomNavigationView"
+        app:itemIconTint="@color/slecte_checked_bottom_navigation"
+        app:itemRippleColor="@null"
+        app:itemTextColor="@color/slecte_checked_bottom_navigation"
+        app:labelVisibilityMode="labeled"
         app:layout_behavior="com.google.android.material.behavior.HideBottomViewOnScrollBehavior"
-        app:menu="@menu/bottom_navigation_menu"
-        />
+        app:layout_insetEdge="bottom"
+        app:menu="@menu/bottom_navigation_menu" />
 
 </LinearLayout>

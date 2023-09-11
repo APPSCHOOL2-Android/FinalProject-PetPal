@@ -3,27 +3,27 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:id="@+id/item_shop"
+        android:id="@+id/shop"
         android:icon="@drawable/storefront_24px"
         android:title="쇼핑"
         app:showAsAction="always" />
     <item
-        android:id="@+id/item_community"
+        android:id="@+id/community"
         android:icon="@drawable/groups_24px"
         android:title="커뮤니티"
         app:showAsAction="always" />
     <item
-        android:id="@+id/item_walk"
+        android:id="@+id/walk"
         android:icon="@drawable/pets_24px"
         android:title="산책"
         app:showAsAction="always" />
     <item
-        android:id="@+id/item_chat"
+        android:id="@+id/chat"
         android:icon="@drawable/chat_24px"
         android:title="채팅"
         app:showAsAction="always" />
     <item
-        android:id="@+id/item_mypage"
+        android:id="@+id/mypage"
         android:icon="@drawable/account_circle_24px"
         android:title="마이페이지"
         app:showAsAction="always" />

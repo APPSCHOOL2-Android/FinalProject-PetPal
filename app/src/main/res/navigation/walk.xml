@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/walk"
+    app:startDestination="@id/item_walk">
+
+
+    <fragment
+        android:id="@+id/item_walk"
+        android:name="com.petpal.mungmate.WalkFragment"
+        android:label="fragment_walk"
+        tools:layout="@layout/fragment_walk" />
+</navigation>
