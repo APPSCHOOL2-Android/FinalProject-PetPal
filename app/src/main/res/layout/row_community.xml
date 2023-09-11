@@ -159,7 +159,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/common_margin"
-        android:layout_marginTop="@dimen/common_padding"
         android:layout_marginEnd="@dimen/common_margin"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
