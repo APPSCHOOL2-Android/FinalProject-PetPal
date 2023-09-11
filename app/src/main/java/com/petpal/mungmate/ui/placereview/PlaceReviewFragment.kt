@@ -76,21 +76,14 @@ class PlaceReviewFragment : Fragment() {
             parent: ViewGroup,
             viewType: Int
         ): ViewHolderClass {
-            // ViewBinding
             val rowBinding = RowPlaceReviewBinding.inflate(layoutInflater)
-            // ViewHolder
             val viewHolderClass = ViewHolderClass(rowBinding)
-            // 클릭 이벤트를 설정해준다.
             rowBinding.root.setOnClickListener(viewHolderClass)
-            // 항목 View의 가로세로길이를 설정해준다(터치때문에...)
             val params = RecyclerView.LayoutParams(
-                // 가로길이
                 RecyclerView.LayoutParams.MATCH_PARENT,
-                // 세로길이
                 RecyclerView.LayoutParams.WRAP_CONTENT
             )
             rowBinding.root.layoutParams = params
-
             return viewHolderClass
         }
 

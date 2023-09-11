@@ -30,5 +30,11 @@
     <string name="search">검색</string>
     <string name="search_hint">검색어를 입력해주세요</string>
 
+    <string name="kakao_login">카카오로 시작하기</string>
+    <string name="google_login">Google로 시작하기</string>
+    <string name="mate_main">멍메이트</string>
+    <string name="mate_description">반려동물 산책 매칭 플랫폼</string>
+    <string name="copyright">Copyright &#169; Petpal</string>
+
 
 </resources>

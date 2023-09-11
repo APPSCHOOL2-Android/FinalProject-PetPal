@@ -14,6 +14,7 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.chip.Chip
+import com.petpal.mungmate.MainActivity
 import com.petpal.mungmate.R
 import com.petpal.mungmate.databinding.FragmentWalkBinding
 import net.daum.android.map.MapView
@@ -23,12 +24,15 @@ import net.daum.mf.map.api.MapPoint
 
 class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListener {
     lateinit var fragmentWalkBinding: FragmentWalkBinding
+    lateinit var mainActivity: MainActivity
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View? {
-       fragmentWalkBinding= FragmentWalkBinding.inflate(layoutInflater)
+        mainActivity=activity as MainActivity
+        fragmentWalkBinding= FragmentWalkBinding.inflate(layoutInflater)
 
         val mapView = fragmentWalkBinding.mapView
         val mapPoint = MapPoint.mapPointWithGeoCoord(37.56647, 126.977963)
@@ -79,7 +83,7 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
         bottomSheetDialog.show()
 
         bottomSheetView.findViewById<Button>(R.id.buttonSubmitReview).setOnClickListener {
-            findNavController().navigate(R.id.action_item_walk_to_writePlaceReviewFragment)
+            mainActivity.navigate(R.id.action_mainFragment_to_writePlaceReviewFragment)
             bottomSheetDialog.dismiss()
         }
 
@@ -91,8 +95,7 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
             detailDialog.show()
         }
         bottomSheetView.findViewById<Chip>(R.id.chipViewAllReviews).setOnClickListener {
-            val navController = findNavController()
-            navController.navigate(R.id.action_item_walk_to_placeReviewFragment3)
+            mainActivity.navigate(R.id.action_mainFragment_to_placeReviewFragment)
             bottomSheetDialog.dismiss()
         }
     }

@@ -81,21 +81,26 @@
                     app:layout_constraintStart_toStartOf="@id/communityPostDetailPostTitle"
                     app:layout_constraintTop_toBottomOf="@id/communityPostDetailUserNickName" />
 
+
                 <androidx.appcompat.widget.AppCompatTextView
-                    android:textAppearance="@style/TextAppearance.AppCompat.Small"
-                    app:layout_constraintEnd_toEndOf="parent"
+                    android:id="@+id/placeDateDistinction"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingStart="@dimen/common_small_padding"
+                    android:paddingEnd="@dimen/common_small_padding"
+                    android:text="@string/place_date_distinction"
                     app:layout_constraintEnd_toStartOf="@id/communityPostDateCreated"
                     app:layout_constraintStart_toEndOf="@id/communityPostUserPlace"
                     app:layout_constraintTop_toBottomOf="@id/communityPostDetailUserNickName" />
 
-<!--                <androidx.appcompat.widget.AppCompatTextView-->
-<!--                    android:id="@+id/communityPostDateCreated"-->
-<!--                    android:layout_width="wrap_content"-->
-<!--                    android:layout_height="wrap_content"-->
-<!--                    android:text="30분전"-->
-<!--                    android:textAppearance="@style/TextAppearance.AppCompat.Small"-->
-<!--                    app:layout_constraintStart_toEndOf="@id/placeDateDistinction"-->
-<!--                    app:layout_constraintTop_toBottomOf="@id/communityPostDetailUserNickName" />-->
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/communityPostDateCreated"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="30분전"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Small"
+                    app:layout_constraintStart_toEndOf="@id/placeDateDistinction"
+                    app:layout_constraintTop_toBottomOf="@id/communityPostDetailUserNickName" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -124,14 +129,14 @@
 
             <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/communityPostDetailContent"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:padding="@dimen/common_padding"
+                tools:text="rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrdddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddrrrrrrrrrrrrrrrrrrrrrrrrrrrrr"
                 android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/communityPostDetailPostCardView"
-                tools:text="rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrdddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddrrrrrrrrrrrrrrrrrrrrrrrrrrrrr" />
+                app:layout_constraintEnd_toEndOf="@id/communityPostDetailPostCardView"
+                app:layout_constraintStart_toStartOf="@id/communityPostDetailPostCardView"
+                app:layout_constraintTop_toBottomOf="@id/communityPostDetailPostCardView" />
 
             <LinearLayout
                 android:id="@+id/communityPostDetailBottomLinerLayout"
@@ -155,15 +160,15 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
-                    android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1"
-                    android:text="좋아요 7"/>
+                    android:text="좋아요 7"
+                    android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1" />
 
                 <androidx.appcompat.widget.AppCompatTextView
                     android:id="@+id/communityPostDetailCommentTextView"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/common_padding"
                     android:layout_gravity="center"
+                    android:layout_marginStart="@dimen/common_padding"
                     android:drawableStart="@drawable/comment"
                     android:drawablePadding="@dimen/common_small_padding"
                     android:text="@string/comment"
@@ -178,7 +183,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/common_margin"
-                android:layout_marginTop="@dimen/common_padding"
                 android:layout_marginEnd="@dimen/common_margin"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"

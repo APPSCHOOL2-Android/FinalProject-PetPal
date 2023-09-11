@@ -38,8 +38,7 @@ class CommunityDetailModifyFragment : Fragment() {
             inflateMenu(R.menu.community_post_modify)
             setNavigationIcon(androidx.appcompat.R.drawable.abc_ic_ab_back_material)
             setNavigationOnClickListener {
-                it.findNavController()
-                    .navigate(R.id.action_communityDetailModifyFragment_to_communityPostDetailFragment)
+                findNavController().popBackStack()
             }
             setOnMenuItemClickListener {
 

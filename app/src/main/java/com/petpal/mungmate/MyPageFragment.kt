@@ -1,38 +1,52 @@
 package com.petpal.mungmate
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.petpal.mungmate.databinding.FragmentMyPageBinding
 
 class MyPageFragment : Fragment() {
     private lateinit var _fragmentMyPageBinding: FragmentMyPageBinding
     private val fragmentMyPageBinding get() = _fragmentMyPageBinding
+    private lateinit var mainActivity: MainActivity
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View? {
         _fragmentMyPageBinding = FragmentMyPageBinding.inflate(layoutInflater)
+        mainActivity = activity as MainActivity
 
         fragmentMyPageBinding.run {
             buttonManagePet.setOnClickListener {
-                findNavController().navigate(R.id.action_to_managePetFragment)
+                mainActivity.navigate(R.id.action_mainFragment_to_manage_pet)
             }
 
             buttonWalkHistory.setOnClickListener {
-                findNavController().navigate(R.id.action_to_walkHistoryFragment)
+                mainActivity.navigate(R.id.action_mainFragment_to_walk_history)
             }
 
             buttonGoToMatchHistory.setOnClickListener {
-                findNavController().navigate(R.id.action_item_mypage_to_matchHistoryFragment)
+                mainActivity.navigate(R.id.action_mainFragment_to_match_history)
             }
 
             buttonGoToManageBlock.setOnClickListener {
-                findNavController().navigate(R.id.action_item_mypage_to_manageBlockFragment)
+               mainActivity.navigate(R.id.action_mainFragment_to_manage_block)
+            }
+
+            buttonAnnouncement.setOnClickListener {
+                mainActivity.navigate(R.id.action_mainFragment_to_announcement)
+            }
+
+            buttonFAQ.setOnClickListener {
+                mainActivity.navigate(R.id.action_mainFragment_to_FAQFragment)
+            }
+
+            buttonInquire.setOnClickListener {
+                mainActivity.navigate(R.id.action_mainFragment_to_inquiryFragment)
             }
         }
         return fragmentMyPageBinding.root

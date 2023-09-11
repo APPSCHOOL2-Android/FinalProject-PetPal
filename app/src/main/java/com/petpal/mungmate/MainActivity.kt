@@ -1,5 +1,4 @@
 package com.petpal.mungmate
-
 import android.app.Application
 import android.content.ContentValues.TAG
 import android.content.pm.PackageInfo
@@ -12,8 +11,10 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import com.kakao.util.maps.helper.Utility
+
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
+
 
 class MainActivity : AppCompatActivity() {
     private lateinit var navController: NavController
@@ -29,6 +30,12 @@ class MainActivity : AppCompatActivity() {
         val navHostFragment =
             supportFragmentManager.findFragmentById(R.id.fragmentContainerView) as NavHostFragment
         navController = navHostFragment.navController
+
+
+    }
+
+    fun navigate(id: Int, arg: Bundle? = null) {
+        navController.navigate(id, arg)
     }
 
 }

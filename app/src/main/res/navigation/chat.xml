@@ -3,17 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/chat"
-    app:startDestination="@id/item_chat">
+    app:startDestination="@id/chatRoomFragment">
 
-    <fragment
-        android:id="@+id/item_chat"
-        android:name="com.petpal.mungmate.ui.chatting.ChatFragment"
-        android:label="fragment_chat"
-        tools:layout="@layout/fragment_chat">
-        <action
-            android:id="@+id/action_item_chat_to_item_chat_room"
-            app:destination="@id/chatRoomFragment" />
-    </fragment>
     <fragment
         android:id="@+id/walkMateRequestFragment"
         android:name="com.petpal.mungmate.ui.chatting.WalkMateRequestFragment"

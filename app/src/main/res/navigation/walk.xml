@@ -11,33 +11,9 @@
         android:name="com.petpal.mungmate.ui.walk.WalkFragment"
         android:label="fragment_walk"
         tools:layout="@layout/fragment_walk" >
-        <action
-            android:id="@+id/action_item_walk_to_placeReviewFragment3"
-            app:destination="@id/placeReviewFragment" />
-        <action
-            android:id="@+id/action_item_walk_to_writePlaceReviewFragment"
-            app:destination="@id/writePlaceReviewFragment" />
-
     </fragment>
 
-    <fragment
-        android:id="@+id/writePlaceReviewFragment"
-        android:name="com.petpal.mungmate.ui.placereview.WritePlaceReviewFragment"
-        android:label="fragment_write_place_review"
-        tools:layout="@layout/fragment_write_place_review">
 
-        <action
-            android:id="@+id/action_writePlaceReviewFragment_to_placeReviewFragment"
-            app:destination="@id/placeReviewFragment" />
-        <action
-            android:id="@+id/action_writePlaceReviewFragment_to_item_walk"
-            app:destination="@id/item_walk" />
-    </fragment>
-    <fragment
-        android:id="@+id/placeReviewFragment"
-        android:name="com.petpal.mungmate.ui.placereview.PlaceReviewFragment"
-        android:label="PlaceReviewFragment"
-        tools:layout="@layout/fragment_place_review"/>
 
 
 </navigation>

@@ -5,8 +5,141 @@
     android:id="@+id/nav_graph"
     app:startDestination="@id/mainFragment">
     <fragment
+        android:id="@+id/manageBlockFragment"
+        android:name="com.petpal.mungmate.ui.manageblock.ManageBlockFragment"
+        android:label="fragment_manage_block"
+        tools:layout="@layout/fragment_manage_block" />
+    <include app:graph="@navigation/chat" />
+    <include app:graph="@navigation/walk"/>
+    <fragment
+        android:id="@+id/FAQFragment"
+        android:name="com.petpal.mungmate.ui.customercenter.FAQFragment"
+        android:label="fragment_f_a_q"
+        tools:layout="@layout/fragment_f_a_q">
+        <action
+            android:id="@+id/action_FAQFragment_to_contactUsFragment"
+            app:destination="@id/contactUsFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/inquiryFragment"
+        android:name="com.petpal.mungmate.ui.customercenter.InquiryFragment"
+        android:label="fragment_inquiry"
+        tools:layout="@layout/fragment_inquiry">
+        <action
+            android:id="@+id/action_inquiryFragment_to_contactUsFragment"
+            app:destination="@id/contactUsFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/contactUsFragment"
+        android:name="com.petpal.mungmate.ui.customercenter.ContactUsFragment"
+        android:label="fragment_contact_us"
+        tools:layout="@layout/fragment_contact_us" />
+    <fragment
         android:id="@+id/mainFragment"
         android:name="com.petpal.mungmate.MainFragment"
         android:label="fragment_main"
-        tools:layout="@layout/fragment_main" />
+        tools:layout="@layout/fragment_main" >
+        <action
+            android:id="@+id/action_mainFragment_to_match_history"
+            app:destination="@id/match_history"
+            app:enterAnim="@anim/from_bottom"
+            app:popEnterAnim="@anim/from_top" />
+        <action
+            android:id="@+id/action_mainFragment_to_manage_pet"
+            app:destination="@id/manage_pet"
+            app:enterAnim="@anim/from_bottom"
+            app:popEnterAnim="@anim/from_top" />
+        <action
+            android:id="@+id/action_mainFragment_to_walk_history"
+            app:destination="@id/walk_history"
+            app:enterAnim="@anim/from_bottom"
+            app:popEnterAnim="@anim/from_top"/>
+        <action
+            android:id="@+id/action_mainFragment_to_manage_block"
+            app:destination="@id/manageBlockFragment"
+            app:enterAnim="@anim/from_bottom"
+            app:popEnterAnim="@anim/from_top" />
+        <action
+            android:id="@+id/action_mainFragment_to_announcement"
+            app:destination="@id/announcement"
+            app:enterAnim="@anim/from_bottom"
+            app:popEnterAnim="@anim/from_top"/>
+        <action
+            android:id="@+id/action_mainFragment_to_FAQFragment"
+            app:destination="@id/FAQFragment" />
+        <action
+            android:id="@+id/action_mainFragment_to_inquiryFragment"
+            app:destination="@id/inquiryFragment" />
+        <action
+            android:id="@+id/action_mainFragment_to_chat"
+            app:destination="@id/chat" />
+
+        <action
+            android:id="@+id/action_mainFragment_to_walk"
+            app:destination="@id/walk" />
+        <action
+            android:id="@+id/action_mainFragment_to_communityPostDetailFragment"
+            app:destination="@id/communityPostDetailFragment" />
+        <action
+            android:id="@+id/action_mainFragment_to_communityWritingFragment"
+            app:destination="@id/communityWritingFragment" />
+        <action
+            android:id="@+id/action_mainFragment_to_communitySearchFragment"
+            app:destination="@id/communitySearchFragment" />
+        <action
+            android:id="@+id/action_mainFragment_to_writePlaceReviewFragment"
+            app:destination="@id/writePlaceReviewFragment" />
+        <action
+            android:id="@+id/action_mainFragment_to_placeReviewFragment"
+            app:destination="@id/placeReviewFragment" />
+
+    </fragment>
+    <fragment
+        android:id="@+id/communityWritingFragment"
+        android:name="com.petpal.mungmate.ui.community.CommunityWritingFragment"
+        android:label="fragment_community_writing"
+        tools:layout="@layout/fragment_community_writing" />
+    <fragment
+        android:id="@+id/communityPostDetailFragment"
+        android:name="com.petpal.mungmate.ui.community.CommunityPostDetailFragment"
+        android:label="CommunityPostDetailFragment">
+        <action
+            android:id="@+id/action_communityPostDetailFragment_to_communityDetailModifyFragment"
+            app:destination="@id/communityDetailModifyFragment"
+            app:enterAnim="@anim/from_right"
+            app:exitAnim="@anim/to_left"
+            app:popEnterAnim="@anim/from_left"
+            app:popExitAnim="@anim/to_right" />
+    </fragment>
+    <fragment
+        android:id="@+id/communitySearchFragment"
+        android:name="com.petpal.mungmate.ui.community.CommunitySearchFragment"
+        android:label="fragment_community_search"
+        tools:layout="@layout/fragment_community_search" />
+    <fragment
+        android:id="@+id/communityDetailModifyFragment"
+        android:name="com.petpal.mungmate.ui.community.CommunityDetailModifyFragment"
+        android:label="fragment_community_detail_modify"
+        tools:layout="@layout/fragment_community_detail_modify" />
+    <fragment
+        android:id="@+id/writePlaceReviewFragment"
+        android:name="com.petpal.mungmate.ui.placereview.WritePlaceReviewFragment"
+        android:label="fragment_write_place_review"
+        tools:layout="@layout/fragment_write_place_review">
+        <action
+            android:id="@+id/action_writePlaceReviewFragment_to_mainFragment"
+            app:destination="@id/mainFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/placeReviewFragment"
+        android:name="com.petpal.mungmate.ui.placereview.PlaceReviewFragment"
+        android:label="PlaceReviewFragment"
+        tools:layout="@layout/fragment_place_review"/>
+
+    <include app:graph="@navigation/manage_pet" />
+    <include app:graph="@navigation/match_history" />
+    <include app:graph="@navigation/walk_history" />
+    <include app:graph="@navigation/announcement" />
+
 </navigation>
