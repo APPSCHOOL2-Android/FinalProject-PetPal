@@ -39,6 +39,11 @@ class CommunitySearchFragment : Fragment() {
             }
 
             val layoutManager = LinearLayoutManager(requireContext())
+
+            // 아이템 역순 코드
+            layoutManager.reverseLayout = true
+            layoutManager.stackFromEnd = true
+
             communityRecentSearchesRecyclerView.layoutManager = layoutManager
 
             adapter = CommunityRecentSearchesAdapter()
