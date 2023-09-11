@@ -1,4 +1,4 @@
-package com.petpal.mungmate.ui.chatting
+package com.petpal.mungmate.ui.chat
 
 import android.os.Bundle
 import androidx.fragment.app.Fragment
@@ -9,7 +9,6 @@ import androidx.navigation.fragment.findNavController
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.timepicker.MaterialTimePicker
 import com.google.android.material.timepicker.TimeFormat
-import com.petpal.mungmate.R
 import com.petpal.mungmate.databinding.FragmentWalkMateRequestBinding
 import java.text.SimpleDateFormat
 import java.util.Date
