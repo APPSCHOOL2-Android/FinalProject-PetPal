@@ -265,7 +265,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="2"
-                        android:text="40,000원"
+                        android:text="55,000원"
                         android:textAppearance="@style/TextAppearance.Material3.BodyMedium" />
                 </LinearLayout>
                 <LinearLayout
@@ -332,7 +332,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="2"
-                        android:text="35,000원"
+                        android:text="53,000원"
                         android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
                         android:textStyle="bold" />
                 </LinearLayout>

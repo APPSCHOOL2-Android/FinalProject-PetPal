@@ -11,11 +11,11 @@ import com.petpal.mungmate.databinding.RowOrderHistoryItemBinding
 import com.petpal.mungmate.model.Item
 import java.text.DecimalFormat
 
-class OrderHistoryItemAdapter(private val context: Context, private val dataList: List<Item>): RecyclerView.Adapter<OrderHistoryItemAdapter.ViewHolder>() {
+class OrderHistoryItemAdapter(private val dataList: List<Item>): RecyclerView.Adapter<OrderHistoryItemAdapter.ViewHolder>() {
     inner class ViewHolder(private val rowBinding: RowOrderHistoryItemBinding): RecyclerView.ViewHolder(rowBinding.root) {
         fun bind(item: Item){
             rowBinding.run {
-                Glide.with(context)
+                Glide.with(itemView.context)
                     .load(item.mainImageId)
                     .into(imageViewOrderItem)
 

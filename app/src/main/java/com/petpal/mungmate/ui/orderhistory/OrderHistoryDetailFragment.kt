@@ -29,7 +29,7 @@ class OrderHistoryDetailFragment : Fragment() {
 
         fragmentOrderHistoryDetailBinding.run {
             recyclerViewOrderDetailItem.run {
-                adapter = OrderHistoryItemAdapter(context, getSampleData())
+                adapter = OrderHistoryItemAdapter(getSampleData())
                 layoutManager = LinearLayoutManager(context)
                 addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
             }
