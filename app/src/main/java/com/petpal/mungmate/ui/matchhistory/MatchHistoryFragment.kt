@@ -5,6 +5,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.divider.MaterialDividerItemDecoration
 import com.petpal.mungmate.R
@@ -26,6 +27,12 @@ class MatchHistoryFragment : Fragment() {
             recyclerViewMatchHistory.run {
                 adapter = MatchHistoryRecyclerAdapter()
                 layoutManager = LinearLayoutManager(requireContext())
+            }
+
+            toolbarManageHistory.run {
+                setNavigationOnClickListener {
+                    findNavController().popBackStack()
+                }
             }
         }
         return fragmentMatchHistoryBinding.root

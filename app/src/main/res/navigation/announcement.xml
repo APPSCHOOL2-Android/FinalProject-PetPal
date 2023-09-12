@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/announcement"
+    app:startDestination="@id/announcementFragment">
+
+    <fragment
+        android:id="@+id/announcementDetailFragment"
+        android:name="com.petpal.mungmate.ui.customercenter.AnnouncementDetailFragment"
+        tools:layout="@layout/fragment_announcement_detail"
+        android:label="fragment_announcement_detail" />
+    <fragment
+        android:id="@+id/announcementFragment"
+        android:name="com.petpal.mungmate.ui.customercenter.AnnouncementFragment"
+        android:label="AnnouncementFragment">
+        <action
+            android:id="@+id/action_announcementFragment_to_announcementDetailFragment"
+            app:destination="@id/announcementDetailFragment" />
+    </fragment>
+</navigation>

@@ -1,18 +1,23 @@
 package com.petpal.mungmate.ui.community
 
 import android.content.Context
+import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.navigation.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import com.airbnb.lottie.LottieAnimationView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.petpal.mungmate.MainActivity
+import com.petpal.mungmate.R
 import com.petpal.mungmate.databinding.RowCommunityBinding
 
-class CommunityAdapter(private val context: Context) :
+class CommunityAdapter(
+    private val context: Context,
+    private val mainActivity: MainActivity,
+) :
     RecyclerView.Adapter<CommunityAdapter.ViewHolder>() {
 
     inner class ViewHolder(item: RowCommunityBinding) :
@@ -30,12 +35,13 @@ class CommunityAdapter(private val context: Context) :
 
         init {
             item.root.setOnClickListener {
+                val bundle = Bundle()
+                bundle.putInt("position", adapterPosition)
 
-                val action =
-                    CommunityFragmentDirections.actionItemCommunityToCommunityPostDetailFragment(
-                        adapterPosition
-                    )
-                item.root.findNavController().navigate(action)
+                mainActivity.navigate(
+                    R.id.action_mainFragment_to_communityPostDetailFragment,
+                    bundle
+                )
             }
         }
 

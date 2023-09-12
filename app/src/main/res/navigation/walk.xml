@@ -8,7 +8,12 @@
 
     <fragment
         android:id="@+id/item_walk"
-        android:name="com.petpal.mungmate.WalkFragment"
+        android:name="com.petpal.mungmate.ui.walk.WalkFragment"
         android:label="fragment_walk"
-        tools:layout="@layout/fragment_walk" />
+        tools:layout="@layout/fragment_walk" >
+    </fragment>
+
+
+
+
 </navigation>

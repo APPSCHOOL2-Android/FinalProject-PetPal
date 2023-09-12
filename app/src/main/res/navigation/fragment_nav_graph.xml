@@ -3,222 +3,32 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/fragment_nav_graph.xml"
-    app:startDestination="@id/walk">
-    <fragment
-        android:id="@+id/item_shop"
-        android:name="com.petpal.mungmate.ShopFragment"
-        android:label="fragment_shop"
-        tools:layout="@layout/fragment_shop" />
+    app:startDestination="@id/item_walk">
+
+
     <fragment
         android:id="@+id/item_community"
         android:name="com.petpal.mungmate.ui.community.CommunityFragment"
         android:label="fragment_community"
-        tools:layout="@layout/fragment_community">
-
-        <action
-            android:id="@+id/action_item_community_to_communityWritingFragment"
-            app:destination="@id/communityWritingFragment"
-            app:enterAnim="@anim/from_bottom"
-            app:popEnterAnim="@anim/from_top" />
-        <action
-            android:id="@+id/action_item_community_to_communityPostDetailFragment"
-            app:destination="@id/communityPostDetailFragment"
-            app:enterAnim="@anim/from_right"
-            app:exitAnim="@anim/to_left"
-            app:popEnterAnim="@anim/from_left"
-            app:popExitAnim="@anim/to_right">
-
-            <argument
-                android:name="idx"
-                app:argType="integer" />
-
-        </action>
-        <action
-            android:id="@+id/action_item_community_to_communityDetailModifyFragment"
-            app:destination="@id/communityDetailModifyFragment" />
-        <action
-            android:id="@+id/action_item_community_to_communitySearchFragment"
-            app:destination="@id/communitySearchFragment"
-            app:enterAnim="@anim/from_right"
-            app:exitAnim="@anim/to_left"
-            app:popEnterAnim="@anim/from_left"
-            app:popExitAnim="@anim/to_right" />
-    </fragment>
+        tools:layout="@layout/fragment_community" />
     <fragment
-        android:id="@+id/item_walk"
-        android:name="com.petpal.mungmate.WalkFragment"
-        android:label="fragment_walk"
-        tools:layout="@layout/fragment_walk" />
+        android:id="@+id/item_chat"
+        android:name="com.petpal.mungmate.ui.chatting.ChatFragment"
+        android:label="fragment_chat"
+        tools:layout="@layout/fragment_chat"/>
     <fragment
         android:id="@+id/item_mypage"
         android:name="com.petpal.mungmate.MyPageFragment"
         android:label="fragment_my_page"
-        tools:layout="@layout/fragment_my_page" >
-        <action
-            android:id="@+id/action_item_mypage_to_managePetFragment"
-            app:destination="@id/managePetFragment" />
-        <action
-            android:id="@+id/action_item_mypage_to_walkHistoryFragment"
-            app:destination="@id/walkHistoryFragment" />
-    </fragment>
-    <fragment
-        android:id="@+id/managePetFragment"
-        android:name="com.petpal.mungmate.ManagePetFragment"
-        android:label="fragment_manage_pet"
-        tools:layout="@layout/fragment_manage_pet" />
-    <fragment
-        android:id="@+id/walkHistoryFragment"
-        android:name="com.petpal.mungmate.ui.walkhistory.WalkHistoryFragment"
-        android:label="fragment_walk_history"
-        tools:layout="@layout/fragment_walk_history" >
-        <action
-            android:id="@+id/action_walkHistoryFragment_to_walkHistoryDetailFragment"
-            app:destination="@id/walkHistoryDetailFragment" />
-    </fragment>
-    <fragment
-        android:id="@+id/walkHistoryDetailFragment"
-        android:name="com.petpal.mungmate.ui.walkhistory.WalkHistoryDetailFragment"
-        android:label="fragment_walk_history_detail"
-        tools:layout="@layout/fragment_walk_history_detail" />
-
-    <fragment
-        android:id="@+id/communityWritingFragment"
-        android:name="com.petpal.mungmate.ui.community.CommunityWritingFragment"
-        android:label="fragment_community_writing"
-        tools:layout="@layout/fragment_community_writing">
-        <action
-            android:id="@+id/action_communityWritingFragment_to_item_community"
-            app:destination="@id/item_community"
-            app:enterAnim="@anim/from_top"
-            app:popEnterAnim="@anim/from_bottom" />
-    </fragment>
-    <fragment
-        android:id="@+id/communityPostDetailFragment"
-        android:name="com.petpal.mungmate.ui.community.CommunityPostDetailFragment"
-        android:label="CommunityPostDetailFragment">
-        <action
-            android:id="@+id/action_communityPostDetailFragment_to_item_community"
-            app:destination="@id/item_community"
-            app:enterAnim="@anim/from_left"
-            app:exitAnim="@anim/to_right"
-            app:popEnterAnim="@anim/from_right"
-            app:popExitAnim="@anim/to_left" />
-        <action
-            android:id="@+id/action_communityPostDetailFragment_to_communityDetailModifyFragment"
-            app:destination="@id/communityDetailModifyFragment"
-            app:enterAnim="@anim/from_right"
-            app:exitAnim="@anim/to_left"
-            app:popEnterAnim="@anim/from_left"
-            app:popExitAnim="@anim/to_right" />
-    </fragment>
-    <fragment
-        android:id="@+id/communityDetailModifyFragment"
-        android:name="com.petpal.mungmate.ui.community.CommunityDetailModifyFragment"
-        android:label="fragment_community_detail_modify"
-        tools:layout="@layout/fragment_community_detail_modify">
-
-        <action
-            android:id="@+id/action_communityDetailModifyFragment_to_item_community"
-            app:destination="@id/item_community" />
-        <action
-            android:id="@+id/action_communityDetailModifyFragment_to_communityPostDetailFragment"
-            app:destination="@id/communityPostDetailFragment"
-            app:enterAnim="@anim/from_left"
-            app:exitAnim="@anim/to_right"
-            app:popEnterAnim="@anim/from_right"
-            app:popExitAnim="@anim/to_left" />
-    </fragment>
-
-
-    <fragment
-        android:id="@+id/communitySearchFragment"
-        android:name="com.petpal.mungmate.ui.community.CommunitySearchFragment"
-        android:label="fragment_community_search"
-        tools:layout="@layout/fragment_community_search" >
-        <action
-            android:id="@+id/action_communitySearchFragment_to_item_community"
-            app:destination="@id/item_community"
-            app:enterAnim="@anim/from_left"
-            app:exitAnim="@anim/to_right"
-            app:popEnterAnim="@anim/from_right"
-            app:popExitAnim="@anim/to_left" />
-    </fragment>
-
+        tools:layout="@layout/fragment_my_page" />
     <fragment
         android:id="@+id/item_shop"
         android:name="com.petpal.mungmate.ShopFragment"
         android:label="fragment_shop"
         tools:layout="@layout/fragment_shop" />
-
     <fragment
         android:id="@+id/item_walk"
-        android:name="com.petpal.mungmate.WalkFragment"
+        android:name="com.petpal.mungmate.ui.walk.WalkFragment"
         android:label="fragment_walk"
         tools:layout="@layout/fragment_walk" />
-    <fragment
-        android:id="@+id/item_chat"
-        android:name="com.petpal.mungmate.ui.chatting.ChatFragment"
-        android:label="fragment_chat"
-        tools:layout="@layout/fragment_chat">
-        <action
-            android:id="@+id/action_item_chat_to_item_chat_room"
-            app:destination="@id/item_chat_room" />
-    </fragment>
-
-    <fragment
-        android:id="@+id/item_mypage"
-        android:name="com.petpal.mungmate.MyPageFragment"
-        android:label="fragment_my_page"
-        tools:layout="@layout/fragment_my_page" >
-        <action
-            android:id="@+id/action_item_mypage_to_managePetFragment"
-            app:destination="@id/managePetFragment" />
-        <action
-            android:id="@+id/action_item_mypage_to_walkHistoryFragment"
-            app:destination="@id/walkHistoryFragment" />
-    </fragment>
-
-    <fragment
-        android:id="@+id/managePetFragment"
-        android:name="com.petpal.mungmate.ManagePetFragment"
-        android:label="fragment_manage_pet"
-        tools:layout="@layout/fragment_manage_pet" />
-
-    <fragment
-        android:id="@+id/walkHistoryFragment"
-        android:name="com.petpal.mungmate.WalkHistoryFragment"
-        android:label="fragment_walk_history"
-        tools:layout="@layout/fragment_walk_history" >
-        <action
-            android:id="@+id/action_walkHistoryFragment_to_walkHistoryDetailFragment"
-            app:destination="@id/walkHistoryDetailFragment" />
-    </fragment>
-
-    <fragment
-        android:id="@+id/walkHistoryDetailFragment"
-        android:name="com.petpal.mungmate.WalkHistoryDetailFragment"
-        android:label="fragment_walk_history_detail"
-        tools:layout="@layout/fragment_walk_history_detail" />
-
-    <fragment
-        android:id="@+id/item_chat_room"
-        android:name="com.petpal.mungmate.ui.chatting.ChatRoomFragment"
-        android:label="fragment_chat_room"
-        tools:layout="@layout/fragment_chat_room">
-        <action
-            android:id="@+id/action_item_chat_room_to_item_walk_mate_request"
-            app:destination="@id/item_walk_mate_request" />
-    </fragment>
-
-    <fragment
-        android:id="@+id/item_walk_mate_request"
-        android:name="com.petpal.mungmate.ui.chatting.WalkMateRequestFragment"
-        android:label="fragment_walk_mate_request"
-        tools:layout="@layout/fragment_walk_mate_request" />
-
-    <include app:graph="@navigation/walk" />
-    <include app:graph="@navigation/shop" />
-    <include app:graph="@navigation/chat" />
-    <include app:graph="@navigation/mypage" />
-    <include app:graph="@navigation/community" />
 </navigation>
