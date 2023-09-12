@@ -13,7 +13,6 @@
         android:layout_height="wrap_content"
         android:minHeight="?attr/actionBarSize"
         android:theme="?attr/actionBarTheme"
-        app:menu="@menu/faq_menu"
         app:navigationIcon="@drawable/arrow_back_24px"
         app:title="FAQ" />
 
@@ -99,6 +98,13 @@
             </LinearLayout>
         </HorizontalScrollView>
 
+        <!--
+        <com.google.android.material.search.SearchView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:iconifiedByDefault="false"
+            android:queryHint="무엇을 도와드릴까요?" />
+        -->
         <com.google.android.material.divider.MaterialDivider
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

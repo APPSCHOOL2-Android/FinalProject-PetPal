@@ -81,6 +81,9 @@
         <action
             android:id="@+id/action_mainFragment_to_communitySearchFragment"
             app:destination="@id/communitySearchFragment" />
+        <action
+            android:id="@+id/action_mainFragment_to_order_history"
+            app:destination="@id/order_history" />
     </fragment>
     <fragment
         android:id="@+id/communityWritingFragment"
@@ -113,4 +116,5 @@
     <include app:graph="@navigation/match_history" />
     <include app:graph="@navigation/walk_history" />
     <include app:graph="@navigation/announcement" />
+    <include app:graph="@navigation/order_history" />
 </navigation>

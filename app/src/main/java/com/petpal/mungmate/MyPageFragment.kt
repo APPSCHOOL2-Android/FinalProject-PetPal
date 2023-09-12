@@ -48,6 +48,10 @@ class MyPageFragment : Fragment() {
             buttonInquire.setOnClickListener {
                 mainActivity.navigate(R.id.action_mainFragment_to_inquiryFragment)
             }
+
+            buttonOrderHistory.setOnClickListener {
+                mainActivity.navigate(R.id.action_mainFragment_to_order_history)
+            }
         }
         return fragmentMyPageBinding.root
     }

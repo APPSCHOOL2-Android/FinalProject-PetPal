@@ -28,7 +28,7 @@
                 android:textAppearance="@style/TextAppearance.Material3.TitleMedium" />
 
             <com.google.android.material.chip.Chip
-                android:id="@+id/chipInquiryState"
+                android:id="@+id/chipInquiryStatus"
                 style="@style/Widget.Material3.Chip.Suggestion"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

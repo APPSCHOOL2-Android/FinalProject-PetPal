@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/order_history"
+    app:startDestination="@id/orderHistoryDetailFragment">
+    <fragment
+        android:id="@+id/orderHistoryFragment"
+        android:name="com.petpal.mungmate.ui.orderhistory.OrderHistoryFragment"
+        android:label="fragment_order_history"
+        tools:layout="@layout/fragment_order_history" >
+        <action
+            android:id="@+id/action_orderHistoryFragment_to_orderHistoryDetailFragment"
+            app:destination="@id/orderHistoryDetailFragment" />
+    </fragment>
+
+
+    <fragment
+        android:id="@+id/orderHistoryDetailFragment"
+        android:name="com.petpal.mungmate.ui.orderhistory.OrderHistoryDetailFragment"
+        android:label="fragment_order_detail"
+        tools:layout="@layout/fragment_order_history_detail" />
+</navigation>

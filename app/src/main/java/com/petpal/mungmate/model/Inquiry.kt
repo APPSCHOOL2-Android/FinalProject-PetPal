@@ -8,5 +8,5 @@ data class Inquiry(
     var answer: String?,
     var questionAuthor: String,
     var dateCreated: String,
-    var state: Boolean
+    var status: Boolean
 )
