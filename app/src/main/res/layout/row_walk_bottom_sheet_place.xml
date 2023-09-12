@@ -1,161 +1,159 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
     android:background="@drawable/walk_bottom_sheet_background"
     android:padding="16dp">
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="top"
-        android:layout_marginLeft="8dp"
-        android:layout_marginRight="8dp"
-        android:gravity="top"
-        android:orientation="horizontal">
-
-        <TextView
-            android:id="@+id/textView"
-            android:layout_width="110dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:gravity="left"
-            android:text="부천 동물병원"
-            android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
-
-        <RatingBar
-            android:id="@+id/placeRatingBar"
-            style="?android:attr/ratingBarStyleSmall"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:numStars="5"
-            android:rating="4.5" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginRight="8dp"
-        android:orientation="horizontal">
-
-        <de.hdodenhof.circleimageview.CircleImageView
-            android:id="@+id/ImageViewBottomRecommendPlace"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:layout_gravity="center"
-            android:background="@android:color/transparent"
-            android:src="@drawable/storefront_24px"
-            app:civ_border_color="#000000"
-            app:civ_border_overlay="true" />
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-            <TextView
-                android:id="@+id/textViewPlaceReviewCount"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="8dp"
-                android:layout_marginTop="8dp"
-                android:layout_weight="1"
-                android:drawableLeft="@drawable/reviews_24px"
-                android:drawablePadding="8dp"
-                android:isScrollContainer="false"
-                android:text="200개의 리뷰가 있습니다" />
-
-            <TextView
-                android:id="@+id/textViewPlaceFavoriteCount"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="8dp"
-                android:layout_marginTop="8dp"
-                android:layout_weight="1"
-                android:drawableLeft="@drawable/favoirte_24px"
-                android:drawablePadding="8dp"
-                android:isScrollContainer="false"
-                android:text="20명의 유저가 추천합니다" />
-        </LinearLayout>
-
-
-    </LinearLayout>
-
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginRight="8dp">
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:layout_gravity="top"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
+            android:gravity="top"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/textView"
+                android:layout_width="110dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:gravity="left"
+                android:text="부천 동물병원"
+                android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
+
+            <RatingBar
+                android:id="@+id/placeRatingBar"
+                style="?android:attr/ratingBarStyleSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:numStars="5"
+                android:rating="4.5" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginRight="8dp"
+            android:orientation="horizontal">
+
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:id="@+id/ImageViewBottomRecommendPlace"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_gravity="center"
+                android:background="@android:color/transparent"
+                android:src="@drawable/storefront_24px"
+                app:civ_border_color="#000000"
+                app:civ_border_overlay="true" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/textViewPlaceReviewCount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_weight="1"
+                    android:drawableLeft="@drawable/reviews_24px"
+                    android:drawablePadding="8dp"
+                    android:isScrollContainer="false"
+                    android:text="200개의 리뷰가 있습니다" />
+
+                <TextView
+                    android:id="@+id/textViewPlaceFavoriteCount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_weight="1"
+                    android:drawableLeft="@drawable/favoirte_24px"
+                    android:drawablePadding="8dp"
+                    android:isScrollContainer="false"
+                    android:text="20명의 유저가 추천합니다" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginRight="8dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="horizontal">
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="horizontal">
+
+                    <RatingBar
+                        android:id="@+id/placeUserRatingBar1"
+                        style="@style/Widget.AppCompat.RatingBar.Small"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:numStars="5"
+                        android:rating="4.5" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/placeUserReview1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="수의사님이 친절하시고 시설도 좋습니다!" />
 
                 <RatingBar
-                    android:id="@+id/placeUserRatingBar1"
+                    android:id="@+id/placeUserRatingBar2"
                     style="@style/Widget.AppCompat.RatingBar.Small"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:numStars="5"
-                    android:rating="4.5" />
+                    android:rating="1" />
+
+                <TextView
+                    android:id="@+id/placeUserReview2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="과잉진료를 받았습니다.." />
+
+                <Button
+                    android:id="@+id/buttonSubmitReview"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginRight="8dp"
+                    android:text="리뷰 등록하기" />
+
 
             </LinearLayout>
 
-
-            <TextView
-                android:id="@+id/placeUserReview1"
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipViewAllReviews"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="수의사님이 친절하시고 시설도 좋습니다!" />
-
-
-            <RatingBar
-                android:id="@+id/placeUserRatingBar2"
-                style="@style/Widget.AppCompat.RatingBar.Small"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:numStars="5"
-                android:rating="1" />
-
-            <TextView
-                android:id="@+id/placeUserReview2"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="과잉진료를 받았습니다.." />
-
-            <Button
-                android:id="@+id/buttonSubmitReview"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="8dp"
-                android:layout_marginRight="8dp"
-                android:text="리뷰 등록하기" />
-        </LinearLayout>
-
-        <com.google.android.material.chip.Chip
-            android:id="@+id/chipViewAllReviews"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="end|top"
-            android:padding="4dp"
-            android:text="전체 리뷰 보기"
-            android:textSize="12sp"
-            />
-
-
-    </FrameLayout>
-
-</LinearLayout>
+                android:layout_gravity="end|top"
+                android:padding="4dp"
+                android:text="전체 리뷰 보기"
+                android:textSize="12sp" />
+        </FrameLayout>
+    </LinearLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

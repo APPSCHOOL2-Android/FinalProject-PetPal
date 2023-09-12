@@ -78,14 +78,13 @@
         android:visibility="visible">
 
 
-
         <Button
             android:id="@+id/buttonWalk"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
             android:gravity="center"
-            android:text="산책하기" />
+            android:text="혼자 산책하기" />
 
 
 

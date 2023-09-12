@@ -34,11 +34,6 @@ class PlaceReviewFragment : Fragment() {
     ): View {
         fragmentPlaceReviewBinding = FragmentPlaceReviewBinding.inflate(layoutInflater)
 
-        fragmentPlaceReviewBinding.placeReviewDetailToolbar.run{
-            setNavigationIcon(androidx.appcompat.R.drawable.abc_ic_ab_back_material)
-            setNavigationOnClickListener {
-            }
-        }
 
         fragmentPlaceReviewBinding.reviewsRecyclerView.adapter = ReviewAdapter(reviews)
         fragmentPlaceReviewBinding.reviewsRecyclerView.layoutManager=LinearLayoutManager(requireContext())

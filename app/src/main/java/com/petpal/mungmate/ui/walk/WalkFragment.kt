@@ -2,22 +2,19 @@ package com.petpal.mungmate.ui.walk
 
 import android.graphics.Color
 import android.os.Bundle
-import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.view.GravityCompat
 import androidx.fragment.app.Fragment
-import androidx.navigation.fragment.findNavController
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.chip.Chip
 import com.petpal.mungmate.MainActivity
 import com.petpal.mungmate.R
 import com.petpal.mungmate.databinding.FragmentWalkBinding
-import net.daum.android.map.MapView
 import net.daum.mf.map.api.MapPOIItem
 import net.daum.mf.map.api.MapPoint
 
@@ -42,8 +39,12 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
             itemName = "서울시청"
             tag = 0
             this.mapPoint = mapPoint
-            markerType = MapPOIItem.MarkerType.BluePin // 기본 마커
-            selectedMarkerType = MapPOIItem.MarkerType.RedPin // 마커 클릭 시 사용할 타입
+            markerType = MapPOIItem.MarkerType.CustomImage
+            customImageResourceId = R.drawable.petplace_pin
+            // 마커 크기 자동 조절 활성화
+            isCustomImageAutoscale = true
+            // 앵커 포인트 설정 (중앙 아래로 설정)
+            setCustomImageAnchor(0.5f, 1.0f)
         }
         mapView.addPOIItem(marker)
         mapView.setPOIItemEventListener(this)
@@ -76,25 +77,67 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
     }
 
     override fun onPOIItemSelected(p0: net.daum.mf.map.api.MapView?, p1: MapPOIItem?) {
-        val bottomSheetView = layoutInflater.inflate(R.layout.row_walk_bottom_sheet_place, null)
+        // 초기 상태의 바텀시트 레이아웃을 설정합니다.
+        val initialBottomSheetView = layoutInflater.inflate(R.layout.row_walk_bottom_sheet_place, null)
         val bottomSheetDialog = BottomSheetDialog(requireActivity())
-        bottomSheetDialog.setContentView(bottomSheetView)
-        bottomSheetDialog.behavior.peekHeight = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 300f, resources.displayMetrics).toInt() // 300dp를 예로 들었습니다.
-        bottomSheetDialog.show()
+        bottomSheetDialog.setContentView(initialBottomSheetView)
 
-        bottomSheetView.findViewById<Button>(R.id.buttonSubmitReview).setOnClickListener {
+        // 바텀시트의 상태 변화를 감지하는 콜백을 설정합니다.
+        bottomSheetDialog.behavior.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
+            override fun onStateChanged(bottomSheet: View, newState: Int) {
+                when (newState) {
+                    BottomSheetBehavior.STATE_EXPANDED -> {
+                        // 완전히 펼친 상태의 레이아웃으로 변경
+                        val fullyExpandedView = layoutInflater.inflate(R.layout.fragment_place_review, null)
+                        // fully_expanded_layout은 새로운 레이아웃을 나타냅니다.
+                        bottomSheetDialog.setContentView(fullyExpandedView)
+                    }
+                    BottomSheetBehavior.STATE_COLLAPSED -> {
+                        // 축소된 상태의 레이아웃으로 변경 (원하시는 대로 변경 가능)
+                        bottomSheetDialog.setContentView(initialBottomSheetView)
+                    }
+                }
+            }
+
+            override fun onSlide(bottomSheet: View, slideOffset: Float) {
+                // 여기는 슬라이드 될 때마다 호출되는 부분입니다. 필요에 따라 구현할 수 있습니다.
+            }
+        })
+
+        // 기타 초기 바텀시트 뷰와 관련된 로직 (기존 코드에서 가져옴)
+        initialBottomSheetView.findViewById<Button>(R.id.buttonSubmitReview).setOnClickListener {
             mainActivity.navigate(R.id.action_mainFragment_to_writePlaceReviewFragment)
             bottomSheetDialog.dismiss()
         }
 
-        bottomSheetView.findViewById<TextView>(R.id.placeUserReview1).setOnClickListener {
+        initialBottomSheetView.findViewById<TextView>(R.id.placeUserReview1).setOnClickListener {
+            val detailCardView = layoutInflater.inflate(R.layout.row_place_review, null)
+            val detailDialog = BottomSheetDialog(requireActivity())
+            detailDialog.setContentView(detailCardView)
+            detailDialog.show()
+        }
+
+        initialBottomSheetView.findViewById<Chip>(R.id.chipViewAllReviews).setOnClickListener {
+            mainActivity.navigate(R.id.action_mainFragment_to_placeReviewFragment)
+            bottomSheetDialog.dismiss()
+        }
+
+        // 바텀시트를 보여줍니다.
+        bottomSheetDialog.show()
+
+        initialBottomSheetView.findViewById<Button>(R.id.buttonSubmitReview).setOnClickListener {
+            mainActivity.navigate(R.id.action_mainFragment_to_writePlaceReviewFragment)
+            bottomSheetDialog.dismiss()
+        }
+
+        initialBottomSheetView.findViewById<TextView>(R.id.placeUserReview1).setOnClickListener {
             val detailCardView = layoutInflater.inflate(R.layout.row_place_review, null)
             val detailDialog = BottomSheetDialog(requireActivity())
             detailDialog.setContentView(detailCardView)
 
             detailDialog.show()
         }
-        bottomSheetView.findViewById<Chip>(R.id.chipViewAllReviews).setOnClickListener {
+        initialBottomSheetView.findViewById<Chip>(R.id.chipViewAllReviews).setOnClickListener {
             mainActivity.navigate(R.id.action_mainFragment_to_placeReviewFragment)
             bottomSheetDialog.dismiss()
         }
@@ -104,7 +147,7 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
         p0: net.daum.mf.map.api.MapView?,
         p1: MapPOIItem?
     ) {
-        TODO("Not yet implemented")
+
     }
 
     override fun onCalloutBalloonOfPOIItemTouched(
@@ -112,7 +155,6 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
         p1: MapPOIItem?,
         p2: MapPOIItem.CalloutBalloonButtonType?
     ) {
-        TODO("Not yet implemented")
     }
 
     override fun onDraggablePOIItemMoved(
@@ -120,7 +162,6 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
         p1: MapPOIItem?,
         p2: MapPoint?
     ) {
-        TODO("Not yet implemented")
     }
 
 }
