@@ -1,5 +1,15 @@
 <resources>
 
+    <string-array name="categoryList">
+        <item>사료</item>
+        <item>간식</item>
+        <item>배변</item>
+        <item>목욕</item>
+        <item>의료&amp;장난감</item>
+        <item>영양제</item>
+    </string-array>
+
+
     <string name="app_name">MungMate</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="chip_all">전체보기</string>
@@ -35,6 +45,16 @@
     <string name="mate_main">멍메이트</string>
     <string name="mate_description">반려동물 산책 매칭 플랫폼</string>
     <string name="copyright">Copyright &#169; Petpal</string>
+    <string name="product_registration">상품 등록</string>
+    <string name="product_Image">상품 이미지</string>
+    <string name="main_image_count">0/5</string>
+    <string name="prompt_product_name">상품명</string>
+    <string name="input_option">옵션을 입력해주세요.(최대 5개)</string>
+    <string name="prompt_description_image">상품 설명 이미지 (1개)</string>
+    <string name="label_description_image_count">0/1</string>
+    <string name="product_registration_button">상품 등록</string>
+    <string name="button_delete_image">이미지 삭제 버튼</string>
+    <string name="representative_photo">대표사진</string>
 
 
 </resources>

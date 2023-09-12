@@ -118,7 +118,11 @@
         android:id="@+id/communitySearchFragment"
         android:name="com.petpal.mungmate.ui.community.CommunitySearchFragment"
         android:label="fragment_community_search"
-        tools:layout="@layout/fragment_community_search" />
+        tools:layout="@layout/fragment_community_search" >
+        <action
+            android:id="@+id/action_communitySearchFragment_to_productRegistrationFragment"
+            app:destination="@id/productRegistrationFragment" />
+    </fragment>
     <fragment
         android:id="@+id/communityDetailModifyFragment"
         android:name="com.petpal.mungmate.ui.community.CommunityDetailModifyFragment"
@@ -154,4 +158,9 @@
             app:argType="boolean"
             android:defaultValue="false" />
     </fragment>
+    <fragment
+        android:id="@+id/productRegistrationFragment"
+        android:name="com.petpal.mungmate.ProductRegistrationFragment"
+        android:label="fragment_product_registration"
+        tools:layout="@layout/fragment_product_registration" />
 </navigation>
