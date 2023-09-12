@@ -6,11 +6,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AlphaAnimation
-import androidx.coordinatorlayout.widget.CoordinatorLayout
-import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.recyclerview.widget.RecyclerView.ItemDecoration
+import com.google.android.material.chip.Chip
 import com.petpal.mungmate.R
 import com.petpal.mungmate.databinding.FragmentOrderHistoryBinding
 import com.petpal.mungmate.model.Item
@@ -20,12 +18,13 @@ class OrderHistoryFragment : Fragment() {
     private var _fragmentOrderHistoryBinding: FragmentOrderHistoryBinding? = null
     private val fragmentOrderHistoryBinding get() = _fragmentOrderHistoryBinding!!
 
+    private lateinit var orderHistoryAdapter: OrderHistoryAdapter
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         _fragmentOrderHistoryBinding = FragmentOrderHistoryBinding.inflate(inflater)
-
         // TODO skeleton 로딩 효과 주기
 
         return fragmentOrderHistoryBinding.root
@@ -36,10 +35,12 @@ class OrderHistoryFragment : Fragment() {
 
         fragmentOrderHistoryBinding.run {
             recyclerViewOrderHistory.apply {
-                adapter = OrderHistoryAdapter(getSampleData())
+                orderHistoryAdapter = OrderHistoryAdapter(getSampleData())
+                adapter = orderHistoryAdapter
                 layoutManager = LinearLayoutManager(context)
                 // addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
 
+                // 최상단 FAB 숨기기, 스크롤시 FAB 보이기
                 val fadeIn = AlphaAnimation(0f, 1f).apply { duration = 500 }
                 val fadeOut = AlphaAnimation(1f, 0f).apply { duration = 500 }
                 var isTop = true
@@ -67,6 +68,15 @@ class OrderHistoryFragment : Fragment() {
             fabOrderHistoryTop.setOnClickListener {
                 // 최상단 이동
                 recyclerViewOrderHistory.smoothScrollToPosition(0)
+            }
+
+            // 주문 상태 필터링
+            chipGroupOrderStatus.setOnCheckedStateChangeListener { group, checkedIds ->
+                val selectedChip = fragmentOrderHistoryBinding.root.findViewById<Chip>(checkedIds.first())
+                if (selectedChip != null) {
+                    val orderStatus = selectedChip.text.toString()
+                    orderHistoryAdapter.filter.filter(orderStatus)
+                }
             }
         }
     }

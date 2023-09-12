@@ -2,6 +2,8 @@ package com.petpal.mungmate.ui.orderhistory
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import android.widget.Filter
+import android.widget.Filterable
 import androidx.navigation.Navigation
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -10,7 +12,8 @@ import com.petpal.mungmate.R
 import com.petpal.mungmate.databinding.RowOrderHistoryBinding
 import com.petpal.mungmate.model.Order
 
-class OrderHistoryAdapter(private val dataList: List<Order>): RecyclerView.Adapter<OrderHistoryAdapter.ViewHolder>() {
+class OrderHistoryAdapter(private val dataList: List<Order>): RecyclerView.Adapter<OrderHistoryAdapter.ViewHolder>(), Filterable {
+    private var filteredDataList: List<Order> = dataList    // 필터링 된 데이터 리스트
 
     inner class ViewHolder(private val rowBinding: RowOrderHistoryBinding): RecyclerView.ViewHolder(rowBinding.root){
 
@@ -47,10 +50,33 @@ class OrderHistoryAdapter(private val dataList: List<Order>): RecyclerView.Adapt
     }
 
     override fun getItemCount(): Int {
-        return dataList.size
+        return filteredDataList.size
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(dataList[position])
+        holder.bind(filteredDataList[position])
     }
+
+    // 주문 상태별 필터링
+    override fun getFilter(): Filter {
+        return object: Filter(){
+            override fun performFiltering(constraint: CharSequence?): FilterResults {
+                val query = constraint.toString()
+                val filteredList = dataList.filter { it.orderStatus == query }
+
+                val result = FilterResults()
+                result.values = filteredList
+                return result
+            }
+
+            override fun publishResults(constraint: CharSequence?, results: FilterResults?) {
+                if (results != null && results.values is List<*>) {
+                    filteredDataList = results.values as List<Order>
+                    notifyDataSetChanged()
+                }
+            }
+        }
+    }
+
+
 }
