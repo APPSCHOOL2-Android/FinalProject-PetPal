@@ -45,8 +45,11 @@ class CommunitySearchFragment : Fragment() {
 
             communityRecentSearchesRecyclerView.layoutManager = layoutManager
 
-            adapter = CommunityRecentSearchesAdapter()
-            communityRecentSearchesRecyclerView.adapter = adapter
+            adapter = CommunityRecentSearchesAdapter { deletedItem ->
+                // 뷰모델을 통해 아이템 삭제
+                communitySearchViewModel.delete(deletedItem)
+            }
+                communityRecentSearchesRecyclerView.adapter = adapter
 
             communitySearchViewModel.allSearchHistory.observe(viewLifecycleOwner) {
                 adapter.submitList(it)

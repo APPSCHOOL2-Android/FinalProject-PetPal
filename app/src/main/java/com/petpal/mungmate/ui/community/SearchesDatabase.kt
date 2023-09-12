@@ -5,7 +5,7 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 
-@Database(entities = [SearchesEntity::class], version = 1)
+@Database(entities = [SearchesEntity::class], version = 2)
 abstract class SearchesDatabase:RoomDatabase() {
 
     abstract fun SearchesDao(): SearchesDao

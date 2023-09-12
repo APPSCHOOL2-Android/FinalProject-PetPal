@@ -3,17 +3,26 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical">
+    android:layout_marginStart="@dimen/common_margin"
+    android:layout_marginTop="@dimen/common_small_margin"
+    android:layout_marginEnd="@dimen/common_margin"
+    android:layout_marginBottom="@dimen/common_small_margin"
+    android:orientation="horizontal">
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/communityRecentSearchesTextView"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/common_margin"
-        android:layout_marginTop="@dimen/common_small_margin"
-        android:layout_marginEnd="@dimen/common_margin"
-        android:layout_marginBottom="@dimen/common_small_margin"
+        android:layout_weight="1"
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
         tools:text="강아지" />
+
+    <androidx.appcompat.widget.AppCompatImageButton
+        android:id="@+id/communityRecentSearchesDeleteButton"
+        android:layout_width="0dp"
+        android:src="@drawable/close"
+        android:layout_weight="0.2"
+        style="@style/Widget.Material3.Button"
+        android:layout_height="match_parent"/>
 
 </LinearLayout>

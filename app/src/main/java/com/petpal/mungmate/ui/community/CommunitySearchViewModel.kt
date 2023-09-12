@@ -27,4 +27,9 @@ class CommunitySearchViewModel (application: Application) : AndroidViewModel(app
     fun deleteAllData() = viewModelScope.launch(Dispatchers.IO) {
         repository.deleteAllData()
     }
+
+    // 아이템 한개 삭제 함수
+    fun delete(searchesEntity: SearchesEntity) = viewModelScope.launch(Dispatchers.IO) {
+        repository.delete(searchesEntity)
+    }
 }

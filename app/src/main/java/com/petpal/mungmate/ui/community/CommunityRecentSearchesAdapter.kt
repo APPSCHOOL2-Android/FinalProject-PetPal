@@ -6,25 +6,35 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.snackbar.Snackbar
 import com.petpal.mungmate.databinding.RowCommunityRecentSearchesBinding
 
 
-class CommunityRecentSearchesAdapter : ListAdapter<SearchesEntity, CommunityRecentSearchesAdapter.SearchHistoryViewHolder>(DiffCallback()) {
+class CommunityRecentSearchesAdapter(private val onItemDeleteListener: (SearchesEntity) -> Unit) : ListAdapter<SearchesEntity, CommunityRecentSearchesAdapter.CommunityRecentSearchesViewHolder>(DiffCallback()) {
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SearchHistoryViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CommunityRecentSearchesViewHolder {
         val inflater = LayoutInflater.from(parent.context)
         val binding = RowCommunityRecentSearchesBinding.inflate(inflater, parent, false)
-        return SearchHistoryViewHolder(binding)
+        return CommunityRecentSearchesViewHolder(binding)
     }
 
-    override fun onBindViewHolder(holder: SearchHistoryViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: CommunityRecentSearchesViewHolder, position: Int) {
         val searchHistory = getItem(position)
         holder.bind(searchHistory)
     }
 
-    inner class SearchHistoryViewHolder(private val binding: RowCommunityRecentSearchesBinding) : RecyclerView.ViewHolder(binding.root) {
+    inner class CommunityRecentSearchesViewHolder(private val binding: RowCommunityRecentSearchesBinding) : RecyclerView.ViewHolder(binding.root) {
         fun bind(searchHistory: SearchesEntity) {
             binding.communityRecentSearchesTextView.text = searchHistory.searchesContent
+
+            binding.communityRecentSearchesDeleteButton.setOnClickListener {
+                val position = adapterPosition
+                if (position != RecyclerView.NO_POSITION) {
+                    val deletedItem = getItem(position)
+                    // 아이템 삭제 함수 호출
+                    onItemDeleteListener(deletedItem)
+                }
+            }
         }
     }
 }
