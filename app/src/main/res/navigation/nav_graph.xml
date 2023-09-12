@@ -10,6 +10,7 @@
         android:label="fragment_manage_block"
         tools:layout="@layout/fragment_manage_block" />
     <include app:graph="@navigation/chat" />
+    <include app:graph="@navigation/walk"/>
     <fragment
         android:id="@+id/FAQFragment"
         android:name="com.petpal.mungmate.ui.customercenter.FAQFragment"
@@ -72,6 +73,10 @@
         <action
             android:id="@+id/action_mainFragment_to_chat"
             app:destination="@id/chat" />
+
+        <action
+            android:id="@+id/action_mainFragment_to_walk"
+            app:destination="@id/walk" />
         <action
             android:id="@+id/action_mainFragment_to_communityPostDetailFragment"
             app:destination="@id/communityPostDetailFragment" />
@@ -83,11 +88,14 @@
             app:destination="@id/communitySearchFragment" />
         <action
             android:id="@+id/action_mainFragment_to_userInfoFragment"
-            app:destination="@id/userInfoFragment" >
-            <argument
-                android:name="isProfile"
-                android:defaultValue="false" />
+            app:destination="@id/userInfoFragment" />
         </action>
+        <action
+            android:id="@+id/action_mainFragment_to_writePlaceReviewFragment"
+            app:destination="@id/writePlaceReviewFragment" />
+        <action
+            android:id="@+id/action_mainFragment_to_placeReviewFragment"
+            app:destination="@id/placeReviewFragment" />
     </fragment>
     <fragment
         android:id="@+id/communityWritingFragment"
@@ -116,6 +124,22 @@
         android:name="com.petpal.mungmate.ui.community.CommunityDetailModifyFragment"
         android:label="fragment_community_detail_modify"
         tools:layout="@layout/fragment_community_detail_modify" />
+    <fragment
+        android:id="@+id/writePlaceReviewFragment"
+        android:name="com.petpal.mungmate.ui.placereview.WritePlaceReviewFragment"
+        android:label="fragment_write_place_review"
+        tools:layout="@layout/fragment_write_place_review">
+        <action
+            android:id="@+id/action_writePlaceReviewFragment_to_mainFragment"
+            app:destination="@id/mainFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/placeReviewFragment"
+        android:name="com.petpal.mungmate.ui.placereview.PlaceReviewFragment"
+        android:label="PlaceReviewFragment"
+        tools:layout="@layout/fragment_place_review"/>
+
     <include app:graph="@navigation/manage_pet" />
     <include app:graph="@navigation/match_history" />
     <include app:graph="@navigation/walk_history" />
@@ -128,6 +152,6 @@
         <argument
             android:name="isProfile"
             app:argType="boolean"
-            android:defaultValue="true" />
+            android:defaultValue="false" />
     </fragment>
 </navigation>
