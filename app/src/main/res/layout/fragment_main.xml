@@ -22,7 +22,7 @@
         android:layout_height="0dp"
         android:layout_gravity="bottom"
         app:itemPaddingTop="5dp"
-        android:layout_weight="0.12"
+        android:layout_weight="0.1"
         android:theme="@style/BottomNavigationView"
         app:itemIconTint="@color/slecte_checked_bottom_navigation"
         app:itemRippleColor="@null"
