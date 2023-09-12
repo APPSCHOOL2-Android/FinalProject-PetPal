@@ -9,7 +9,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.petpal.mungmate.databinding.RowCommunityRecentSearchesBinding
 
 
-class CommunityRecentSearchesAdapter : ListAdapter<SearchesEntity, CommunityRecentSearchesAdapter.SearchHistoryViewHolder>(SearchHistoryDiffCallback()) {
+class CommunityRecentSearchesAdapter : ListAdapter<SearchesEntity, CommunityRecentSearchesAdapter.SearchHistoryViewHolder>(DiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SearchHistoryViewHolder {
         val inflater = LayoutInflater.from(parent.context)
@@ -29,7 +29,7 @@ class CommunityRecentSearchesAdapter : ListAdapter<SearchesEntity, CommunityRece
     }
 }
 
-class SearchHistoryDiffCallback : DiffUtil.ItemCallback<SearchesEntity>() {
+class DiffCallback : DiffUtil.ItemCallback<SearchesEntity>() {
     override fun areItemsTheSame(oldItem: SearchesEntity, newItem: SearchesEntity): Boolean {
         return oldItem.id == newItem.id
     }

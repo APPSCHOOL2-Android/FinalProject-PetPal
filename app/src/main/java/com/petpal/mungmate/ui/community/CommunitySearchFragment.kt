@@ -18,6 +18,7 @@ class CommunitySearchFragment : Fragment() {
     lateinit var communitySearchBinding: FragmentCommunitySearchBinding
     private lateinit var communitySearchViewModel: CommunitySearchViewModel
     private lateinit var adapter: CommunityRecentSearchesAdapter
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -25,9 +26,7 @@ class CommunitySearchFragment : Fragment() {
 
         communitySearchBinding = FragmentCommunitySearchBinding.inflate(inflater)
 
-
         communitySearchViewModel = ViewModelProvider(this)[CommunitySearchViewModel::class.java]
-        val db = SearchesDatabase.getDataBase(requireContext())
 
         communitySearchBinding.run {
             communitySearchToolbar.run {
@@ -49,9 +48,10 @@ class CommunitySearchFragment : Fragment() {
             adapter = CommunityRecentSearchesAdapter()
             communityRecentSearchesRecyclerView.adapter = adapter
 
-            communitySearchViewModel.allSearchHistory.observe(viewLifecycleOwner) { searchHistoryList ->
-                adapter.submitList(searchHistoryList)
+            communitySearchViewModel.allSearchHistory.observe(viewLifecycleOwner) {
+                adapter.submitList(it)
             }
+
             communityRecentSearchesAllClearButton.setOnClickListener {
                 communitySearchViewModel.deleteAllData()
             }
@@ -59,8 +59,12 @@ class CommunitySearchFragment : Fragment() {
             searchView.editText.setOnEditorActionListener { v, actionId, event ->
                 if (actionId == EditorInfo.IME_ACTION_SEARCH) {
                     val query = searchView.text.toString().trim()
+
+                    // 검색어가 비어 있지 않으면..
                     if (query.isNotEmpty()) {
-                        val searchesEntity = SearchesEntity(0,query)
+
+                        val searchesEntity = SearchesEntity(0, query)
+                        // 검색어를 데이터 데이스에 삽입
                         communitySearchViewModel.insert(searchesEntity)
                     }
                     searchView.text?.clear()
