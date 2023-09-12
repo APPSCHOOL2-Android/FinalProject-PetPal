@@ -11,16 +11,19 @@ import com.petpal.mungmate.databinding.RowOrderHistoryBinding
 import com.petpal.mungmate.model.Order
 
 class OrderHistoryAdapter(private val dataList: List<Order>): RecyclerView.Adapter<OrderHistoryAdapter.ViewHolder>() {
+
     inner class ViewHolder(private val rowBinding: RowOrderHistoryBinding): RecyclerView.ViewHolder(rowBinding.root){
+
         fun bind(order: Order) {
             rowBinding.run {
                 textViewOrderHistoryDate.text = order.orderDate
                 textViewOrderHistoryStatus.text = order.orderStatus
 
+                // 주문 상품 목록
                 recyclerViewOrderHistoryItem.run {
                     adapter = OrderHistoryItemAdapter(order.itemList)
                     layoutManager = LinearLayoutManager(itemView.context)
-                    addItemDecoration(DividerItemDecoration(itemView.context, DividerItemDecoration.VERTICAL))
+                    // addItemDecoration(DividerItemDecoration(itemView.context, DividerItemDecoration.VERTICAL))
                 }
 
                 layoutOrder.setOnClickListener {
@@ -30,6 +33,7 @@ class OrderHistoryAdapter(private val dataList: List<Order>): RecyclerView.Adapt
                 }
             }
         }
+
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {

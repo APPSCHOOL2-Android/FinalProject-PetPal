@@ -5,8 +5,11 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AlphaAnimation
+import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ItemDecoration
 import com.petpal.mungmate.R
 import com.petpal.mungmate.databinding.FragmentOrderHistoryBinding
@@ -32,10 +35,38 @@ class OrderHistoryFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         fragmentOrderHistoryBinding.run {
-            recyclerViewOrderHistory.run {
+            recyclerViewOrderHistory.apply {
                 adapter = OrderHistoryAdapter(getSampleData())
                 layoutManager = LinearLayoutManager(context)
                 // addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
+
+                val fadeIn = AlphaAnimation(0f, 1f).apply { duration = 500 }
+                val fadeOut = AlphaAnimation(1f, 0f).apply { duration = 500 }
+                var isTop = true
+
+                addOnScrollListener(object: RecyclerView.OnScrollListener() {
+                    override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                        super.onScrollStateChanged(recyclerView, newState)
+                        // 최상단에 있는 순간 -> FAB 숨기기
+                        if (!canScrollVertically(-1) && newState == RecyclerView.SCROLL_STATE_IDLE) {
+                            fabOrderHistoryTop.startAnimation(fadeOut)
+                            fabOrderHistoryTop.visibility = View.GONE
+                            isTop = true
+                        } else {
+                            // 최상단에서 내리기 시작하는 순간 -> FAB 보이기
+                            if (isTop) {
+                                fabOrderHistoryTop.visibility = View.VISIBLE
+                                fabOrderHistoryTop.startAnimation(fadeIn)
+                                isTop = false
+                            }
+                        }
+                    }
+                })
+            }
+
+            fabOrderHistoryTop.setOnClickListener {
+                // 최상단 이동
+                recyclerViewOrderHistory.smoothScrollToPosition(0)
             }
         }
     }

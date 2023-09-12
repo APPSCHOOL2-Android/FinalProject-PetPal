@@ -63,7 +63,7 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="상품 조회"
+                    android:text="상품 정보"
                     android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
                     android:textStyle="bold" />
 
@@ -184,10 +184,12 @@
                     android:text="010-0000-0000"
                     android:textAppearance="@style/TextAppearance.Material3.BodyMedium" />
             </LinearLayout>
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_marginTop="8dp"
+                    android:gravity="top"
                     android:orientation="horizontal">
 
                     <TextView
@@ -203,10 +205,12 @@
                         android:text="[00000] 서울특별시 멍멍구 멍멍로 00"
                         android:textAppearance="@style/TextAppearance.Material3.BodyMedium" />
                 </LinearLayout>
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_marginTop="8dp"
+                    android:gravity="top"
                     android:orientation="horizontal">
 
                     <TextView

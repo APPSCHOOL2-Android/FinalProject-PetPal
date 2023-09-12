@@ -31,7 +31,7 @@ class OrderHistoryDetailFragment : Fragment() {
             recyclerViewOrderDetailItem.run {
                 adapter = OrderHistoryItemAdapter(getSampleData())
                 layoutManager = LinearLayoutManager(context)
-                addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
+                // addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
             }
         }
     }
