@@ -1,6 +1,7 @@
 package com.petpal.mungmate.ui.orderhistory
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import android.widget.Filter
 import android.widget.Filterable
@@ -21,12 +22,14 @@ class OrderHistoryAdapter(private val dataList: List<Order>): RecyclerView.Adapt
             rowBinding.run {
                 textViewOrderHistoryDate.text = order.orderDate
                 textViewOrderHistoryStatus.text = order.orderStatus
-
                 // 주문 상품 목록
                 recyclerViewOrderHistoryItem.run {
                     adapter = OrderHistoryItemAdapter(order.itemList)
                     layoutManager = LinearLayoutManager(itemView.context)
                     // addItemDecoration(DividerItemDecoration(itemView.context, DividerItemDecoration.VERTICAL))
+                }
+                if (order.orderStatus == "결제완료") {
+                    buttonOrderDeliveryTracking.visibility = View.GONE
                 }
 
                 layoutOrder.setOnClickListener {
@@ -62,7 +65,11 @@ class OrderHistoryAdapter(private val dataList: List<Order>): RecyclerView.Adapt
         return object: Filter(){
             override fun performFiltering(constraint: CharSequence?): FilterResults {
                 val query = constraint.toString()
-                val filteredList = dataList.filter { it.orderStatus == query }
+                val filteredList = if (query == "전체") {
+                    dataList
+                } else {
+                    dataList.filter { it.orderStatus == query }
+                }
 
                 val result = FilterResults()
                 result.values = filteredList

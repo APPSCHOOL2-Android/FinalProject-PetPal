@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AlphaAnimation
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.chip.Chip
@@ -34,6 +35,10 @@ class OrderHistoryFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         fragmentOrderHistoryBinding.run {
+            toolbarOrderHistory.setNavigationOnClickListener {
+                findNavController().popBackStack()
+            }
+
             recyclerViewOrderHistory.apply {
                 orderHistoryAdapter = OrderHistoryAdapter(getSampleData())
                 adapter = orderHistoryAdapter
@@ -89,11 +94,11 @@ class OrderHistoryFragment : Fragment() {
                     Item("펫팔", "신상 로얄 프리미엄 캔", R.drawable.sample_order_item2, 15000, "참치맛 150g", 1)
                 ),
                 "배송중"),
-            Order("2023.09.11", listOf(Item("펫팔", "신상 로얄 프리미엄 사료", R.drawable.sample_order_item1, 20000, "퍼피 500g", 1),), "배송완료"),
+            Order("2023.09.11", listOf(Item("펫팔", "신상 로얄 프리미엄 사료", R.drawable.sample_order_item1, 20000, "퍼피 500g", 1),), "결제완료"),
             Order("2023.09.10", listOf(Item("펫팔", "신상 로얄 프리미엄 사료", R.drawable.sample_order_item1, 20000, "퍼피 500g", 1),), "배송완료"),
             Order("2023.09.09", listOf(Item("펫팔", "신상 로얄 프리미엄 사료신상 로얄 프리미엄 사료신상 로얄 프리미엄 사료신상 로얄 프리미엄 사료신상 로얄 프리미엄 사료신상 로얄 프리미엄 사료신상 로얄 프리미엄 사료신상 로얄 프리미엄 사료신상 로얄 프리미엄 사료신상 로얄 프리미엄 사료", R.drawable.sample_order_item1, 20000, "퍼피 500g", 1),), "배송완료"),
-            Order("2023.09.09", listOf(Item("펫팔", "신상 로얄 프리미엄 사료", R.drawable.sample_order_item1, 20000, "퍼피 500g", 1),), "배송완료"),
-            Order("2023.09.09", listOf(Item("펫팔", "신상 로얄 프리미엄 사료", R.drawable.sample_order_item1, 20000, "퍼피 500g", 1),), "배송완료")
+            Order("2023.09.08", listOf(Item("펫팔", "신상 로얄 프리미엄 사료", R.drawable.sample_order_item1, 20000, "퍼피 500g", 1),), "배송완료"),
+            Order("2023.09.07", listOf(Item("펫팔", "신상 로얄 프리미엄 사료", R.drawable.sample_order_item1, 20000, "퍼피 500g", 1),), "배송완료")
         )
     }
 

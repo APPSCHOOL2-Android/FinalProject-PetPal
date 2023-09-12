@@ -5,6 +5,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.divider.MaterialDividerItemDecoration
@@ -28,6 +29,10 @@ class OrderHistoryDetailFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         fragmentOrderHistoryDetailBinding.run {
+            toolbarOrderDetail.setNavigationOnClickListener {
+                findNavController().popBackStack()
+            }
+
             recyclerViewOrderDetailItem.run {
                 adapter = OrderHistoryItemAdapter(getSampleData())
                 layoutManager = LinearLayoutManager(context)
