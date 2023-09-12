@@ -6,11 +6,12 @@
     android:layout_height="match_parent"
     android:gravity="center_vertical"
     android:orientation="horizontal"
-    android:padding="16dp">
+    android:paddingTop="16dp"
+    android:paddingBottom="16dp">
 
     <ImageView
         android:id="@+id/imageViewOrderItem"
-        android:layout_width="100dp"
+        android:layout_width="80dp"
         android:layout_height="wrap_content"
         android:layout_marginEnd="16dp"
         android:adjustViewBounds="true"
@@ -32,7 +33,6 @@
             android:id="@+id/textViewOrderItemName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
             android:text="상품명"
             android:textAppearance="@style/TextAppearance.Material3.BodyLarge" />
 
@@ -40,7 +40,6 @@
             android:id="@+id/textViewOrderItemOption"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
             android:text="옵션 | 수량"
             android:textAppearance="@style/TextAppearance.Material3.BodySmall" />
 
@@ -48,7 +47,6 @@
             android:id="@+id/textViewOrderItemTotalPrice"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
             android:text="가격"
             android:textAppearance="@style/TextAppearance.Material3.BodyMedium" />
     </LinearLayout>
