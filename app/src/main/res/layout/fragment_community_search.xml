@@ -98,6 +98,8 @@
                         android:layout_height="wrap_content"
                         android:text="전체 삭제"
                         android:padding="@dimen/common_padding"
+                        style="@style/Widget.Material3.Button"
+                        android:textColor="@color/delete"
                         app:layout_constraintBottom_toBottomOf="@id/communityRecentSearchesTextView"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toTopOf="@id/communityRecentSearchesTextView" />

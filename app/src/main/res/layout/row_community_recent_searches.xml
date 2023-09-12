@@ -10,14 +10,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/common_margin"
+        android:layout_marginTop="@dimen/common_small_margin"
         android:layout_marginEnd="@dimen/common_margin"
+        android:layout_marginBottom="@dimen/common_small_margin"
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
         tools:text="강아지" />
-
-    <com.google.android.material.divider.MaterialDivider
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/common_margin"
-        android:layout_marginEnd="@dimen/common_margin" />
 
 </LinearLayout>
