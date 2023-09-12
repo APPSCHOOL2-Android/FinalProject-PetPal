@@ -63,7 +63,7 @@ dependencies {
     implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
 
     // splashscreen
-    implementation("androidx.core:core-splashscreen:1.0.0")
+    implementation("androidx.core:core-splashscreen:1.0.1")
 
     // Circle ImageView
     implementation 'de.hdodenhof:circleimageview:3.1.0'
