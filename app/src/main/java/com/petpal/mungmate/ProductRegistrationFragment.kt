@@ -9,7 +9,6 @@ import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
 import android.util.TypedValue
-import android.view.KeyEvent
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -19,18 +18,15 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
-import android.widget.TextView
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.google.android.flexbox.FlexboxLayout
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 
 import com.petpal.mungmate.databinding.FragmentProductRegistrationBinding
-import com.petpal.mungmate.databinding.ItemProductRegistrationImageviewBinding
 import com.petpal.mungmate.model.Image
 import kotlin.math.roundToInt
 
@@ -60,7 +56,7 @@ class ProductRegistrationFragment : Fragment() {
         productRegistrationBinding.run {
 
             recyclerViewMainImage.run {
-                adapter = MainImageRecyclerViewAdapter()
+                adapter = ProductRegistrationAdapter(mainImageList,buttonAddMainImage)
                 layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
             }
 
@@ -231,50 +227,6 @@ class ProductRegistrationFragment : Fragment() {
             dp.toFloat(),
             resources.displayMetrics
         ).roundToInt()
-    }
-
-    inner class MainImageRecyclerViewAdapter :
-        RecyclerView.Adapter<MainImageRecyclerViewAdapter.MainImageViewHolder>() {
-        inner class MainImageViewHolder(itemImageviewDeleteBinding: ItemProductRegistrationImageviewBinding) :
-            RecyclerView.ViewHolder(itemImageviewDeleteBinding.root) {
-            val imageViewMain: ImageView = itemImageviewDeleteBinding.imageViewDelete
-            val textViewIsMain: TextView = itemImageviewDeleteBinding.textViewIsMain
-            private val buttonDeleteMain: Button = itemImageviewDeleteBinding.buttonDelete
-
-            init {
-                // 우측 상단 X버튼 클릭시 이미지 삭제
-                buttonDeleteMain.setOnClickListener {
-                    mainImageList.removeAt(adapterPosition)
-                    productRegistrationBinding.buttonAddMainImage.text =
-                        "${mainImageList.count()}/5"
-                    notifyDataSetChanged()
-                }
-            }
-        }
-
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MainImageViewHolder {
-            val imageViewBinding = ItemProductRegistrationImageviewBinding.inflate(layoutInflater)
-            imageViewBinding.root.layoutParams = ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.WRAP_CONTENT,
-                ViewGroup.LayoutParams.MATCH_PARENT
-            )
-            return MainImageViewHolder(imageViewBinding)
-        }
-
-        override fun getItemCount(): Int {
-            return mainImageList.size
-        }
-
-        override fun onBindViewHolder(holder: MainImageViewHolder, position: Int) {
-            // 메인 이미지 리스트에 저장된 Bitmap을 커스텀 뷰에 표시
-            holder.imageViewMain.setImageBitmap(mainImageList[position].second)
-            // 첫번째 이미지를 대표 이미지로 지정
-            holder.textViewIsMain.visibility = if (position == 0) {
-                View.VISIBLE
-            } else {
-                View.INVISIBLE
-            }
-        }
     }
 
 }
