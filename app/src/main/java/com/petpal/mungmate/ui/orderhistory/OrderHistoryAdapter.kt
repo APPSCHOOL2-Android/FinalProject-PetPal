@@ -84,6 +84,4 @@ class OrderHistoryAdapter(private val dataList: List<Order>): RecyclerView.Adapt
             }
         }
     }
-
-
 }

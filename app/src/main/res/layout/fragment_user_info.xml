@@ -16,21 +16,15 @@
         app:title="사용자 정보 입력"
         app:titleTextAppearance="@style/TextAppearance.AppCompat.Medium" />
 
-    <View
-        android:id="@+id/userInfoDivider"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="?android:attr/listDivider" />
-
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:padding="16dp">
+        android:layout_height="match_parent">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:padding="16dp">
 
             <de.hdodenhof.circleimageview.CircleImageView
                 android:id="@+id/startMainImageView"
@@ -112,7 +106,7 @@
 
             <com.google.android.material.chip.ChipGroup
                 android:id="@+id/userInfoChipgroup"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_marginBottom="16dp"

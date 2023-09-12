@@ -66,5 +66,6 @@
 
     <color name="bottom_navigation_state_checked_false">#33000000</color>
     <color name="kakao_login_btn_backgroundTint">#FEE500</color>
+    <color name="delete">#F61023</color>
 
 </resources>
