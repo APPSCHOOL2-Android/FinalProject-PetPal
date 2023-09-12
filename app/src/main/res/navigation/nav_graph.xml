@@ -87,12 +87,15 @@
             android:id="@+id/action_mainFragment_to_communitySearchFragment"
             app:destination="@id/communitySearchFragment" />
         <action
+            android:id="@+id/action_mainFragment_to_userInfoFragment"
+            app:destination="@id/userInfoFragment" />
+        </action>
+        <action
             android:id="@+id/action_mainFragment_to_writePlaceReviewFragment"
             app:destination="@id/writePlaceReviewFragment" />
         <action
             android:id="@+id/action_mainFragment_to_placeReviewFragment"
             app:destination="@id/placeReviewFragment" />
-
     </fragment>
     <fragment
         android:id="@+id/communityWritingFragment"
@@ -141,5 +144,14 @@
     <include app:graph="@navigation/match_history" />
     <include app:graph="@navigation/walk_history" />
     <include app:graph="@navigation/announcement" />
-
+    <fragment
+        android:id="@+id/userInfoFragment"
+        android:name="com.petpal.mungmate.user.UserInfoFragment"
+        android:label="fragment_user_info"
+        tools:layout="@layout/fragment_user_info" >
+        <argument
+            android:name="isProfile"
+            app:argType="boolean"
+            android:defaultValue="false" />
+    </fragment>
 </navigation>
