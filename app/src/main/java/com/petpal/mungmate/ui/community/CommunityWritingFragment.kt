@@ -52,11 +52,6 @@ class CommunityWritingFragment : Fragment() {
         communityWritingBinding.run {
             toolbar()
 
-            communityWritingPostImageHorizontalRecyclerView.run {
-                adapter = ProductRegistrationAdapter(mainImageList, communityWritingImageButton)
-                layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
-            }
-
             communityWritingImageButton.setOnClickListener {
                 val galleryIntent =
                     Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI).apply {
@@ -66,6 +61,10 @@ class CommunityWritingFragment : Fragment() {
                 mainGalleryLauncher.launch(galleryIntent)
             }
 
+            communityWritingPostImageHorizontalRecyclerView.run {
+                adapter = ProductRegistrationAdapter(mainImageList, communityWritingImageButton)
+                layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
+            }
 
         }
 
