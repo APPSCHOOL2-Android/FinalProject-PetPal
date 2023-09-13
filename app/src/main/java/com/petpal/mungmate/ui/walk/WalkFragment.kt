@@ -4,15 +4,18 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.location.Location
+import android.location.LocationManager
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.FrameLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
+import androidx.core.location.LocationManagerCompat.getCurrentLocation
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
@@ -25,10 +28,12 @@ import com.google.android.gms.location.LocationServices
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.chip.Chip
+import com.google.android.material.snackbar.Snackbar
 import com.petpal.mungmate.MainActivity
 import com.petpal.mungmate.R
 import com.petpal.mungmate.databinding.FragmentWalkBinding
 import com.petpal.mungmate.model.KakaoSearchResponse
+import com.petpal.mungmate.ui.walk.WalkFragment.Companion.REQUEST_LOCATION_PERMISSION
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -55,9 +60,9 @@ class WalkFragment : Fragment(),
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private val viewModel: WalkViewModel by viewModels { WalkViewModelFactory(WalkRepository()) }
     private lateinit var kakaoSearchResponse: KakaoSearchResponse
+    private var isLocationPermissionGranted = false
     companion object {
         const val REQUEST_LOCATION_PERMISSION = 1
-        const val API_KEY="29842459a2117277a50ac661f2f7e089"
 
     }
 
@@ -78,7 +83,7 @@ class WalkFragment : Fragment(),
         fragmentWalkBinding.mapView.setPOIItemEventListener(this)
         fragmentWalkBinding.mapView.setCurrentLocationEventListener(this)
         fragmentWalkBinding.mapView.setMapViewEventListener(this)
-        getCurrentLocationAndSearch()
+        requestLocationPermissionIfNeeded()
     }
 
     private fun setupButtonListeners() {
@@ -127,25 +132,48 @@ class WalkFragment : Fragment(),
         }
     }
 
-    private fun getCurrentLocationAndSearch() {
+    private fun requestLocationPermissionIfNeeded() {
         if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            requestLocationPermission()
-            return
+            requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), REQUEST_LOCATION_PERMISSION)
+        } else {
+            // 권한이 승인되어있으면 위치 가져오기
+            isLocationPermissionGranted = true
+            getCurrentLocation()
         }
+    }
 
-        fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
-            location?.let {
-                viewModel.searchPlacesByKeyword(it.latitude, it.longitude, "동물병원")
-                val mapPoint = MapPoint.mapPointWithGeoCoord(it.latitude, it.longitude)
-                fragmentWalkBinding.mapView.setMapCenterPoint(mapPoint, true)
+    private fun getCurrentLocation() {
+        if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
+                location?.let {
+                    viewModel.searchPlacesByKeyword(it.latitude, it.longitude, "동물병원")
+                    val mapPoint = MapPoint.mapPointWithGeoCoord(it.latitude, it.longitude)
+                    fragmentWalkBinding.mapView.setMapCenterPoint(mapPoint, true)
+                }
             }
         }
     }
-
-    private fun requestLocationPermission() {
-        requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), REQUEST_LOCATION_PERMISSION)
+    //권한 핸들링
+    // 앱 초기 실행시 권한 부여 여부 결정 전에 위치를 받아올 수 없는 현상 핸들링
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        when (requestCode) {
+            REQUEST_LOCATION_PERMISSION -> {
+                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // 사용자가 위치 권한을 승인한 경우
+                    isLocationPermissionGranted = true
+                    getCurrentLocation()
+                } else {
+                    //이런 느낌?
+                    showSnackbar("현재 위치를 확인하려면 위치 권한이 필요합니다. 설정에서 권한을 허용해주세요.")
+                }
+                return
+            }
+            //다른 권한 필요하면 ㄱ
+        }
     }
-
+    private fun showSnackbar(message: String) {
+        Snackbar.make(fragmentWalkBinding.root, message, Snackbar.LENGTH_LONG).show()
+    }
     override fun onCurrentLocationUpdate(mapView: net.daum.mf.map.api.MapView?, mapPoint: MapPoint?, v: Float) {}
 
     override fun onCurrentLocationDeviceHeadingUpdate(p0: MapView?, p1: Float) {}
@@ -156,10 +184,11 @@ class WalkFragment : Fragment(),
     override fun onPOIItemSelected(p0: net.daum.mf.map.api.MapView?, p1: MapPOIItem?) {
         val selectedPlace = kakaoSearchResponse.documents[p1?.tag ?: return]
 
-        Log.d("WalkFragment", "onPOIItemSelected called")
+        Log.d("WalkFragment", "로그로그")
         val initialBottomSheetView = layoutInflater.inflate(R.layout.row_walk_bottom_sheet_place, null)
-        val bottomSheetDialog = BottomSheetDialog(requireActivity())
+        val bottomSheetDialog = BottomSheetDialog(requireContext())
         bottomSheetDialog.setContentView(initialBottomSheetView)
+        val bottomSheetBehavior = BottomSheetBehavior.from(bottomSheetDialog.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)!!)
         initialBottomSheetView.findViewById<TextView>(R.id.textView).text = selectedPlace.place_name
         bottomSheetDialog.show()
 
@@ -167,11 +196,13 @@ class WalkFragment : Fragment(),
             override fun onStateChanged(bottomSheet: View, newState: Int) {
                 when (newState) {
                     BottomSheetBehavior.STATE_EXPANDED -> {
-                        val fullyExpandedView = layoutInflater.inflate(R.layout.fragment_place_review, null)
-                        bottomSheetDialog.setContentView(fullyExpandedView)
-                    }
-                    BottomSheetBehavior.STATE_COLLAPSED -> {
-                        bottomSheetDialog.setContentView(initialBottomSheetView)
+                        val bundle = Bundle()
+                        bundle.putString("place_name", selectedPlace.place_name)
+                        bundle.putString("phone", selectedPlace.phone)
+                        bundle.putString("place_road_adress_name", selectedPlace.road_address_name)
+                        bundle.putString("place_category", selectedPlace.category_group_name)
+                        mainActivity.navigate(R.id.action_mainFragment_to_placeReviewFragment, bundle)
+                        bottomSheetDialog.dismiss()
                     }
                 }
             }
@@ -202,6 +233,7 @@ class WalkFragment : Fragment(),
         }
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onCalloutBalloonOfPOIItemTouched(p0: net.daum.mf.map.api.MapView?, p1: MapPOIItem?) {}
 
     override fun onCalloutBalloonOfPOIItemTouched(p0: net.daum.mf.map.api.MapView?, p1: MapPOIItem?, p2: MapPOIItem.CalloutBalloonButtonType?) {}
@@ -232,6 +264,8 @@ class WalkFragment : Fragment(),
     override fun onMapViewDragEnded(p0: MapView?, p1: MapPoint?) {}
 
     override fun onMapViewMoveFinished(p0: MapView?, p1: MapPoint?) {}
+
+
 
 
 }
