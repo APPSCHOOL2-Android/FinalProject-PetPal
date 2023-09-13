@@ -26,8 +26,6 @@ class OrderHistoryFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         _fragmentOrderHistoryBinding = FragmentOrderHistoryBinding.inflate(inflater)
-        // TODO skeleton 로딩 효과 주기
-
         return fragmentOrderHistoryBinding.root
     }
 
@@ -35,6 +33,7 @@ class OrderHistoryFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         fragmentOrderHistoryBinding.run {
+
             toolbarOrderHistory.setNavigationOnClickListener {
                 findNavController().popBackStack()
             }
@@ -78,6 +77,8 @@ class OrderHistoryFragment : Fragment() {
             chipGroupOrderStatus.setOnCheckedStateChangeListener { _, checkedIds ->
                 changeOrderStatusFilter(checkedIds.first())
             }
+
+//            skeleton.showOriginal()
         }
     }
 

@@ -71,7 +71,6 @@ class ChatRoomFragment : Fragment() {
             // 산책 메이트 요청
             buttonRequestWalkMate.setOnClickListener {
                 findNavController().navigate(R.id.action_chatRoomFragment_to_walkMateRequestFragment)
-
             }
 
             // 채팅방 메시지 목록

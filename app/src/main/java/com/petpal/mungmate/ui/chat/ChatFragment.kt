@@ -32,17 +32,6 @@ class ChatFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val navController = findNavController()
-        val listener = NavController.OnDestinationChangedListener { navController: NavController, navDestination: NavDestination, bundle: Bundle? ->
-            if (navDestination.id == R.id.chatRoomFragment) {
-                // ChatRoomFragment 가 열린 상태로 전환될 때
-            } else if (navDestination.id == R.id.item_chat) {
-                // ChatRoomFragment 가 닫힌 상태로 ChatFragment로 전환될 때
-                Snackbar.make(fragmentChatBinding.root, "채팅방에서 나갔습니다", Snackbar.LENGTH_SHORT).show()
-            }
-        }
-        navController.addOnDestinationChangedListener(listener)
-
         fragmentChatBinding.run {
             recyclerViewChatRoom.run {
                 adapter = ChatRoomAdapter(getSampleData(), activity as MainActivity)
@@ -70,13 +59,5 @@ class ChatFragment : Fragment() {
                 "몽실이네", "안녕하세요 같이 산책할래요? 강아지 공원에서 봅시다", "4일 전", 0
             )
         )
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-
-        val navController = findNavController()
-        val listener = NavController.OnDestinationChangedListener { _, _, _ -> }
-        findNavController().removeOnDestinationChangedListener(listener)
     }
 }
