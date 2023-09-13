@@ -61,6 +61,7 @@ class WalkFragment : Fragment(),
     private val viewModel: WalkViewModel by viewModels { WalkViewModelFactory(WalkRepository()) }
     private lateinit var kakaoSearchResponse: KakaoSearchResponse
     private var isLocationPermissionGranted = false
+
     companion object {
         const val REQUEST_LOCATION_PERMISSION = 1
 
@@ -70,6 +71,7 @@ class WalkFragment : Fragment(),
         mainActivity = activity as MainActivity
         fragmentWalkBinding = FragmentWalkBinding.inflate(inflater)
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(mainActivity)
+
         setupMapView()
         setupButtonListeners()
         observeViewModel()
@@ -109,26 +111,43 @@ class WalkFragment : Fragment(),
         }
     }
 
+    private val currentMarkers: MutableList<MapPOIItem> = mutableListOf()
     private fun observeViewModel() {
         viewModel.searchResults.observe(viewLifecycleOwner) { response ->
+            //검색 결과로 씀
             kakaoSearchResponse = response
-            for ((index, place) in response.documents.withIndex()) {
+            val newMarkers = kakaoSearchResponse.documents.map { place ->
                 val mapPoint = MapPoint.mapPointWithGeoCoord(place.y, place.x)
-                val marker = MapPOIItem().apply {
+                MapPOIItem().apply {
                     itemName = place.place_name
-                    tag = index
+                    tag = place.id.hashCode() //id로 태그
                     this.mapPoint = mapPoint
                     markerType = MapPOIItem.MarkerType.CustomImage
                     customImageResourceId = R.drawable.paw_pin
+                    //마커 크기 자동조정
                     isCustomImageAutoscale = true
+                    //마커 위치 조정
                     setCustomImageAnchor(0.5f, 1.0f)
                 }
-                fragmentWalkBinding.mapView.addPOIItem(marker)
             }
-        }
 
-        viewModel.errorMessage.observe(viewLifecycleOwner) { message ->
-            Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+            //기존 마커 중 새로운 검색 결과에 없는 것은 지도에서 제거하고 currentMarkers에서도 제거
+            val markersToRemove = currentMarkers.filter { marker ->
+                newMarkers.none { it.tag == marker.tag }
+            }
+            for (marker in markersToRemove) {
+                fragmentWalkBinding.mapView.removePOIItem(marker)
+                currentMarkers.remove(marker)
+            }
+
+            //새로운 검색 결과 중 현재 지도에 없는 마커들을 추가
+            val markersToAdd = newMarkers.filter { marker ->
+                currentMarkers.none { it.tag == marker.tag }
+            }
+            for (marker in markersToAdd) {
+                fragmentWalkBinding.mapView.addPOIItem(marker)
+                currentMarkers.add(marker)
+            }
         }
     }
 
@@ -154,7 +173,7 @@ class WalkFragment : Fragment(),
         }
     }
     //권한 핸들링
-    // 앱 초기 실행시 권한 부여 여부 결정 전에 위치를 받아올 수 없는 현상 핸들링
+    //앱 초기 실행시 권한 부여 여부 결정 전에 위치를 받아올 수 없는 현상 핸들링
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         when (requestCode) {
             REQUEST_LOCATION_PERMISSION -> {
@@ -163,7 +182,7 @@ class WalkFragment : Fragment(),
                     isLocationPermissionGranted = true
                     getCurrentLocation()
                 } else {
-                    //이런 느낌?
+                    //이런 느낌? 근데 스낵바 띄우고 위치정보를 가져오지 못한채로 기본값(서울시청 기준)을 보여주는게 맞는건가? 아니면 다시 권한을 요청해야하나?
                     showSnackbar("현재 위치를 확인하려면 위치 권한이 필요합니다. 설정에서 권한을 허용해주세요.")
                 }
                 return
@@ -182,14 +201,14 @@ class WalkFragment : Fragment(),
 
     override fun onCurrentLocationUpdateCancelled(p0: MapView?) {}
     override fun onPOIItemSelected(p0: net.daum.mf.map.api.MapView?, p1: MapPOIItem?) {
-        val selectedPlace = kakaoSearchResponse.documents[p1?.tag ?: return]
+        val selectedPlace = kakaoSearchResponse.documents.find { it.id.hashCode() == p1?.tag }
 
         Log.d("WalkFragment", "로그로그")
         val initialBottomSheetView = layoutInflater.inflate(R.layout.row_walk_bottom_sheet_place, null)
         val bottomSheetDialog = BottomSheetDialog(requireContext())
         bottomSheetDialog.setContentView(initialBottomSheetView)
         val bottomSheetBehavior = BottomSheetBehavior.from(bottomSheetDialog.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)!!)
-        initialBottomSheetView.findViewById<TextView>(R.id.textView).text = selectedPlace.place_name
+        initialBottomSheetView.findViewById<TextView>(R.id.textView).text = selectedPlace?.place_name
         bottomSheetDialog.show()
 
         bottomSheetDialog.behavior.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
@@ -197,10 +216,10 @@ class WalkFragment : Fragment(),
                 when (newState) {
                     BottomSheetBehavior.STATE_EXPANDED -> {
                         val bundle = Bundle()
-                        bundle.putString("place_name", selectedPlace.place_name)
-                        bundle.putString("phone", selectedPlace.phone)
-                        bundle.putString("place_road_adress_name", selectedPlace.road_address_name)
-                        bundle.putString("place_category", selectedPlace.category_group_name)
+                        bundle.putString("place_name", selectedPlace?.place_name)
+                        bundle.putString("phone", selectedPlace?.phone)
+                        bundle.putString("place_road_adress_name", selectedPlace?.road_address_name)
+                        bundle.putString("place_category", selectedPlace?.category_group_name)
                         mainActivity.navigate(R.id.action_mainFragment_to_placeReviewFragment, bundle)
                         bottomSheetDialog.dismiss()
                     }
@@ -224,10 +243,10 @@ class WalkFragment : Fragment(),
 
         initialBottomSheetView.findViewById<Chip>(R.id.chipViewAllReviews).setOnClickListener {
             val bundle = Bundle()
-            bundle.putString("place_name", selectedPlace.place_name)
-            bundle.putString("phone", selectedPlace.phone)
-            bundle.putString("place_road_adress_name", selectedPlace.road_address_name)
-            bundle.putString("place_category", selectedPlace.category_group_name)
+            bundle.putString("place_name", selectedPlace?.place_name)
+            bundle.putString("phone", selectedPlace?.phone)
+            bundle.putString("place_road_adress_name", selectedPlace?.road_address_name)
+            bundle.putString("place_category", selectedPlace?.category_group_name)
             mainActivity.navigate(R.id.action_mainFragment_to_placeReviewFragment, bundle)
             bottomSheetDialog.dismiss()
         }
@@ -243,7 +262,7 @@ class WalkFragment : Fragment(),
     override fun onMapViewInitialized(p0: MapView?) {}
 
     override fun onMapViewCenterPointMoved(p0: MapView?, p1: MapPoint?) {
-        fragmentWalkBinding.mapView.removeAllPOIItems()
+       // fragmentWalkBinding.mapView.removeAllPOIItems()
 
         // 새로운 중심에서 검색 수행
         p1?.mapPointGeoCoord?.let {
