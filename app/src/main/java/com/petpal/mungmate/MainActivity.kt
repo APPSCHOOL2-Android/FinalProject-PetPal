@@ -8,6 +8,8 @@ import android.os.Bundle
 import android.util.Base64
 import android.util.Log
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import com.kakao.util.maps.helper.Utility
@@ -18,19 +20,20 @@ import java.security.NoSuchAlgorithmException
 
 class MainActivity : AppCompatActivity() {
     private lateinit var navController: NavController
-
+    lateinit var mainViewModel: MainActivityViewModel
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        installSplashScreen()
+        val splashScreen = installSplashScreen()
         setContentView(R.layout.activity_main)
 
-//        var keyHash = Utility.getKeyHash(this)
-//        Log.d(TAG, "keyhash : $keyHash")
+        mainViewModel= ViewModelProvider(this)[MainActivityViewModel::class.java]
+        splashScreen.setKeepOnScreenCondition {
+            mainViewModel.postSplashTheme.value
+        }
 
         val navHostFragment =
             supportFragmentManager.findFragmentById(R.id.fragmentContainerView) as NavHostFragment
         navController = navHostFragment.navController
-
 
     }
 

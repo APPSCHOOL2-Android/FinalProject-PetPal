@@ -68,7 +68,6 @@
                     android:text="닉네임"
                     android:textAppearance="@style/TextAppearance.AppCompat.Small"
                     android:textColor="@color/black"
-
                     app:layout_constraintStart_toStartOf="@id/communityPostDetailPostTitle"
                     app:layout_constraintTop_toBottomOf="@id/communityPostDetailPostTitle" />
 

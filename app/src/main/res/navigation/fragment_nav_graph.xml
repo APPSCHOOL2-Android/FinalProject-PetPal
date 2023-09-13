@@ -13,7 +13,7 @@
         tools:layout="@layout/fragment_community" />
     <fragment
         android:id="@+id/item_chat"
-        android:name="com.petpal.mungmate.ui.chatting.ChatFragment"
+        android:name="com.petpal.mungmate.ui.chat.ChatFragment"
         android:label="fragment_chat"
         tools:layout="@layout/fragment_chat"/>
     <fragment

@@ -18,10 +18,16 @@ class UserInfoFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View? {
-        mainActivity = activity as MainActivity
         _fragmentUserInfoBinding = FragmentUserInfoBinding.inflate(layoutInflater)
 
+        val isProfile = requireArguments().getBoolean("isProfile")
+
         fragmentUserInfoBinding.run {
+            if (isProfile) {
+                userInfoToolbar.inflateMenu(R.menu.my_profile_menu)
+                infoToNextButton.visibility = View.GONE
+            }
+
             userInfoToolbar.run {
                 setNavigationOnClickListener {
                     findNavController().popBackStack()
