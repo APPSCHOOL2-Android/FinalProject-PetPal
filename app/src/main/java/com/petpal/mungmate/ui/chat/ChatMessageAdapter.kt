@@ -1,4 +1,4 @@
-package com.petpal.mungmate.ui.chatting
+package com.petpal.mungmate.ui.chat
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
