@@ -8,8 +8,7 @@ data class UserBasicInfo(
     val birthday: String,
     val ageVisible: Boolean,
     val gender: String,
-    val walkTimeZoneStart: String,
-    val walkTimeZoneEnd: String,
+    val walkTimeZone: Pair<String, String>
 
 )
 

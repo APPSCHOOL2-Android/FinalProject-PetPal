@@ -13,7 +13,6 @@ import com.petpal.mungmate.databinding.FragmentUserInfoBinding
 class UserInfoFragment : Fragment() {
 
     lateinit var fragmentUserInfoBinding: FragmentUserInfoBinding
-    lateinit var userInfoViewModel: UserInfoViewModel
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -21,7 +20,6 @@ class UserInfoFragment : Fragment() {
     ): View? {
 
         fragmentUserInfoBinding = FragmentUserInfoBinding.inflate(layoutInflater)
-        userInfoViewModel = ViewModelProvider(this)[UserInfoViewModel::class.java]
 
         fragmentUserInfoBinding.run {
 
