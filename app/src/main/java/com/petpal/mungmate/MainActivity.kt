@@ -31,7 +31,6 @@ class MainActivity : AppCompatActivity() {
             supportFragmentManager.findFragmentById(R.id.fragmentContainerView) as NavHostFragment
         navController = navHostFragment.navController
 
-
     }
 
     fun navigate(id: Int, arg: Bundle? = null) {
