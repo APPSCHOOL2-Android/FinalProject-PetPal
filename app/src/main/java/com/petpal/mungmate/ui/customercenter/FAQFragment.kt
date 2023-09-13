@@ -5,6 +5,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.widget.SearchView
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.chip.Chip
@@ -18,6 +19,7 @@ class FAQFragment : Fragment() {
     private val fragmentFAQBinding get() = _fragmentFaqBinding!!
 
     private lateinit var faqAdapter: FAQAdapter
+    private lateinit var searchView: SearchView
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -31,8 +33,11 @@ class FAQFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         fragmentFAQBinding.run {
-            toolbarFaq.setNavigationOnClickListener {
-                findNavController().popBackStack()
+            toolbarFaq.run {
+                setNavigationOnClickListener {
+                    findNavController().popBackStack()
+                }
+
             }
 
             recyclerViewFaq.run {

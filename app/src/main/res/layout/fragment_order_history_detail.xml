@@ -37,14 +37,14 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="No. 주문코드"
+                    android:text="No. 202309121111"
                     android:textAppearance="@style/TextAppearance.Material3.TitleMedium" />
 
                 <TextView
                     android:id="@+id/textViewOrderDate"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="yyyy.MM.dd"
+                    android:text="2023.09.12"
                     android:textAppearance="@style/TextAppearance.Material3.BodyLarge" />
             </LinearLayout>
 
@@ -77,7 +77,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:text="주문상태"
+                    android:text="배송중"
                     android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
                     android:textColor="@color/md_theme_dark_inversePrimary"
                     android:textStyle="bold" />
