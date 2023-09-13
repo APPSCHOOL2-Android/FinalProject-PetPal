@@ -92,6 +92,9 @@
         <action
             android:id="@+id/action_mainFragment_to_placeReviewFragment"
             app:destination="@id/placeReviewFragment" />
+        <action
+            android:id="@+id/action_mainFragment_to_addPetFragment"
+            app:destination="@id/addPetFragment" />
 
     </fragment>
     <fragment
@@ -141,5 +144,9 @@
     <include app:graph="@navigation/match_history" />
     <include app:graph="@navigation/walk_history" />
     <include app:graph="@navigation/announcement" />
+    <fragment
+        android:id="@+id/addPetFragment"
+        android:name="com.petpal.mungmate.ui.pet.AddPetFragment"
+        android:label="AddPetFragment" />
 
 </navigation>

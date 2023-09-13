@@ -13,14 +13,8 @@
         android:layout_height="wrap_content"
         android:minHeight="?attr/actionBarSize"
         android:theme="?attr/actionBarTheme"
-        app:title="사용자 정보 입력"
-        app:titleTextAppearance="@style/TextAppearance.AppCompat.Medium" />
-
-    <View
-        android:id="@+id/userInfoDivider"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="?android:attr/listDivider" />
+        app:navigationIcon="@drawable/arrow_back_24px"
+        app:title="사용자 정보 입력" />
 
     <ScrollView
         android:layout_width="match_parent"
@@ -88,7 +82,7 @@
             </LinearLayout>
 
             <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/textInputUserBirth"
+                android:id="@+id/textInputPetBirth"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -97,7 +91,7 @@
                 app:endIconMode="custom">
 
                 <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/textInputUserBirthText"
+                    android:id="@+id/textInputPetBirthText"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="생년월일"
