@@ -32,12 +32,22 @@ class PlaceReviewFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+
+        val placeName = arguments?.getString("place_name")
+        if (placeName != null) {
+            Log.d("placename",placeName)
+        }
+        val phone = arguments?.getString("phone")
+        val roadAddressName = arguments?.getString("place_road_adress_name")
+        val placeCategory=arguments?.getString("place_cateogry")
         fragmentPlaceReviewBinding = FragmentPlaceReviewBinding.inflate(layoutInflater)
-
-
         fragmentPlaceReviewBinding.reviewsRecyclerView.adapter = ReviewAdapter(reviews)
         fragmentPlaceReviewBinding.reviewsRecyclerView.layoutManager=LinearLayoutManager(requireContext())
 
+        fragmentPlaceReviewBinding.textViewPlaceReviewTitle.text=placeName
+        fragmentPlaceReviewBinding.textView22.text=roadAddressName
+        fragmentPlaceReviewBinding.textView25.text=phone
+        fragmentPlaceReviewBinding.textView21.text=placeCategory
 
         return fragmentPlaceReviewBinding.root
     }
