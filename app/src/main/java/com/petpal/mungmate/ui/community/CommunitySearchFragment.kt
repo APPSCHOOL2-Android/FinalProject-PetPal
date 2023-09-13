@@ -8,6 +8,7 @@ import android.view.inputmethod.EditorInfo
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.findNavController
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.petpal.mungmate.R
 import com.petpal.mungmate.databinding.FragmentCommunitySearchBinding
@@ -29,6 +30,11 @@ class CommunitySearchFragment : Fragment() {
         communitySearchViewModel = ViewModelProvider(this)[CommunitySearchViewModel::class.java]
 
         communitySearchBinding.run {
+
+            exbutton1.setOnClickListener {
+                findNavController().navigate(R.id.action_communitySearchFragment_to_productRegistrationFragment)
+            }
+
             communitySearchToolbar.run {
                 setNavigationIcon(androidx.appcompat.R.drawable.abc_ic_ab_back_material)
                 setNavigationOnClickListener {

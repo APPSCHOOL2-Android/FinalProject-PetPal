@@ -3,6 +3,7 @@ plugins {
     id 'org.jetbrains.kotlin.android'
     id 'androidx.navigation.safeargs.kotlin'
     id 'kotlin-kapt'
+    id 'kotlin-parcelize'
 }
 
 android {
@@ -88,4 +89,11 @@ dependencies {
 
     // lifecycle-viewmodel
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2")
+
+    // flexbox
+    implementation 'com.google.android.flexbox:flexbox:3.0.0'
+
+
+
+
 }
