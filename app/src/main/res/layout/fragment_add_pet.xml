@@ -19,8 +19,8 @@
             android:layout_height="wrap_content"
             android:minHeight="?attr/actionBarSize"
             android:theme="?attr/actionBarTheme"
-            app:navigationIcon="@drawable/arrow_back_24px"
             app:layout_scrollFlags="scroll|exitUntilCollapsed"
+            app:navigationIcon="@drawable/arrow_back_24px"
             app:title="반려견 정보 입력" />
     </com.google.android.material.appbar.AppBarLayout>
 

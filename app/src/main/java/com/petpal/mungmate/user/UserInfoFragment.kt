@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.navigation.findNavController
 import com.petpal.mungmate.MainActivity
@@ -20,11 +21,15 @@ class UserInfoFragment : Fragment() {
     ): View? {
         _fragmentUserInfoBinding = FragmentUserInfoBinding.inflate(layoutInflater)
 
-        val isProfile = requireArguments().getBoolean("isProfile")
+        //가입(true)인지 수정(false)인지 식별
+        val isRegister = requireArguments().getBoolean("isRegister")
 
         fragmentUserInfoBinding.run {
-            if (isProfile) {
-                userInfoToolbar.inflateMenu(R.menu.my_profile_menu)
+            //수정화면이면
+            if (!isRegister) {
+                //수정완료 버튼 보이기
+                userInfoToolbar.inflateMenu(R.menu.complete_menu)
+                //다음 버튼 안보이기
                 infoToNextButton.visibility = View.GONE
             }
 
@@ -35,7 +40,7 @@ class UserInfoFragment : Fragment() {
             }
 
             infoToNextButton.setOnClickListener {
-                mainActivity.navigate(R.id.action_mainFragment_to_addPetFragment)
+                mainActivity.navigate(R.id.action_mainFragment_to_addPetFragment, bundleOf("isAdd" to true))
             }
         }
         return fragmentUserInfoBinding.root

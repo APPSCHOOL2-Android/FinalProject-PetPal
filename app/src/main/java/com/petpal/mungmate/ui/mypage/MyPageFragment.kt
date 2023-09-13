@@ -1,4 +1,4 @@
-package com.petpal.mungmate
+package com.petpal.mungmate.ui.mypage
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -6,7 +6,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
-import androidx.navigation.fragment.findNavController
+import com.petpal.mungmate.MainActivity
+import com.petpal.mungmate.R
 import com.petpal.mungmate.databinding.FragmentMyPageBinding
 
 class MyPageFragment : Fragment() {
@@ -23,7 +24,7 @@ class MyPageFragment : Fragment() {
 
         fragmentMyPageBinding.run {
             buttonManagePet.setOnClickListener {
-                mainActivity.navigate(R.id.action_mainFragment_to_manage_pet)
+                mainActivity.navigate(R.id.action_mainFragment_to_managePetFragment)
             }
 
             buttonWalkHistory.setOnClickListener {
@@ -51,7 +52,7 @@ class MyPageFragment : Fragment() {
             }
 
             buttonAddPet.setOnClickListener {
-                mainActivity.navigate(R.id.action_mainFragment_to_addPetFragment)
+                mainActivity.navigate(R.id.action_mainFragment_to_addPetFragment, bundleOf("isAdd" to true))
             }
 
             buttonOrderHistory.setOnClickListener {
@@ -60,7 +61,7 @@ class MyPageFragment : Fragment() {
 
             cardViewProfile.setOnClickListener {
                 //회원가입 진입 인지, 마이페이지 진입인지 구분용
-                mainActivity.navigate(R.id.action_mainFragment_to_userInfoFragment, bundleOf("isProfile" to true))
+                mainActivity.navigate(R.id.action_mainFragment_to_userInfoFragment, bundleOf("isRegister" to false))
             }
         }
         return fragmentMyPageBinding.root

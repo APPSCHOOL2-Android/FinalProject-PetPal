@@ -5,6 +5,15 @@
     android:id="@+id/nav_graph"
     app:startDestination="@id/mainFragment">
     <fragment
+        android:id="@+id/managePetFragment"
+        android:name="com.petpal.mungmate.ui.managepet.ManagePetFragment"
+        android:label="fragment_manage_pet"
+        tools:layout="@layout/fragment_manage_pet" >
+        <action
+            android:id="@+id/action_managePetFragment_to_addPetFragment"
+            app:destination="@id/addPetFragment" />
+    </fragment>
+    <fragment
         android:id="@+id/manageBlockFragment"
         android:name="com.petpal.mungmate.ui.manageblock.ManageBlockFragment"
         android:label="fragment_manage_block"
@@ -42,11 +51,6 @@
         <action
             android:id="@+id/action_mainFragment_to_match_history"
             app:destination="@id/match_history"
-            app:enterAnim="@anim/from_bottom"
-            app:popEnterAnim="@anim/from_top" />
-        <action
-            android:id="@+id/action_mainFragment_to_manage_pet"
-            app:destination="@id/manage_pet"
             app:enterAnim="@anim/from_bottom"
             app:popEnterAnim="@anim/from_top" />
         <action
@@ -101,6 +105,9 @@
         <action
             android:id="@+id/action_mainFragment_to_addPetFragment"
             app:destination="@id/addPetFragment" />
+        <action
+            android:id="@+id/action_mainFragment_to_managePetFragment"
+            app:destination="@id/managePetFragment" />
 
     </fragment>
     <fragment
@@ -150,7 +157,6 @@
         android:label="PlaceReviewFragment"
         tools:layout="@layout/fragment_place_review"/>
 
-    <include app:graph="@navigation/manage_pet" />
     <include app:graph="@navigation/match_history" />
     <include app:graph="@navigation/walk_history" />
     <include app:graph="@navigation/announcement" />
@@ -161,7 +167,7 @@
         android:label="fragment_user_info"
         tools:layout="@layout/fragment_user_info" >
         <argument
-            android:name="isProfile"
+            android:name="isRegister"
             app:argType="boolean"
             android:defaultValue="false" />
     </fragment>
@@ -173,6 +179,11 @@
     <fragment
         android:id="@+id/addPetFragment"
         android:name="com.petpal.mungmate.ui.pet.AddPetFragment"
-        android:label="AddPetFragment" />
+        android:label="AddPetFragment" >
+        <argument
+            android:name="isAdd"
+            app:argType="boolean"
+            android:defaultValue="true" />
+    </fragment>
 
 </navigation>

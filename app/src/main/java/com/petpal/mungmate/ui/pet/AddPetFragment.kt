@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
+import androidx.navigation.fragment.findNavController
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.petpal.mungmate.R
 import com.petpal.mungmate.databinding.FragmentAddPetBinding
@@ -24,10 +25,18 @@ class AddPetFragment : Fragment() {
         _fragmentAddPetBinding = FragmentAddPetBinding.inflate(layoutInflater)
 
         val dogBreeds = resources.getStringArray(R.array.dog_breeds)
-
-
+        //추가(true)인지 수정(false)인지 식별
+        val isAdd = requireArguments().getBoolean("isAdd")
 
         fragmentAddPetBinding.run {
+
+            //수정작업이면
+            if(!isAdd) {
+                //수정완료 아이콘 띄우기
+                toolbarAddPet.inflateMenu(R.menu.complete_menu)
+                //가입하기 버튼 삭제하기
+                buttonPetComplete.visibility = View.GONE
+            }
 
             ArrayAdapter<String>(requireContext(), android.R.layout.simple_list_item_1, dogBreeds).also { adapter ->
                 autoCompleteTextViewPetBreed.setAdapter(adapter)
@@ -47,6 +56,10 @@ class AddPetFragment : Fragment() {
                     textInputPetBirthText.setText(selectDate)
                 }
                 datePicker.show(parentFragmentManager, "tag")
+            }
+
+            toolbarAddPet.setNavigationOnClickListener {
+                findNavController().popBackStack()
             }
         }
         return fragmentAddPetBinding.root
