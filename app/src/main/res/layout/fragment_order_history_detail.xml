@@ -37,14 +37,14 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="No. 202309121111"
+                    android:text="No. 주문코드"
                     android:textAppearance="@style/TextAppearance.Material3.TitleMedium" />
 
                 <TextView
                     android:id="@+id/textViewOrderDate"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="2023.09.12"
+                    android:text="yyyy.MM.dd"
                     android:textAppearance="@style/TextAppearance.Material3.BodyLarge" />
             </LinearLayout>
 
@@ -77,7 +77,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:text="배송중"
+                    android:text="주문상태"
                     android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
                     android:textColor="@color/md_theme_dark_inversePrimary"
                     android:textStyle="bold" />
@@ -159,7 +159,7 @@
                         android:text="수령인" />
 
                     <TextView
-                        android:id="@+id/textViewOrder"
+                        android:id="@+id/textViewOrderRecipient"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="2"
@@ -289,7 +289,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="2"
-                        android:text="- 5,000 P"
+                        android:text="- 5,000P"
                         android:textAppearance="@style/TextAppearance.Material3.BodyMedium" />
                 </LinearLayout>
                 <LinearLayout

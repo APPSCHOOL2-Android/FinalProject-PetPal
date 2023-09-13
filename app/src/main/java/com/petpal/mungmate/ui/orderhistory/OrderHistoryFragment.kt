@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AlphaAnimation
+import android.view.animation.AnimationUtils
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -46,8 +47,8 @@ class OrderHistoryFragment : Fragment() {
                 // addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
 
                 // 최상단 FAB 숨기기, 스크롤시 FAB 보이기
-                val fadeIn = AlphaAnimation(0f, 1f).apply { duration = 500 }
-                val fadeOut = AlphaAnimation(1f, 0f).apply { duration = 500 }
+                val fadeIn = AnimationUtils.loadAnimation(context, R.anim.fab_fade_in)
+                val fadeOut = AnimationUtils.loadAnimation(context, R.anim.fab_fade_out)
                 var isTop = true
 
                 addOnScrollListener(object: RecyclerView.OnScrollListener() {
