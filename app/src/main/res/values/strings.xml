@@ -1,12 +1,31 @@
 <resources>
 
-    <string-array name="categoryList">
+    <string-array name="productRegistrationCategoryList">
         <item>사료</item>
         <item>간식</item>
         <item>배변</item>
         <item>목욕</item>
         <item>의료&amp;장난감</item>
         <item>영양제</item>
+    </string-array>
+
+    <string-array name="communityCategoryList">
+        <item>전체</item>
+        <item>일상</item>
+        <item>산책일지</item>
+        <item>산책 메이트 구해요</item>
+        <item>장소 후기</item>
+        <item>애견용품 후기</item>
+        <item>시츄 아지트</item>
+        <item>푸들 아지트</item>
+        <item>포메라니안 아지트</item>
+        <item>치와와 아지트</item>
+        <item>몰티즈 아지트</item>
+        <item>진돗개 아지트</item>
+        <item>리트리버 아지트</item>
+        <item>웰시 코기 아지트</item>
+        <item>나머지 아이들 아지트</item>
+
     </string-array>
 
 
