@@ -20,17 +20,10 @@ class CommunityDetailModifyFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         fragmentCommunityDetailModifyBinding = FragmentCommunityDetailModifyBinding.inflate(inflater)
-        bottomNavigationViewGone()
         fragmentCommunityDetailModifyBinding.run {
             toolbar()
         }
         return fragmentCommunityDetailModifyBinding.root
-    }
-
-    private fun bottomNavigationViewGone() {
-        val bottomNavigationView =
-            requireActivity().findViewById<BottomNavigationView>(R.id.bottomNavigation)
-        bottomNavigationView.visibility = View.GONE
     }
 
     private fun FragmentCommunityDetailModifyBinding.toolbar() {
