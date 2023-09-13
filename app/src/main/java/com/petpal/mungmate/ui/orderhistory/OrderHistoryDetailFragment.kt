@@ -1,14 +1,15 @@
 package com.petpal.mungmate.ui.orderhistory
 
+import android.content.DialogInterface
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.google.android.material.divider.MaterialDividerItemDecoration
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.snackbar.Snackbar
 import com.petpal.mungmate.R
 import com.petpal.mungmate.databinding.FragmentOrderHistoryDetailBinding
 import com.petpal.mungmate.model.Item
@@ -37,6 +38,33 @@ class OrderHistoryDetailFragment : Fragment() {
                 adapter = OrderHistoryItemAdapter(getSampleData())
                 layoutManager = LinearLayoutManager(context)
                 // addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
+            }
+
+            buttonExchange.setOnClickListener {
+                Snackbar.make(fragmentOrderHistoryDetailBinding.root, "교환 신청이 완료됐습니다", Snackbar.LENGTH_SHORT).show()
+            }
+
+            buttonRefund.setOnClickListener {
+                Snackbar.make(fragmentOrderHistoryDetailBinding.root, "반품 신청이 완료됐습니다", Snackbar.LENGTH_SHORT).show()
+            }
+
+            buttonDeliveryTracking.setOnClickListener {
+                // TODO 택배사 배송 조회 화면
+            }
+
+            buttonCancelOrder.setOnClickListener {
+                MaterialAlertDialogBuilder(requireContext())
+                    .setTitle("주문 취소")
+                    .setMessage("한 번 취소한 주문은 다시 되돌릴 수 없습니다.")
+                    .setPositiveButton("확인"){ dialogInterface: DialogInterface, i: Int ->
+                        Snackbar.make(fragmentOrderHistoryDetailBinding.root, "주문이 취소됐습니다", Snackbar.LENGTH_SHORT).show()
+                        buttonRefund.isEnabled = false
+                        buttonExchange.isEnabled = false
+                        buttonDeliveryTracking.isEnabled = false
+                        buttonCancelOrder.isEnabled = false
+                    }
+                    .setNegativeButton("취소", null)
+                    .show()
             }
         }
     }
