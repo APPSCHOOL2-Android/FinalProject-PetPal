@@ -2,12 +2,4 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/manage_pet"
-    app:startDestination="@id/managePetFragment">
-
-    <fragment
-        android:id="@+id/managePetFragment"
-        android:name="com.petpal.mungmate.ManagePetFragment"
-        tools:layout="@layout/fragment_manage_pet"
-        android:label="fragment_manage_pet" />
-</navigation>
+    android:id="@+id/manage_pet" />

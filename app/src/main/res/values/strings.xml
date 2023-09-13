@@ -75,5 +75,37 @@
     <string name="button_delete_image">이미지 삭제 버튼</string>
     <string name="representative_photo">대표사진</string>
 
+    <!-- 견종 문자열 배열 -->
+    <string-array name="dog_breeds">
+        <item>골든 리트리버</item>
+        <item>래브라도 리트리버</item>
+        <item>시베리안 허스키</item>
+        <item>달마시안</item>
+        <item>불독</item>
+        <item>포메라니안</item>
+        <item>보더 콜리</item>
+        <item>치와와</item>
+        <item>불링턴 테리어</item>
+        <item>요크셔 테리어</item>
+        <item>비글</item>
+        <item>푸들</item>
+        <item>세터</item>
+        <item>그레이 하운드</item>
+        <item>로트와일러</item>
+        <item>보스턴 테리어</item>
+        <item>킹 찰스 스패니얼</item>
+        <item>래트 테리어</item>
+        <item>시추</item>
+        <item>도베르만 핀셔</item>
+        <item>불도그</item>
+        <item>코카 스패니얼</item>
+        <item>스코티쉬 테리어</item>
+        <item>베들링턴 테리어</item>
+        <item>레온베르거</item>
+        <item>잉글리시 불독</item>
+        <item>뉴펀들랜드</item>
+        <item>웰시 코기</item>
+    </string-array>
+
 
 </resources>

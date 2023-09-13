@@ -5,19 +5,20 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.petpal.mungmate.databinding.RowSimplePostBinding
-import com.petpal.mungmate.model.Post
 
-class PostAdapter : ListAdapter<Post, PostAdapter.PostViewHolder>(PostDiffCallback()) {
-    inner class PostViewHolder(rowSimplePostBinding: RowSimplePostBinding) :
+class PostAdapter : ListAdapter<PostUiState, PostAdapter.PostViewHolder>(PostDiffCallback()) {
+    inner class PostViewHolder(private val rowSimplePostBinding: RowSimplePostBinding) :
         ViewHolder(rowSimplePostBinding.root) {
-        val textViewPostTitle = rowSimplePostBinding.textViewRowPostTitle
-        val textViewPostCategory = rowSimplePostBinding.textViewRowCategory
-        val textViewPostTimeStamp = rowSimplePostBinding.textViewRowTimeStamp
-        val textViewPostCommentCnt = rowSimplePostBinding.textViewRowPostCommentCnt
+        fun bind(post: PostUiState) {
+            rowSimplePostBinding.run {
+                textViewRowPostTitle.text = post.title
+                textViewRowCategory.text = post.category
+                textViewRowTimeStamp.text = post.dateCreated
+                textViewRowPostCommentCnt.text = post.commentCnt.toString()
 
-        init {
-            rowSimplePostBinding.root.setOnClickListener {
-                //TODO: 게시글로 이동
+                root.setOnClickListener {
+                    //TODO: 게시글로 이동
+                }
             }
         }
 
@@ -35,6 +36,6 @@ class PostAdapter : ListAdapter<Post, PostAdapter.PostViewHolder>(PostDiffCallba
     }
 
     override fun onBindViewHolder(holder: PostViewHolder, position: Int) {
-        holder.textViewPostTitle.text = position.toString()
+        holder.bind(getItem(position) as PostUiState)
     }
 }
