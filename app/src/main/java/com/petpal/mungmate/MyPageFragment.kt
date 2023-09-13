@@ -50,6 +50,10 @@ class MyPageFragment : Fragment() {
                 mainActivity.navigate(R.id.action_mainFragment_to_inquiryFragment)
             }
 
+            buttonOrderHistory.setOnClickListener {
+                mainActivity.navigate(R.id.action_mainFragment_to_order_history)
+            }
+
             cardViewProfile.setOnClickListener {
                 //회원가입 진입 인지, 마이페이지 진입인지 구분용
                 mainActivity.navigate(R.id.action_mainFragment_to_userInfoFragment, bundleOf("isProfile" to true))
