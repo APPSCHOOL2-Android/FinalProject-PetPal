@@ -60,6 +60,7 @@ class WalkFragment : Fragment(),
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private val viewModel: WalkViewModel by viewModels { WalkViewModelFactory(WalkRepository()) }
     private lateinit var kakaoSearchResponse: KakaoSearchResponse
+    private var lastKnownLocation: Location? = null
     private var isLocationPermissionGranted = false
 
     companion object {
@@ -75,7 +76,6 @@ class WalkFragment : Fragment(),
         setupMapView()
         setupButtonListeners()
         observeViewModel()
-
         return fragmentWalkBinding.root
     }
 
@@ -85,6 +85,7 @@ class WalkFragment : Fragment(),
         fragmentWalkBinding.mapView.setPOIItemEventListener(this)
         fragmentWalkBinding.mapView.setCurrentLocationEventListener(this)
         fragmentWalkBinding.mapView.setMapViewEventListener(this)
+
         requestLocationPermissionIfNeeded()
     }
 
@@ -116,6 +117,7 @@ class WalkFragment : Fragment(),
         viewModel.searchResults.observe(viewLifecycleOwner) { response ->
             //검색 결과로 씀
             kakaoSearchResponse = response
+            Log.d("sizeee",(kakaoSearchResponse.documents.size).toString())
             val newMarkers = kakaoSearchResponse.documents.map { place ->
                 val mapPoint = MapPoint.mapPointWithGeoCoord(place.y, place.x)
                 MapPOIItem().apply {
@@ -165,9 +167,12 @@ class WalkFragment : Fragment(),
         if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
                 location?.let {
-                    viewModel.searchPlacesByKeyword(it.latitude, it.longitude, "동물병원")
+                    lastKnownLocation=it
+                    viewModel.searchPlacesByKeyword(it.latitude, it.longitude, "동물")
                     val mapPoint = MapPoint.mapPointWithGeoCoord(it.latitude, it.longitude)
                     fragmentWalkBinding.mapView.setMapCenterPoint(mapPoint, true)
+
+
                 }
             }
         }
@@ -190,6 +195,8 @@ class WalkFragment : Fragment(),
             //다른 권한 필요하면 ㄱ
         }
     }
+
+
     private fun showSnackbar(message: String) {
         Snackbar.make(fragmentWalkBinding.root, message, Snackbar.LENGTH_LONG).show()
     }
@@ -203,7 +210,6 @@ class WalkFragment : Fragment(),
     override fun onPOIItemSelected(p0: net.daum.mf.map.api.MapView?, p1: MapPOIItem?) {
         val selectedPlace = kakaoSearchResponse.documents.find { it.id.hashCode() == p1?.tag }
 
-        Log.d("WalkFragment", "로그로그")
         val initialBottomSheetView = layoutInflater.inflate(R.layout.row_walk_bottom_sheet_place, null)
         val bottomSheetDialog = BottomSheetDialog(requireContext())
         bottomSheetDialog.setContentView(initialBottomSheetView)
@@ -266,12 +272,16 @@ class WalkFragment : Fragment(),
 
         // 새로운 중심에서 검색 수행
         p1?.mapPointGeoCoord?.let {
-            viewModel.searchPlacesByKeyword(it.latitude, it.longitude, "동물병원")
+            viewModel.searchPlacesByKeyword(it.latitude, it.longitude, "동물")
         }
     }
-
-    override fun onMapViewZoomLevelChanged(p0: MapView?, p1: Int) {}
-
+    //줌 아웃 제한
+    override fun onMapViewZoomLevelChanged(p0: MapView?, zoomLevel: Int) {
+        val maxZoomLevel = 2
+        if (zoomLevel > maxZoomLevel) {
+            p0?.setZoomLevel(maxZoomLevel, true)
+        }
+    }
     override fun onMapViewSingleTapped(p0: MapView?, p1: MapPoint?) {}
 
     override fun onMapViewDoubleTapped(p0: MapView?, p1: MapPoint?) {}
@@ -284,8 +294,13 @@ class WalkFragment : Fragment(),
 
     override fun onMapViewMoveFinished(p0: MapView?, p1: MapPoint?) {}
 
-
-
+    override fun onResume() {
+        super.onResume()
+        // 마지막 알려진 위치를 기준으로 키워드 검색 수행
+        lastKnownLocation?.let {
+            viewModel.searchPlacesByKeyword(it.latitude, it.longitude, "동물")
+        }
+    }
 
 }
 class WalkViewModelFactory(private val repository: WalkRepository) : ViewModelProvider.Factory {

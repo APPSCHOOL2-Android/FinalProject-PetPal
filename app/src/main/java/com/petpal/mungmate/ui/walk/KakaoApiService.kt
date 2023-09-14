@@ -11,7 +11,9 @@ interface KakaoApiService {
     suspend fun searchPlacesByKeyword(
         @Query("y") latitude: Double,
         @Query("x") longitude: Double,
-        @Query("radius") radius: Int = 20000,
-        @Query("query") query: String
+        @Query("radius") radius: Int = 3000,
+        @Query("query") query: String,
+        @Query("page") page: Int = 1,
+        //@Query("size") size: Int=30
     ): KakaoSearchResponse
 }
