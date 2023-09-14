@@ -124,6 +124,7 @@
                     android:id="@+id/textViewNoReview"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginBottom="40dp"
                     android:text="등록된 리뷰가 없습니다."
                     android:textAppearance="@style/TextAppearance.AppCompat.Medium"
                     android:visibility="gone" />

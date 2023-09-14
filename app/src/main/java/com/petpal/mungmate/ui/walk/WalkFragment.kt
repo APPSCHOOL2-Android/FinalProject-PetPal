@@ -13,6 +13,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.FrameLayout
+import android.widget.ImageView
 import android.widget.RatingBar
 import android.widget.TextView
 import android.widget.Toast
@@ -32,6 +33,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.chip.Chip
 import com.google.android.material.snackbar.Snackbar
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.petpal.mungmate.MainActivity
 import com.petpal.mungmate.R
@@ -105,6 +107,7 @@ class WalkFragment : Fragment(),
             fragmentWalkBinding.LinearLayoutOffWalk.visibility = View.GONE
             fragmentWalkBinding.imageViewWalkToggle.setImageResource(R.drawable.dog_walk)
         }
+
 
         fragmentWalkBinding.chipMapFilter.setOnClickListener {
             fragmentWalkBinding.drawerLayout.setScrimColor(Color.parseColor("#FFFFFF"))
@@ -249,12 +252,21 @@ class WalkFragment : Fragment(),
         val buttonsubmit=initialBottomSheetView.findViewById<Button>(R.id.buttonSubmitReview)
 
         val placeId = selectedPlace?.id
-
+        val favoriteCountTextView = initialBottomSheetView.findViewById<TextView>(R.id.textViewPlaceFavoriteCount)
         if (placeId != null) {
             getReviewCount(placeId) { reviewCount ->
                 // 리뷰의 개수를 UI에 표시
                 val reviewCountTextView = initialBottomSheetView.findViewById<TextView>(R.id.textViewPlaceReviewCount)
                 reviewCountTextView.text = "${reviewCount}개의 리뷰가 있어요"
+            }
+            getFavoriteCount(placeId){ favoriteCount->
+                if(favoriteCount!=null) {
+
+                   favoriteCountTextView.text = "${favoriteCount}명의 유저가 추천합니다"
+                } else {
+                    favoriteCountTextView.text= "아무도 추천하지 않아요"
+                }
+
             }
         }
         if (placeId != null) {
@@ -324,6 +336,24 @@ class WalkFragment : Fragment(),
             override fun onSlide(bottomSheet: View, slideOffset: Float) {}
         })
 
+        initialBottomSheetView.findViewById<ImageView>(R.id.imageViewFavoirte).apply {
+            tag = "unfavorited" // 초기 상태 설정
+
+            setOnClickListener {
+                if (tag == "unfavorited") {
+                    //setImageResource(R.drawable.favorite_pink_filled) // 핑크색으로 채워진 즐겨찾기 아이콘으로 변경
+                    tag = "favorited"
+                    addPlace(selectedPlace.place_name,selectedPlace.category_group_name,selectedPlace?.x.toString(),selectedPlace?.y.toString(),selectedPlace?.phone,selectedPlace?.road_address_name,placeId)
+                    incrementFavoriteCount(placeId)
+
+                } else {
+                    //setImageResource(R.drawable.favorite_default) // 기본 즐겨찾기 아이콘으로 변경
+                    tag = "unfavorited"
+                    decrementFavoriteCount(placeId)
+                }
+            }
+        }
+
         buttonsubmit.setOnClickListener {
             val bundle = Bundle()
             bundle.putString("place_name", selectedPlace?.place_name)
@@ -365,6 +395,21 @@ class WalkFragment : Fragment(),
             }
             .addOnFailureListener { e ->
                 Log.e("ERROR", "Failed to get review count", e)
+            }
+    }
+    fun getFavoriteCount(placeId: String, onComplete: (Int?) -> Unit) {
+        val placeRef = db.collection("places").document(placeId)
+        placeRef.get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    val favoriteCount = document.getLong("favoriteCount")?.toInt()
+                    onComplete(favoriteCount)
+                } else {
+                    onComplete(null)
+                }
+            }
+            .addOnFailureListener { e ->
+                Log.e("ERROR", "Failed to get favorite count", e)
             }
     }
 
@@ -473,6 +518,59 @@ class WalkFragment : Fragment(),
             }
             .addOnFailureListener { e ->
                 Log.e("ERROR", "Failed to fetch latest reviews", e)
+            }
+    }
+    private fun incrementFavoriteCount(placeId: String) {
+        val placeRef = db.collection("places").document(placeId)
+        placeRef.update("favoriteCount", FieldValue.increment(1))
+            .addOnSuccessListener {
+                Log.d("FAVORITE", "Successfully incremented favorite count.")
+            }
+            .addOnFailureListener { e ->
+                Log.e("FAVORITE", "Failed to increment favorite count.", e)
+            }
+    }
+
+    private fun decrementFavoriteCount(placeId: String) {
+        val placeRef = db.collection("places").document(placeId)
+        placeRef.update("favoriteCount", FieldValue.increment(-1))
+            .addOnSuccessListener {
+                Log.d("FAVORITE", "Successfully decremented favorite count.")
+            }
+            .addOnFailureListener { e ->
+                Log.e("FAVORITE", "Failed to decrement favorite count.", e)
+            }
+    }
+    fun addPlace(placeName: String?, placeCategory:String?,placeLong:String?,placeLat:String?,placePhone:String?,placeAddress:String?,placeId: String?) {
+        val placesRef = db.collection("places")
+        val placeDocument = placesRef.document(placeId!!)
+
+        placeDocument.get()
+            .addOnSuccessListener { document ->
+                if (!document.exists()) {
+                    // Place가 Firestore에 없는 경우
+                    val place = hashMapOf(
+                        "name" to placeName,
+                        "category" to placeCategory,
+                        "longitude" to placeLong,
+                        "latitude" to placeLat,
+                        "phone" to placePhone,
+                        "address" to placeAddress,
+                        "favoriteCount" to 1
+                    )
+                    placeDocument.set(place)
+                        .addOnSuccessListener {
+                            // 장소 정보가 성공적으로 저장됨
+                            Log.d("Firestore", "Document successfully written!")
+                        }
+                        .addOnFailureListener { e ->
+                            // 오류가 발생한 경우
+                            Log.w("Firestore", "Error writing document", e)
+                        }
+                }
+            }
+            .addOnFailureListener { e ->
+                Log.w("Firestore", "Error checking document existence", e)
             }
     }
 
