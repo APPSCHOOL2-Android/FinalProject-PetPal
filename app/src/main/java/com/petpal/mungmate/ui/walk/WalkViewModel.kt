@@ -13,8 +13,10 @@ class WalkViewModel(private val repository: WalkRepository) : ViewModel() {
 
     fun searchPlacesByKeyword(latitude: Double, longitude: Double, query: String) {
         viewModelScope.launch {
+            Log.d("sisisi",query)
             try {
                 val results = repository.searchPlacesByKeyword(latitude, longitude, query)
+                Log.d("API_RESULTS", results.toString())
                 searchResults.postValue(results)
             } catch (e: Exception) {
                 Log.e("API_ERROR", "Error occurred: ${e.localizedMessage}")

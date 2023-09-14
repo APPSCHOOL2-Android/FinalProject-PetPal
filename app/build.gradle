@@ -103,7 +103,8 @@ dependencies {
     implementation platform('com.google.firebase:firebase-bom:32.2.3')
     //firebase analytics
     implementation 'com.google.firebase:firebase-analytics-ktx'
-
+    //firestore
+    implementation "com.google.firebase:firebase-firestore-ktx:24.7.1"
 
 
 

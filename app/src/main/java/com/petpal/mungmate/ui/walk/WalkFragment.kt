@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.location.Location
+import com.google.firebase.firestore.Query
 import android.location.LocationManager
 import android.os.Bundle
 import android.util.Log
@@ -12,11 +13,13 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.FrameLayout
+import android.widget.RatingBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.location.LocationManagerCompat.getCurrentLocation
 import androidx.core.view.GravityCompat
+import androidx.core.view.marginTop
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -29,10 +32,12 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.chip.Chip
 import com.google.android.material.snackbar.Snackbar
+import com.google.firebase.firestore.FirebaseFirestore
 import com.petpal.mungmate.MainActivity
 import com.petpal.mungmate.R
 import com.petpal.mungmate.databinding.FragmentWalkBinding
 import com.petpal.mungmate.model.KakaoSearchResponse
+import com.petpal.mungmate.model.Review
 import com.petpal.mungmate.ui.walk.WalkFragment.Companion.REQUEST_LOCATION_PERMISSION
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -40,11 +45,12 @@ import kotlinx.coroutines.withContext
 import net.daum.mf.map.api.MapPOIItem
 import net.daum.mf.map.api.MapPoint
 import net.daum.mf.map.api.MapView
+import org.w3c.dom.Text
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
 import retrofit2.http.Headers
-import retrofit2.http.Query
+//import retrofit2.http.Query
 
 
 
@@ -62,13 +68,17 @@ class WalkFragment : Fragment(),
     private lateinit var kakaoSearchResponse: KakaoSearchResponse
     private var lastKnownLocation: Location? = null
     private var isLocationPermissionGranted = false
-
+    private val db = FirebaseFirestore.getInstance()
     companion object {
         const val REQUEST_LOCATION_PERMISSION = 1
 
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
         mainActivity = activity as MainActivity
         fragmentWalkBinding = FragmentWalkBinding.inflate(inflater)
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(mainActivity)
@@ -117,7 +127,7 @@ class WalkFragment : Fragment(),
         viewModel.searchResults.observe(viewLifecycleOwner) { response ->
             //검색 결과로 씀
             kakaoSearchResponse = response
-            Log.d("sizeee",(kakaoSearchResponse.documents.size).toString())
+            Log.d("sizeee", (kakaoSearchResponse.documents.size).toString())
             val newMarkers = kakaoSearchResponse.documents.map { place ->
                 val mapPoint = MapPoint.mapPointWithGeoCoord(place.y, place.x)
                 MapPOIItem().apply {
@@ -154,8 +164,15 @@ class WalkFragment : Fragment(),
     }
 
     private fun requestLocationPermissionIfNeeded() {
-        if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), REQUEST_LOCATION_PERMISSION)
+        if (ActivityCompat.checkSelfPermission(
+                requireContext(),
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            requestPermissions(
+                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                REQUEST_LOCATION_PERMISSION
+            )
         } else {
             // 권한이 승인되어있으면 위치 가져오기
             isLocationPermissionGranted = true
@@ -164,10 +181,14 @@ class WalkFragment : Fragment(),
     }
 
     private fun getCurrentLocation() {
-        if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(
+                requireContext(),
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
             fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
                 location?.let {
-                    lastKnownLocation=it
+                    lastKnownLocation = it
                     viewModel.searchPlacesByKeyword(it.latitude, it.longitude, "동물")
                     val mapPoint = MapPoint.mapPointWithGeoCoord(it.latitude, it.longitude)
                     fragmentWalkBinding.mapView.setMapCenterPoint(mapPoint, true)
@@ -177,9 +198,14 @@ class WalkFragment : Fragment(),
             }
         }
     }
+
     //권한 핸들링
     //앱 초기 실행시 권한 부여 여부 결정 전에 위치를 받아올 수 없는 현상 핸들링
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
         when (requestCode) {
             REQUEST_LOCATION_PERMISSION -> {
                 if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
@@ -200,7 +226,13 @@ class WalkFragment : Fragment(),
     private fun showSnackbar(message: String) {
         Snackbar.make(fragmentWalkBinding.root, message, Snackbar.LENGTH_LONG).show()
     }
-    override fun onCurrentLocationUpdate(mapView: net.daum.mf.map.api.MapView?, mapPoint: MapPoint?, v: Float) {}
+
+    override fun onCurrentLocationUpdate(
+        mapView: net.daum.mf.map.api.MapView?,
+        mapPoint: MapPoint?,
+        v: Float
+    ) {
+    }
 
     override fun onCurrentLocationDeviceHeadingUpdate(p0: MapView?, p1: Float) {}
 
@@ -210,14 +242,68 @@ class WalkFragment : Fragment(),
     override fun onPOIItemSelected(p0: net.daum.mf.map.api.MapView?, p1: MapPOIItem?) {
         val selectedPlace = kakaoSearchResponse.documents.find { it.id.hashCode() == p1?.tag }
 
-        val initialBottomSheetView = layoutInflater.inflate(R.layout.row_walk_bottom_sheet_place, null)
+        val initialBottomSheetView =
+            layoutInflater.inflate(R.layout.row_walk_bottom_sheet_place, null)
         val bottomSheetDialog = BottomSheetDialog(requireContext())
         bottomSheetDialog.setContentView(initialBottomSheetView)
-        val bottomSheetBehavior = BottomSheetBehavior.from(bottomSheetDialog.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)!!)
-        initialBottomSheetView.findViewById<TextView>(R.id.textView).text = selectedPlace?.place_name
+        val buttonsubmit=initialBottomSheetView.findViewById<Button>(R.id.buttonSubmitReview)
+
+        val placeId = selectedPlace?.id
+
+        if (placeId != null) {
+            getReviewCount(placeId) { reviewCount ->
+                // 리뷰의 개수를 UI에 표시
+                val reviewCountTextView = initialBottomSheetView.findViewById<TextView>(R.id.textViewPlaceReviewCount)
+                reviewCountTextView.text = "${reviewCount}개의 리뷰가 있어요"
+            }
+        }
+        if (placeId != null) {
+            fetchLatestReviews(placeId) { reviews ->
+                val placeuserRating1= initialBottomSheetView.findViewById<RatingBar>(R.id.placeUserRatingBar1)
+                val placeuserRating2= initialBottomSheetView.findViewById<RatingBar>(R.id.placeUserRatingBar2)
+                val placeuserReview1=initialBottomSheetView.findViewById<TextView>(R.id.placeUserReview1)
+                val placeuserReview2=initialBottomSheetView.findViewById<TextView>(R.id.placeUserReview2)
+                if (reviews.isNotEmpty()) {
+                    val firstReview = reviews[0]
+                    placeuserRating1.rating=firstReview.rating
+                    placeuserReview1.text=firstReview.review
+
+                    if (reviews.size > 1) {
+                        val secondReview = reviews[1]
+                        placeuserRating2.rating=secondReview.rating
+                        placeuserReview2.text=secondReview.review
+                    }
+                }
+                if(reviews.isEmpty()){
+                    placeuserRating1.visibility=View.GONE
+                    placeuserRating2.visibility=View.GONE
+                    placeuserReview1.visibility=View.GONE
+                    placeuserReview2.visibility=View.GONE
+                    initialBottomSheetView.findViewById<Chip>(R.id.chipViewAllReviews).visibility=View.GONE
+                    initialBottomSheetView.findViewById<TextView>(R.id.textViewNoReview).visibility=View.VISIBLE
+
+                }
+            }
+        }
+        val placeRef = db.collection("places").document(placeId!!)
+        placeRef.get().addOnSuccessListener { document ->
+            if (document.exists()) {
+                // 장소의 정보를 가져옴
+                val placeInfo = document.data
+                // 이제 placeInfo를 사용하여 원하는 데이터를 UI에 표시할 수 있습니다.
+                if(placeInfo!=null) {
+                    initialBottomSheetView.findViewById<TextView>(R.id.textView).text =
+                        placeInfo["name"] as String?
+                }
+
+            }
+            initialBottomSheetView.findViewById<TextView>(R.id.textView).text =selectedPlace.place_name
+        }
+
         bottomSheetDialog.show()
 
-        bottomSheetDialog.behavior.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
+        bottomSheetDialog.behavior.addBottomSheetCallback(object :
+            BottomSheetBehavior.BottomSheetCallback() {
             override fun onStateChanged(bottomSheet: View, newState: Int) {
                 when (newState) {
                     BottomSheetBehavior.STATE_EXPANDED -> {
@@ -226,7 +312,10 @@ class WalkFragment : Fragment(),
                         bundle.putString("phone", selectedPlace?.phone)
                         bundle.putString("place_road_adress_name", selectedPlace?.road_address_name)
                         bundle.putString("place_category", selectedPlace?.category_group_name)
-                        mainActivity.navigate(R.id.action_mainFragment_to_placeReviewFragment, bundle)
+                        mainActivity.navigate(
+                            R.id.action_mainFragment_to_placeReviewFragment,
+                            bundle
+                        )
                         bottomSheetDialog.dismiss()
                     }
                 }
@@ -235,8 +324,16 @@ class WalkFragment : Fragment(),
             override fun onSlide(bottomSheet: View, slideOffset: Float) {}
         })
 
-        initialBottomSheetView.findViewById<Button>(R.id.buttonSubmitReview).setOnClickListener {
-            mainActivity.navigate(R.id.action_mainFragment_to_writePlaceReviewFragment)
+        buttonsubmit.setOnClickListener {
+            val bundle = Bundle()
+            bundle.putString("place_name", selectedPlace?.place_name)
+            bundle.putString("place_id", selectedPlace?.id)
+            bundle.putString("place_category", selectedPlace?.category_group_name)
+            bundle.putString("place_long", selectedPlace?.x.toString())
+            bundle.putString("place_lat", selectedPlace?.y.toString())
+            bundle.putString("phone", selectedPlace?.phone)
+            bundle.putString("place_road_adress_name", selectedPlace?.road_address_name)
+            mainActivity.navigate(R.id.action_mainFragment_to_writePlaceReviewFragment, bundle)
             bottomSheetDialog.dismiss()
         }
 
@@ -250,6 +347,7 @@ class WalkFragment : Fragment(),
         initialBottomSheetView.findViewById<Chip>(R.id.chipViewAllReviews).setOnClickListener {
             val bundle = Bundle()
             bundle.putString("place_name", selectedPlace?.place_name)
+            bundle.putString("place_id", selectedPlace?.id)
             bundle.putString("phone", selectedPlace?.phone)
             bundle.putString("place_road_adress_name", selectedPlace?.road_address_name)
             bundle.putString("place_category", selectedPlace?.category_group_name)
@@ -258,12 +356,38 @@ class WalkFragment : Fragment(),
         }
     }
 
+    fun getReviewCount(placeId: String, onComplete: (Int) -> Unit) {
+        val reviewRef = db.collection("places").document(placeId).collection("reviews")
+        reviewRef.get()
+            .addOnSuccessListener { querySnapshot ->
+                val reviewCount = querySnapshot.size()
+                onComplete(reviewCount)
+            }
+            .addOnFailureListener { e ->
+                Log.e("ERROR", "Failed to get review count", e)
+            }
+    }
+
     @Deprecated("Deprecated in Java")
-    override fun onCalloutBalloonOfPOIItemTouched(p0: net.daum.mf.map.api.MapView?, p1: MapPOIItem?) {}
+    override fun onCalloutBalloonOfPOIItemTouched(
+        p0: net.daum.mf.map.api.MapView?,
+        p1: MapPOIItem?
+    ) {
+    }
 
-    override fun onCalloutBalloonOfPOIItemTouched(p0: net.daum.mf.map.api.MapView?, p1: MapPOIItem?, p2: MapPOIItem.CalloutBalloonButtonType?) {}
+    override fun onCalloutBalloonOfPOIItemTouched(
+        p0: net.daum.mf.map.api.MapView?,
+        p1: MapPOIItem?,
+        p2: MapPOIItem.CalloutBalloonButtonType?
+    ) {
+    }
 
-    override fun onDraggablePOIItemMoved(p0: net.daum.mf.map.api.MapView?, p1: MapPOIItem?, p2: MapPoint?) {}
+    override fun onDraggablePOIItemMoved(
+        p0: net.daum.mf.map.api.MapView?,
+        p1: MapPOIItem?,
+        p2: MapPoint?
+    ) {
+    }
 
     override fun onMapViewInitialized(p0: MapView?) {}
 
@@ -275,6 +399,7 @@ class WalkFragment : Fragment(),
             viewModel.searchPlacesByKeyword(it.latitude, it.longitude, "동물")
         }
     }
+
     //줌 아웃 제한
     override fun onMapViewZoomLevelChanged(p0: MapView?, zoomLevel: Int) {
         val maxZoomLevel = 2
@@ -282,6 +407,7 @@ class WalkFragment : Fragment(),
             p0?.setZoomLevel(maxZoomLevel, true)
         }
     }
+
     override fun onMapViewSingleTapped(p0: MapView?, p1: MapPoint?) {}
 
     override fun onMapViewDoubleTapped(p0: MapView?, p1: MapPoint?) {}
@@ -296,11 +422,60 @@ class WalkFragment : Fragment(),
 
     override fun onResume() {
         super.onResume()
+
         // 마지막 알려진 위치를 기준 키워드 검색
         lastKnownLocation?.let {
             viewModel.searchPlacesByKeyword(it.latitude, it.longitude, "동물")
         }
+
+        // 직접 검색 결과로 마커 생성
+        if (::kakaoSearchResponse.isInitialized) {
+            val newMarkers = kakaoSearchResponse.documents.map { place ->
+                val mapPoint = MapPoint.mapPointWithGeoCoord(place.y, place.x)
+                MapPOIItem().apply {
+                    itemName = place.place_name
+                    tag = place.id.hashCode() //id로 태그
+                    this.mapPoint = mapPoint
+                    markerType = MapPOIItem.MarkerType.CustomImage
+                    customImageResourceId = R.drawable.paw_pin
+                    //마커 크기 자동조정
+                    isCustomImageAutoscale = true
+                    //마커 위치 조정
+                    setCustomImageAnchor(0.5f, 1.0f)
+                }
+            }
+
+
+            // 기존의 마커들을 지도에서 제거
+            currentMarkers.forEach { marker ->
+                fragmentWalkBinding.mapView.removePOIItem(marker)
+            }
+            currentMarkers.clear()
+
+            // 새로운 마커들을 지도에 추가
+            newMarkers.forEach { marker ->
+                fragmentWalkBinding.mapView.addPOIItem(marker)
+                currentMarkers.add(marker)
+            }
+        }
     }
+
+    fun fetchLatestReviews(placeId: String, onComplete: (List<Review>) -> Unit) {
+        val reviewRef = db.collection("places").document(placeId).collection("reviews")
+        reviewRef.orderBy("timestamp", Query.Direction.DESCENDING)
+            .limit(2)
+            .get()
+            .addOnSuccessListener { querySnapshot ->
+                val reviews = querySnapshot.documents.mapNotNull { doc ->
+                    doc.toObject(Review::class.java)
+                }
+                onComplete(reviews)
+            }
+            .addOnFailureListener { e ->
+                Log.e("ERROR", "Failed to fetch latest reviews", e)
+            }
+    }
+
 }
 
 
