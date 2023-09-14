@@ -1,5 +1,6 @@
 package com.petpal.mungmate.ui.pet
 
+import android.os.Build
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -34,8 +35,14 @@ class AddPetFragment : Fragment() {
             if(!isAdd) {
                 //수정완료 아이콘 띄우기
                 toolbarAddPet.inflateMenu(R.menu.complete_menu)
+                //툴바 타이틀 반려견 정보 수정으로 변경
+                toolbarAddPet.title = "반려견 정보 수정"
                 //가입하기 버튼 삭제하기
                 buttonPetComplete.visibility = View.GONE
+
+                //성별 버튼 클릭 방지
+                buttonHe.isClickable = false
+                buttonShe.isClickable = false
             }
 
             ArrayAdapter<String>(requireContext(), android.R.layout.simple_list_item_1, dogBreeds).also { adapter ->
