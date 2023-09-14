@@ -44,7 +44,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="left"
-            android:background="@null"
+            android:background="@color/md_theme_light_background"
             android:text="전체 선택"
             app:icon="@drawable/check_circle_24px" />
 
