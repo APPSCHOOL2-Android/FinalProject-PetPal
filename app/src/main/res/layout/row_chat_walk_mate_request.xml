@@ -29,7 +29,6 @@
                 app:civ_border_overlay="true" />
 
             <TextView
-                android:id="@+id/textView3"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -44,7 +43,7 @@
             android:orientation="vertical">
 
             <TextView
-                android:id="@+id/textView4"
+                android:id="@+id/textViewRequestDate"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
@@ -52,7 +51,7 @@
                 android:text="일시 : 9월 5일 (화) 오후 6:00" />
 
             <TextView
-                android:id="@+id/textView5"
+                android:id="@+id/textViewRequestPlace"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
@@ -67,7 +66,7 @@
             android:orientation="horizontal">
 
             <Button
-                android:id="@+id/button"
+                android:id="@+id/buttonAccept"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="8dp"
@@ -75,7 +74,7 @@
                 android:text="수락" />
 
             <Button
-                android:id="@+id/button2"
+                android:id="@+id/buttonReject"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
