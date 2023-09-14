@@ -268,9 +268,9 @@ class WalkFragment : Fragment(),
     override fun onMapViewInitialized(p0: MapView?) {}
 
     override fun onMapViewCenterPointMoved(p0: MapView?, p1: MapPoint?) {
-       // fragmentWalkBinding.mapView.removeAllPOIItems()
 
-        // 새로운 중심에서 검색 수행
+
+        // 새로운 중심에서 검색
         p1?.mapPointGeoCoord?.let {
             viewModel.searchPlacesByKeyword(it.latitude, it.longitude, "동물")
         }
@@ -296,13 +296,15 @@ class WalkFragment : Fragment(),
 
     override fun onResume() {
         super.onResume()
-        // 마지막 알려진 위치를 기준으로 키워드 검색 수행
+        // 마지막 알려진 위치를 기준 키워드 검색
         lastKnownLocation?.let {
             viewModel.searchPlacesByKeyword(it.latitude, it.longitude, "동물")
         }
     }
-
 }
+
+
+//뷰 모델 팩토리
 class WalkViewModelFactory(private val repository: WalkRepository) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(WalkViewModel::class.java)) {

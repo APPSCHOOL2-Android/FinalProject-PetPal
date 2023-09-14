@@ -9,7 +9,7 @@ import kotlinx.coroutines.launch
 
 class WalkViewModel(private val repository: WalkRepository) : ViewModel() {
     val searchResults: MutableLiveData<KakaoSearchResponse> = MutableLiveData()
-    val errorMessage: MutableLiveData<String> = MutableLiveData()
+    private val errorMessage: MutableLiveData<String> = MutableLiveData()
 
     fun searchPlacesByKeyword(latitude: Double, longitude: Double, query: String) {
         viewModelScope.launch {
