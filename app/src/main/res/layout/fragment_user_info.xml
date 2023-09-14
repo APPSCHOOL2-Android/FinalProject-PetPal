@@ -13,18 +13,18 @@
         android:layout_height="wrap_content"
         android:minHeight="?attr/actionBarSize"
         android:theme="?attr/actionBarTheme"
-        app:title="사용자 정보 입력"
-        app:titleTextAppearance="@style/TextAppearance.AppCompat.Medium" />
+        app:navigationIcon="@drawable/arrow_back_24px"
+        app:title="사용자 정보 입력" />
 
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:padding="16dp">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:padding="16dp">
+            android:orientation="vertical">
 
             <de.hdodenhof.circleimageview.CircleImageView
                 android:id="@+id/startMainImageView"
