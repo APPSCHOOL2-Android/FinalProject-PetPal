@@ -108,6 +108,9 @@
         <action
             android:id="@+id/action_mainFragment_to_managePetFragment"
             app:destination="@id/managePetFragment" />
+        <action
+            android:id="@+id/action_mainFragment_to_walkReviewHistoryFragment"
+            app:destination="@id/walkReviewHistoryFragment" />
 
     </fragment>
     <fragment
@@ -185,5 +188,10 @@
             app:argType="boolean"
             android:defaultValue="true" />
     </fragment>
+    <fragment
+        android:id="@+id/walkReviewHistoryFragment"
+        android:name="com.petpal.mungmate.ui.walkreview.WalkReviewHistoryFragment"
+        android:label="fragment_walk_review_history"
+        tools:layout="@layout/fragment_walk_review_history" />
 
 </navigation>

@@ -39,6 +39,10 @@ class MyPageFragment : Fragment() {
                mainActivity.navigate(R.id.action_mainFragment_to_manage_block)
             }
 
+            buttonGoToWalkReview.setOnClickListener {
+                mainActivity.navigate(R.id.action_mainFragment_to_walkReviewHistoryFragment)
+            }
+
             buttonAnnouncement.setOnClickListener {
                 mainActivity.navigate(R.id.action_mainFragment_to_announcement)
             }
