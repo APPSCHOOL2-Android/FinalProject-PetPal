@@ -109,6 +109,18 @@
                     app:simpleItems="@array/productRegistrationCategoryList" />
             </com.google.android.material.textfield.TextInputLayout>
 
+            <EditText
+                android:id="@+id/flexBoxLayoutEditText"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:hint="@string/input_option"
+                android:imeOptions="actionDone"
+                android:maxLines="1"
+                android:layout_marginTop="@dimen/common_margin"
+                android:singleLine="true"
+                android:inputType="text|textCapWords"
+                app:layout_flexGrow="1"/>
+
             <FrameLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -120,20 +132,7 @@
                     android:layout_height="match_parent"
                     app:alignContent="stretch"
                     app:alignItems="stretch"
-                    app:flexWrap="wrap">
-
-                    <EditText
-                        android:id="@+id/flexBoxLayoutEditText"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:hint="@string/input_option"
-                        android:imeOptions="actionDone"
-                        android:maxLines="1"
-                        android:singleLine="true"
-                        android:inputType="text|textCapWords"
-                        app:layout_flexGrow="1"/>
-
-                </com.google.android.flexbox.FlexboxLayout>
+                    app:flexWrap="wrap"/>
 
             </FrameLayout>
 
@@ -176,7 +175,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/common_margin"
-                android:text="@string/prompt_description_image"
+                android:text="@string/prompt_description_context"
                 android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
 
             <com.google.android.material.textfield.TextInputLayout
@@ -193,7 +192,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:gravity="top"
-                    android:hint="@string/community_post_writing_contentText"
+                    android:hint="@string/product_registration_contentText"
                     android:maxLength="300" />
 
             </com.google.android.material.textfield.TextInputLayout>

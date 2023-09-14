@@ -81,6 +81,10 @@ class CommunityDetailCommentAdapter(private val context: Context) :
         }
 
         var isClicked = false
+
+        holder.communityCommentFavoriteLottie.scaleX = 2.0f
+        holder.communityCommentFavoriteLottie.scaleY = 2.0f
+
         holder.communityCommentFavoriteLottie.setOnClickListener {
             isClicked = !isClicked // 클릭할 때마다 변수를 반전시킴
             if (isClicked) {
