@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".ui.user.UserInfoFragment">
+    tools:context=".user.UserInfoFragment">
 
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/userInfoToolbar"
@@ -13,14 +13,8 @@
         android:layout_height="wrap_content"
         android:minHeight="?attr/actionBarSize"
         android:theme="?attr/actionBarTheme"
-        app:title="사용자 정보 입력"
-        app:titleTextAppearance="@style/TextAppearance.AppCompat.Medium" />
-
-    <View
-        android:id="@+id/userInfoDivider"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="?android:attr/listDivider" />
+        app:navigationIcon="@drawable/arrow_back_24px"
+        app:title="사용자 정보 입력" />
 
     <ScrollView
         android:layout_width="match_parent"
@@ -34,12 +28,11 @@
 
             <de.hdodenhof.circleimageview.CircleImageView
                 android:id="@+id/startMainImageView"
-                android:layout_width="112dp"
-                android:layout_height="112dp"
+                android:layout_width="120dp"
+                android:layout_height="120dp"
                 android:layout_gravity="center"
                 android:layout_marginTop="16dp"
-                android:layout_marginBottom="8dp"
-                android:src="@drawable/user_profile"
+                android:src="@drawable/user_icon"
                 app:civ_border_color="#000000"
                 app:civ_border_overlay="true"
                 app:civ_border_width="0dp" />
@@ -59,8 +52,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 app:counterEnabled="true"
-                app:counterMaxLength="8"
-                app:errorEnabled="false">
+                app:counterMaxLength="8">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/textInputUserNicknameText"
@@ -112,50 +104,43 @@
                 android:layout_height="wrap_content"
                 android:text="성별" />
 
-            <LinearLayout
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/userInfoChipgroup"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center"
                 android:layout_marginBottom="16dp"
-                android:orientation="horizontal">
+                app:selectionRequired="true"
+                app:singleSelection="true">
 
-                <com.google.android.material.chip.ChipGroup
-                    android:id="@+id/userInfoChipgroup"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_gravity="center"
-                    app:selectionRequired="true"
-                    app:singleLine="true"
-                    app:singleSelection="true">
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipMale"
+                    style="@style/Widget.Material3.Chip.Suggestion"
+                    android:layout_width="120dp"
+                    android:layout_height="wrap_content"
+                    android:text="남성"
+                    android:textAlignment="center"
+                    app:chipSpacingHorizontal="42dp" />
 
-                    <com.google.android.material.chip.Chip
-                        android:id="@+id/chipMale"
-                        style="@style/Widget.Material3.Chip.Suggestion"
-                        android:layout_width="100dp"
-                        android:layout_height="wrap_content"
-                        android:text="남성"
-                        android:textAlignment="center"
-                        app:chipSpacingHorizontal="42dp" />
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipFemale"
+                    style="@style/Widget.Material3.Chip.Suggestion"
+                    android:layout_width="120dp"
+                    android:layout_height="wrap_content"
+                    android:text="여성"
+                    android:textAlignment="center"
+                    app:chipSpacingHorizontal="42dp" />
 
-                    <com.google.android.material.chip.Chip
-                        android:id="@+id/chipFemale"
-                        style="@style/Widget.Material3.Chip.Suggestion"
-                        android:layout_width="100dp"
-                        android:layout_height="match_parent"
-                        android:text="여성"
-                        android:textAlignment="center"
-                        app:chipSpacingHorizontal="42dp" />
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipNone"
+                    style="@style/Widget.Material3.Chip.Suggestion"
+                    android:layout_width="120dp"
+                    android:layout_height="wrap_content"
+                    android:text="선택안함"
+                    android:textAlignment="center"
+                    app:chipSpacingHorizontal="42dp" />
 
-                    <com.google.android.material.chip.Chip
-                        android:id="@+id/chipNone"
-                        style="@style/Widget.Material3.Chip.Suggestion"
-                        android:layout_width="100dp"
-                        android:layout_height="wrap_content"
-                        android:text="선택안함"
-                        android:textAlignment="center"
-                        app:chipSpacingHorizontal="42dp" />
-
-                </com.google.android.material.chip.ChipGroup>
-            </LinearLayout>
+            </com.google.android.material.chip.ChipGroup>
 
             <TextView
                 android:id="@+id/userInfoHolder2"
@@ -166,8 +151,7 @@
             <RadioGroup
                 android:id="@+id/userInfoRadiogroup"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:checkedButton="@id/radioAlways">
+                android:layout_height="match_parent">
 
                 <RadioButton
                     android:id="@+id/radioAlways"
@@ -176,7 +160,7 @@
                     android:text="언제든 가능해요" />
 
                 <RadioButton
-                    android:id="@+id/radioSelect"
+                    android:id="@+id/radioButton2"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="아래 시간대만 가능해요" />
@@ -186,8 +170,9 @@
                 android:id="@+id/linearWhenSelected"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
                 android:orientation="horizontal"
-                android:visibility="gone">
+                android:visibility="visible">
 
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/textInputStart"
@@ -232,7 +217,6 @@
                 style="@style/Widget.Material3.Button.ElevatedButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
                 android:text="다음" />
         </LinearLayout>
     </ScrollView>

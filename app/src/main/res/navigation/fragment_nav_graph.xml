@@ -13,12 +13,12 @@
         tools:layout="@layout/fragment_community" />
     <fragment
         android:id="@+id/item_chat"
-        android:name="com.petpal.mungmate.ui.chatting.ChatFragment"
+        android:name="com.petpal.mungmate.ui.chat.ChatFragment"
         android:label="fragment_chat"
         tools:layout="@layout/fragment_chat"/>
     <fragment
         android:id="@+id/item_mypage"
-        android:name="com.petpal.mungmate.MyPageFragment"
+        android:name="com.petpal.mungmate.ui.mypage.MyPageFragment"
         android:label="fragment_my_page"
         tools:layout="@layout/fragment_my_page" />
     <fragment
@@ -28,7 +28,7 @@
         tools:layout="@layout/fragment_shop" />
     <fragment
         android:id="@+id/item_walk"
-        android:name="com.petpal.mungmate.WalkFragment"
+        android:name="com.petpal.mungmate.ui.walk.WalkFragment"
         android:label="fragment_walk"
         tools:layout="@layout/fragment_walk" />
 </navigation>

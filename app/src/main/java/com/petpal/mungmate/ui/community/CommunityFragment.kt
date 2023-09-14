@@ -8,10 +8,12 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AlphaAnimation
 import android.widget.ImageButton
 import android.widget.TextView
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.faltenreich.skeletonlayout.Skeleton
 import com.faltenreich.skeletonlayout.applySkeleton
 import com.faltenreich.skeletonlayout.createSkeleton
@@ -34,7 +36,6 @@ class CommunityFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Log.d("community onCreate", "onCreate")
 
         communityBinding = FragmentCommunityBinding.inflate(layoutInflater)
         mainActivity = activity as MainActivity
@@ -49,6 +50,30 @@ class CommunityFragment : Fragment() {
             Handler(Looper.getMainLooper()).postDelayed({
                 skeleton.showOriginal()
             }, 3000)
+
+            // 최상단 FAB 숨기기, 스크롤시 FAB 보이기
+            val fadeIn = AlphaAnimation(0f, 1f).apply { duration = 500 }
+            val fadeOut = AlphaAnimation(1f, 0f).apply { duration = 500 }
+            var isTop = true
+
+            addOnScrollListener(object: RecyclerView.OnScrollListener() {
+                override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                    super.onScrollStateChanged(recyclerView, newState)
+                    // 최상단에 있는 순간 -> FAB 숨기기
+                    if (!canScrollVertically(-1) && newState == RecyclerView.SCROLL_STATE_IDLE) {
+                        communityBinding.communityPostWritingUpFab.startAnimation(fadeOut)
+                        communityBinding.communityPostWritingUpFab.visibility = View.GONE
+                        isTop = true
+                    } else {
+                        // 최상단에서 내리기 시작하는 순간 -> FAB 보이기
+                        if (isTop) {
+                            communityBinding.communityPostWritingUpFab.visibility = View.VISIBLE
+                            communityBinding.communityPostWritingUpFab.startAnimation(fadeIn)
+                            isTop = false
+                        }
+                    }
+                }
+            })
         }
     }
     override fun onCreateView(
@@ -57,7 +82,7 @@ class CommunityFragment : Fragment() {
     ): View? {
 
 
-//        bottomNavigationViewVISIBLE()
+
         communityBinding.run {
             communityToolbar.run {
                 setOnMenuItemClickListener {
@@ -81,7 +106,12 @@ class CommunityFragment : Fragment() {
                 mainActivity
                     .navigate(R.id.action_mainFragment_to_communityWritingFragment)
             }
-//            communityRecyclerView()
+
+            communityPostWritingUpFab.setOnClickListener {
+                // 최상단 이동
+                communityPostRecyclerView.smoothScrollToPosition(0)
+            }
+
         }
 
         return communityBinding.root

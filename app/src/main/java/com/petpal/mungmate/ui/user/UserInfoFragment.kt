@@ -33,7 +33,7 @@ class UserInfoFragment : Fragment() {
             }
             // 닉네임 textInputLayout
             textInputUserNickname.run {
-                error = getString(R.string.error_nickname)
+                error = getString(R.string.nickname_error)
             }
             // 생일 비공객 처리 switch
             switchUserInfo.run {

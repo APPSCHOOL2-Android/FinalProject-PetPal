@@ -26,12 +26,12 @@ class InquiryAdapter(private val dataList: List<Inquiry>): RecyclerView.Adapter<
                     layoutInquiryBody.visibility = View.VISIBLE
 
                     // 답변 여부에 따라 UI 변경
-                    if (inquiry.state) {
-                        chipInquiryState.text = "답변완료"
+                    if (inquiry.status) {
+                        chipInquiryStatus.text = "답변완료"
                         layoutInquiryAnswer.visibility = View.VISIBLE
                         textViewInquiryAnswer.text = inquiry.answer
                     } else {
-                        chipInquiryState.text = "답변대기"
+                        chipInquiryStatus.text = "답변대기"
                         layoutInquiryAnswer.visibility = View.GONE
                     }
                 } else {
