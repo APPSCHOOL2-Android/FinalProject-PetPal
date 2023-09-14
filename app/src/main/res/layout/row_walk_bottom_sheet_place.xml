@@ -44,12 +44,18 @@
                 android:id="@+id/textViewratingbar"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="0.5"
                 android:layout_gravity="center"
                 android:layout_marginStart="4dp"
                 android:gravity="start"
                 android:text="4.5"
                 android:textAppearance="@style/TextAppearance.AppCompat.Small" />
+
+            <ImageView
+                android:id="@+id/imageViewFavoirte"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="16dp"
+                app:srcCompat="@drawable/favoirte_24px" />
         </LinearLayout>
 
         <LinearLayout
