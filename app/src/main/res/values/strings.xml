@@ -74,6 +74,7 @@
     <string name="product_registration_button">상품 등록</string>
     <string name="button_delete_image">이미지 삭제 버튼</string>
     <string name="representative_photo">대표사진</string>
+    <string name="nickname_error">8자 이내의 닉네임을 입력해주세요.</string>
 
     <!-- 견종 문자열 배열 -->
     <string-array name="dog_breeds">
