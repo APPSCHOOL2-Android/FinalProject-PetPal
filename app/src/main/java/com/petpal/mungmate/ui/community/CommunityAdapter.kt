@@ -13,6 +13,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.petpal.mungmate.MainActivity
 import com.petpal.mungmate.R
 import com.petpal.mungmate.databinding.RowCommunityBinding
+import com.petpal.mungmate.model.Post
 
 class CommunityAdapter(
     private val context: Context,
@@ -90,6 +91,7 @@ class CommunityAdapter(
         holder.communityContent.text = post.postContent
         holder.communityCommentTextView.append(post.postComment.toString())
         holder.communityFavoriteTextView.text = post.postLike.toString()
+
         var isClicked = false
         holder.communityFavoriteLottie.setOnClickListener {
             isClicked = !isClicked // 클릭할 때마다 변수를 반전시킴

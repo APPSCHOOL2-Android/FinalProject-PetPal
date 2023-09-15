@@ -21,6 +21,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.petpal.mungmate.MainActivity
 import com.petpal.mungmate.R
 import com.petpal.mungmate.databinding.FragmentCommunityBinding
+import com.petpal.mungmate.model.Post
 
 
 class CommunityFragment : Fragment() {
