@@ -13,8 +13,8 @@
         android:layout_height="wrap_content"
         android:minHeight="?attr/actionBarSize"
         android:theme="?attr/actionBarTheme"
-        app:navigationIcon="@drawable/arrow_back_24px"
-        app:title="산책 후기" />
+        app:navigationIcon="@drawable/close_24px"
+        app:title="산책 후기 작성" />
 
     <LinearLayout
         android:layout_width="match_parent"

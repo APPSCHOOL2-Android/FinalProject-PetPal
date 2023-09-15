@@ -15,4 +15,18 @@
         android:theme="?attr/actionBarTheme"
         app:navigationIcon="@drawable/arrow_back_24px"
         app:title="산책 후기" />
+
+    <TextView
+        android:id="@+id/textViewWalkReviewCount"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        android:text="받은 산책 후기 2개"
+        android:textAppearance="@style/TextAppearance.Material3.TitleMedium" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerViewWalkReview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
 </LinearLayout>
