@@ -17,6 +17,8 @@ import com.petpal.mungmate.databinding.RowCommunityBinding
 class CommunityAdapter(
     private val context: Context,
     private val mainActivity: MainActivity,
+    private val postList: MutableList<Post>
+
 ) :
     RecyclerView.Adapter<CommunityAdapter.ViewHolder>() {
 
@@ -32,6 +34,7 @@ class CommunityAdapter(
         val communityContent: TextView = item.communityContent
         val communityCommentTextView: TextView = item.communityCommentTextView
         val communityFavoriteLottie: LottieAnimationView = item.communityFavoriteLottie
+        val communityFavoriteTextView: TextView = item.communityFavoriteTextView
 
         init {
             item.root.setOnClickListener {
@@ -58,33 +61,35 @@ class CommunityAdapter(
         return viewHolderClass
     }
 
-    override fun getItemCount() = 10
+    override fun getItemCount() = postList.size
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        val post = postList[position]
+
+
         Glide
             .with(context)
-            .load("https://mblogthumb-phinf.pstatic.net/MjAxOTEyMTNfMTQx/MDAxNTc2MjAyNzE5NDE0.B-NhNQS5QdweUBY53sWNGA8cJQUupeQeza7ognzYmGUg.1zj3ZPxEc2QrCJ2y5O--fmvMl2yljMb3uZQn6C1xsdUg.JPEG.369ginseng/1576202724454.jpg?type=w800")
+            .load(post.userImage)
             .diskCacheStrategy(DiskCacheStrategy.NONE)
             .centerCrop()
             .into(holder.communityProfileImage)
 
         Glide
             .with(context)
-            .load("https://mblogthumb-phinf.pstatic.net/MjAxOTEyMTNfMTQx/MDAxNTc2MjAyNzE5NDE0.B-NhNQS5QdweUBY53sWNGA8cJQUupeQeza7ognzYmGUg.1zj3ZPxEc2QrCJ2y5O--fmvMl2yljMb3uZQn6C1xsdUg.JPEG.369ginseng/1576202724454.jpg?type=w800")
+            .load(post.postImages)
             .diskCacheStrategy(DiskCacheStrategy.NONE)
             .centerCrop()
             .into(holder.communityPostImage)
 
-        holder.communityPostTitle.text = "귀여운 강아지 사진"
-        holder.communityUserNickName.text = "리트리버군"
+        holder.communityPostTitle.text = post.postTitle
+        holder.communityUserNickName.text = post.userNickName
 
-        holder.communityUserPlace.text = "제주시 애월읍"
+        holder.communityUserPlace.text = post.userPlace
 
-        holder.communityPostDateCreated.text = "30분전"
-        holder.communityContent.text =
-            "귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다."
-        holder.communityCommentTextView.text = "댓글 2"
-
+        holder.communityPostDateCreated.text = post.postDateCreated
+        holder.communityContent.text = post.postContent
+        holder.communityCommentTextView.append(post.postComment.toString())
+        holder.communityFavoriteTextView.text = post.postLike.toString()
         var isClicked = false
         holder.communityFavoriteLottie.setOnClickListener {
             isClicked = !isClicked // 클릭할 때마다 변수를 반전시킴
@@ -97,7 +102,12 @@ class CommunityAdapter(
             }
 
         }
+    }
 
-
+    fun add(post: Post) {
+        if (!postList.contains(post)) {
+            postList.add(post)
+            notifyItemChanged(postList.size - 1)
+        }
     }
 }

@@ -99,7 +99,6 @@ dependencies {
     //firebase analytics
     implementation 'com.google.firebase:firebase-analytics-ktx'
 
-
-
-
+    //firebase firestore
+    implementation("com.google.firebase:firebase-firestore-ktx")
 }

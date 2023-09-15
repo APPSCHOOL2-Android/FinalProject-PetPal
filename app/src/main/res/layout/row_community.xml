@@ -32,6 +32,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="제목"
+            android:maxLength="17"
             android:textAppearance="@style/TextAppearance.AppCompat.Title"
             app:layout_constraintStart_toEndOf="@id/communityProfileImage"
             app:layout_constraintTop_toTopOf="@id/communityProfileImage" />
@@ -134,6 +135,7 @@
             app:lottie_rawRes="@raw/favorite" />
 
         <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/communityFavoriteTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
