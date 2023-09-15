@@ -67,7 +67,6 @@ class CommunityAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val post = postList[position]
 
-
         Glide
             .with(context)
             .load(post.userImage)
@@ -84,10 +83,12 @@ class CommunityAdapter(
 
         holder.communityPostTitle.text = post.postTitle
         holder.communityUserNickName.text = post.userNickName
-
         holder.communityUserPlace.text = post.userPlace
 
-        holder.communityPostDateCreated.text = post.postDateCreated
+
+
+
+        holder.communityPostDateCreated.text = post.postDateCreated.toString()
         holder.communityContent.text = post.postContent
         holder.communityCommentTextView.append(post.postComment.toString())
         holder.communityFavoriteTextView.text = post.postLike.toString()

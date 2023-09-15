@@ -3,6 +3,7 @@ package com.petpal.mungmate.ui.community
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -18,10 +19,17 @@ import com.google.android.material.sidesheet.SideSheetCallback
 import com.google.android.material.sidesheet.SideSheetDialog
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
 import com.petpal.mungmate.MainActivity
 import com.petpal.mungmate.R
 import com.petpal.mungmate.databinding.FragmentCommunityBinding
 import com.petpal.mungmate.model.Post
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Date
+import java.util.Locale
+import java.util.TimeZone
+import kotlin.math.abs
 
 
 class CommunityFragment : Fragment() {
@@ -145,16 +153,31 @@ class CommunityFragment : Fragment() {
         val db = FirebaseFirestore.getInstance()
 
         db.collection("Post")
+            .orderBy("postDateCreated", Query.Direction.DESCENDING) // 최근에 등록한거 순으로..
             .get()
             .addOnSuccessListener { snapshots ->
+                val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+                dateFormat.timeZone = TimeZone.getTimeZone("Asia/Seoul")// 시간대를 UTC로 설정
+
                 for (document in snapshots) {
                     val community = document.toObject(Post::class.java)
-                    communityAdapter.add(community)
+                    val snapshotTime = dateFormat.parse(community.postDateCreated) // Firestore에서 가져온 시간 문자열을 Date 객체로 변환
 
+                    val currentTime = Date()
+                    val timeDifferenceMillis = currentTime.time -snapshotTime.time  // Firestore 시간에서 현재 시간을 뺌
+
+
+                    val timeAgo = when {
+                        timeDifferenceMillis < 60_000 -> "방금 전" // 1분 미만
+                        timeDifferenceMillis < 3_600_000 -> "${timeDifferenceMillis / 60_000}분 전" // 1시간 미만
+                        timeDifferenceMillis < 86_400_000 -> "${timeDifferenceMillis / 3_600_000}시간 전" // 1일 미만
+                        else -> "${timeDifferenceMillis / 86_400_000}일 전" // 1일 이상 전
+                    }
+                    community.postDateCreated = "$timeAgo"
+                    communityAdapter.add(community)
                 }
             }
             .addOnFailureListener {
-               // 또는 원하는 뷰의 ID를 사용하세요.
                 Snackbar.make(rootView, "데이터를 불러오는데 실패했습니다.", Snackbar.LENGTH_SHORT).show()
             }
 

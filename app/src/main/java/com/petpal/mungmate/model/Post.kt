@@ -1,5 +1,7 @@
 package com.petpal.mungmate.model
 
+import com.google.firebase.Timestamp
+
 data class Post(
     val postID: String?=null, //게시글 id
     val authorUid: Long=0,//작성자 id
@@ -8,7 +10,7 @@ data class Post(
     val userPlace: String?=null,//유저 위치
     val postTitle: String?=null,//게시글 제목
     val postCategory: String?=null,//게시글 카테고리
-    val postDateCreated: String?=null,//게시글 작성 날짜
+    var postDateCreated: String? = null,//게시글 작성 날짜
 //    val postImages: List<PostImage>,//게시글 이미지 목록
     val postImages:String?=null,
     val postContent: String?=null,//게시글 내용
