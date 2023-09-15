@@ -22,7 +22,7 @@ class WalkReviewHistoryAdapter: RecyclerView.Adapter<WalkReviewHistoryAdapter.Vi
     }
 
     override fun getItemCount(): Int {
-        return 100
+        return 50
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {

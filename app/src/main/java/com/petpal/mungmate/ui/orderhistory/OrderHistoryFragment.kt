@@ -51,13 +51,13 @@ class OrderHistoryFragment : Fragment() {
                 addOnScrollListener(object: RecyclerView.OnScrollListener() {
                     override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                         super.onScrollStateChanged(recyclerView, newState)
-                        // 최상단에 있는 순간 -> FAB 숨기기
+                        // 최상단에 올라오면 fab 서서히 사라지기
                         if (!canScrollVertically(-1) && newState == RecyclerView.SCROLL_STATE_IDLE) {
                             fabOrderHistoryTop.startAnimation(fadeOut)
                             fabOrderHistoryTop.visibility = View.GONE
                             isTop = true
                         } else {
-                            // 최상단에서 내리기 시작하는 순간 -> FAB 보이기
+                            // 최상단에서 내려가면 fab 서서히 나타나기
                             if (isTop) {
                                 fabOrderHistoryTop.visibility = View.VISIBLE
                                 fabOrderHistoryTop.startAnimation(fadeIn)
@@ -77,8 +77,6 @@ class OrderHistoryFragment : Fragment() {
             chipGroupOrderStatus.setOnCheckedStateChangeListener { _, checkedIds ->
                 changeOrderStatusFilter(checkedIds.first())
             }
-
-//            skeleton.showOriginal()
         }
     }
 
