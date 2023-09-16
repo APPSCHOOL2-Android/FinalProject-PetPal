@@ -56,7 +56,7 @@ class ProductRegistrationFragment : Fragment() {
         productRegistrationBinding.run {
 
             recyclerViewMainImage.run {
-                adapter = ProductRegistrationAdapter(mainImageList,buttonAddMainImage)
+                adapter = ProductRegistrationAdapter(mainImageList, buttonAddMainImage)
                 layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
             }
 
@@ -87,7 +87,7 @@ class ProductRegistrationFragment : Fragment() {
                     val name = et.text.toString()
 
                     // chip 최대 5개 까지만
-                    if (flexBoxLayout.childCount <= 5 && name.isNotBlank()) {
+                    if (flexBoxLayout.childCount < 5 && name.isNotBlank()) {
                         flexBoxLayout.addChip(name)
                         et.text.clear()
                     }

@@ -16,12 +16,11 @@
 
         <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/communityProfileImage"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_marginStart="@dimen/common_padding"
+            android:layout_marginEnd="@dimen/common_padding"
             android:background="@android:color/transparent"
-            android:paddingStart="@dimen/common_padding"
-            android:paddingEnd="@dimen/common_padding"
-            android:paddingBottom="@dimen/common_padding"
             android:src="@mipmap/ic_launcher"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -31,8 +30,10 @@
             android:id="@+id/communityPostTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/common_small_margin"
             android:text="제목"
-            android:textAppearance="@style/TextAppearance.AppCompat.Title"
+            android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
+            android:textStyle="bold"
             app:layout_constraintStart_toEndOf="@id/communityProfileImage"
             app:layout_constraintTop_toTopOf="@id/communityProfileImage" />
 
@@ -81,7 +82,9 @@
         android:id="@+id/communityPostCardView"
         android:layout_width="match_parent"
         android:layout_height="250dp"
-        android:layout_margin="@dimen/common_padding"
+        android:layout_marginStart="@dimen/common_margin"
+        android:layout_marginTop="@dimen/common_margin"
+        android:layout_marginEnd="@dimen/common_margin"
         android:paddingStart="@dimen/common_padding"
         android:paddingEnd="@dimen/common_padding"
         app:cardCornerRadius="15dp"
@@ -97,7 +100,6 @@
             android:adjustViewBounds="true"
             android:scaleType="fitXY"
             app:srcCompat="@mipmap/ic_launcher" />
-
     </com.google.android.material.card.MaterialCardView>
 
 
@@ -105,9 +107,9 @@
         android:id="@+id/communityContent"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/common_margin"
         android:ellipsize="end"
         android:maxLines="4"
-        android:padding="@dimen/common_padding"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1"
         app:layout_constraintBottom_toTopOf="@id/communityBottomLinerLayout"
         app:layout_constraintEnd_toEndOf="@id/communityPostCardView"
@@ -120,25 +122,40 @@
         android:id="@+id/communityBottomLinerLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/common_margin"
+        android:layout_marginTop="@dimen/common_margin"
+        android:layout_marginEnd="@dimen/common_margin"
         android:orientation="horizontal"
-        android:padding="@dimen/common_padding"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/communityContent">
 
-        <com.airbnb.lottie.LottieAnimationView
-            android:id="@+id/communityFavoriteLottie"
-            android:layout_width="30dp"
-            android:layout_height="40dp"
-            android:scaleType="centerCrop"
-            app:lottie_rawRes="@raw/favorite" />
-
-        <androidx.appcompat.widget.AppCompatTextView
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text="좋아요 7"
-            android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1" />
+            android:layout_height="match_parent">
+
+            <com.airbnb.lottie.LottieAnimationView
+                android:id="@+id/communityFavoriteLottie"
+                android:layout_width="30dp"
+                android:layout_height="0dp"
+                app:layout_constraintBottom_toBottomOf="@id/communityFavoriteTextView"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@id/communityFavoriteTextView"
+                app:lottie_rawRes="@raw/favorite" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/communityFavoriteTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:text="좋아요 7"
+                android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/communityFavoriteLottie"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/communityCommentTextView"
@@ -148,17 +165,18 @@
             android:layout_marginStart="@dimen/common_padding"
             android:drawableStart="@drawable/comment"
             android:drawablePadding="@dimen/common_small_padding"
+            android:gravity="center"
             android:text="@string/comment"
             android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1" />
 
     </LinearLayout>
-
 
     <com.google.android.material.divider.MaterialDivider
         android:id="@+id/communityDivider"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/common_margin"
+        android:layout_marginTop="@dimen/common_margin"
         android:layout_marginEnd="@dimen/common_margin"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
