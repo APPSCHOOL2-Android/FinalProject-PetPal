@@ -46,8 +46,12 @@
     <string name="product_registration_button">상품 등록</string>
     <string name="button_delete_image">이미지 삭제 버튼</string>
     <string name="representative_photo">대표사진</string>
+    <string name="nickname_error">8자 이내의 닉네임을 입력해주세요.</string>
+
 
     <string name="product_registration_contentText">내용을 입력하세요.\n( 내용 최대 300자 이내)</string>
+
+    <string name="kakao_api_key">29842459a2117277a50ac661f2f7e089</string>
 
     <!-- 견종 문자열 배열 -->
     <string-array name="dog_breeds">

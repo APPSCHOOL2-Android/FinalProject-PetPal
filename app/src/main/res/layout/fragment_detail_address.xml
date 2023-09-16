@@ -1,0 +1,115 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbarDetailAddress"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="?attr/actionBarSize"
+        app:title="상세 주소 입력"/>
+
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/textInputLayoutDetailAddressName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginRight="10dp"
+        android:hint=""
+        android:transitionGroup="true"
+        app:endIconMode="clear_text">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/textInputEditDetailAddressName"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:hint="이름을 입력해주세요."
+            android:inputType="text|textPersonName"
+            android:textAppearance="@style/TextAppearance.AppCompat.Large" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <TextView
+        android:id="@+id/textViewApiAddress"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginRight="10dp"
+        android:text=""
+        android:textAppearance="@style/TextAppearance.AppCompat.Large" />
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/textInputLayoutDetailAddress"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginRight="10dp"
+        android:hint=""
+        android:transitionGroup="true"
+        app:endIconMode="clear_text">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/textInputEditDetailAddress"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:hint="상세주소를 입력해주세요."
+            android:inputType="text|textPersonName"
+            android:textAppearance="@style/TextAppearance.AppCompat.Large" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/textInputLayoutDetailAddressPhone"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginRight="10dp"
+        android:hint=""
+        android:transitionGroup="true"
+        app:endIconMode="clear_text">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/textInputEditDetailAddressPhone"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:hint="핸드폰 번호를 입력해주세요."
+            android:inputType="phone"
+            android:textAppearance="@style/TextAppearance.AppCompat.Large" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginRight="10dp"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/ButtonSubmitAddress"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="0dp"
+            android:layout_weight="1"
+            android:text="확인"
+            android:textAppearance="@style/TextAppearance.AppCompat.Large" />
+
+        <Button
+            android:id="@+id/ButtCancelAddress"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="0dp"
+            android:layout_weight="1"
+            android:text="취소"
+            android:textAppearance="@style/TextAppearance.AppCompat.Large" />
+
+
+    </LinearLayout>
+
+</LinearLayout>

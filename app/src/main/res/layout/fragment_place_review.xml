@@ -3,18 +3,18 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:layout_marginLeft="8dp"
     android:orientation="vertical">
 
 
-    <com.google.android.material.appbar.MaterialToolbar
-        android:id="@+id/placeReviewDetailToolbar"
+    <ImageView
+        android:id="@+id/textViewPlaceImage"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="start"
-        android:minHeight="?attr/actionBarSize"
-        android:theme="?attr/actionBarTheme"
-        app:title="장소 리뷰" />
-
+        android:layout_height="200dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginBottom="8dp"
+        app:srcCompat="@drawable/storefront_24px" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -25,39 +25,75 @@
             android:id="@+id/textViewPlaceReviewTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="@dimen/common_margin"
             android:layout_marginBottom="8dp"
-            android:paddingLeft="16dp"
             android:text="부천 동물병원"
             android:textSize="25sp"
             android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/textView21"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="4dp"
+            android:layout_weight="1"
+            android:text="동물병원"
+            android:textAppearance="@style/TextAppearance.AppCompat.Small" />
 
         <RatingBar
             android:id="@+id/placeUserRatingBar1"
             style="@android:style/Widget.DeviceDefault.RatingBar.Indicator"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="16dp"
+            android:layout_marginStart="8dp"
             android:numStars="5"
             android:rating="4.5" />
 
     </LinearLayout>
 
-
-    <ImageView
-        android:id="@+id/textViewPlaceImage"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="200dp"
-        android:layout_marginBottom="8dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginRight="8dp"
-        app:srcCompat="@drawable/storefront_24px" />
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/textView22"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:drawableStart="@drawable/location_on_24px"
+            android:text="부천 부천구 부천로 000길 00 3층(부천동)" />
+
+        <TextView
+            android:id="@+id/textView23"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:drawableStart="@drawable/pace_24px"
+            android:text="영업 종료"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/textView24"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="24dp"
+            android:layout_weight="1"
+            android:text="매일 9:00~18:00" />
+
+        <TextView
+            android:id="@+id/textView25"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:drawableStart="@drawable/call_24px"
+            android:text="000-000-0000" />
+
+    </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/reviewsRecyclerView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        >
+        android:layout_height="wrap_content">
 
     </androidx.recyclerview.widget.RecyclerView>
 

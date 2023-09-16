@@ -89,6 +89,7 @@
                     android:nestedScrollingEnabled="false" />
 
                 <LinearLayout
+                    android:id="@+id/layoutItemButton"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_marginTop="8dp"
@@ -159,7 +160,7 @@
                         android:text="수령인" />
 
                     <TextView
-                        android:id="@+id/textViewOrder"
+                        android:id="@+id/textViewOrderRecipient"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="2"
@@ -289,7 +290,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="2"
-                        android:text="- 5,000 P"
+                        android:text="- 5,000P"
                         android:textAppearance="@style/TextAppearance.Material3.BodyMedium" />
                 </LinearLayout>
                 <LinearLayout
