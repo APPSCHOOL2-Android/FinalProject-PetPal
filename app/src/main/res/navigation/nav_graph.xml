@@ -82,13 +82,23 @@
             app:destination="@id/walk" />
         <action
             android:id="@+id/action_mainFragment_to_communityPostDetailFragment"
-            app:destination="@id/communityPostDetailFragment" />
+            app:destination="@id/communityPostDetailFragment"
+            app:enterAnim="@anim/from_right"
+            app:exitAnim="@anim/to_left"
+            app:popEnterAnim="@anim/from_left"
+            app:popExitAnim="@anim/to_right" />
         <action
             android:id="@+id/action_mainFragment_to_communityWritingFragment"
-            app:destination="@id/communityWritingFragment" />
+            app:destination="@id/communityWritingFragment"
+            app:enterAnim="@anim/from_bottom"
+            app:popEnterAnim="@anim/from_top" />
         <action
             android:id="@+id/action_mainFragment_to_communitySearchFragment"
-            app:destination="@id/communitySearchFragment" />
+            app:destination="@id/communitySearchFragment"
+            app:enterAnim="@anim/from_right"
+            app:exitAnim="@anim/to_left"
+            app:popEnterAnim="@anim/from_left"
+            app:popExitAnim="@anim/to_right" />
         <action
             android:id="@+id/action_mainFragment_to_order_history"
             app:destination="@id/order_history" />
@@ -134,13 +144,25 @@
         tools:layout="@layout/fragment_community_search" >
         <action
             android:id="@+id/action_communitySearchFragment_to_productRegistrationFragment"
-            app:destination="@id/productRegistrationFragment" />
+            app:destination="@id/productRegistrationFragment"
+            app:enterAnim="@anim/from_left"
+            app:exitAnim="@anim/to_right"
+            app:popEnterAnim="@anim/from_right"
+            app:popExitAnim="@anim/to_left" />
     </fragment>
     <fragment
         android:id="@+id/communityDetailModifyFragment"
         android:name="com.petpal.mungmate.ui.community.CommunityDetailModifyFragment"
         android:label="fragment_community_detail_modify"
-        tools:layout="@layout/fragment_community_detail_modify" />
+        tools:layout="@layout/fragment_community_detail_modify" >
+        <action
+            android:id="@+id/action_communityDetailModifyFragment_to_communityPostDetailFragment"
+            app:destination="@id/communityPostDetailFragment"
+            app:enterAnim="@anim/from_left"
+            app:exitAnim="@anim/to_right"
+            app:popEnterAnim="@anim/from_right"
+            app:popExitAnim="@anim/to_left" />
+    </fragment>
     <fragment
         android:id="@+id/writePlaceReviewFragment"
         android:name="com.petpal.mungmate.ui.placereview.WritePlaceReviewFragment"
