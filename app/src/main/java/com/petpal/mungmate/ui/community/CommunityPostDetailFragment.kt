@@ -1,23 +1,21 @@
 package com.petpal.mungmate.ui.community
 
+
 import android.os.Bundle
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AlphaAnimation
+import androidx.coordinatorlayout.widget.CoordinatorLayout
+import androidx.fragment.app.Fragment
 import androidx.navigation.findNavController
-import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.firestore.FirebaseFirestore
 import com.petpal.mungmate.R
 import com.petpal.mungmate.databinding.FragmentCommunityPostDetailBinding
-import com.petpal.mungmate.model.Post
 
 
 class CommunityPostDetailFragment : Fragment() {
@@ -49,7 +47,7 @@ class CommunityPostDetailFragment : Fragment() {
 
             fadeOut.duration = 500
             communityPostDetailNestedScrollView.setOnScrollChangeListener { _, _, scrollY, _, _ ->
-                Log.d("scrollY",scrollY.toString())
+                Log.d("scrollY", scrollY.toString())
 
                 if (scrollY >= targetScrollPosition && !isFabVisible) {
 
@@ -105,21 +103,26 @@ class CommunityPostDetailFragment : Fragment() {
                 when (it?.itemId) {
                     R.id.item_modify -> {
                         findNavController().navigate(R.id.action_communityPostDetailFragment_to_communityDetailModifyFragment)
-                        Snackbar.make(requireView(), "글 수정하기", Snackbar.LENGTH_SHORT).show()
+                        Snackbar.make(rootView, "글 수정하기", Snackbar.LENGTH_SHORT).show()
                     }
 
                     R.id.item_delete -> {
                         val db = FirebaseFirestore.getInstance()
                         val postRef = db.collection("Post")
-                        Log.d("여기 Id",postGetId)
-                        postGetId?.let { id->
+                        Log.d("여기 Id", postGetId)
+                        postGetId?.let { id ->
                             postRef.document(id)
                                 .delete()
                                 .addOnFailureListener {
-                                    Snackbar.make(rootView, "데이터를 삭제 하는데 실패했습니다.", Snackbar.LENGTH_SHORT).show()
+                                    Snackbar.make(
+                                        rootView,
+                                        "데이터를 삭제 하는데 실패했습니다.",
+                                        Snackbar.LENGTH_SHORT
+                                    ).show()
                                 }
                         }
-                        Snackbar.make(requireView(), "게시글이 삭제 되었습니다.", Snackbar.LENGTH_SHORT).show()
+
+                        Snackbar.make(rootView, "게시글이 삭제 되었습니다.", Snackbar.LENGTH_SHORT).show()
                         val navController = findNavController()
                         navController.popBackStack()
                     }

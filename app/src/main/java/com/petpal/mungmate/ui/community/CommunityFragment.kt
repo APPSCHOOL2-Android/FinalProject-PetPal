@@ -117,8 +117,7 @@ class CommunityFragment : Fragment() {
                         communityBinding.communityPostWritingUpFab.startAnimation(fadeOut)
                         communityBinding.communityPostWritingUpFab.visibility = View.GONE
                         isTop = true
-                    } else if(currentPosition >= 7
-                    ) {
+                    } else if(currentPosition >= 5) {
                         // 최상단에서 내리기 시작하는 순간 -> FAB 보이기
                         if (isTop) {
                             communityBinding.communityPostWritingUpFab.visibility = View.VISIBLE
