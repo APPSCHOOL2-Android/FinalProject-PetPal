@@ -5,9 +5,14 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.navigation.NavController
+import androidx.navigation.NavDestination
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.divider.MaterialDividerItemDecoration
+import com.google.android.material.snackbar.Snackbar
 import com.petpal.mungmate.MainActivity
+import com.petpal.mungmate.R
 import com.petpal.mungmate.databinding.FragmentChatBinding
 import com.petpal.mungmate.model.ChatRoom
 

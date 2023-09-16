@@ -177,6 +177,13 @@
 
             </LinearLayout>
 
+            <TextView
+                android:id="@+id/textViewAcceptDate"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="이달의 산책 기록"
+                android:textAppearance="@style/TextAppearance.Material3.TitleMedium" />
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>

@@ -14,7 +14,7 @@
         android:minHeight="?attr/actionBarSize"
         android:theme="?attr/actionBarTheme"
         app:navigationIcon="@drawable/arrow_back_24px"
-        app:title="FAQ" />
+        app:title="FAQ"></com.google.android.material.appbar.MaterialToolbar>
 
     <LinearLayout
         android:layout_width="match_parent"

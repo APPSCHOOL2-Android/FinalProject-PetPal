@@ -49,7 +49,7 @@
         android:layout_gravity="center"
         android:layout_marginTop="@dimen/common_margin"
         android:numStars="5"
-        android:rating="4.5" />
+        android:rating="3" />
 
     <TextView
         android:id="@+id/textViewPlaceReviewAnnouncement2"
@@ -68,6 +68,7 @@
         >
 
         <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/editTextReviewContent"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:gravity="top"
