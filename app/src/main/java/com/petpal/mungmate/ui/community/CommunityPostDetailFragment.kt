@@ -109,7 +109,6 @@ class CommunityPostDetailFragment : Fragment() {
                     R.id.item_delete -> {
                         val db = FirebaseFirestore.getInstance()
                         val postRef = db.collection("Post")
-                        Log.d("여기 Id", postGetId)
                         postGetId?.let { id ->
                             postRef.document(id)
                                 .delete()
