@@ -44,7 +44,7 @@ class CommunityFragment : Fragment() {
     private lateinit var communityAdapter: CommunityAdapter
     private lateinit var rootView: View
     private lateinit var firestoreListener: ListenerRegistration // Firestore에서 이벤트 리스너를 등록할 때 반환되는 객체
-    private var postMutableList = mutableListOf<Post>()
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?,
@@ -55,7 +55,6 @@ class CommunityFragment : Fragment() {
             toolbar()
             communityRecyclerView()
             refreshLayout()
-
         }
 
         return communityBinding.root
@@ -74,7 +73,6 @@ class CommunityFragment : Fragment() {
                     R.id.item_community_category -> {
                         showSideSheet()
                     }
-
                 }
                 false
             }
@@ -90,7 +88,6 @@ class CommunityFragment : Fragment() {
             communityPostRecyclerView.smoothScrollToPosition(0)
         }
     }
-
 
     private fun FragmentCommunityBinding.communityRecyclerView() {
         communityPostRecyclerView.run {
@@ -129,7 +126,6 @@ class CommunityFragment : Fragment() {
                     }
                 }
             })
-
         }
     }
 
@@ -193,7 +189,6 @@ class CommunityFragment : Fragment() {
                     val timeDifferenceMillis =
                         currentTime.time - snapshotTime.time  // Firestore 시간에서 현재 시간을 뺌
 
-
                     val timeAgo = when {
                         timeDifferenceMillis < 60_000 -> "방금 전" // 1분 미만
                         timeDifferenceMillis < 3_600_000 -> "${timeDifferenceMillis / 60_000}분 전" // 1시간 미만
@@ -208,9 +203,7 @@ class CommunityFragment : Fragment() {
                 // 또는 원하는 뷰의 ID를 사용하세요.
                 Snackbar.make(rootView, "데이터를 불러오는데 실패했습니다.", Snackbar.LENGTH_SHORT).show()
             }
-
     }
-
 
     private fun configFirestoreRealtime() {
         val db = FirebaseFirestore.getInstance()
@@ -245,8 +238,6 @@ class CommunityFragment : Fragment() {
 
                 community.postDateCreated = "$timeAgo"
                 communityAdapter.add(community)
-                postMutableList.add(community)
-                postMutableList
                 when (value.type) {
                     DocumentChange.Type.ADDED -> communityAdapter.add(community)
                     DocumentChange.Type.MODIFIED -> communityAdapter.update(community)
@@ -266,5 +257,4 @@ class CommunityFragment : Fragment() {
         super.onPause()
         firestoreListener.remove()
     }
-
 }
