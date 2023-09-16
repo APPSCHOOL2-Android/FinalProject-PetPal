@@ -32,7 +32,8 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/common_small_margin"
             android:text="제목"
-            android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
+            android:maxLength="17"
+            android:textAppearance="@style/TextAppearance.AppCompat.Title"
             android:textStyle="bold"
             app:layout_constraintStart_toEndOf="@id/communityProfileImage"
             app:layout_constraintTop_toTopOf="@id/communityProfileImage" />

@@ -107,7 +107,6 @@ dependencies {
     implementation "com.google.firebase:firebase-firestore-ktx:24.7.1"
 
 
-
-
-
+    //firebase firestore
+    implementation("com.google.firebase:firebase-firestore-ktx")
 }

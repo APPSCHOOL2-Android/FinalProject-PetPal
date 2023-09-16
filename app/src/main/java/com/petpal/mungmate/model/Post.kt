@@ -1,55 +1,37 @@
 package com.petpal.mungmate.model
 
+import com.google.firebase.Timestamp
+
 data class Post(
-    val postID: String,
-    val authorUid: Long,
-    val userImage: String,
-    val userNickName: String,
-    val userPlace: String,
-    val postTitle: String,
-    val postCategory: String,
-    val postDateCreated: String,
-    val postImage: String,
-    val postContent: String,
-    val postLike: Long,
-    //TODO: Comment로 바꾸기
-    val postComment: List<String>,
-) {
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
+    val postID: String?=null, //게시글 id
+    val authorUid: Long=0,//작성자 id
+    val userImage: String?=null,//유저 프로필 사진
+    val userNickName: String?=null,//유저 닉네임
+    val userPlace: String?=null,//유저 위치
+    val postTitle: String?=null,//게시글 제목
+    val postCategory: String?=null,//게시글 카테고리
+    var postDateCreated: String? = null,//게시글 작성 날짜
+//    val postImages: List<PostImage>,//게시글 이미지 목록
+    val postImages:String?=null,
+    val postContent: String?=null,//게시글 내용
+    val postLike: Long=0,//게시글 좋아요 수
+//    val postComment: List<Comment>//게시글 댓글
+    val postComment:String?=null
+)
 
-        other as Post
+data class Comment(
+    val commentUid: Long,//댓글 작성자 id
+    val commentNickName: String,//댓글 작성자 닉네임
+    val commentDateCreated: String,//댓글 작성 날짜
+    val commentContent: String,//댓글 내용
+    val commentLike: Long,//댓글 좋아요 수
+    val parentID: String//부모 ID(최상위인 경우 "root")
+)
 
-        if (postID != other.postID) return false
-        if (authorUid != other.authorUid) return false
-        if (userImage != other.userImage) return false
-        if (userNickName != other.userNickName) return false
-        if (userPlace != other.userPlace) return false
-        if (postTitle != other.postTitle) return false
-        if (postCategory != other.postCategory) return false
-        if (postDateCreated != other.postDateCreated) return false
-        if (postImage != other.postImage) return false
-        if (postContent != other.postContent) return false
-        if (postLike != other.postLike) return false
-        if (postComment != other.postComment) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        var result = postID.hashCode()
-        result = 31 * result + authorUid.hashCode()
-        result = 31 * result + userImage.hashCode()
-        result = 31 * result + userNickName.hashCode()
-        result = 31 * result + userPlace.hashCode()
-        result = 31 * result + postTitle.hashCode()
-        result = 31 * result + postCategory.hashCode()
-        result = 31 * result + postDateCreated.hashCode()
-        result = 31 * result + postImage.hashCode()
-        result = 31 * result + postContent.hashCode()
-        result = 31 * result + postLike.hashCode()
-        result = 31 * result + postComment.hashCode()
-        return result
-    }
-}
+data class PostImage(
+    val mainImage:String,
+    val image1:String,
+    val image2:String,
+    val image3:String,
+    val image4:String,
+)
