@@ -52,6 +52,7 @@
     <string name="product_registration_contentText">내용을 입력하세요.\n( 내용 최대 300자 이내)</string>
 
     <string name="kakao_api_key">29842459a2117277a50ac661f2f7e089</string>
+    <string name="web_client_id">952517903388-uv2c0ms0p7abt2jk6ou9f88knb720bkt.apps.googleusercontent.com</string>
 
     <!-- 견종 문자열 배열 -->
     <string-array name="dog_breeds">

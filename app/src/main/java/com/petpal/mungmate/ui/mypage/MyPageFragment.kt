@@ -6,6 +6,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import com.google.android.material.snackbar.Snackbar
+import com.google.firebase.auth.FirebaseAuth
 import com.petpal.mungmate.MainActivity
 import com.petpal.mungmate.R
 import com.petpal.mungmate.databinding.FragmentMyPageBinding
@@ -15,6 +17,7 @@ class MyPageFragment : Fragment() {
     private val fragmentMyPageBinding get() = _fragmentMyPageBinding
     private lateinit var mainActivity: MainActivity
 
+    private val auth = FirebaseAuth.getInstance()
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?,
@@ -62,6 +65,14 @@ class MyPageFragment : Fragment() {
             cardViewProfile.setOnClickListener {
                 //회원가입 진입 인지, 마이페이지 진입인지 구분용
                 mainActivity.navigate(R.id.action_mainFragment_to_userInfoFragment, bundleOf("isRegister" to false))
+            }
+
+            buttonLogOut.setOnClickListener {
+            //로그아웃
+                auth.signOut()
+                Snackbar.make(requireView(),"로그아웃 되었습니다.",Snackbar.LENGTH_SHORT).show()
+                //로그인 화면으로 이동
+                mainActivity.navigate(R.id.userStartFragment)
             }
         }
         return fragmentMyPageBinding.root
