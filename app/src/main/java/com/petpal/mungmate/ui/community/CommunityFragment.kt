@@ -53,7 +53,7 @@ class CommunityFragment : Fragment() {
         communityBinding.run {
             toolbar()
             communityRecyclerView()
-            // configFirestore()
+            refreshLayout()
 
         }
 
@@ -100,7 +100,7 @@ class CommunityFragment : Fragment() {
             skeleton = applySkeleton(R.layout.row_community, 10).apply { showSkeleton() }
             Handler(Looper.getMainLooper()).postDelayed({
                 skeleton.showOriginal()
-            }, 3000)
+            }, 1000)
 
             // 최상단 FAB 숨기기, 스크롤시 FAB 보이기
             val fadeIn = AlphaAnimation(0f, 1f).apply { duration = 500 }
@@ -110,12 +110,15 @@ class CommunityFragment : Fragment() {
             addOnScrollListener(object : RecyclerView.OnScrollListener() {
                 override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                     super.onScrollStateChanged(recyclerView, newState)
+                    val currentPosition = (layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
+                    Log.d("currentPosition",currentPosition.toString())
                     // 최상단에 있는 순간 -> FAB 숨기기
                     if (!canScrollVertically(-1) && newState == RecyclerView.SCROLL_STATE_IDLE) {
                         communityBinding.communityPostWritingUpFab.startAnimation(fadeOut)
                         communityBinding.communityPostWritingUpFab.visibility = View.GONE
                         isTop = true
-                    } else {
+                    } else if(currentPosition >= 7
+                    ) {
                         // 최상단에서 내리기 시작하는 순간 -> FAB 보이기
                         if (isTop) {
                             communityBinding.communityPostWritingUpFab.visibility = View.VISIBLE
@@ -126,6 +129,20 @@ class CommunityFragment : Fragment() {
                 }
             })
 
+        }
+    }
+
+    private fun FragmentCommunityBinding.refreshLayout() {
+        refreshLayout.setOnRefreshListener {
+            // 새로고침 코드를 작성
+            communityAdapter.clear()
+            communityRecyclerView()
+            configFirestoreRealtime()
+            communityAdapter.notifyDataSetChanged()
+
+            // 새로고침 완료시,
+            // 새로고침 아이콘이 사라질 수 있게 isRefreshing = false
+            refreshLayout.isRefreshing = false
         }
     }
 

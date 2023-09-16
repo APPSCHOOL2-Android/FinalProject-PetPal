@@ -149,12 +149,25 @@
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:gravity="center"
-                android:text="좋아요 7"
+                android:text="좋아요"
                 android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@id/communityFavoriteLottie"
                 app:layout_constraintTop_toTopOf="parent" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/communityFavoriteCounter"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="0"
+                android:gravity="center"
+                android:textStyle="bold"
+                android:layout_marginStart="@dimen/common_small_margin"
+                android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1"
+                app:layout_constraintBottom_toBottomOf="@id/communityFavoriteTextView"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/communityFavoriteTextView"
+                app:layout_constraintTop_toTopOf="@id/communityFavoriteTextView" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -168,6 +181,16 @@
             android:drawablePadding="@dimen/common_small_padding"
             android:gravity="center"
             android:text="@string/comment"
+            android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/communityCommentCounter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginStart="@dimen/common_small_margin"
+            android:text="0"
+            android:textStyle="bold"
             android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1" />
 
     </LinearLayout>

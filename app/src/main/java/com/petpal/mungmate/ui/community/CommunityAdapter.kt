@@ -36,9 +36,9 @@ class CommunityAdapter(
         val communityPostDateCreated: TextView = item.communityPostDateCreated
         val communityPostImage: ImageView = item.communityPostImage
         val communityContent: TextView = item.communityContent
-        val communityCommentTextView: TextView = item.communityCommentTextView
+        val communityCommentCounter: TextView = item.communityCommentCounter
         val communityFavoriteLottie: LottieAnimationView = item.communityFavoriteLottie
-        val communityFavoriteTextView: TextView = item.communityFavoriteTextView
+        val communityFavoriteCounter: TextView = item.communityFavoriteCounter
 
         init {
             item.root.setOnClickListener {
@@ -96,8 +96,8 @@ class CommunityAdapter(
 
         holder.communityPostDateCreated.text = post.postDateCreated.toString()
         holder.communityContent.text = post.postContent
-        holder.communityCommentTextView.append(post.postComment.toString())
-        holder.communityFavoriteTextView.text = post.postLike.toString()
+        holder.communityCommentCounter.text= post.postComment
+        holder.communityFavoriteCounter.text = post.postLike.toString()
 
         var isClicked = false
 
@@ -142,4 +142,10 @@ class CommunityAdapter(
             notifyItemRemoved(index)
         }
     }
+
+    fun clear() {
+        postList.clear()
+    }
+
+
 }

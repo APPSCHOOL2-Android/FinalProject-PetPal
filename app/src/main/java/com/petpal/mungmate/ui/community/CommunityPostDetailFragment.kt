@@ -46,8 +46,11 @@ class CommunityPostDetailFragment : Fragment() {
             val fadeOut = AlphaAnimation(1f, 0f)
             val targetScrollPosition =
                 resources.getDimensionPixelSize(R.dimen.target_scroll_position)
+
             fadeOut.duration = 500
             communityPostDetailNestedScrollView.setOnScrollChangeListener { _, _, scrollY, _, _ ->
+                Log.d("scrollY",scrollY.toString())
+
                 if (scrollY >= targetScrollPosition && !isFabVisible) {
 
                     communityPostDetailCommentFab.startAnimation(fadeIn)
