@@ -94,7 +94,12 @@ class CommunityAdapter(
         holder.communityFavoriteTextView.text = post.postLike.toString()
 
         var isClicked = false
+
+        holder.communityFavoriteLottie.scaleX = 2.0f
+        holder.communityFavoriteLottie.scaleY = 2.0f
+
         holder.communityFavoriteLottie.setOnClickListener {
+
             isClicked = !isClicked // 클릭할 때마다 변수를 반전시킴
             if (isClicked) {
                 holder.communityFavoriteLottie.playAnimation()
