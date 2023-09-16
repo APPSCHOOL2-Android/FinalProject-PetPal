@@ -25,6 +25,7 @@
                 android:orientation="horizontal">
 
                 <de.hdodenhof.circleimageview.CircleImageView
+                    android:id="@+id/matchHistoryUserImage"
                     android:layout_width="50dp"
                     android:layout_height="50dp"
                     android:src="@drawable/pets_24px" />

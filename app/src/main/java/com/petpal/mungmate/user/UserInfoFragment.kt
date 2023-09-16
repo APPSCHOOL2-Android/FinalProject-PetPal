@@ -29,6 +29,8 @@ class UserInfoFragment : Fragment() {
             if (!isRegister) {
                 //수정완료 버튼 보이기
                 userInfoToolbar.inflateMenu(R.menu.complete_menu)
+                //툴바 타이틀 내 정보 수정으로 변경
+                userInfoToolbar.title = "내 정보 수정"
                 //다음 버튼 안보이기
                 infoToNextButton.visibility = View.GONE
             }
