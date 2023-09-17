@@ -16,6 +16,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.firestore.FirebaseFirestore
 import com.petpal.mungmate.R
 import com.petpal.mungmate.databinding.FragmentCommunityPostDetailBinding
+import com.petpal.mungmate.model.Post
 
 
 class CommunityPostDetailFragment : Fragment() {
@@ -38,38 +39,42 @@ class CommunityPostDetailFragment : Fragment() {
             val postid = args.position
             postGetId = postid
 //            Log.d("확인", postid.toString())
-
-            val fadeIn = AlphaAnimation(0f, 1f)
-            fadeIn.duration = 500
-            val fadeOut = AlphaAnimation(1f, 0f)
-            val targetScrollPosition =
-                resources.getDimensionPixelSize(R.dimen.target_scroll_position)
-
-            fadeOut.duration = 500
-            communityPostDetailNestedScrollView.setOnScrollChangeListener { _, _, scrollY, _, _ ->
-                Log.d("scrollY", scrollY.toString())
-
-                if (scrollY >= targetScrollPosition && !isFabVisible) {
-
-                    communityPostDetailCommentFab.startAnimation(fadeIn)
-                    communityPostDetailCommentFab.visibility = View.VISIBLE
-                    isFabVisible = true
-
-                } else if (scrollY < targetScrollPosition && isFabVisible) {
-
-                    communityPostDetailCommentFab.startAnimation(fadeOut)
-                    communityPostDetailCommentFab.visibility = View.GONE
-                    isFabVisible = false
-
-                }
-            }
-
-            communityPostDetailCommentFab.setOnClickListener {
-                communityPostDetailNestedScrollView.smoothScrollTo(0, 0)
-            }
+            getFireStoreData()
+            scrollUpFab()
         }
 
         return communityPostDetailBinding.root
+    }
+
+    private fun FragmentCommunityPostDetailBinding.scrollUpFab() {
+        val fadeIn = AlphaAnimation(0f, 1f)
+        fadeIn.duration = 500
+        val fadeOut = AlphaAnimation(1f, 0f)
+        val targetScrollPosition =
+            resources.getDimensionPixelSize(R.dimen.target_scroll_position)
+
+        fadeOut.duration = 500
+        communityPostDetailNestedScrollView.setOnScrollChangeListener { _, _, scrollY, _, _ ->
+            Log.d("scrollY", scrollY.toString())
+
+            if (scrollY >= targetScrollPosition && !isFabVisible) {
+
+                communityPostDetailCommentFab.startAnimation(fadeIn)
+                communityPostDetailCommentFab.visibility = View.VISIBLE
+                isFabVisible = true
+
+            } else if (scrollY < targetScrollPosition && isFabVisible) {
+
+                communityPostDetailCommentFab.startAnimation(fadeOut)
+                communityPostDetailCommentFab.visibility = View.GONE
+                isFabVisible = false
+
+            }
+        }
+
+        communityPostDetailCommentFab.setOnClickListener {
+            communityPostDetailNestedScrollView.smoothScrollTo(0, 0)
+        }
     }
 
     private fun FragmentCommunityPostDetailBinding.lottie() {
@@ -107,37 +112,50 @@ class CommunityPostDetailFragment : Fragment() {
                     }
 
                     R.id.item_delete -> {
-
                         val dlg = CommunityDeleteDialog(requireContext())
-                        dlg.listener = object: CommunityDeleteDialog.LessonDeleteDialogClickedListener {
-                            override fun onDeleteClicked() {
-                                val db = FirebaseFirestore.getInstance()
-                                val postRef = db.collection("Post")
-                                postGetId?.let { id ->
-                                    postRef.document(id)
-                                        .delete()
-                                        .addOnFailureListener {
-                                            Snackbar.make(
-                                                rootView,
-                                                "데이터를 삭제 하는데 실패했습니다.",
-                                                Snackbar.LENGTH_SHORT
-                                            ).show()
-                                        }
+                        dlg.listener =
+                            object : CommunityDeleteDialog.LessonDeleteDialogClickedListener {
+                                override fun onDeleteClicked() {
+                                    val db = FirebaseFirestore.getInstance()
+                                    val postRef = db.collection("Post")
+                                    postGetId?.let { id ->
+                                        postRef.document(id)
+                                            .delete()
+                                            .addOnFailureListener {
+                                                Snackbar.make(
+                                                    rootView,
+                                                    "데이터를 삭제 하는데 실패했습니다.",
+                                                    Snackbar.LENGTH_SHORT
+                                                ).show()
+                                            }
+                                    }
+
+                                    Snackbar.make(rootView, "게시글이 삭제 되었습니다.", Snackbar.LENGTH_SHORT)
+                                        .show()
+                                    val navController = findNavController()
+                                    navController.popBackStack()
                                 }
-
-                                Snackbar.make(rootView, "게시글이 삭제 되었습니다.", Snackbar.LENGTH_SHORT).show()
-                                val navController = findNavController()
-                                navController.popBackStack()
                             }
-                        }
                         dlg.start()
-
                     }
-
                 }
                 false
             }
+        }
+    }
 
+    private fun getFireStoreData() {
+        val db = FirebaseFirestore.getInstance()
+        val postRef = db.collection("Post")
+        postGetId?.let { id ->
+            postRef.document(id)
+                .get()
+                .addOnSuccessListener { documentSnapshot ->
+                    if (documentSnapshot.exists()) {
+                        val postTitle = documentSnapshot.getString("postTitle")
+                        Log.d("postTitle", postTitle.toString())
+                    }
+                }
         }
     }
 
@@ -146,10 +164,7 @@ class CommunityPostDetailFragment : Fragment() {
             val communityAdapter = CommunityDetailCommentAdapter(requireContext())
             adapter = communityAdapter
             setHasFixedSize(true)
-
             layoutManager = LinearLayoutManager(requireContext())
-
         }
     }
-
 }
