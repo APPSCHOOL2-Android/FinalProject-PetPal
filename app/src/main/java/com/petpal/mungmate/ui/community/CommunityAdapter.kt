@@ -40,7 +40,8 @@ class CommunityAdapter(
 
                 mainActivity.navigate(
                     R.id.action_mainFragment_to_communityPostDetailFragment,
-                    bundle
+                    bundle,
+
                 )
             }
         }

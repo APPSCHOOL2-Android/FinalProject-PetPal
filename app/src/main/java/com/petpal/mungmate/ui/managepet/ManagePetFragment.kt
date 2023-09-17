@@ -12,7 +12,6 @@ import com.google.android.material.divider.MaterialDividerItemDecoration
 import com.petpal.mungmate.MainActivity
 import com.petpal.mungmate.R
 import com.petpal.mungmate.databinding.FragmentManagePetBinding
-import com.petpal.mungmate.model.Announcement
 
 
 class ManagePetFragment : Fragment() {
@@ -31,7 +30,8 @@ class ManagePetFragment : Fragment() {
             fabGoToAddPet.setOnClickListener {
                 mainActivity.navigate(
                     R.id.action_managePetFragment_to_addPetFragment,
-                    bundleOf("isAdd" to true)
+                    bundleOf("isAdd" to true),
+
                 )
             }
             toolbarManagePet.setNavigationOnClickListener {

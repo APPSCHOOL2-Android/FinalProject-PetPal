@@ -24,44 +24,76 @@ class MyPageFragment : Fragment() {
 
         fragmentMyPageBinding.run {
             buttonManagePet.setOnClickListener {
-                mainActivity.navigate(R.id.action_mainFragment_to_managePetFragment)
+                mainActivity.navigate(
+                    R.id.action_mainFragment_to_managePetFragment,
+
+                )
             }
 
             buttonWalkHistory.setOnClickListener {
-                mainActivity.navigate(R.id.action_mainFragment_to_walk_history)
+                mainActivity.navigate(
+                    R.id.action_mainFragment_to_walk_history,
+
+                )
             }
 
             buttonGoToMatchHistory.setOnClickListener {
-                mainActivity.navigate(R.id.action_mainFragment_to_match_history)
+                mainActivity.navigate(
+                    R.id.action_mainFragment_to_match_history,
+
+                )
             }
 
             buttonGoToManageBlock.setOnClickListener {
-               mainActivity.navigate(R.id.action_mainFragment_to_manage_block)
+               mainActivity.navigate(
+                   R.id.action_mainFragment_to_manage_block,
+
+               )
             }
 
             buttonAnnouncement.setOnClickListener {
-                mainActivity.navigate(R.id.action_mainFragment_to_announcement)
+                mainActivity.navigate(
+                    R.id.action_mainFragment_to_announcement,
+
+                )
             }
 
             buttonFAQ.setOnClickListener {
-                mainActivity.navigate(R.id.action_mainFragment_to_FAQFragment)
+                mainActivity.navigate(
+                    R.id.action_mainFragment_to_FAQFragment,
+
+                )
             }
 
             buttonInquire.setOnClickListener {
-                mainActivity.navigate(R.id.action_mainFragment_to_inquiryFragment)
+                mainActivity.navigate(
+                    R.id.action_mainFragment_to_inquiryFragment,
+
+                )
             }
 
             buttonAddPet.setOnClickListener {
-                mainActivity.navigate(R.id.action_mainFragment_to_addPetFragment, bundleOf("isAdd" to true))
+                mainActivity.navigate(
+                    R.id.action_mainFragment_to_addPetFragment,
+                    bundleOf("isAdd" to true),
+
+                )
             }
 
             buttonOrderHistory.setOnClickListener {
-                mainActivity.navigate(R.id.action_mainFragment_to_order_history)
+                mainActivity.navigate(
+                    R.id.action_mainFragment_to_order_history,
+
+                )
             }
 
             cardViewProfile.setOnClickListener {
                 //회원가입 진입 인지, 마이페이지 진입인지 구분용
-                mainActivity.navigate(R.id.action_mainFragment_to_userInfoFragment, bundleOf("isRegister" to false))
+                mainActivity.navigate(
+                    R.id.action_mainFragment_to_userInfoFragment,
+                    bundleOf("isRegister" to false),
+
+                )
             }
         }
         return fragmentMyPageBinding.root

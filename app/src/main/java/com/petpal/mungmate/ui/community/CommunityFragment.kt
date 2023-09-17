@@ -3,22 +3,17 @@ package com.petpal.mungmate.ui.community
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AlphaAnimation
-import android.widget.ImageButton
 import android.widget.TextView
-import androidx.navigation.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.faltenreich.skeletonlayout.Skeleton
 import com.faltenreich.skeletonlayout.applySkeleton
-import com.faltenreich.skeletonlayout.createSkeleton
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.google.android.material.chip.Chip
 import com.google.android.material.sidesheet.SideSheetBehavior
 import com.google.android.material.sidesheet.SideSheetCallback
 import com.google.android.material.sidesheet.SideSheetDialog
@@ -90,7 +85,10 @@ class CommunityFragment : Fragment() {
 
                         R.id.item_community_search->{
                             mainActivity
-                                .navigate(R.id.action_mainFragment_to_communitySearchFragment)
+                                .navigate(
+                                    R.id.action_mainFragment_to_communitySearchFragment,
+
+                                )
                         }
 
                         R.id.item_community_category -> {
@@ -104,7 +102,10 @@ class CommunityFragment : Fragment() {
 
             communityPostWritingFab.setOnClickListener {
                 mainActivity
-                    .navigate(R.id.action_mainFragment_to_communityWritingFragment)
+                    .navigate(
+                        R.id.action_mainFragment_to_communityWritingFragment,
+
+                    )
             }
 
             communityPostWritingUpFab.setOnClickListener {

@@ -36,7 +36,10 @@ class ChatRoomAdapter(
 
             rowBinding.root.setOnClickListener {
                 // 채팅방 이동 (roomId 전달 필요)
-                activity.navigate(R.id.action_mainFragment_to_chat, bundleOf("position" to adapterPosition))
+                activity.navigate(
+                    R.id.action_mainFragment_to_chat,
+                    bundleOf("position" to adapterPosition),
+                )
             }
         }
     }
