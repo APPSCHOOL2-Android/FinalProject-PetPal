@@ -52,6 +52,9 @@
     <string name="product_registration_contentText">내용을 입력하세요.\n( 내용 최대 300자 이내)</string>
 
     <string name="kakao_api_key">29842459a2117277a50ac661f2f7e089</string>
+    <string name="cancel">취소</string>
+    <string name="check">확인</string>
+    <string name="delete_dialog_title">정말 게시글을 삭제하시겠습니까?</string>
 
     <!-- 견종 문자열 배열 -->
     <string-array name="dog_breeds">

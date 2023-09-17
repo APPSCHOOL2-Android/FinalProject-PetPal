@@ -107,23 +107,31 @@ class CommunityPostDetailFragment : Fragment() {
                     }
 
                     R.id.item_delete -> {
-                        val db = FirebaseFirestore.getInstance()
-                        val postRef = db.collection("Post")
-                        postGetId?.let { id ->
-                            postRef.document(id)
-                                .delete()
-                                .addOnFailureListener {
-                                    Snackbar.make(
-                                        rootView,
-                                        "데이터를 삭제 하는데 실패했습니다.",
-                                        Snackbar.LENGTH_SHORT
-                                    ).show()
-                                }
-                        }
 
-                        Snackbar.make(rootView, "게시글이 삭제 되었습니다.", Snackbar.LENGTH_SHORT).show()
-                        val navController = findNavController()
-                        navController.popBackStack()
+                        val dlg = CommunityDeleteDialog(requireContext())
+                        dlg.listener = object: CommunityDeleteDialog.LessonDeleteDialogClickedListener {
+                            override fun onDeleteClicked() {
+                                val db = FirebaseFirestore.getInstance()
+                                val postRef = db.collection("Post")
+                                postGetId?.let { id ->
+                                    postRef.document(id)
+                                        .delete()
+                                        .addOnFailureListener {
+                                            Snackbar.make(
+                                                rootView,
+                                                "데이터를 삭제 하는데 실패했습니다.",
+                                                Snackbar.LENGTH_SHORT
+                                            ).show()
+                                        }
+                                }
+
+                                Snackbar.make(rootView, "게시글이 삭제 되었습니다.", Snackbar.LENGTH_SHORT).show()
+                                val navController = findNavController()
+                                navController.popBackStack()
+                            }
+                        }
+                        dlg.start()
+
                     }
 
                 }
