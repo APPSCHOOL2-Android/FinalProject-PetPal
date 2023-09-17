@@ -76,24 +76,20 @@ class CommunityAdapter(
         Glide
             .with(context)
             .load(post.userImage)
-            .diskCacheStrategy(DiskCacheStrategy.NONE)
-            .centerCrop()
+            .diskCacheStrategy(DiskCacheStrategy.ALL)
+            .fitCenter()
             .into(holder.communityProfileImage)
 
         Glide
             .with(context)
             .load(post.postImages)
-            .diskCacheStrategy(DiskCacheStrategy.NONE)
-            .centerCrop()
+            .diskCacheStrategy(DiskCacheStrategy.ALL)
+            .fitCenter()
             .into(holder.communityPostImage)
 
         holder.communityPostTitle.text = post.postTitle
         holder.communityUserNickName.text = post.userNickName
         holder.communityUserPlace.text = post.userPlace
-
-
-
-
         holder.communityPostDateCreated.text = post.postDateCreated.toString()
         holder.communityContent.text = post.postContent
         holder.communityCommentCounter.text= post.postComment

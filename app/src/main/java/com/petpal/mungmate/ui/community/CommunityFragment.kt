@@ -28,6 +28,11 @@ import com.petpal.mungmate.MainActivity
 import com.petpal.mungmate.R
 import com.petpal.mungmate.databinding.FragmentCommunityBinding
 import com.petpal.mungmate.model.Post
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -44,7 +49,7 @@ class CommunityFragment : Fragment() {
     private lateinit var communityAdapter: CommunityAdapter
     private lateinit var rootView: View
     private lateinit var firestoreListener: ListenerRegistration // Firestore에서 이벤트 리스너를 등록할 때 반환되는 객체
-
+    private var firestoreJob: Job? = null
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?,
@@ -55,6 +60,9 @@ class CommunityFragment : Fragment() {
             toolbar()
             communityRecyclerView()
             refreshLayout()
+
+
+
         }
 
         return communityBinding.root
@@ -96,9 +104,7 @@ class CommunityFragment : Fragment() {
             setHasFixedSize(true)
             layoutManager = LinearLayoutManager(requireContext())
             skeleton = applySkeleton(R.layout.row_community, 10).apply { showSkeleton() }
-            Handler(Looper.getMainLooper()).postDelayed({
-                skeleton.showOriginal()
-            }, 1000)
+
 
             // 최상단 FAB 숨기기, 스크롤시 FAB 보이기
             val fadeIn = AlphaAnimation(0f, 1f).apply { duration = 500 }
@@ -177,13 +183,11 @@ class CommunityFragment : Fragment() {
             .get()
             .addOnSuccessListener { snapshots ->
                 val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-                dateFormat.timeZone = TimeZone.getTimeZone("Asia/Seoul")// 시간대를 UTC로 설정
+                dateFormat.timeZone = TimeZone.getTimeZone("Asia/Seoul")
 
                 for (document in snapshots) {
                     val community = document.toObject(Post::class.java)
-                    communityAdapter.add(community)
-                    val snapshotTime =
-                        dateFormat.parse(community.postDateCreated) // Firestore에서 가져온 시간 문자열을 Date 객체로 변환
+                    val snapshotTime = dateFormat.parse(community.postDateCreated) // Firestore에서 가져온 시간 문자열을 Date 객체로 변환
 
                     val currentTime = Date()
                     val timeDifferenceMillis =
@@ -200,7 +204,6 @@ class CommunityFragment : Fragment() {
                 }
             }
             .addOnFailureListener {
-                // 또는 원하는 뷰의 ID를 사용하세요.
                 Snackbar.make(rootView, "데이터를 불러오는데 실패했습니다.", Snackbar.LENGTH_SHORT).show()
             }
     }
@@ -245,6 +248,11 @@ class CommunityFragment : Fragment() {
                     else -> {}
                 }
             }
+
+            firestoreJob?.cancel() // 이전의 Job이 있으면 취소
+            firestoreJob = CoroutineScope(Dispatchers.Main).launch {
+                skeleton.showOriginal()
+            }
         }
     }
 
@@ -256,5 +264,6 @@ class CommunityFragment : Fragment() {
     override fun onPause() {
         super.onPause()
         firestoreListener.remove()
+        firestoreJob?.cancel()
     }
 }
