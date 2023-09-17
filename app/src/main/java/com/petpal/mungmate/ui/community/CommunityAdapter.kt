@@ -2,15 +2,18 @@ package com.petpal.mungmate.ui.community
 
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.navigation.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import com.airbnb.lottie.LottieAnimationView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.petpal.mungmate.MainActivity
+import com.petpal.mungmate.MainFragmentDirections
 import com.petpal.mungmate.R
 import com.petpal.mungmate.databinding.RowCommunityBinding
 import com.petpal.mungmate.model.Post
@@ -33,19 +36,22 @@ class CommunityAdapter(
         val communityPostDateCreated: TextView = item.communityPostDateCreated
         val communityPostImage: ImageView = item.communityPostImage
         val communityContent: TextView = item.communityContent
-        val communityCommentTextView: TextView = item.communityCommentTextView
+        val communityCommentCounter: TextView = item.communityCommentCounter
         val communityFavoriteLottie: LottieAnimationView = item.communityFavoriteLottie
-        val communityFavoriteTextView: TextView = item.communityFavoriteTextView
+        val communityFavoriteCounter: TextView = item.communityFavoriteCounter
 
         init {
             item.root.setOnClickListener {
-                val bundle = Bundle()
-                bundle.putInt("position", adapterPosition)
+                val bundle = Bundle().apply {
+                    putString("position", postList[adapterPosition].postID)
+                }
 
+                Log.d("확인2", postList[adapterPosition].postID.toString())
                 mainActivity.navigate(
                     R.id.action_mainFragment_to_communityPostDetailFragment,
                     bundle
                 )
+
             }
         }
 
@@ -90,8 +96,8 @@ class CommunityAdapter(
 
         holder.communityPostDateCreated.text = post.postDateCreated.toString()
         holder.communityContent.text = post.postContent
-        holder.communityCommentTextView.append(post.postComment.toString())
-        holder.communityFavoriteTextView.text = post.postLike.toString()
+        holder.communityCommentCounter.text= post.postComment
+        holder.communityFavoriteCounter.text = post.postLike.toString()
 
         var isClicked = false
 
@@ -116,6 +122,30 @@ class CommunityAdapter(
         if (!postList.contains(post)) {
             postList.add(post)
             notifyItemChanged(postList.size - 1)
+        } else {
+            update(post)
         }
     }
+
+    fun update(post: Post) {
+        val index = postList.indexOf(post)
+        if (index != -1) {
+            postList[index] = post
+            notifyItemChanged(index)
+        }
+    }
+
+    fun delete(post: Post) {
+        val index = postList.indexOf(post)
+        if (index != -1) {
+            postList.removeAt(index)
+            notifyItemRemoved(index)
+        }
+    }
+
+    fun clear() {
+        postList.clear()
+    }
+
+
 }

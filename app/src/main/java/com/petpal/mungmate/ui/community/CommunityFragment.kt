@@ -3,6 +3,7 @@ package com.petpal.mungmate.ui.community
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.text.format.DateUtils
 import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -18,7 +19,10 @@ import com.google.android.material.sidesheet.SideSheetBehavior
 import com.google.android.material.sidesheet.SideSheetCallback
 import com.google.android.material.sidesheet.SideSheetDialog
 import com.google.android.material.snackbar.Snackbar
+import com.google.firebase.Timestamp
+import com.google.firebase.firestore.DocumentChange
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.Query
 import com.petpal.mungmate.MainActivity
 import com.petpal.mungmate.R
@@ -39,6 +43,8 @@ class CommunityFragment : Fragment() {
     private lateinit var mainActivity: MainActivity
     private lateinit var communityAdapter: CommunityAdapter
     private lateinit var rootView: View
+    private lateinit var firestoreListener: ListenerRegistration // Firestore에서 이벤트 리스너를 등록할 때 반환되는 객체
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?,
@@ -48,7 +54,7 @@ class CommunityFragment : Fragment() {
         communityBinding.run {
             toolbar()
             communityRecyclerView()
-            configFirestore()
+            refreshLayout()
         }
 
         return communityBinding.root
@@ -67,7 +73,6 @@ class CommunityFragment : Fragment() {
                     R.id.item_community_category -> {
                         showSideSheet()
                     }
-
                 }
                 false
             }
@@ -84,7 +89,6 @@ class CommunityFragment : Fragment() {
         }
     }
 
-
     private fun FragmentCommunityBinding.communityRecyclerView() {
         communityPostRecyclerView.run {
             communityAdapter = CommunityAdapter(requireContext(), mainActivity, mutableListOf())
@@ -94,7 +98,7 @@ class CommunityFragment : Fragment() {
             skeleton = applySkeleton(R.layout.row_community, 10).apply { showSkeleton() }
             Handler(Looper.getMainLooper()).postDelayed({
                 skeleton.showOriginal()
-            }, 3000)
+            }, 1000)
 
             // 최상단 FAB 숨기기, 스크롤시 FAB 보이기
             val fadeIn = AlphaAnimation(0f, 1f).apply { duration = 500 }
@@ -104,12 +108,15 @@ class CommunityFragment : Fragment() {
             addOnScrollListener(object : RecyclerView.OnScrollListener() {
                 override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                     super.onScrollStateChanged(recyclerView, newState)
+                    val currentPosition =
+                        (layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
+                    Log.d("currentPosition", currentPosition.toString())
                     // 최상단에 있는 순간 -> FAB 숨기기
                     if (!canScrollVertically(-1) && newState == RecyclerView.SCROLL_STATE_IDLE) {
                         communityBinding.communityPostWritingUpFab.startAnimation(fadeOut)
                         communityBinding.communityPostWritingUpFab.visibility = View.GONE
                         isTop = true
-                    } else {
+                    } else if (currentPosition >= 5) {
                         // 최상단에서 내리기 시작하는 순간 -> FAB 보이기
                         if (isTop) {
                             communityBinding.communityPostWritingUpFab.visibility = View.VISIBLE
@@ -119,7 +126,20 @@ class CommunityFragment : Fragment() {
                     }
                 }
             })
+        }
+    }
 
+    private fun FragmentCommunityBinding.refreshLayout() {
+        refreshLayout.setOnRefreshListener {
+            // 새로고침 코드를 작성
+            communityAdapter.clear()
+            communityRecyclerView()
+            configFirestore()
+            communityAdapter.notifyDataSetChanged()
+
+            // 새로고침 완료시,
+            // 새로고침 아이콘이 사라질 수 있게 isRefreshing = false
+            refreshLayout.isRefreshing = false
         }
     }
 
@@ -161,11 +181,13 @@ class CommunityFragment : Fragment() {
 
                 for (document in snapshots) {
                     val community = document.toObject(Post::class.java)
-                    val snapshotTime = dateFormat.parse(community.postDateCreated) // Firestore에서 가져온 시간 문자열을 Date 객체로 변환
+                    communityAdapter.add(community)
+                    val snapshotTime =
+                        dateFormat.parse(community.postDateCreated) // Firestore에서 가져온 시간 문자열을 Date 객체로 변환
 
                     val currentTime = Date()
-                    val timeDifferenceMillis = currentTime.time -snapshotTime.time  // Firestore 시간에서 현재 시간을 뺌
-
+                    val timeDifferenceMillis =
+                        currentTime.time - snapshotTime.time  // Firestore 시간에서 현재 시간을 뺌
 
                     val timeAgo = when {
                         timeDifferenceMillis < 60_000 -> "방금 전" // 1분 미만
@@ -178,9 +200,61 @@ class CommunityFragment : Fragment() {
                 }
             }
             .addOnFailureListener {
+                // 또는 원하는 뷰의 ID를 사용하세요.
                 Snackbar.make(rootView, "데이터를 불러오는데 실패했습니다.", Snackbar.LENGTH_SHORT).show()
             }
-
     }
 
+    private fun configFirestoreRealtime() {
+        val db = FirebaseFirestore.getInstance()
+        val postRef = db.collection("Post")
+            .orderBy("postDateCreated", Query.Direction.DESCENDING) // 최근에 등록한거 순으로..
+        firestoreListener = postRef.addSnapshotListener { values, error ->
+            if (error != null) {
+                Snackbar.make(rootView, "데이터를 불러오는데 실패했습니다.", Snackbar.LENGTH_SHORT).show()
+                return@addSnapshotListener
+            }
+
+            for (value in values!!.documentChanges) {
+
+                val community = value.document.toObject(Post::class.java)
+                community.postID = value.document.id
+                val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+                dateFormat.timeZone = TimeZone.getTimeZone("Asia/Seoul")// 시간대를 UTC로 설정
+                val snapshotTime =
+                    dateFormat.parse(community.postDateCreated) // Firestore에서 가져온 시간 문자열을 Date 객체로 변환
+
+                val currentTime = Date()
+                val timeDifferenceMillis =
+                    currentTime.time - snapshotTime.time  // Firestore 시간에서 현재 시간을 뺌
+
+
+                val timeAgo = when {
+                    timeDifferenceMillis < 60_000 -> "방금 전" // 1분 미만
+                    timeDifferenceMillis < 3_600_000 -> "${timeDifferenceMillis / 60_000}분 전" // 1시간 미만
+                    timeDifferenceMillis < 86_400_000 -> "${timeDifferenceMillis / 3_600_000}시간 전" // 1일 미만
+                    else -> "${timeDifferenceMillis / 86_400_000}일 전" // 1일 이상 전
+                }
+
+                community.postDateCreated = "$timeAgo"
+                communityAdapter.add(community)
+                when (value.type) {
+                    DocumentChange.Type.ADDED -> communityAdapter.add(community)
+                    DocumentChange.Type.MODIFIED -> communityAdapter.update(community)
+                    DocumentChange.Type.REMOVED -> communityAdapter.delete(community)
+                    else -> {}
+                }
+            }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        configFirestoreRealtime()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        firestoreListener.remove()
+    }
 }

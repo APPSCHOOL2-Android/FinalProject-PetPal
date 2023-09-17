@@ -122,6 +122,8 @@
         android:id="@+id/communityPostDetailFragment"
         android:name="com.petpal.mungmate.ui.community.CommunityPostDetailFragment"
         android:label="CommunityPostDetailFragment">
+
+
         <action
             android:id="@+id/action_communityPostDetailFragment_to_communityDetailModifyFragment"
             app:destination="@id/communityDetailModifyFragment"
@@ -129,6 +131,9 @@
             app:exitAnim="@anim/to_left"
             app:popEnterAnim="@anim/from_left"
             app:popExitAnim="@anim/to_right" />
+        <argument
+            android:name="position"
+            app:argType="string" />
     </fragment>
     <fragment
         android:id="@+id/communitySearchFragment"
