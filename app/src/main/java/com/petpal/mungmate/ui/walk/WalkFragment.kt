@@ -37,16 +37,10 @@ import com.petpal.mungmate.model.Favorite
 import com.petpal.mungmate.model.KakaoSearchResponse
 import com.petpal.mungmate.model.Place
 import com.petpal.mungmate.utils.LastKnownLocation
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import net.daum.mf.map.api.MapPOIItem
 import net.daum.mf.map.api.MapPoint
 import net.daum.mf.map.api.MapView
-
-
-
-
 class WalkFragment : Fragment(),
 
 
@@ -92,7 +86,6 @@ class WalkFragment : Fragment(),
 
         return fragmentWalkBinding.root
     }
-
     private fun setupMapView() {
         //필터 드로어 제어
         fragmentWalkBinding.drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
@@ -197,7 +190,6 @@ class WalkFragment : Fragment(),
     }
 
     private fun getCurrentLocation() {
-        Log.d("getlocation","getCurrent")
         if (ActivityCompat.checkSelfPermission(
                 requireContext(),
                 Manifest.permission.ACCESS_FINE_LOCATION
@@ -216,7 +208,6 @@ class WalkFragment : Fragment(),
     }
 
     private fun getLastLocation() {
-        Log.d("getlocation","getLast")
         if (ActivityCompat.checkSelfPermission(
                 requireContext(),
                 Manifest.permission.ACCESS_FINE_LOCATION
@@ -267,7 +258,6 @@ class WalkFragment : Fragment(),
         }
     }
 
-
     private fun showSnackbar(message: String) {
         Snackbar.make(fragmentWalkBinding.root, message, Snackbar.LENGTH_LONG).show()
     }
@@ -302,7 +292,6 @@ class WalkFragment : Fragment(),
                 isFavorited = true
             }
         }
-
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.favoriteCount.collect { count ->
                 val favoriteCountTextView =
@@ -338,13 +327,13 @@ class WalkFragment : Fragment(),
 
             if (reviews.isNotEmpty()) {
                 val firstReview = reviews[0]
-                placeuserRating1.rating = firstReview.rating
-                placeuserReview1.text = firstReview.review
+                placeuserRating1.rating = firstReview.rating!!
+                placeuserReview1.text = firstReview.comment
 
                 if (reviews.size > 1) {
                     val secondReview = reviews[1]
-                    placeuserRating2.rating = secondReview.rating
-                    placeuserReview2.text = secondReview.review
+                    placeuserRating2.rating = secondReview.rating!!
+                    placeuserReview2.text = secondReview.comment
                 }
             } else {
                 placeuserRating1.visibility = View.GONE
@@ -377,6 +366,7 @@ class WalkFragment : Fragment(),
                         val bundle = Bundle()
                         bundle.putString("place_name", selectedPlace?.place_name)
                         bundle.putString("phone", selectedPlace?.phone)
+                        bundle.putString("place_id", selectedPlace?.id)
                         bundle.putString("place_road_adress_name", selectedPlace?.road_address_name)
                         bundle.putString("place_category", selectedPlace?.category_group_name)
                         mainActivity.navigate(

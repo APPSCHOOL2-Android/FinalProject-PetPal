@@ -5,110 +5,111 @@ import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
-import android.view.View.OnClickListener
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.RatingBar
 import android.widget.TextView
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.petpal.mungmate.R
 import com.petpal.mungmate.databinding.FragmentPlaceReviewBinding
 import com.petpal.mungmate.databinding.RowPlaceReviewBinding
+import com.petpal.mungmate.model.Review
+import com.petpal.mungmate.ui.walk.WalkRepository
+import com.petpal.mungmate.ui.walk.WalkViewModel
+import com.petpal.mungmate.ui.walk.WalkViewModelFactory
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 
 class PlaceReviewFragment : Fragment() {
-    val reviews = listOf(
-        Review("User3", "2023.09.09", 2.5f, "별로였어요.", R.drawable.dog_home),
-        Review("User4", "2023.09.08", 4.0f, "다시 방문하고 싶네요.", R.drawable.dog_home),
-        Review("User5", "2023.09.07", 3.5f, "서비스가 좋았습니다.", R.drawable.dog_home),
-        Review("User6", "2023.09.06", 5.0f, "최고의 경험이었어요!", R.drawable.dog_home),
-        Review("User7", "2023.09.05", 1.5f, "다시는 가고 싶지 않아요.", R.drawable.dog_home),
-        Review("User8", "2023.09.04", 4.5f, "정말 매력적인 곳이에요.", R.drawable.dog_home),
-        Review("User9", "2023.09.03", 3.0f, "평범했어요.", R.drawable.dog_home),
-        Review("User10", "2023.09.02", 2.0f, "기대 이하였습니다.", R.drawable.dog_home)
-    )
-    lateinit var fragmentPlaceReviewBinding:FragmentPlaceReviewBinding
+    private lateinit var fragmentPlaceReviewBinding: FragmentPlaceReviewBinding
+    private lateinit var reviewAdapter: ReviewAdapter
+    private val viewModel: PlaceReviewViewModel by viewModels { PlaceReviewViewModelFactory(PlaceReviewRepository()) }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-
         val placeName = arguments?.getString("place_name")
-        if (placeName != null) {
-            Log.d("placename",placeName)
-        }
         val phone = arguments?.getString("phone")
         val roadAddressName = arguments?.getString("place_road_adress_name")
-        val placeCategory=arguments?.getString("place_cateogry")
-        fragmentPlaceReviewBinding = FragmentPlaceReviewBinding.inflate(layoutInflater)
-        fragmentPlaceReviewBinding.reviewsRecyclerView.adapter = ReviewAdapter(reviews)
-        fragmentPlaceReviewBinding.reviewsRecyclerView.layoutManager=LinearLayoutManager(requireContext())
+        val placeCategory = arguments?.getString("place_cateogry")
+        val placeId=arguments?.getString("place_id")
 
-        fragmentPlaceReviewBinding.textViewPlaceReviewTitle.text=placeName
-        fragmentPlaceReviewBinding.textView22.text=roadAddressName
-        fragmentPlaceReviewBinding.textView25.text=phone
-        fragmentPlaceReviewBinding.textView21.text=placeCategory
+        fragmentPlaceReviewBinding = FragmentPlaceReviewBinding.inflate(layoutInflater)
+
+        // Initialize the adapter and set to the RecyclerView
+        reviewAdapter = ReviewAdapter(emptyList())
+        fragmentPlaceReviewBinding.reviewsRecyclerView.adapter = reviewAdapter
+        fragmentPlaceReviewBinding.reviewsRecyclerView.layoutManager = LinearLayoutManager(requireContext())
+
+        fragmentPlaceReviewBinding.textViewPlaceReviewTitle.text = placeName
+        fragmentPlaceReviewBinding.textView22.text = roadAddressName
+        fragmentPlaceReviewBinding.textView25.text = phone
+        fragmentPlaceReviewBinding.textView21.text = placeCategory
+
+        lifecycleScope.launch {
+            viewModel.reviews.collect { updatedReviews ->
+                reviewAdapter.updateReviews(updatedReviews)
+            }
+        }
+
+        placeId?.let {
+            viewModel.fetchAllReviewsForPlace(it)
+        }
 
         return fragmentPlaceReviewBinding.root
     }
 
-
-    inner class ReviewAdapter(private val reviews: List<Review>) : RecyclerView.Adapter<ReviewAdapter.ViewHolderClass>() {
-        inner class ViewHolderClass(rowBinding:RowPlaceReviewBinding) : RecyclerView.ViewHolder(rowBinding.root),OnClickListener{
-
-
-            var ratingBar: RatingBar
-            var usernameTextView: TextView
-            var dateTextView: TextView
-            var commentTextView: TextView
-            var reviewImageView: ImageView
-
-            init{
-                ratingBar=rowBinding.placeReviewDetailRatingBar
-                usernameTextView=rowBinding.textViewPlaceReviewDetailUserName
-                dateTextView=rowBinding.textViewPlaceReviewDetailDate
-                commentTextView=rowBinding.textView4
-                reviewImageView=rowBinding.imageView11
-            }
-            //온클릭이 있어야 하나 ?
-            override fun onClick(v: View?) {
-                TODO("Not yet implemented")
-            }
-
+    inner class ReviewAdapter(private var reviews: List<Review>) : RecyclerView.Adapter<ReviewAdapter.ViewHolderClass>() {
+        inner class ViewHolderClass(rowBinding: RowPlaceReviewBinding) : RecyclerView.ViewHolder(rowBinding.root) {
+            val ratingBar: RatingBar = rowBinding.placeReviewDetailRatingBar
+            val usernameTextView: TextView = rowBinding.textViewPlaceReviewDetailUserName
+            val dateTextView: TextView = rowBinding.textViewPlaceReviewDetailDate
+            val commentTextView: TextView = rowBinding.textView4
+            val reviewImageView: ImageView = rowBinding.imageView11
         }
 
-        override fun onCreateViewHolder(
-            parent: ViewGroup,
-            viewType: Int
-        ): ViewHolderClass {
-            val rowBinding = RowPlaceReviewBinding.inflate(layoutInflater)
-            val viewHolderClass = ViewHolderClass(rowBinding)
-            rowBinding.root.setOnClickListener(viewHolderClass)
-            val params = RecyclerView.LayoutParams(
-                RecyclerView.LayoutParams.MATCH_PARENT,
-                RecyclerView.LayoutParams.WRAP_CONTENT
-            )
-            rowBinding.root.layoutParams = params
-            return viewHolderClass
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolderClass {
+            val rowBinding = RowPlaceReviewBinding.inflate(layoutInflater, parent, false)
+            return ViewHolderClass(rowBinding)
         }
 
         override fun onBindViewHolder(holder: ViewHolderClass, position: Int) {
             val review = reviews[position]
-            holder.usernameTextView.text = review.username
+            holder.usernameTextView.text = review.userid
             holder.dateTextView.text = review.date
-            holder.ratingBar.rating = review.rating
+            holder.ratingBar.rating = review.rating!!
             holder.commentTextView.text = review.comment
-            holder.reviewImageView.setImageResource(review.imageRes)
+            review.imageRes?.let { holder.reviewImageView.setImageResource(it) }
         }
 
         override fun getItemCount(): Int = reviews.size
+
+        // This function updates the reviews list and notifies the RecyclerView of the changes
+        fun updateReviews(newReviews: List<Review>) {
+            reviews = newReviews
+            notifyDataSetChanged()
+        }
     }
 }
 
-data class Review(
-    val username: String,
-    val date: String,
-    val rating: Float,
-    val comment: String,
-    val imageRes: Int
-)
+class PlaceReviewViewModelFactory(private val repository: PlaceReviewRepository) : ViewModelProvider.Factory {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(PlaceReviewViewModel::class.java)) {
+            return PlaceReviewViewModel(repository) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class")
+    }
+}
+
+

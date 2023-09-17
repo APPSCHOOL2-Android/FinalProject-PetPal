@@ -34,10 +34,10 @@ class WritePlaceReviewFragment : Fragment() {
 
             buttonPlaceReviewSubmit.setOnClickListener {
                 val rating = placeRatingBar.rating
-                val writeid = "writeid"  // 실제로는 사용자 ID나 다른 고유 식별자를 사용해야 합니다.
-                val reviewText = editTextReviewContent.text.toString()
-                val timestamp = getCurrentDate()
-                val review = Review(rating, writeid, reviewText, timestamp)
+                val userid = "userid"  // 실제로는 사용자 ID나 다른 고유 식별자를 사용해야 합니다.
+                val comment = editTextReviewContent.text.toString()
+                val date = getCurrentDate()
+                val review = Review(userid, date,rating,comment)
 
                 // Firestore에 리뷰 데이터 저장
                 if (place != null) {
@@ -57,7 +57,7 @@ class WritePlaceReviewFragment : Fragment() {
     @SuppressLint("SimpleDateFormat")
     fun getCurrentDate(): String {
         val current = Date()
-        val formatter = SimpleDateFormat("yyyy-MM-dd") // 년-월-일 형식으로 출력
+        val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm:ss") //년-월-일 시:분:초
         return formatter.format(current)
     }
 

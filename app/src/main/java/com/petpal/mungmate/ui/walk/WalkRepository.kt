@@ -70,7 +70,7 @@ class WalkRepository {
     suspend fun fetchLatestReviewsSuspend(placeId: String): List<Review> {
         val reviews = mutableListOf<Review>()
         val reviewRef = db.collection("places").document(placeId).collection("reviews")
-        val task = reviewRef.orderBy("timestamp", Query.Direction.DESCENDING).limit(2).get().await()
+        val task = reviewRef.orderBy("date", Query.Direction.DESCENDING).limit(2).get().await()
         for (document in task) {
             document.toObject(Review::class.java)?.let { reviews.add(it) }
         }
@@ -81,15 +81,37 @@ class WalkRepository {
         val placesRef = db.collection("places")
         val placeDocument = placesRef.document(place.id)
 
-        placeDocument.get().await().run {
-            if (!exists()) {
-                placeDocument.set(place).await()
-            }
+        val document = placeDocument.get().await()
+
+        if (!document.exists()) {
+            //Place가 db에 없음
+            placeDocument.set(place).await()
         }
 
+        //Place가 이미 db에 있거나 추가된 다음에 실행됨(await)
         val favoriteRef = db.collection("places").document(place.id).collection("favorite")
         favoriteRef.document(favorite.userid).set(favorite).await()
     }
+
+//    fun addReview(place: Place, review: Review) {
+//        val placesRef = db.collection("places")
+//        val placeDocument = placesRef.document(place.id)
+//
+//        placeDocument.get()
+//            .addOnSuccessListener {
+//                if (!document.exists()) {
+//                    // Place가 Firestore에 없는 경우
+//                    placeDocument.set(place)
+//                        .addOnSuccessListener {
+//                            // Place 추가 성공 후 review 추가
+//                            addPlaceReview(place.id, review)
+//                        }
+//                } else {
+//                    // Place가 이미 Firestore에 있는 경우
+//                    addPlaceReview(place.id, review)
+//                }
+//            }
+//    }
 
     suspend fun removeUserFavorite(placeId: String, userid: String) {
         val favoriteRef = db.collection("places").document(placeId).collection("favorite").document(userid)
