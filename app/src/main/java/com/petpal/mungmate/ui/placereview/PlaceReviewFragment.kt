@@ -59,7 +59,16 @@ class PlaceReviewFragment : Fragment() {
 
         lifecycleScope.launch {
             viewModel.reviews.collect { updatedReviews ->
-                reviewAdapter.updateReviews(updatedReviews)
+                if(updatedReviews.isEmpty())
+                {
+                    fragmentPlaceReviewBinding.noReviewsTextView.visibility=View.VISIBLE
+                    fragmentPlaceReviewBinding.reviewsRecyclerView.visibility=View.GONE
+                }else{
+                    fragmentPlaceReviewBinding.noReviewsTextView.visibility=View.GONE
+                    fragmentPlaceReviewBinding.reviewsRecyclerView.visibility=View.VISIBLE
+                    reviewAdapter.updateReviews(updatedReviews)
+                }
+
             }
         }
 

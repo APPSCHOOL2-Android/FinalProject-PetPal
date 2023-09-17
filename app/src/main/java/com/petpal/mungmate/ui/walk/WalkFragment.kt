@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.location.Location
+import android.media.Rating
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -36,6 +37,7 @@ import com.petpal.mungmate.databinding.FragmentWalkBinding
 import com.petpal.mungmate.model.Favorite
 import com.petpal.mungmate.model.KakaoSearchResponse
 import com.petpal.mungmate.model.Place
+import com.petpal.mungmate.model.Review
 import com.petpal.mungmate.utils.LastKnownLocation
 import kotlinx.coroutines.launch
 import net.daum.mf.map.api.MapPOIItem
@@ -55,7 +57,7 @@ class WalkFragment : Fragment(),
     private lateinit var kakaoSearchResponse: KakaoSearchResponse
     private var isLocationPermissionGranted = false
     private var isFavorited = false
-
+    private var latestReviews: List<Review>? = null
     companion object {
         const val REQUEST_LOCATION_PERMISSION = 1
 
@@ -70,15 +72,6 @@ class WalkFragment : Fragment(),
         mainActivity = activity as MainActivity
         fragmentWalkBinding = FragmentWalkBinding.inflate(inflater)
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(mainActivity)
-        Log.d("LocationCheck", "oncreate")
-        if (LastKnownLocation.latitude == null) {
-            Log.d("LocationCheck", "lastKnownLocation is null")
-        } else {
-            Log.d(
-                "LocationCheck",
-                "lastKnownLocation is not null: lat=${LastKnownLocation.latitude}, lon=${LastKnownLocation.longitude}"
-            )
-        }
 
         setupMapView()
         setupButtonListeners()
@@ -275,9 +268,18 @@ class WalkFragment : Fragment(),
 
     override fun onCurrentLocationUpdateCancelled(p0: MapView?) {}
     override fun onPOIItemSelected(p0: net.daum.mf.map.api.MapView?, p1: MapPOIItem?) {
+
         val selectedPlace = kakaoSearchResponse.documents.find { it.id.hashCode() == p1?.tag }
-        val initialBottomSheetView =
-            layoutInflater.inflate(R.layout.row_walk_bottom_sheet_place, null)
+        val detailCardView = layoutInflater.inflate(R.layout.row_place_review, null)
+        val initialBottomSheetView = layoutInflater.inflate(R.layout.row_walk_bottom_sheet_place, null)
+        val bottomSheetDialog = BottomSheetDialog(requireContext())
+        bottomSheetDialog.setContentView(initialBottomSheetView)
+        val detailDialog = BottomSheetDialog(requireActivity())
+        val detailRating=detailCardView.findViewById<RatingBar>(R.id.placeReviewDetailRatingBar)
+        val detailUserName=detailCardView.findViewById<TextView>(R.id.textViewPlaceReviewDetailUserName)
+        val detailDate=detailCardView.findViewById<TextView>(R.id.textViewPlaceReviewDetailDate)
+        val detailContent=detailCardView.findViewById<TextView>(R.id.textView4)
+        val detailImage=detailCardView.findViewById<ImageView>(R.id.imageView11)
 
         val placeId = selectedPlace?.id
         placeId?.let {
@@ -303,9 +305,8 @@ class WalkFragment : Fragment(),
 
         viewModel.placeInfo.observe(viewLifecycleOwner) { placeInfo ->
             val textViewPlaceName = initialBottomSheetView.findViewById<TextView>(R.id.textView)
-            textViewPlaceName.text =
-                placeInfo?.get("name") as? String ?: "${selectedPlace?.place_name}"
-
+            textViewPlaceName.text = placeInfo?.get("name") as? String ?: "${selectedPlace?.place_name}"
+            bottomSheetDialog.show()
         }
 
 
@@ -316,6 +317,7 @@ class WalkFragment : Fragment(),
         }
 
         viewModel.latestReviews.observe(viewLifecycleOwner) { reviews ->
+            latestReviews=reviews
             val placeuserRating1 = initialBottomSheetView.findViewById<RatingBar>(R.id.placeUserRatingBar1)
             val placeuserRating2 = initialBottomSheetView.findViewById<RatingBar>(R.id.placeUserRatingBar2)
             val placeuserReview1 = initialBottomSheetView.findViewById<TextView>(R.id.placeUserReview1)
@@ -329,6 +331,10 @@ class WalkFragment : Fragment(),
                 placeuserRating1.visibility = View.VISIBLE
                 placeuserReview1.visibility = View.VISIBLE
 
+
+
+
+
                 if (reviews.size > 1) {
                     val secondReview = reviews[1]
                     placeuserRating2.rating = secondReview.rating!!
@@ -336,6 +342,7 @@ class WalkFragment : Fragment(),
 
                     placeuserRating2.visibility = View.VISIBLE
                     placeuserReview2.visibility = View.VISIBLE
+
                 } else {
                     placeuserRating2.visibility = View.GONE
                     placeuserReview2.visibility = View.GONE
@@ -353,15 +360,13 @@ class WalkFragment : Fragment(),
             }
         }
 
-        val bottomSheetDialog = BottomSheetDialog(requireContext())
-        bottomSheetDialog.setContentView(initialBottomSheetView)
 
         val buttonsubmit = initialBottomSheetView.findViewById<Button>(R.id.buttonSubmitReview)
 
 
-        Handler(Looper.getMainLooper()).postDelayed({
-            bottomSheetDialog.show()
-        }, 300)  // 0.5초 딜레이
+//        Handler(Looper.getMainLooper()).postDelayed({
+//            bottomSheetDialog.show()
+//        }, 300)  // 0.5초 딜레이
 
         bottomSheetDialog.behavior.addBottomSheetCallback(object :
             BottomSheetBehavior.BottomSheetCallback() {
@@ -399,11 +404,13 @@ class WalkFragment : Fragment(),
             setOnClickListener {
                 if (!isFavorited) {
                     isFavorited = true
+                    setImageResource(R.drawable.filled_heart)
                     val favorite = Favorite("userid")
                     viewModel.addPlaceToFavorite(place, favorite)
                     // 좋아요가 눌릴 때마다 텍스트뷰 업데이트
                 } else {
                     isFavorited = false
+                    setImageResource(R.drawable.favoirte_24px)
                     viewModel.removeFavorite(placeId!!, "userid")
 
                 }
@@ -448,10 +455,29 @@ class WalkFragment : Fragment(),
         }
 
         initialBottomSheetView.findViewById<TextView>(R.id.placeUserReview1).setOnClickListener {
-            val detailCardView = layoutInflater.inflate(R.layout.row_place_review, null)
-            val detailDialog = BottomSheetDialog(requireActivity())
+            detailRating.rating=latestReviews!![0].rating!!
+            detailUserName.text=latestReviews!![0].userid
+            detailDate.text=latestReviews!![0].date
+            detailContent.text=latestReviews!![0].comment
+            latestReviews!![0].imageRes?.let { detailImage?.setImageResource(it) }
+
+
+            // detailCardView.findViewById<TextView>(R.id.)
             detailDialog.setContentView(detailCardView)
             detailDialog.show()
+
+
+        }
+
+        initialBottomSheetView.findViewById<TextView>(R.id.placeUserReview2).setOnClickListener {
+
+            detailRating.rating=latestReviews!![1].rating!!
+            detailUserName.text=latestReviews!![1].userid
+            detailDate.text=latestReviews!![1].date
+            detailContent.text=latestReviews!![1].comment
+            latestReviews!![1].imageRes?.let { detailImage?.setImageResource(it) }
+
+                detailDialog.show()
         }
 
         initialBottomSheetView.findViewById<Chip>(R.id.chipViewAllReviews).setOnClickListener {
@@ -471,25 +497,11 @@ class WalkFragment : Fragment(),
 
 
     @Deprecated("Deprecated in Java")
-    override fun onCalloutBalloonOfPOIItemTouched(
-        p0: net.daum.mf.map.api.MapView?,
-        p1: MapPOIItem?
-    ) {
-    }
+    override fun onCalloutBalloonOfPOIItemTouched(p0: net.daum.mf.map.api.MapView?, p1: MapPOIItem?) {}
 
-    override fun onCalloutBalloonOfPOIItemTouched(
-        p0: net.daum.mf.map.api.MapView?,
-        p1: MapPOIItem?,
-        p2: MapPOIItem.CalloutBalloonButtonType?
-    ) {
-    }
+    override fun onCalloutBalloonOfPOIItemTouched(p0: net.daum.mf.map.api.MapView?, p1: MapPOIItem?, p2: MapPOIItem.CalloutBalloonButtonType?) {}
 
-    override fun onDraggablePOIItemMoved(
-        p0: net.daum.mf.map.api.MapView?,
-        p1: MapPOIItem?,
-        p2: MapPoint?
-    ) {
-    }
+    override fun onDraggablePOIItemMoved(p0: net.daum.mf.map.api.MapView?, p1: MapPOIItem?, p2: MapPoint?) {}
 
     override fun onMapViewInitialized(p0: MapView?) {}
     override fun onMapViewCenterPointMoved(p0: MapView?, p1: MapPoint?) {

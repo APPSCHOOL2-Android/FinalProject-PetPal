@@ -88,6 +88,13 @@
             android:drawableStart="@drawable/call_24px"
             android:text="000-000-0000" />
 
+        <TextView
+            android:id="@+id/noReviewsTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="작성된 리뷰가 없습니다"
+            android:visibility="gone" />
+
     </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView

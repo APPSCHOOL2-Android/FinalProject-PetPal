@@ -20,6 +20,7 @@ class WalkViewModel(private val repository: WalkRepository) : ViewModel() {
     val isPlaceFavorited: MutableLiveData<Boolean> = MutableLiveData()
     private val errorMessage: MutableLiveData<String> = MutableLiveData()
     private val _favoriteCount = MutableStateFlow<Int?>(null)
+    val isDataLoading: MutableLiveData<Boolean> = MutableLiveData(false)
     val favoriteCount: StateFlow<Int?> = _favoriteCount
 
 
@@ -35,15 +36,17 @@ class WalkViewModel(private val repository: WalkRepository) : ViewModel() {
     }
     fun fetchPlaceInfoFromFirestore(placeId: String) {
         viewModelScope.launch {
+            isDataLoading.postValue(true)  // 데이터 로딩 시작
             try {
                 val placeData = repository.getPlaceInfoFromFirestore(placeId)
                 placeInfo.postValue(placeData)
             } catch (e: Exception) {
                 errorMessage.postValue(e.localizedMessage ?: "Failed to fetch place info")
+            } finally {
+                isDataLoading.postValue(false)  // 데이터 로딩 완료
             }
         }
     }
-
     fun fetchFavoriteCount(placeId: String) {
         viewModelScope.launch {
             repository.observeFavoritesChanges(placeId).collect { count ->
