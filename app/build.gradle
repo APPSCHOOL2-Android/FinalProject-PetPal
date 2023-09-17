@@ -99,7 +99,8 @@ dependencies {
     //firebase analytics
     implementation 'com.google.firebase:firebase-analytics-ktx'
 
-
+    // SimpleRatingBar
+    implementation 'com.github.ome450901:SimpleRatingBar:1.5.1'
 
 
 }
