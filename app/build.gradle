@@ -107,6 +107,9 @@ dependencies {
     implementation "com.google.firebase:firebase-firestore-ktx:24.7.1"
 
 
+    // SimpleRatingBar
+    implementation 'com.github.ome450901:SimpleRatingBar:1.5.1'
+
     //firebase firestore
     implementation("com.google.firebase:firebase-firestore-ktx")
 }

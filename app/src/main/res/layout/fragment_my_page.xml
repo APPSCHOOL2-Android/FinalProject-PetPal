@@ -410,6 +410,17 @@
                     android:text="차단 관리"
                     android:textAppearance="?attr/textAppearanceTitleMedium"
                     android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/button_go_to_walk_review"
+                    android:layout_width="match_parent"
+                    android:layout_height="49dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:gravity="center_vertical"
+                    android:text="산책 후기 보기"
+                    android:textAppearance="?attr/textAppearanceTitleMedium"
+                    android:textStyle="bold" />
             </LinearLayout>
 
             <View
