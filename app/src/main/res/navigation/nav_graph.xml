@@ -148,7 +148,11 @@
         android:id="@+id/communityDetailModifyFragment"
         android:name="com.petpal.mungmate.ui.community.CommunityDetailModifyFragment"
         android:label="fragment_community_detail_modify"
-        tools:layout="@layout/fragment_community_detail_modify" />
+        tools:layout="@layout/fragment_community_detail_modify" >
+        <argument
+            android:name="positionPostId"
+            app:argType="string" />
+    </fragment>
     <fragment
         android:id="@+id/writePlaceReviewFragment"
         android:name="com.petpal.mungmate.ui.placereview.WritePlaceReviewFragment"

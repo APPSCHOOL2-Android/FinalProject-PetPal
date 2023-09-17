@@ -136,8 +136,15 @@ class CommunityPostDetailFragment : Fragment() {
 
                 when (it?.itemId) {
                     R.id.item_modify -> {
-                        findNavController().navigate(R.id.action_communityPostDetailFragment_to_communityDetailModifyFragment)
-                        Snackbar.make(rootView, "글 수정하기", Snackbar.LENGTH_SHORT).show()
+                        val bundle = Bundle().apply {
+                            putString("positionPostId", postGetId)
+                        }
+
+                        findNavController().navigate(
+                            R.id.action_communityPostDetailFragment_to_communityDetailModifyFragment,
+                            bundle
+                        )
+
                     }
 
                     R.id.item_delete -> {
@@ -192,7 +199,7 @@ class CommunityPostDetailFragment : Fragment() {
             val postComment = documentSnapshot.getString("postComment")
 
             val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-            dateFormat.timeZone = TimeZone.getTimeZone("Asia/Seoul")// 시간대를 UTC로 설정
+            dateFormat.timeZone = TimeZone.getTimeZone("Asia/Seoul")
             val snapshotTime =
                 dateFormat.parse(postDateCreated) // Firestore에서 가져온 시간 문자열을 Date 객체로 변환
 
