@@ -114,11 +114,10 @@
             android:layout_marginTop="8dp"
             android:layout_marginRight="8dp">
 
-            <LinearLayout
+            <RelativeLayout
                 android:id="@+id/layoutReview"
                 android:layout_width="match_parent"
-                android:layout_height="120dp"
-                android:orientation="vertical">
+                android:layout_height="120dp">
 
                 <TextView
                     android:id="@+id/textViewNoReview"
@@ -142,7 +141,8 @@
                     android:id="@+id/placeUserReview1"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:visibility="visible" />
+                    android:visibility="visible"
+                    android:layout_below="@+id/placeUserRatingBar1" />
 
                 <RatingBar
                     android:id="@+id/placeUserRatingBar2"
@@ -151,25 +151,33 @@
                     android:layout_height="wrap_content"
                     android:numStars="5"
                     android:rating="1"
-                    android:visibility="visible" />
+                    android:visibility="visible"
+                    android:layout_below="@+id/placeUserReview1" />
 
                 <TextView
                     android:id="@+id/placeUserReview2"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:visibility="visible" />
+                    android:visibility="visible"
+                    android:layout_below="@+id/placeUserRatingBar2" />
+
+                <Space
+                    android:id="@+id/spacer"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_below="@+id/placeUserReview2"
+                    android:layout_above="@+id/buttonSubmitReview" />
 
                 <Button
                     android:id="@+id/buttonSubmitReview"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="bottom"
+                    android:layout_alignParentBottom="true"
                     android:layout_marginLeft="8dp"
                     android:layout_marginRight="8dp"
                     android:text="리뷰 등록하기" />
 
-
-            </LinearLayout>
+            </RelativeLayout>
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chipViewAllReviews"
