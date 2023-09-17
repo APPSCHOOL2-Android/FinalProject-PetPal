@@ -25,6 +25,7 @@
                 android:orientation="horizontal">
 
                 <de.hdodenhof.circleimageview.CircleImageView
+                    android:id="@+id/matchHistoryUserImage"
                     android:layout_width="50dp"
                     android:layout_height="50dp"
                     android:src="@drawable/pets_24px" />
@@ -68,6 +69,14 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="산책기록" />
+
+                    <Button
+                        android:id="@+id/buttonWalkReview"
+                        style="@style/Widget.Material3.Button"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="후기 작성"
+                        android:visibility="gone" />
                 </LinearLayout>
 
             </LinearLayout>

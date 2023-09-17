@@ -5,7 +5,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.animation.AlphaAnimation
+import android.view.animation.AnimationUtils
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -26,8 +26,6 @@ class OrderHistoryFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         _fragmentOrderHistoryBinding = FragmentOrderHistoryBinding.inflate(inflater)
-        // TODO skeleton 로딩 효과 주기
-
         return fragmentOrderHistoryBinding.root
     }
 
@@ -35,6 +33,7 @@ class OrderHistoryFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         fragmentOrderHistoryBinding.run {
+
             toolbarOrderHistory.setNavigationOnClickListener {
                 findNavController().popBackStack()
             }
@@ -43,23 +42,22 @@ class OrderHistoryFragment : Fragment() {
                 orderHistoryAdapter = OrderHistoryAdapter(getSampleData())
                 adapter = orderHistoryAdapter
                 layoutManager = LinearLayoutManager(context)
-                // addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
 
                 // 최상단 FAB 숨기기, 스크롤시 FAB 보이기
-                val fadeIn = AlphaAnimation(0f, 1f).apply { duration = 500 }
-                val fadeOut = AlphaAnimation(1f, 0f).apply { duration = 500 }
+                val fadeIn = AnimationUtils.loadAnimation(context, R.anim.fab_fade_in)
+                val fadeOut = AnimationUtils.loadAnimation(context, R.anim.fab_fade_out)
                 var isTop = true
 
                 addOnScrollListener(object: RecyclerView.OnScrollListener() {
                     override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                         super.onScrollStateChanged(recyclerView, newState)
-                        // 최상단에 있는 순간 -> FAB 숨기기
+                        // 최상단에 올라오면 fab 서서히 사라지기
                         if (!canScrollVertically(-1) && newState == RecyclerView.SCROLL_STATE_IDLE) {
                             fabOrderHistoryTop.startAnimation(fadeOut)
                             fabOrderHistoryTop.visibility = View.GONE
                             isTop = true
                         } else {
-                            // 최상단에서 내리기 시작하는 순간 -> FAB 보이기
+                            // 최상단에서 내려가면 fab 서서히 나타나기
                             if (isTop) {
                                 fabOrderHistoryTop.visibility = View.VISIBLE
                                 fabOrderHistoryTop.startAnimation(fadeIn)
@@ -76,13 +74,17 @@ class OrderHistoryFragment : Fragment() {
             }
 
             // 주문 상태 필터링
-            chipGroupOrderStatus.setOnCheckedStateChangeListener { group, checkedIds ->
-                val selectedChip = fragmentOrderHistoryBinding.root.findViewById<Chip>(checkedIds.first())
-                if (selectedChip != null) {
-                    val orderStatus = selectedChip.text.toString()
-                    orderHistoryAdapter.filter.filter(orderStatus)
-                }
+            chipGroupOrderStatus.setOnCheckedStateChangeListener { _, checkedIds ->
+                changeOrderStatusFilter(checkedIds.first())
             }
+        }
+    }
+
+    private fun changeOrderStatusFilter(checkedId: Int) {
+        val selectedChip = fragmentOrderHistoryBinding.root.findViewById<Chip>(checkedId)
+        if (selectedChip != null) {
+            val orderStatus = selectedChip.text.toString()
+            orderHistoryAdapter.filter.filter(orderStatus)
         }
     }
 

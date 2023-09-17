@@ -20,20 +20,20 @@ class InquiryAdapter(private val dataList: List<Inquiry>): RecyclerView.Adapter<
                 textViewInquiryQuestion.text = inquiry.question
                 textViewInquiryDateCreated.text = inquiry.dateCreated
 
+                // 답변 여부에 따라 UI 변경
+                if (inquiry.status) {
+                    textViewInquiryState.text = "답변완료"
+                    layoutInquiryAnswer.visibility = View.VISIBLE
+                    textViewInquiryAnswer.text = inquiry.answer
+                } else {
+                    textViewInquiryState.text = "답변대기"
+                    layoutInquiryAnswer.visibility = View.GONE
+                }
+
                 // 확장 여부에 따라 UI 변경 (RecyclerView 재활용 시 리셋 방지)
                 if (expendedItems.get(absoluteAdapterPosition)) {
                     imageViewInquiryExpand.setImageResource(R.drawable.expand_less_24px)
                     layoutInquiryBody.visibility = View.VISIBLE
-
-                    // 답변 여부에 따라 UI 변경
-                    if (inquiry.status) {
-                        chipInquiryStatus.text = "답변완료"
-                        layoutInquiryAnswer.visibility = View.VISIBLE
-                        textViewInquiryAnswer.text = inquiry.answer
-                    } else {
-                        chipInquiryStatus.text = "답변대기"
-                        layoutInquiryAnswer.visibility = View.GONE
-                    }
                 } else {
                     imageViewInquiryExpand.setImageResource(R.drawable.expand_more_24px)
                     layoutInquiryBody.visibility = View.GONE

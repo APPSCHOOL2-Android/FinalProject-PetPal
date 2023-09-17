@@ -2,21 +2,27 @@ package com.petpal.mungmate.ui.community
 
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.navigation.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import com.airbnb.lottie.LottieAnimationView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.petpal.mungmate.MainActivity
+import com.petpal.mungmate.MainFragmentDirections
 import com.petpal.mungmate.R
 import com.petpal.mungmate.databinding.RowCommunityBinding
+import com.petpal.mungmate.model.Post
 
 class CommunityAdapter(
     private val context: Context,
     private val mainActivity: MainActivity,
+    private val postList: MutableList<Post>
+
 ) :
     RecyclerView.Adapter<CommunityAdapter.ViewHolder>() {
 
@@ -30,19 +36,23 @@ class CommunityAdapter(
         val communityPostDateCreated: TextView = item.communityPostDateCreated
         val communityPostImage: ImageView = item.communityPostImage
         val communityContent: TextView = item.communityContent
-        val communityCommentTextView: TextView = item.communityCommentTextView
+        val communityCommentCounter: TextView = item.communityCommentCounter
         val communityFavoriteLottie: LottieAnimationView = item.communityFavoriteLottie
+        val communityFavoriteCounter: TextView = item.communityFavoriteCounter
 
         init {
             item.root.setOnClickListener {
-                val bundle = Bundle()
-                bundle.putInt("position", adapterPosition)
+                val bundle = Bundle().apply {
+                    putString("position", postList[adapterPosition].postID)
+                }
 
+                Log.d("확인2", postList[adapterPosition].postID.toString())
                 mainActivity.navigate(
                     R.id.action_mainFragment_to_communityPostDetailFragment,
                     bundle,
 
                 )
+
             }
         }
 
@@ -59,35 +69,40 @@ class CommunityAdapter(
         return viewHolderClass
     }
 
-    override fun getItemCount() = 10
+    override fun getItemCount() = postList.size
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        val post = postList[position]
+
         Glide
             .with(context)
-            .load("https://mblogthumb-phinf.pstatic.net/MjAxOTEyMTNfMTQx/MDAxNTc2MjAyNzE5NDE0.B-NhNQS5QdweUBY53sWNGA8cJQUupeQeza7ognzYmGUg.1zj3ZPxEc2QrCJ2y5O--fmvMl2yljMb3uZQn6C1xsdUg.JPEG.369ginseng/1576202724454.jpg?type=w800")
-            .diskCacheStrategy(DiskCacheStrategy.NONE)
-            .centerCrop()
+            .load(post.userImage)
+            .diskCacheStrategy(DiskCacheStrategy.ALL)
+            .fitCenter()
             .into(holder.communityProfileImage)
 
         Glide
             .with(context)
-            .load("https://mblogthumb-phinf.pstatic.net/MjAxOTEyMTNfMTQx/MDAxNTc2MjAyNzE5NDE0.B-NhNQS5QdweUBY53sWNGA8cJQUupeQeza7ognzYmGUg.1zj3ZPxEc2QrCJ2y5O--fmvMl2yljMb3uZQn6C1xsdUg.JPEG.369ginseng/1576202724454.jpg?type=w800")
-            .diskCacheStrategy(DiskCacheStrategy.NONE)
-            .centerCrop()
+            .load(post.postImages)
+            .diskCacheStrategy(DiskCacheStrategy.ALL)
+            .fitCenter()
             .into(holder.communityPostImage)
 
-        holder.communityPostTitle.text = "귀여운 강아지 사진"
-        holder.communityUserNickName.text = "리트리버군"
-
-        holder.communityUserPlace.text = "제주시 애월읍"
-
-        holder.communityPostDateCreated.text = "30분전"
-        holder.communityContent.text =
-            "귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다."
-        holder.communityCommentTextView.text = "댓글 2"
+        holder.communityPostTitle.text = post.postTitle
+        holder.communityUserNickName.text = post.userNickName
+        holder.communityUserPlace.text = post.userPlace
+        holder.communityPostDateCreated.text = post.postDateCreated.toString()
+        holder.communityContent.text = post.postContent
+        holder.communityCommentCounter.text= post.postComment
+        holder.communityFavoriteCounter.text = post.postLike.toString()
 
         var isClicked = false
+
+        holder.communityFavoriteLottie.scaleX = 2.0f
+        holder.communityFavoriteLottie.scaleY = 2.0f
+
         holder.communityFavoriteLottie.setOnClickListener {
+
             isClicked = !isClicked // 클릭할 때마다 변수를 반전시킴
             if (isClicked) {
                 holder.communityFavoriteLottie.playAnimation()
@@ -98,7 +113,36 @@ class CommunityAdapter(
             }
 
         }
-
-
     }
+
+    fun add(post: Post) {
+        if (!postList.contains(post)) {
+            postList.add(post)
+            notifyItemChanged(postList.size - 1)
+        } else {
+            update(post)
+        }
+    }
+
+    fun update(post: Post) {
+        val index = postList.indexOf(post)
+        if (index != -1) {
+            postList[index] = post
+            notifyItemChanged(index)
+        }
+    }
+
+    fun delete(post: Post) {
+        val index = postList.indexOf(post)
+        if (index != -1) {
+            postList.removeAt(index)
+            notifyItemRemoved(index)
+        }
+    }
+
+    fun clear() {
+        postList.clear()
+    }
+
+
 }

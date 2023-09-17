@@ -3,8 +3,8 @@ package com.petpal.mungmate.ui.chat
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.petpal.mungmate.databinding.RowReceiveMessageBinding
-import com.petpal.mungmate.databinding.RowSendMessageBinding
+import com.petpal.mungmate.databinding.RowChatReceiveMessageBinding
+import com.petpal.mungmate.databinding.RowChatSendMessageBinding
 import com.petpal.mungmate.model.Message
 import java.lang.IllegalArgumentException
 
@@ -17,9 +17,9 @@ class ChatMessageAdapter(private val messageList: List<Message>): RecyclerView.A
     }
 
     // 보낸 메시지
-    inner class SendMessageViewHolder(private val rowSendMessageBinding: RowSendMessageBinding): RecyclerView.ViewHolder(rowSendMessageBinding.root){
+    inner class SendMessageViewHolder(private val RowChatSendMessageBinding: RowChatSendMessageBinding): RecyclerView.ViewHolder(RowChatSendMessageBinding.root){
         fun bindSendMessage(message: Message){
-            rowSendMessageBinding.run {
+            RowChatSendMessageBinding.run {
                 textViewMessage.text = message.messageText
                 textViewTime.text = message.messageTime
                 // TODO 이전것과 시간이 변경 없을 경우 TextViewTime visibility GONE
@@ -27,9 +27,9 @@ class ChatMessageAdapter(private val messageList: List<Message>): RecyclerView.A
         }
     }
     // 받은 메시지
-    inner class ReceiveMessageViewHolder(private val rowReceiveMessageBinding: RowReceiveMessageBinding): RecyclerView.ViewHolder(rowReceiveMessageBinding.root){
+    inner class ReceiveMessageViewHolder(private val RowChatReceiveMessageBinding: RowChatReceiveMessageBinding): RecyclerView.ViewHolder(RowChatReceiveMessageBinding.root){
         fun bindReceiveMessage(message: Message) {
-            rowReceiveMessageBinding.run {
+            RowChatReceiveMessageBinding.run {
                 textViewMessage.text = message.messageText
                 textViewTime.text = message.messageTime
                 // TODO 이전것과 시간이 변경 없을 경우 TextViewTime visibility GONE
@@ -41,7 +41,7 @@ class ChatMessageAdapter(private val messageList: List<Message>): RecyclerView.A
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         return when (viewType) {
             SEND_MESSAGE_VIEW_TYPE -> {
-                val rowBinding = RowSendMessageBinding.inflate(LayoutInflater.from(parent.context))
+                val rowBinding = RowChatSendMessageBinding.inflate(LayoutInflater.from(parent.context))
 
                 rowBinding.root.layoutParams = ViewGroup.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT,
@@ -51,7 +51,7 @@ class ChatMessageAdapter(private val messageList: List<Message>): RecyclerView.A
                 SendMessageViewHolder(rowBinding)
             }
             RECEIVE_MESSAGE_VIEW_TYPE -> {
-                val rowBinding = RowReceiveMessageBinding.inflate(LayoutInflater.from(parent.context))
+                val rowBinding = RowChatReceiveMessageBinding.inflate(LayoutInflater.from(parent.context))
 
                 rowBinding.root.layoutParams = ViewGroup.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT,

@@ -26,7 +26,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="2023.09.12"
+                android:text="yyyy.MM.dd"
                 android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
                 android:textStyle="bold" />
 
@@ -46,7 +46,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="배송중"
+            android:text="주문상태"
             android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
             android:textColor="@color/md_theme_dark_inversePrimary"
             android:textStyle="bold" />

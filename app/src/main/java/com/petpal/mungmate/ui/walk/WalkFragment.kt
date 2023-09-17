@@ -255,12 +255,7 @@ class WalkFragment : Fragment(),
         Snackbar.make(fragmentWalkBinding.root, message, Snackbar.LENGTH_LONG).show()
     }
 
-    override fun onCurrentLocationUpdate(
-        mapView: net.daum.mf.map.api.MapView?,
-        mapPoint: MapPoint?,
-        v: Float
-    ) {
-    }
+    override fun onCurrentLocationUpdate(mapView: net.daum.mf.map.api.MapView?, mapPoint: MapPoint?, v: Float) {}
 
     override fun onCurrentLocationDeviceHeadingUpdate(p0: MapView?, p1: Float) {}
 

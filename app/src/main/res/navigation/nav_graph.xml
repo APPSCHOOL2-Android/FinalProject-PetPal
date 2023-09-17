@@ -108,6 +108,9 @@
         <action
             android:id="@+id/action_mainFragment_to_managePetFragment"
             app:destination="@id/managePetFragment" />
+        <action
+            android:id="@+id/action_mainFragment_to_walkReviewHistoryFragment"
+            app:destination="@id/walkReviewHistoryFragment" />
 
     </fragment>
     <fragment
@@ -119,6 +122,8 @@
         android:id="@+id/communityPostDetailFragment"
         android:name="com.petpal.mungmate.ui.community.CommunityPostDetailFragment"
         android:label="CommunityPostDetailFragment">
+
+
         <action
             android:id="@+id/action_communityPostDetailFragment_to_communityDetailModifyFragment"
             app:destination="@id/communityDetailModifyFragment"
@@ -126,6 +131,9 @@
             app:exitAnim="@anim/to_left"
             app:popEnterAnim="@anim/from_left"
             app:popExitAnim="@anim/to_right" />
+        <argument
+            android:name="position"
+            app:argType="string" />
     </fragment>
     <fragment
         android:id="@+id/communitySearchFragment"
@@ -185,5 +193,10 @@
             app:argType="boolean"
             android:defaultValue="true" />
     </fragment>
+    <fragment
+        android:id="@+id/walkReviewHistoryFragment"
+        android:name="com.petpal.mungmate.ui.walkreview.WalkReviewHistoryFragment"
+        android:label="fragment_walk_review_history"
+        tools:layout="@layout/fragment_walk_review_history" />
 
 </navigation>
