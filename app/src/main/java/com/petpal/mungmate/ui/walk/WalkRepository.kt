@@ -93,26 +93,6 @@ class WalkRepository {
         favoriteRef.document(favorite.userid).set(favorite).await()
     }
 
-//    fun addReview(place: Place, review: Review) {
-//        val placesRef = db.collection("places")
-//        val placeDocument = placesRef.document(place.id)
-//
-//        placeDocument.get()
-//            .addOnSuccessListener {
-//                if (!document.exists()) {
-//                    // Place가 Firestore에 없는 경우
-//                    placeDocument.set(place)
-//                        .addOnSuccessListener {
-//                            // Place 추가 성공 후 review 추가
-//                            addPlaceReview(place.id, review)
-//                        }
-//                } else {
-//                    // Place가 이미 Firestore에 있는 경우
-//                    addPlaceReview(place.id, review)
-//                }
-//            }
-//    }
-
     suspend fun removeUserFavorite(placeId: String, userid: String) {
         val favoriteRef = db.collection("places").document(placeId).collection("favorite").document(userid)
         favoriteRef.delete().await()

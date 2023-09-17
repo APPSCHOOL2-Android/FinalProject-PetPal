@@ -316,37 +316,42 @@ class WalkFragment : Fragment(),
         }
 
         viewModel.latestReviews.observe(viewLifecycleOwner) { reviews ->
-            val placeuserRating1 =
-                initialBottomSheetView.findViewById<RatingBar>(R.id.placeUserRatingBar1)
-            val placeuserRating2 =
-                initialBottomSheetView.findViewById<RatingBar>(R.id.placeUserRatingBar2)
-            val placeuserReview1 =
-                initialBottomSheetView.findViewById<TextView>(R.id.placeUserReview1)
-            val placeuserReview2 =
-                initialBottomSheetView.findViewById<TextView>(R.id.placeUserReview2)
+            val placeuserRating1 = initialBottomSheetView.findViewById<RatingBar>(R.id.placeUserRatingBar1)
+            val placeuserRating2 = initialBottomSheetView.findViewById<RatingBar>(R.id.placeUserRatingBar2)
+            val placeuserReview1 = initialBottomSheetView.findViewById<TextView>(R.id.placeUserReview1)
+            val placeuserReview2 = initialBottomSheetView.findViewById<TextView>(R.id.placeUserReview2)
 
             if (reviews.isNotEmpty()) {
                 val firstReview = reviews[0]
                 placeuserRating1.rating = firstReview.rating!!
                 placeuserReview1.text = firstReview.comment
 
+                placeuserRating1.visibility = View.VISIBLE
+                placeuserReview1.visibility = View.VISIBLE
+
                 if (reviews.size > 1) {
                     val secondReview = reviews[1]
                     placeuserRating2.rating = secondReview.rating!!
                     placeuserReview2.text = secondReview.comment
+
+                    placeuserRating2.visibility = View.VISIBLE
+                    placeuserReview2.visibility = View.VISIBLE
+                } else {
+                    placeuserRating2.visibility = View.GONE
+                    placeuserReview2.visibility = View.GONE
                 }
+
+                initialBottomSheetView.findViewById<Chip>(R.id.chipViewAllReviews).visibility = View.VISIBLE
+                initialBottomSheetView.findViewById<TextView>(R.id.textViewNoReview).visibility = View.GONE
             } else {
                 placeuserRating1.visibility = View.GONE
                 placeuserRating2.visibility = View.GONE
                 placeuserReview1.visibility = View.GONE
                 placeuserReview2.visibility = View.GONE
-                initialBottomSheetView.findViewById<Chip>(R.id.chipViewAllReviews).visibility =
-                    View.GONE
-                initialBottomSheetView.findViewById<TextView>(R.id.textViewNoReview).visibility =
-                    View.VISIBLE
+                initialBottomSheetView.findViewById<Chip>(R.id.chipViewAllReviews).visibility = View.GONE
+                initialBottomSheetView.findViewById<TextView>(R.id.textViewNoReview).visibility = View.VISIBLE
             }
         }
-
 
         val bottomSheetDialog = BottomSheetDialog(requireContext())
         bottomSheetDialog.setContentView(initialBottomSheetView)
