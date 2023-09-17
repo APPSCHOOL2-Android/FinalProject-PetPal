@@ -55,7 +55,7 @@ class MyPageFragment : Fragment() {
                 mainActivity.navigate(R.id.action_mainFragment_to_inquiryFragment)
             }
 
-            buttonAddPet.setOnClickListener {
+            imageRowSimplePet.setOnClickListener {
                 mainActivity.navigate(R.id.action_mainFragment_to_addPetFragment, bundleOf("isAdd" to true))
             }
 

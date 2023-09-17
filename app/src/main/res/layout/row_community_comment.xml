@@ -3,133 +3,136 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
+    android:layout_marginEnd="@dimen/common_margin"
+    android:layout_marginStart="@dimen/common_margin"
     android:layout_height="wrap_content">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/communityCommentProfileConstraintLayout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/common_padding"
-        app:layout_constraintEnd_toEndOf="parent"
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/communityCommentProfileImage"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_gravity="center"
+
+        android:layout_marginTop="@dimen/common_margin"
+        android:layout_marginBottom="@dimen/common_margin"
+        android:background="@android:color/transparent"
+        android:scaleType="centerCrop"
+        android:src="@drawable/a11"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <de.hdodenhof.circleimageview.CircleImageView
-            android:id="@+id/communityCommentProfileImage"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_gravity="center"
-            android:layout_marginStart="@dimen/common_margin"
-            android:layout_marginTop="@dimen/common_margin"
-            android:layout_marginBottom="@dimen/common_margin"
-            android:background="@android:color/transparent"
-            android:scaleType="centerCrop"
-            android:src="@mipmap/ic_launcher"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent" />
 
 
-        <androidx.appcompat.widget.AppCompatImageButton
-            android:id="@+id/communityCommentMenuImageButton"
-            style="@style/Widget.AppCompat.ImageButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="@dimen/common_margin"
-            android:backgroundTint="@android:color/transparent"
-            android:src="@drawable/more_vert"
-            app:layout_constraintBottom_toBottomOf="@id/communityCommentPostDateCreated"
-            app:layout_constraintEnd_toEndOf="parent" />
+    <androidx.appcompat.widget.AppCompatImageButton
+        android:id="@+id/communityCommentMenuImageButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:backgroundTint="@android:color/transparent"
+        android:src="@drawable/more_vert"
+        app:layout_constraintBottom_toBottomOf="@id/communityCommentPostDateCreated"
+        app:layout_constraintEnd_toEndOf="parent" />
 
 
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/communityCommentUserNickName"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/common_margin"
-            android:text="닉네임"
-            android:textAppearance="@style/TextAppearance.AppCompat.Small"
-            android:textColor="@color/black"
-            app:layout_constraintStart_toEndOf="@id/communityCommentProfileImage"
-            app:layout_constraintTop_toTopOf="@id/communityCommentProfileImage" />
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/communityCommentUserNickName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textStyle="bold"
+        android:layout_marginStart="@dimen/common_margin"
+        android:text="닉네임"
+        android:textAppearance="@style/TextAppearance.AppCompat.Small"
+        android:textColor="@color/black"
+        app:layout_constraintStart_toEndOf="@id/communityCommentProfileImage"
+        app:layout_constraintTop_toTopOf="@id/communityCommentProfileImage" />
 
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/communityCommentUserPlace"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="제주 제주시 애월읍"
-            android:textAppearance="@style/TextAppearance.AppCompat.Small"
-            app:layout_constraintStart_toStartOf="@id/communityCommentUserNickName"
-            app:layout_constraintTop_toBottomOf="@id/communityCommentUserNickName" />
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/communityCommentUserPlace"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="제주 제주시 애월읍"
+        android:textAppearance="@style/TextAppearance.AppCompat.Small"
+        app:layout_constraintStart_toStartOf="@id/communityCommentUserNickName"
+        app:layout_constraintTop_toBottomOf="@id/communityCommentUserNickName" />
 
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/placeDateDistinction"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingStart="@dimen/common_small_padding"
-            android:paddingEnd="@dimen/common_small_padding"
-            android:text="@string/place_date_distinction"
-            app:layout_constraintEnd_toStartOf="@id/communityCommentPostDateCreated"
-            app:layout_constraintStart_toEndOf="@id/communityCommentUserPlace"
-            app:layout_constraintTop_toBottomOf="@id/communityCommentUserNickName" />
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/placeDateDistinction"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingStart="@dimen/common_small_padding"
+        android:paddingEnd="@dimen/common_small_padding"
+        android:text="@string/place_date_distinction"
+        app:layout_constraintEnd_toStartOf="@id/communityCommentPostDateCreated"
+        app:layout_constraintStart_toEndOf="@id/communityCommentUserPlace"
+        app:layout_constraintTop_toBottomOf="@id/communityCommentUserNickName" />
 
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/communityCommentPostDateCreated"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="30분전"
-            android:textAppearance="@style/TextAppearance.AppCompat.Small"
-            app:layout_constraintStart_toEndOf="@id/placeDateDistinction"
-            app:layout_constraintTop_toBottomOf="@id/communityCommentUserNickName" />
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/communityCommentPostDateCreated"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="30분전"
+        android:textAppearance="@style/TextAppearance.AppCompat.Small"
+        app:layout_constraintStart_toEndOf="@id/placeDateDistinction"
+        app:layout_constraintTop_toBottomOf="@id/communityCommentUserNickName" />
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/communityCommentContent"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:ellipsize="end"
-        android:maxLines="4"
-        android:padding="@dimen/common_padding"
+        android:maxLength="300"
+        android:layout_marginTop="@dimen/common_small_margin"
+        app:layout_constraintEnd_toEndOf="@id/communityCommentMenuImageButton"
+        android:text="rrrrrrrrrrrrrrrrrddddddddddddddddddddddddddddddddddddddddddddddddddddrrrrrrrrrrrrrrrrrrrrrrrr"
         android:textAppearance="@style/TextAppearance.AppCompat.Body2"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/communityCommentProfileConstraintLayout"
-        tools:text="rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrdddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddrrrrrrrrrrrrrrrrrrrrrrrrrrrrr" />
+        app:layout_constraintStart_toStartOf="@id/communityCommentUserPlace"
+        app:layout_constraintTop_toBottomOf="@id/communityCommentPostDateCreated" />
+
 
     <LinearLayout
         android:id="@+id/communityCommentBottomLinerLayout"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/common_margin"
+        android:layout_marginEnd="@dimen/common_margin"
         android:orientation="horizontal"
-        android:padding="@dimen/common_padding"
-        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/communityCommentContent">
 
-        <com.airbnb.lottie.LottieAnimationView
-            android:id="@+id/communityCommentFavoriteLottie"
-            android:layout_width="30dp"
-            android:layout_height="40dp"
-            android:scaleType="centerCrop"
-            app:lottie_rawRes="@raw/favorite" />
-
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/communityCommentFavoriteTextView"
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text="좋아요 7"
-            android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1" />
+            android:layout_height="match_parent">
+
+            <com.airbnb.lottie.LottieAnimationView
+                android:id="@+id/communityCommentFavoriteLottie"
+                android:layout_width="20dp"
+                android:layout_height="0dp"
+                app:layout_constraintBottom_toBottomOf="@id/communityCommentFavoriteTextView"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@id/communityCommentFavoriteTextView"
+                app:lottie_rawRes="@raw/favorite" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/communityCommentFavoriteTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:text="좋아요 7"
+                android:layout_marginStart="@dimen/common_small_margin"
+                android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/communityCommentFavoriteLottie"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/communityCommentCommentTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/common_padding"
             android:layout_gravity="center"
+            android:layout_marginStart="@dimen/common_padding"
             android:drawableStart="@drawable/comment"
             android:drawablePadding="@dimen/common_small_padding"
+            android:gravity="center"
             android:text="@string/comment"
             android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1" />
 
@@ -139,7 +142,7 @@
         android:id="@+id/communityCommentDivider"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/common_margin"
+        android:layout_marginTop="@dimen/common_margin"
         android:layout_marginEnd="@dimen/common_margin"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
