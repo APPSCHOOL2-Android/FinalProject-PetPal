@@ -99,7 +99,6 @@
     </string-array>
 
     <string-array name="communityCategoryList">
-        <item>전체</item>
         <item>일상</item>
         <item>산책일지</item>
         <item>산책 메이트 구해요</item>
@@ -114,9 +113,6 @@
         <item>리트리버 아지트</item>
         <item>웰시 코기 아지트</item>
         <item>나머지 아이들 아지트</item>
-
     </string-array>
-
-
 
 </resources>

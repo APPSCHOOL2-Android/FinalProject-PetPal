@@ -143,8 +143,7 @@ class CommunityFragment : Fragment() {
             configFirestore()
             communityAdapter.notifyDataSetChanged()
 
-            // 새로고침 완료시,
-            // 새로고침 아이콘이 사라질 수 있게 isRefreshing = false
+
             refreshLayout.isRefreshing = false
         }
     }
@@ -201,6 +200,13 @@ class CommunityFragment : Fragment() {
                     community.postDateCreated = "$timeAgo"
                     communityAdapter.add(community)
                 }
+
+                firestoreJob?.cancel() // 이전의 Job이 있으면 취소
+                firestoreJob = CoroutineScope(Dispatchers.Main).launch {
+                    delay(1000)
+                    skeleton.showOriginal()
+                }
+
             }
             .addOnFailureListener {
                 Snackbar.make(rootView, "데이터를 불러오는데 실패했습니다.", Snackbar.LENGTH_SHORT).show()
