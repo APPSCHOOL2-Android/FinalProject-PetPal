@@ -35,7 +35,6 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.TimeZone
 
-
 class CommunityPostDetailFragment : Fragment() {
 
     private lateinit var communityPostDetailBinding: FragmentCommunityPostDetailBinding
@@ -58,6 +57,9 @@ class CommunityPostDetailFragment : Fragment() {
             val postid = args.position
             postGetId = postid
 //            Log.d("확인", postid.toString())
+            getFireStoreData()
+            scrollUpFab()
+        }
 
             scrollUpFab()
 

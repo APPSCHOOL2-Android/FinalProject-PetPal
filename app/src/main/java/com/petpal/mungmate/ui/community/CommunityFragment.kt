@@ -189,8 +189,7 @@ class CommunityFragment : Fragment() {
                     val snapshotTime = dateFormat.parse(community.postDateCreated) // Firestore에서 가져온 시간 문자열을 Date 객체로 변환
 
                     val currentTime = Date()
-                    val timeDifferenceMillis =
-                        currentTime.time - snapshotTime.time  // Firestore 시간에서 현재 시간을 뺌
+                    val timeDifferenceMillis = currentTime.time - snapshotTime.time  // Firestore 시간에서 현재 시간을 뺌
 
                     val timeAgo = when {
                         timeDifferenceMillis < 60_000 -> "방금 전" // 1분 미만
