@@ -10,7 +10,6 @@ import androidx.appcompat.content.res.AppCompatResources
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.snackbar.Snackbar
 import com.petpal.mungmate.R
 import com.petpal.mungmate.databinding.FragmentChatRoomBinding
 import com.petpal.mungmate.model.Message
@@ -20,12 +19,16 @@ class ChatRoomFragment : Fragment() {
     private val fragmentChatRoomBinding get() = _fragmentChatRoomBinding!!
 
     private var messageList = mutableListOf<Message>()
+    lateinit var chatRoomId: String
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         _fragmentChatRoomBinding = FragmentChatRoomBinding.inflate(inflater)
+
+        chatRoomId = arguments?.getString("chatRoomId")!!
+
         return fragmentChatRoomBinding.root
     }
 
@@ -33,7 +36,7 @@ class ChatRoomFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         // 임시 데이터 세팅
-        setSampleData()
+        // setSampleData()
 
         fragmentChatRoomBinding.run {
             toolbarChatRoom.run {
@@ -75,7 +78,7 @@ class ChatRoomFragment : Fragment() {
 
             // 채팅방 메시지 목록
             recyclerViewMessage.run {
-                adapter = ChatMessageAdapter(messageList)
+                adapter = MessageAdapter(messageList)
                 layoutManager = LinearLayoutManager(requireContext())
             }
         }
@@ -131,15 +134,15 @@ class ChatRoomFragment : Fragment() {
         builder.show()
     }
 
-    private fun setSampleData() {
-        messageList = mutableListOf(
-            Message("안녕하세요!", "오후 10:00", false),
-            Message("멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍장문테스트멍멍멍멍멍멍멍멍멍멍", "오후 10:01", true),
-            Message("같이 산책하실래요?", "오후 10:02", false),
-            Message("좋아요ㅎㅎ", "오후 10:03", true),
-            Message("그럼 몇시에 만날까요?", "오후 10:04", true),
-            Message("테스트메시지입니다.", "오후 10:05", false),
-            Message("테스트메시지입니다.", "오후 10:06", false)
-        )
-    }
+//    private fun setSampleData() {
+//        messageList = mutableListOf(
+//            Message("안녕하세요!", "오후 10:00", false),
+//            Message("멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍장문테스트멍멍멍멍멍멍멍멍멍멍", "오후 10:01", true),
+//            Message("같이 산책하실래요?", "오후 10:02", false),
+//            Message("좋아요ㅎㅎ", "오후 10:03", true),
+//            Message("그럼 몇시에 만날까요?", "오후 10:04", true),
+//            Message("테스트메시지입니다.", "오후 10:05", false),
+//            Message("테스트메시지입니다.", "오후 10:06", false)
+//        )
+//    }
 }

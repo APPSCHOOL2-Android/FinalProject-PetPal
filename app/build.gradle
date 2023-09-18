@@ -112,4 +112,8 @@ dependencies {
 
     //firebase firestore
     implementation("com.google.firebase:firebase-firestore-ktx")
+
+    // firebase firestore UI
+    implementation 'com.firebaseui:firebase-ui-firestore:8.0.0'
+
 }

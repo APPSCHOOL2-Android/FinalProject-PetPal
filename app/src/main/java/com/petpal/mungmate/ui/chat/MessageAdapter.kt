@@ -9,7 +9,9 @@ import com.petpal.mungmate.model.Message
 import java.lang.IllegalArgumentException
 
 // Recyceler.ViewHolder를 상속받는 자식 클래스 ViewHolder들로 이루어진 리스트를 하나의 RecyclerView로 표시
-class ChatMessageAdapter(private val messageList: List<Message>): RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+class MessageAdapter(private val messageList: List<Message>): RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+    private val loginUserId = "user1"
+
     // 메시지 뷰 식별용 상수
     companion object {
         const val SEND_MESSAGE_VIEW_TYPE = 1
@@ -20,8 +22,8 @@ class ChatMessageAdapter(private val messageList: List<Message>): RecyclerView.A
     inner class SendMessageViewHolder(private val RowChatSendMessageBinding: RowChatSendMessageBinding): RecyclerView.ViewHolder(RowChatSendMessageBinding.root){
         fun bindSendMessage(message: Message){
             RowChatSendMessageBinding.run {
-                textViewMessage.text = message.messageText
-                textViewTime.text = message.messageTime
+                textViewMessage.text = message.text
+                textViewTime.text = message.timestamp.toString()
                 // TODO 이전것과 시간이 변경 없을 경우 TextViewTime visibility GONE
             }
         }
@@ -30,8 +32,8 @@ class ChatMessageAdapter(private val messageList: List<Message>): RecyclerView.A
     inner class ReceiveMessageViewHolder(private val RowChatReceiveMessageBinding: RowChatReceiveMessageBinding): RecyclerView.ViewHolder(RowChatReceiveMessageBinding.root){
         fun bindReceiveMessage(message: Message) {
             RowChatReceiveMessageBinding.run {
-                textViewMessage.text = message.messageText
-                textViewTime.text = message.messageTime
+                textViewMessage.text = message.text
+                textViewTime.text = message.timestamp.toString()
                 // TODO 이전것과 시간이 변경 없을 경우 TextViewTime visibility GONE
             }
         }
@@ -84,7 +86,7 @@ class ChatMessageAdapter(private val messageList: List<Message>): RecyclerView.A
     // 객체 멤버변수 값에 따라 ViewHolder 타입 구분
     override fun getItemViewType(position: Int): Int {
         val message = messageList[position]
-        return if (message.isSendMessage) {
+        return if (message.senderId == loginUserId) {
             SEND_MESSAGE_VIEW_TYPE
         } else {
             RECEIVE_MESSAGE_VIEW_TYPE

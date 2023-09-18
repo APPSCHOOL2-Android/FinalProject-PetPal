@@ -9,7 +9,14 @@
         android:id="@+id/walkMateRequestFragment"
         android:name="com.petpal.mungmate.ui.chat.WalkMateRequestFragment"
         android:label="산책 메이트 요청"
-        tools:layout="@layout/fragment_walk_mate_request" />
+        tools:layout="@layout/fragment_walk_mate_request" >
+        <argument
+            android:name="senderId"
+            app:argType="string" />
+        <argument
+            android:name="receiverId"
+            app:argType="string" />
+    </fragment>
     <fragment
         android:id="@+id/chatRoomFragment"
         android:name="com.petpal.mungmate.ui.chat.ChatRoomFragment"
@@ -21,10 +28,17 @@
         <action
             android:id="@+id/action_chatRoomFragment_to_reportUserFragment"
             app:destination="@id/reportUserFragment" />
+        <argument
+            android:name="chatRoomId"
+            app:argType="string" />
     </fragment>
     <fragment
         android:id="@+id/reportUserFragment"
         android:name="com.petpal.mungmate.ui.chat.ReportUserFragment"
         android:label="사용자 신고"
-        tools:layout="@layout/fragment_report_user" />
+        tools:layout="@layout/fragment_report_user" >
+        <argument
+            android:name="receiverId"
+            app:argType="string" />
+    </fragment>
 </navigation>

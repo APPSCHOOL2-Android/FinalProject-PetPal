@@ -1,8 +1,13 @@
 package com.petpal.mungmate.model
 
-// test
+import com.google.firebase.Timestamp
+
+// 채팅방 메시지
 data class Message(
-    var messageText: String,
-    var messageTime: String,
-    var isSendMessage: Boolean
+    val senderId: String? = null,
+    val text: String? = null,
+    val timestamp: Timestamp? = null,
+    @field:JvmField
+    var isRead: Boolean? = null,
+    val type: String? = null
 )
