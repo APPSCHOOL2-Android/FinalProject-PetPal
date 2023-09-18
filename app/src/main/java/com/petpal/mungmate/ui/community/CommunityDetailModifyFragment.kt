@@ -7,22 +7,30 @@ import android.graphics.ImageDecoder
 import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
+import android.text.Editable
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ArrayAdapter
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
+import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.snackbar.Snackbar
+import com.google.firebase.firestore.FirebaseFirestore
 import com.petpal.mungmate.MainActivity
 import com.petpal.mungmate.ProductRegistrationAdapter
 import com.petpal.mungmate.R
 import com.petpal.mungmate.databinding.FragmentCommunityDetailModifyBinding
 import com.petpal.mungmate.model.Image
+import com.petpal.mungmate.model.Post
+import java.util.Date
 
 
 class CommunityDetailModifyFragment : Fragment() {
@@ -35,7 +43,7 @@ class CommunityDetailModifyFragment : Fragment() {
 
     // 갤러리 실행
     lateinit var mainGalleryLauncher: ActivityResultLauncher<Intent>
-
+    lateinit var postGetId: String
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -47,8 +55,13 @@ class CommunityDetailModifyFragment : Fragment() {
         mainActivity = activity as MainActivity
 
         fragmentCommunityDetailModifyBinding.run {
+
             toolbar()
 
+            val args: CommunityDetailModifyFragmentArgs by navArgs()
+            val postid = args.positionPostId
+            postGetId = postid
+            Log.d("확인", postid)
 
             communityModifyImageButton.setOnClickListener {
                 val galleryIntent =
@@ -63,6 +76,8 @@ class CommunityDetailModifyFragment : Fragment() {
                 adapter = ProductRegistrationAdapter(mainImageList, communityModifyImageButton)
                 layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
             }
+
+            getFirestore()
 
         }
         return fragmentCommunityDetailModifyBinding.root
@@ -80,6 +95,7 @@ class CommunityDetailModifyFragment : Fragment() {
                 when (it?.itemId) {
                     R.id.item_modify -> {
                         Snackbar.make(requireView(), "완료", Snackbar.LENGTH_SHORT).show()
+                        modifyFirestore()
                     }
 
                 }
@@ -123,4 +139,56 @@ class CommunityDetailModifyFragment : Fragment() {
         return galleryLauncher
     }
 
+    private fun getFirestore() {
+        val db = FirebaseFirestore.getInstance()
+        val postRef = db.collection("Post")
+        postGetId?.let { id ->
+            postRef.document(id)
+                .get()
+                .addOnSuccessListener { documentSnapshot ->
+                    if (documentSnapshot.exists()) {
+                        val postTitle = documentSnapshot.getString("postTitle")
+                        val postCategory = documentSnapshot.getString("postCategory")
+                        val postContent = documentSnapshot.getString("postContent")
+                        fragmentCommunityDetailModifyBinding.run {
+                            communityPostWritingTitleTextInputEditText.text =
+                                Editable.Factory.getInstance().newEditable(postTitle)
+//                            communityPostModifyCategory.isHintEnabled = false
+//                            communityPostModifyCategory.isHintAnimationEnabled = false
+//                            categoryItem.text = Editable.Factory.getInstance().newEditable(postCategory)
+                            categoryItem.setText(postCategory)
+                            val items = resources.getStringArray(R.array.communityCategoryList)
+                            val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, items)
+                            categoryItem.setAdapter(adapter)
+
+
+                            communityPostModifyContentTextInputEditText.text =
+                                Editable.Factory.getInstance().newEditable(postContent)
+                        }
+                    }
+                }
+        }
+
+    }
+
+    fun modifyFirestore() {
+        val db = FirebaseFirestore.getInstance()
+        val documentRef = db.collection("Post").document(postGetId)
+        val dataToUpdate: Map<String, Any> = hashMapOf(
+            "postTitle" to fragmentCommunityDetailModifyBinding.communityPostWritingTitleTextInputEditText.text.toString(),
+            "postCategory" to fragmentCommunityDetailModifyBinding.categoryItem.text.toString(),
+            "postContent" to fragmentCommunityDetailModifyBinding.communityPostModifyContentTextInputEditText.text.toString()
+        )
+        documentRef.update(dataToUpdate)
+            .addOnSuccessListener { documentReference ->
+
+            }
+            .addOnFailureListener {
+
+            }
+            .addOnCompleteListener {
+                val navController = findNavController()
+                navController.popBackStack()
+            }
+    }
 }

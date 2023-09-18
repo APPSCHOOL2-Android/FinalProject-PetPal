@@ -7,6 +7,11 @@ plugins {
     id 'com.google.gms.google-services'
 }
 
+//추가
+//Properties를 선언하고 local.properties에 새로 등록된 api_key값을 load
+Properties properties = new Properties()
+properties.load(project.rootProject.file('local.properties').newDataInputStream())
+
 android {
     namespace 'com.petpal.mungmate'
     compileSdk 33
@@ -17,6 +22,8 @@ android {
         targetSdk 33
         versionCode 1
         versionName "1.0"
+
+        buildConfigField "String", "KAKAO_NATIVE_APP_KEY", properties['kakao_native_app_key']
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -104,15 +111,19 @@ dependencies {
     //firebase analytics
     implementation 'com.google.firebase:firebase-analytics-ktx'
     //firestore
-    implementation "com.google.firebase:firebase-firestore-ktx:24.7.1"
+    implementation "com.google.firebase:firebase-firestore-ktx"
+    //authentication
+    implementation "com.google.firebase:firebase-auth-ktx"
+    //firebasefunctions
+    implementation("com.google.firebase:firebase-functions-ktx")
+    // Google Play services library
+    implementation("com.google.android.gms:play-services-auth:20.7.0")
 
-
+    //kakao login
+    implementation "com.kakao.sdk:v2-user:2.16.0" // 카카오 로그인
+    
     // SimpleRatingBar
     implementation 'com.github.ome450901:SimpleRatingBar:1.5.1'
-
-    //firebase firestore
-    implementation("com.google.firebase:firebase-firestore-ktx")
-
 
     // swiperefreshlayout
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")

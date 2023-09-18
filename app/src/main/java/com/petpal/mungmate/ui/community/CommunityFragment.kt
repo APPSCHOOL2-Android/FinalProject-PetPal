@@ -143,8 +143,7 @@ class CommunityFragment : Fragment() {
             configFirestore()
             communityAdapter.notifyDataSetChanged()
 
-            // 새로고침 완료시,
-            // 새로고침 아이콘이 사라질 수 있게 isRefreshing = false
+
             refreshLayout.isRefreshing = false
         }
     }
@@ -190,8 +189,7 @@ class CommunityFragment : Fragment() {
                     val snapshotTime = dateFormat.parse(community.postDateCreated) // Firestore에서 가져온 시간 문자열을 Date 객체로 변환
 
                     val currentTime = Date()
-                    val timeDifferenceMillis =
-                        currentTime.time - snapshotTime.time  // Firestore 시간에서 현재 시간을 뺌
+                    val timeDifferenceMillis = currentTime.time - snapshotTime.time  // Firestore 시간에서 현재 시간을 뺌
 
                     val timeAgo = when {
                         timeDifferenceMillis < 60_000 -> "방금 전" // 1분 미만
@@ -202,6 +200,13 @@ class CommunityFragment : Fragment() {
                     community.postDateCreated = "$timeAgo"
                     communityAdapter.add(community)
                 }
+
+                firestoreJob?.cancel() // 이전의 Job이 있으면 취소
+                firestoreJob = CoroutineScope(Dispatchers.Main).launch {
+                    delay(1000)
+                    skeleton.showOriginal()
+                }
+
             }
             .addOnFailureListener {
                 Snackbar.make(rootView, "데이터를 불러오는데 실패했습니다.", Snackbar.LENGTH_SHORT).show()
