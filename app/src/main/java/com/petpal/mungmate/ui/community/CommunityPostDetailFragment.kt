@@ -57,9 +57,6 @@ class CommunityPostDetailFragment : Fragment() {
             val postid = args.position
             postGetId = postid
 //            Log.d("확인", postid.toString())
-            getFireStoreData()
-            scrollUpFab()
-        }
 
             scrollUpFab()
 
