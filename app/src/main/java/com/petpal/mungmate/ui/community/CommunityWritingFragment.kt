@@ -32,6 +32,7 @@ import com.petpal.mungmate.R
 import com.petpal.mungmate.databinding.FragmentCommunityWritingBinding
 import com.petpal.mungmate.model.Image
 import com.petpal.mungmate.model.Post
+import com.petpal.mungmate.model.PostImage
 import java.io.ByteArrayOutputStream
 import java.text.SimpleDateFormat
 import java.time.LocalDateTime
@@ -52,6 +53,7 @@ class CommunityWritingFragment : Fragment() {
     // 갤러리 실행
     lateinit var mainGalleryLauncher: ActivityResultLauncher<Intent>
     private var photoSelectedUri: Uri? = null
+    val postImagesList: MutableList<PostImage> = mutableListOf()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -116,7 +118,7 @@ class CommunityWritingFragment : Fragment() {
                             "",
                             "",
                             "",
-                            "",
+                            emptyList(),
                             "",
                             0,
                             ""
@@ -175,53 +177,57 @@ class CommunityWritingFragment : Fragment() {
     }
 
     private fun saveFirestore(post: Post) {
-
-
         val db = FirebaseFirestore.getInstance()
         db.collection("Post")
             .add(post)
             .addOnSuccessListener { documentReference ->
-
                 val generatedDocId = documentReference.id
                 val currentDateTime = Date()
                 val formattedDateTime = formatDateTimeToNewFormat(currentDateTime)
-                uploadImage()
-                val updatedData = Post(
-                    generatedDocId,
-                    0,
-                    "https://cotieshop.co.kr/wp-content/uploads/2021/09/%ED%8E%AB%EC%86%8C%EC%8B%9C%ED%81%AC_Tiny-dog-collar%EA%B0%95%EC%95%84%EC%A7%80%EB%B0%98%EB%8B%A4%EB%82%98-Mimi-Mini_thumb002.jpg",
-                    "데이터 없음",
-                    "데이터 없음",
-                    communityWritingBinding.communityPostWritingTitleTextInputEditText.text.toString(),
-                    communityWritingBinding.categoryItem.text.toString(),
-                    formattedDateTime,
-                    "https://cotieshop.co.kr/wp-content/uploads/2021/09/%ED%8E%AB%EC%86%8C%EC%8B%9C%ED%81%AC_Tiny-dog-collar%EA%B0%95%EC%95%84%EC%A7%80%EB%B0%98%EB%8B%A4%EB%82%98-Mimi-Mini_thumb002.jpg",
-                    communityWritingBinding.communityPostWritingContentTextInputEditText.text.toString(),
-                    0,
-                    "0"
-                )
-                val documentRef = db.collection("Post").document(generatedDocId)
-                documentRef.set(updatedData)
-                documentRef
-                    .set(updatedData)
-                    .addOnSuccessListener {
-                        Snackbar.make(
-                            communityWritingBinding.communityPostWritingTitleTextInputEditText,
-                            "게시글 등록 성공",
-                            Snackbar.LENGTH_SHORT
-                        ).show()
+
+
+                uploadImage { eventPost ->
+                    val postImage = PostImage(eventPost.photoUrl)
+                    postImagesList.add(postImage)
+
+                    if (eventPost.isSuccess) {
+                        val updatedData = Post(
+                            generatedDocId,
+                            0,
+                            "https://cotieshop.co.kr/wp-content/uploads/2021/09/%ED%8E%AB%EC%86%8C%EC%8B%9C%ED%81%AC_Tiny-dog-collar%EA%B0%95%EC%95%84%EC%A7%80%EB%B0%98%EB%8B%A4%EB%82%98-Mimi-Mini_thumb002.jpg",
+                            "데이터 없음",
+                            "데이터 없음",
+                            communityWritingBinding.communityPostWritingTitleTextInputEditText.text.toString(),
+                            communityWritingBinding.categoryItem.text.toString(),
+                            formattedDateTime,
+                            postImagesList,
+                            communityWritingBinding.communityPostWritingContentTextInputEditText.text.toString(),
+                            0,
+                            "0"
+                        )
+
+                        val documentRef = db.collection("Post").document(generatedDocId)
+                        documentRef.set(updatedData)
+                            .addOnSuccessListener {
+                                Snackbar.make(
+                                    communityWritingBinding.communityPostWritingTitleTextInputEditText,
+                                    "게시글 등록 성공",
+                                    Snackbar.LENGTH_SHORT
+                                ).show()
+                            }
+                            .addOnFailureListener {
+                                Snackbar.make(
+                                    communityWritingBinding.communityPostWritingTitleTextInputEditText,
+                                    "게시글 등록 실패",
+                                    Snackbar.LENGTH_SHORT
+                                ).show()
+                            }
+                            .addOnCompleteListener {
+                                val navController = findNavController()
+                                navController.popBackStack()
+                            }
                     }
-                    .addOnFailureListener {
-                        Snackbar.make(
-                            communityWritingBinding.communityPostWritingTitleTextInputEditText,
-                            "게시글 등록 실패",
-                            Snackbar.LENGTH_SHORT
-                        ).show()
-                    }
-                    .addOnCompleteListener {
-                        val navController = findNavController()
-                        navController.popBackStack()
-                    }
+                }
             }
             .addOnFailureListener {
                 Snackbar.make(
@@ -230,10 +236,9 @@ class CommunityWritingFragment : Fragment() {
                     Snackbar.LENGTH_SHORT
                 ).show()
             }
-
     }
 
-    private fun uploadImage() {
+    private fun uploadImage(callback: (EventPost) -> Unit) {
 
         val storageRef = FirebaseStorage.getInstance().reference.child("post")
         val eventPost = EventPost()
@@ -254,7 +259,18 @@ class CommunityWritingFragment : Fragment() {
                 .addOnSuccessListener {
                     it.storage.downloadUrl.addOnSuccessListener { downloadUri ->
                         Log.i("URL 정보", downloadUri.toString())
+//                        val imageUrl = downloadUri.toString()
+//                        val postImage = PostImage(imageUrl)
+//                        postImagesList = postImagesList + postImage
+//                        Log.i("URL 정보", postImagesList.toString())
+                        eventPost.isSuccess = true
+                        eventPost.photoUrl = downloadUri.toString()
+                        callback(eventPost)
                     }
+                }
+                .addOnFailureListener {
+                    eventPost.isSuccess = false
+                    callback(eventPost)
                 }
         }
     }
