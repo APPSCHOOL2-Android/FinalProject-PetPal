@@ -197,6 +197,7 @@ class CommunityPostDetailFragment : Fragment() {
             val postImages = documentSnapshot.getString("postImages")
             val postLike = documentSnapshot.getLong("postLike")
             val postComment = documentSnapshot.getString("postComment")
+            val postContent = documentSnapshot.getString("postContent")
 
             val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
             dateFormat.timeZone = TimeZone.getTimeZone("Asia/Seoul")
@@ -235,6 +236,7 @@ class CommunityPostDetailFragment : Fragment() {
                 communityPostDateCreated.text = timeAgo
                 communityPostDetailFavoriteCounter.text = postLike.toString()
                 communityPostDetailCommentCounter.text = postComment
+                communityPostDetailContent.text=postContent
             }
         }
     }
