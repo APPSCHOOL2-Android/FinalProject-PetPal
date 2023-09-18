@@ -4,7 +4,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_marginLeft="8dp"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:padding="8dp">
 
 
     <ImageView
@@ -14,7 +15,7 @@
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
         android:layout_marginBottom="8dp"
-        app:srcCompat="@drawable/storefront_24px" />
+        app:srcCompat="@drawable/photo" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -35,7 +36,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="4dp"
-            android:layout_weight="1"
             android:text="동물병원"
             android:textAppearance="@style/TextAppearance.AppCompat.Small" />
 
@@ -45,6 +45,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
+            android:layout_marginLeft="@dimen/bottom_navigation_icon_size"
+            android:layout_marginRight="8dp"
             android:numStars="5"
             android:rating="4.5" />
 
@@ -92,7 +94,10 @@
             android:id="@+id/noReviewsTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_margin="16dp"
             android:text="작성된 리뷰가 없습니다"
+            android:textAppearance="@style/TextAppearance.AppCompat.Large"
             android:visibility="gone" />
 
     </LinearLayout>

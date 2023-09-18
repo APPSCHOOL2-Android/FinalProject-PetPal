@@ -22,6 +22,8 @@ class WalkViewModel(private val repository: WalkRepository) : ViewModel() {
     private val _favoriteCount = MutableStateFlow<Int?>(null)
     val isDataLoading: MutableLiveData<Boolean> = MutableLiveData(false)
     val favoriteCount: StateFlow<Int?> = _favoriteCount
+    val reviewsForPlace = MutableLiveData<List<Review>>()
+    val averageRatingForPlace = MutableLiveData<Float>()
 
 
     fun searchPlacesByKeyword(latitude: Double, longitude: Double, query: String) {
@@ -34,6 +36,7 @@ class WalkViewModel(private val repository: WalkRepository) : ViewModel() {
             }
         }
     }
+
     fun fetchPlaceInfoFromFirestore(placeId: String) {
         viewModelScope.launch {
             isDataLoading.postValue(true)  // 데이터 로딩 시작
@@ -47,6 +50,21 @@ class WalkViewModel(private val repository: WalkRepository) : ViewModel() {
             }
         }
     }
+    fun fetchAverageRatingForPlace(placeId: String) {
+        viewModelScope.launch {
+            try {
+                val reviews = repository.fetchAllReviewsForPlace(placeId)
+                reviewsForPlace.postValue(reviews)
+                val totalRating = reviews.map { it.rating ?: 0f }.sum()
+                val avgRating = if (reviews.isNotEmpty()) totalRating / reviews.size else 0f
+                averageRatingForPlace.postValue(avgRating)
+
+            } catch (e: Exception) {
+                errorMessage.postValue(e.localizedMessage ?: "Failed to fetch reviews")
+            }
+        }
+    }
+
     fun fetchFavoriteCount(placeId: String) {
         viewModelScope.launch {
             repository.observeFavoritesChanges(placeId).collect { count ->

@@ -43,12 +43,7 @@ import kotlinx.coroutines.launch
 import net.daum.mf.map.api.MapPOIItem
 import net.daum.mf.map.api.MapPoint
 import net.daum.mf.map.api.MapView
-class WalkFragment : Fragment(),
-
-
-    net.daum.mf.map.api.MapView.POIItemEventListener,
-    net.daum.mf.map.api.MapView.CurrentLocationEventListener,
-    net.daum.mf.map.api.MapView.MapViewEventListener {
+class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListener, net.daum.mf.map.api.MapView.CurrentLocationEventListener, net.daum.mf.map.api.MapView.MapViewEventListener {
 
     private lateinit var fragmentWalkBinding: FragmentWalkBinding
     private lateinit var mainActivity: MainActivity
@@ -58,6 +53,8 @@ class WalkFragment : Fragment(),
     private var isLocationPermissionGranted = false
     private var isFavorited = false
     private var latestReviews: List<Review>? = null
+    private val currentMarkers: MutableList<MapPOIItem> = mutableListOf()
+    private val avgRatingBundle = Bundle()
     companion object {
         const val REQUEST_LOCATION_PERMISSION = 1
 
@@ -120,7 +117,7 @@ class WalkFragment : Fragment(),
         }
     }
 
-    private val currentMarkers: MutableList<MapPOIItem> = mutableListOf()
+
     private fun observeViewModel() {
 
         viewModel.searchResults.observe(viewLifecycleOwner) { response ->
@@ -281,6 +278,7 @@ class WalkFragment : Fragment(),
             viewModel.fetchLatestReviewsForPlace(it)
             viewModel.fetchPlaceInfoFromFirestore(it)
             viewModel.fetchIsPlaceFavoritedByUser(it, "userid")
+            viewModel.fetchAverageRatingForPlace(it)
         }
         viewModel.isPlaceFavorited.observe(viewLifecycleOwner) { isPlaceFavorited ->
                 isFavorited = isPlaceFavorited
@@ -289,11 +287,21 @@ class WalkFragment : Fragment(),
                     .setImageResource(R.drawable.filled_heart)
             }else{
                 initialBottomSheetView.findViewById<ImageView>(R.id.imageViewFavoirte)
-                    .setImageResource(R.drawable.favoirte_24px)
+                    .setImageResource(R.drawable.empty_heart)
             }
 
 
         }
+
+        viewModel.averageRatingForPlace.observe(viewLifecycleOwner) { avgRating ->
+            val roundedAvgRating = String.format("%.1f", avgRating).toFloat()
+            initialBottomSheetView.findViewById<RatingBar>(R.id.placeRatingBar).rating=avgRating
+            initialBottomSheetView.findViewById<TextView>(R.id.textViewratingbar).text=roundedAvgRating.toString()
+
+            avgRatingBundle.putFloat("avgRating", avgRating)
+            Log.d("avgRating",avgRating.toString())
+        }
+
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.favoriteCount.collect { count ->
                 val favoriteCountTextView = initialBottomSheetView.findViewById<TextView>(R.id.textViewPlaceFavoriteCount)
@@ -361,22 +369,21 @@ class WalkFragment : Fragment(),
 
         Handler(Looper.getMainLooper()).postDelayed({
             bottomSheetDialog.show()
-        }, 300)  // 0.3초 딜레이
+        }, 400)  // 0.3초 딜레이
 
         bottomSheetDialog.behavior.addBottomSheetCallback(object :
             BottomSheetBehavior.BottomSheetCallback() {
             override fun onStateChanged(bottomSheet: View, newState: Int) {
                 when (newState) {
                     BottomSheetBehavior.STATE_EXPANDED -> {
-                        val bundle = Bundle()
-                        bundle.putString("place_name", selectedPlace?.place_name)
-                        bundle.putString("phone", selectedPlace?.phone)
-                        bundle.putString("place_id", selectedPlace?.id)
-                        bundle.putString("place_road_adress_name", selectedPlace?.road_address_name)
-                        bundle.putString("place_category", selectedPlace?.category_group_name)
+                        avgRatingBundle.putString("place_name", selectedPlace?.place_name)
+                        avgRatingBundle.putString("place_id", selectedPlace?.id)
+                        avgRatingBundle.putString("phone", selectedPlace?.phone)
+                        avgRatingBundle.putString("place_road_adress_name", selectedPlace?.road_address_name)
+                        avgRatingBundle.putString("place_category", selectedPlace?.category_group_name)
                         mainActivity.navigate(
                             R.id.action_mainFragment_to_placeReviewFragment,
-                            bundle,
+                            avgRatingBundle,
                         )
                         bottomSheetDialog.dismiss()
                     }
@@ -402,20 +409,16 @@ class WalkFragment : Fragment(),
                     setImageResource(R.drawable.filled_heart)
                     val favorite = Favorite("userid")
                     viewModel.addPlaceToFavorite(place, favorite)
-                    // 좋아요가 눌릴 때마다 텍스트뷰 업데이트
                 } else {
                     isFavorited = false
-                    setImageResource(R.drawable.favoirte_24px)
+                    setImageResource(R.drawable.empty_heart)
                     viewModel.removeFavorite(placeId!!, "userid")
-
                 }
-
                 // 좋아요 개수 반영 ?
                 val alertDialog = AlertDialog.Builder(context)
                     .setTitle("멍메이트")
                     .setMessage("반영되었습니다.")
                     .setPositiveButton("확인") { dialog, which ->
-                        // 확인 버튼 클릭 시 수행될 로직
                         dialog.dismiss()
                     }
                     .create()
@@ -473,16 +476,13 @@ class WalkFragment : Fragment(),
         }
 
         initialBottomSheetView.findViewById<Chip>(R.id.chipViewAllReviews).setOnClickListener {
-            val bundle = Bundle()
-            bundle.putString("place_name", selectedPlace?.place_name)
-            bundle.putString("place_id", selectedPlace?.id)
-            bundle.putString("phone", selectedPlace?.phone)
-            bundle.putString("place_road_adress_name", selectedPlace?.road_address_name)
-            bundle.putString("place_category", selectedPlace?.category_group_name)
-            mainActivity.navigate(
-                R.id.action_mainFragment_to_placeReviewFragment,
-                bundle,
-            )
+            avgRatingBundle.putString("place_name", selectedPlace?.place_name)
+            avgRatingBundle.putString("place_id", selectedPlace?.id)
+            avgRatingBundle.putString("phone", selectedPlace?.phone)
+            avgRatingBundle.putString("place_road_adress_name", selectedPlace?.road_address_name)
+            avgRatingBundle.putString("place_category", selectedPlace?.category_group_name)
+
+            mainActivity.navigate(R.id.action_mainFragment_to_placeReviewFragment, avgRatingBundle)
             bottomSheetDialog.dismiss()
         }
     }

@@ -27,10 +27,12 @@
 
     <ImageView
         android:id="@+id/imageViewPlaceReview"
-        android:layout_width="400dp"
-        android:layout_height="200dp"
+        android:layout_width="300dp"
+        android:layout_height="150dp"
+        android:layout_gravity="center"
         android:layout_marginTop="@dimen/common_margin"
-        tools:src="@drawable/default_profile_image" />
+        android:src="@drawable/photo"
+        tools:src="@drawable/photo" />
 
     <TextView
         android:id="@+id/textViewPlaceReviewAnnouncement"

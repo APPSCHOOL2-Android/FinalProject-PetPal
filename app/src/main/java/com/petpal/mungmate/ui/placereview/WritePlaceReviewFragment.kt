@@ -34,7 +34,7 @@ class WritePlaceReviewFragment : Fragment() {
 
             buttonPlaceReviewSubmit.setOnClickListener {
                 val rating = placeRatingBar.rating
-                val userid = "userid"  // 실제로는 사용자 ID나 다른 고유 식별자를 사용해야 합니다.
+                val userid = "userid"
                 val comment = editTextReviewContent.text.toString()
                 val date = getCurrentDate()
                 val review = Review(userid, date,rating,comment)

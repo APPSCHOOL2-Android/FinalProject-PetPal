@@ -30,11 +30,6 @@ class PlaceReviewFragment : Fragment() {
     private lateinit var reviewAdapter: ReviewAdapter
     private val viewModel: PlaceReviewViewModel by viewModels { PlaceReviewViewModelFactory(PlaceReviewRepository()) }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -42,8 +37,10 @@ class PlaceReviewFragment : Fragment() {
         val placeName = arguments?.getString("place_name")
         val phone = arguments?.getString("phone")
         val roadAddressName = arguments?.getString("place_road_adress_name")
-        val placeCategory = arguments?.getString("place_cateogry")
+        val placeCategory = arguments?.getString("place_category")
         val placeId=arguments?.getString("place_id")
+        val avgRating=arguments?.getFloat("avgRating")
+        Log.d("avgRating",avgRating.toString())
 
         fragmentPlaceReviewBinding = FragmentPlaceReviewBinding.inflate(layoutInflater)
 
@@ -52,6 +49,10 @@ class PlaceReviewFragment : Fragment() {
         fragmentPlaceReviewBinding.reviewsRecyclerView.adapter = reviewAdapter
         fragmentPlaceReviewBinding.reviewsRecyclerView.layoutManager = LinearLayoutManager(requireContext())
 
+
+        if (avgRating != null) {
+            fragmentPlaceReviewBinding.placeUserRatingBar1.rating=avgRating
+        }
         fragmentPlaceReviewBinding.textViewPlaceReviewTitle.text = placeName
         fragmentPlaceReviewBinding.textView22.text = roadAddressName
         fragmentPlaceReviewBinding.textView25.text = phone

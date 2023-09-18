@@ -45,6 +45,18 @@ class WalkRepository {
             continuation.resumeWithException(exception)
         }
     }
+
+    suspend fun fetchAllReviewsForPlace(placeId: String): List<Review> {
+        val reviews = mutableListOf<Review>()
+        val reviewRef = db.collection("places").document(placeId).collection("reviews")
+        val task = reviewRef.get().await()
+        for (document in task) {
+            document.toObject(Review::class.java)?.let { reviews.add(it) }
+        }
+        return reviews
+    }
+
+
     suspend fun getFavoriteCountSuspend(placeId: String): Int {
         var favoriteCount = 0
         val favoriteRef = db.collection("places").document(placeId).collection("favorite")
