@@ -121,13 +121,9 @@ dependencies {
 
     //kakao login
     implementation "com.kakao.sdk:v2-user:2.16.0" // 카카오 로그인
-
-
-
+    
     // SimpleRatingBar
     implementation 'com.github.ome450901:SimpleRatingBar:1.5.1'
-
-
 
     // swiperefreshlayout
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
