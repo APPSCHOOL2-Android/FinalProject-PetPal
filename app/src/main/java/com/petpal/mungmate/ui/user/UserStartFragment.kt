@@ -108,6 +108,7 @@ class UserStartFragment : Fragment() {
             firebaseAuthWithGoogle(account.idToken!!)
         } catch (e: ApiException) {
             // Google Sign In failed, update UI appropriately
+            Snackbar.make(requireView(), "로그인에 실패하였습니다. 다시 시도해주세요.", Snackbar.LENGTH_SHORT).show()
             Log.w(TAG, "Google sign in failed", e)
         }
     }
@@ -124,6 +125,7 @@ class UserStartFragment : Fragment() {
                 } else {
                     // If sign in fails, display a message to the user.
                     Log.w(TAG, "signInWithCredential:failure", task.exception)
+                    Snackbar.make(requireView(), "로그인에 실패하였습니다. 다시 시도해주세요.", Snackbar.LENGTH_SHORT).show()
                     updateUI(null)
                 }
             }
@@ -204,6 +206,7 @@ class UserStartFragment : Fragment() {
                 } catch (e: RuntimeExecutionException) {
                     // 호출 실패
                     Log.d("카카오", "호출 실패")
+                    Snackbar.make(requireView(), "로그인에 실패하였습니다. 다시 시도해주세요.", Snackbar.LENGTH_SHORT).show()
                     Log.d("카카오", e.message!!)
                 }
             }
@@ -216,6 +219,7 @@ class UserStartFragment : Fragment() {
                 updateUI(auth.currentUser)
             } else {
                 // 실패 후 로직
+                Snackbar.make(requireView(), "로그인에 실패하였습니다. 다시 시도해주세요.", Snackbar.LENGTH_SHORT).show()
                 updateUI(null)
             }
         }
