@@ -24,6 +24,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.functions.FirebaseFunctions
 import com.google.firebase.functions.ktx.functions
 import com.google.firebase.ktx.Firebase
@@ -130,7 +131,8 @@ class UserStartFragment : Fragment() {
                 } else {
                     // If sign in fails, display a message to the user.
                     Log.w(TAG, "signInWithCredential:failure", task.exception)
-                    Snackbar.make(requireView(), "로그인에 실패하였습니다. 다시 시도해주세요.", Snackbar.LENGTH_SHORT).show()
+                    Snackbar.make(requireView(), "로그인에 실패하였습니다. 다시 시도해주세요.", Snackbar.LENGTH_SHORT)
+                        .show()
                     updateUI(null)
                 }
             }
@@ -148,9 +150,48 @@ class UserStartFragment : Fragment() {
             //Viewmodel통해 사용자 데이터 설정
             userViewModel.setUser(user)
 
-            //사용자 정보 입력 화면으로 넘어가기
-            findNavController().navigate(R.id.action_userStartFragment_to_userInfoFragment, bundleOf("isRegister" to true))
+//            if (isUserDataExists()) {
+//                //유저 데이터가 저장돼있다면
+//                //메인화면(산책)으로 바로 넘어가기
+//                findNavController().navigate(R.id.action_userStartFragment_to_mainFragment)
+//            } else {
+//                //유저 데이터가 저장돼있지 않다면
+//                //사용자 정보 입력 화면으로 넘어가기
+//                findNavController().navigate(
+//                    R.id.action_userStartFragment_to_userInfoFragment,
+//                    bundleOf("isRegister" to true)
+//                )
+//            }
+
+            findNavController().navigate(
+                R.id.action_userStartFragment_to_userInfoFragment,
+                bundleOf("isRegister" to true)
+            )
+
+
         }
+    }
+
+    private fun isUserDataExists(): Boolean {
+        var result = false
+        val db = Firebase.firestore
+
+        val usersRef = db.collection("users").document(auth.currentUser!!.uid)
+        usersRef.get()
+            .addOnSuccessListener { document ->
+                if (document != null) {
+                    Log.d(TAG, "DocumentSnapshot data: ${document.data}")
+                    result = true
+                } else {
+                    Log.d(TAG, "No such document")
+                    result = false
+                }
+            }
+            .addOnFailureListener { e ->
+                Log.d(TAG, "get failed with ", e)
+                result = false
+            }
+        return result
     }
 
 
@@ -214,7 +255,8 @@ class UserStartFragment : Fragment() {
                 } catch (e: RuntimeExecutionException) {
                     // 호출 실패
                     Log.d("카카오", "호출 실패")
-                    Snackbar.make(requireView(), "로그인에 실패하였습니다. 다시 시도해주세요.", Snackbar.LENGTH_SHORT).show()
+                    Snackbar.make(requireView(), "로그인에 실패하였습니다. 다시 시도해주세요.", Snackbar.LENGTH_SHORT)
+                        .show()
                     Log.d("카카오", e.message!!)
                 }
             }
@@ -227,12 +269,12 @@ class UserStartFragment : Fragment() {
                 updateUI(auth.currentUser)
             } else {
                 // 실패 후 로직
-                Snackbar.make(requireView(), "로그인에 실패하였습니다. 다시 시도해주세요.", Snackbar.LENGTH_SHORT).show()
+                Snackbar.make(requireView(), "로그인에 실패하였습니다. 다시 시도해주세요.", Snackbar.LENGTH_SHORT)
+                    .show()
                 updateUI(null)
             }
         }
     }
-
 
 
     companion object {

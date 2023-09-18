@@ -160,7 +160,7 @@ class UserInfoFragment : Fragment() {
     //추가하거나 업데이트하기
     private fun saveUserData(
         userUid: String,
-        image: Uri,
+        image: Uri? = null,
         nickName: String,
         birth: String,
         isBirthPublic: Boolean,
@@ -186,7 +186,7 @@ class UserInfoFragment : Fragment() {
                 checkedWalkHourId.ordinal,
                 walkHoursStart,
                 walkHoursEnd
-            ).toHashMap()
+            )
         ).addOnSuccessListener {
             Log.d("saveUser", "DocumentSnapshot successfully written!")
             successCallBack()

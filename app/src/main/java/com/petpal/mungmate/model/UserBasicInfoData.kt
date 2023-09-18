@@ -3,7 +3,7 @@ package com.petpal.mungmate.model
 import android.net.Uri
 
 data class UserBasicInfoData(
-    val userImage: Uri,
+    val userImage: Uri? = null,
     val nickname: String,
     val birthday: String,
     val ageVisible: Boolean,
