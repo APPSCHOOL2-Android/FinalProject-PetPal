@@ -2,6 +2,8 @@ package com.petpal.mungmate.ui.community
 
 
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -12,12 +14,26 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.faltenreich.skeletonlayout.Skeleton
+import com.faltenreich.skeletonlayout.applySkeleton
+import com.faltenreich.skeletonlayout.createSkeleton
 import com.google.android.material.snackbar.Snackbar
+import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.petpal.mungmate.R
 import com.petpal.mungmate.databinding.FragmentCommunityPostDetailBinding
 import com.petpal.mungmate.model.Post
-
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.TimeZone
 
 class CommunityPostDetailFragment : Fragment() {
 
@@ -25,6 +41,8 @@ class CommunityPostDetailFragment : Fragment() {
     var isClicked = false
     private var isFabVisible = true
     lateinit var postGetId: String
+    private lateinit var skeleton: Skeleton
+    private val coroutineScope = CoroutineScope(Dispatchers.Main)
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -41,6 +59,19 @@ class CommunityPostDetailFragment : Fragment() {
 //            Log.d("확인", postid.toString())
             getFireStoreData()
             scrollUpFab()
+        }
+
+            scrollUpFab()
+
+            coroutineScope.launch(Dispatchers.IO) {
+                skeleton = communityPostDetailBinding.skeletonLayout.apply { showSkeleton() }
+                val documentSnapshot = getFirestoreData(postGetId)
+                withContext(Dispatchers.Main) {
+                    updateUI(documentSnapshot)
+
+                    skeleton.showOriginal()
+                }
+            }
         }
 
         return communityPostDetailBinding.root
@@ -144,18 +175,62 @@ class CommunityPostDetailFragment : Fragment() {
         }
     }
 
-    private fun getFireStoreData() {
+    // Firestore에서 데이터 가져오기
+    private suspend fun getFirestoreData(id: String): DocumentSnapshot? {
         val db = FirebaseFirestore.getInstance()
-        val postRef = db.collection("Post")
-        postGetId?.let { id ->
-            postRef.document(id)
-                .get()
-                .addOnSuccessListener { documentSnapshot ->
-                    if (documentSnapshot.exists()) {
-                        val postTitle = documentSnapshot.getString("postTitle")
-                        Log.d("postTitle", postTitle.toString())
-                    }
-                }
+        val postRef = db.collection("Post").document(id).get().await()
+        return if (postRef.exists()) postRef else null
+    }
+
+    // UI 업데이트
+    private fun updateUI(documentSnapshot: DocumentSnapshot?) {
+        if (documentSnapshot != null) {
+            val userImage = documentSnapshot.getString("userImage")
+            val postTitle = documentSnapshot.getString("postTitle")
+            val userPlace = documentSnapshot.getString("userPlace")
+            val postDateCreated = documentSnapshot.getString("postDateCreated")
+            val postImages = documentSnapshot.getString("postImages")
+            val postLike = documentSnapshot.getLong("postLike")
+            val postComment = documentSnapshot.getString("postComment")
+
+            val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+            dateFormat.timeZone = TimeZone.getTimeZone("Asia/Seoul")// 시간대를 UTC로 설정
+            val snapshotTime =
+                dateFormat.parse(postDateCreated) // Firestore에서 가져온 시간 문자열을 Date 객체로 변환
+
+            val currentTime = Date()
+            val timeDifferenceMillis =
+                currentTime.time - snapshotTime.time  // Firestore 시간에서 현재 시간을 뺌
+
+
+            val timeAgo = when {
+                timeDifferenceMillis < 60_000 -> "방금 전" // 1분 미만
+                timeDifferenceMillis < 3_600_000 -> "${timeDifferenceMillis / 60_000}분 전" // 1시간 미만
+                timeDifferenceMillis < 86_400_000 -> "${timeDifferenceMillis / 3_600_000}시간 전" // 1일 미만
+                else -> "${timeDifferenceMillis / 86_400_000}일 전" // 1일 이상 전
+            }
+
+            communityPostDetailBinding.run {
+                Glide
+                    .with(requireContext())
+                    .load(userImage)
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .fitCenter()
+                    .into(communityPostDetailProfileImage)
+
+                Glide
+                    .with(requireContext())
+                    .load(postImages)
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .fitCenter()
+                    .into(communityPostDetailPostImage)
+
+                communityPostDetailPostTitle.text = postTitle
+                communityPostUserPlace.text = userPlace
+                communityPostDateCreated.text = timeAgo
+                communityPostDetailFavoriteCounter.text = postLike.toString()
+                communityPostDetailCommentCounter.text = postComment
+            }
         }
     }
 
