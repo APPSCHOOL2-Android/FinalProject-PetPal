@@ -227,14 +227,20 @@ class CommunityFragment : Fragment() {
 
                 val community = value.document.toObject(Post::class.java)
                 community.postID = value.document.id
+
+
+
                 val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
                 dateFormat.timeZone = TimeZone.getTimeZone("Asia/Seoul")// 시간대를 UTC로 설정
-                val snapshotTime =
-                    dateFormat.parse(community.postDateCreated) // Firestore에서 가져온 시간 문자열을 Date 객체로 변환
 
+                val snapshotTime = if (community.postDateCreated?.isNotEmpty() == true) {
+                    dateFormat.parse(community.postDateCreated)// Firestore에서 가져온 시간 문자열을 Date 객체로 변환
+                } else {
+                    null // 빈 문자열인 경우 파싱을 수행하지 않음
+                }
                 val currentTime = Date()
                 val timeDifferenceMillis =
-                    currentTime.time - snapshotTime.time  // Firestore 시간에서 현재 시간을 뺌
+                    currentTime.time - (snapshotTime?.time ?: 0)  // Firestore 시간에서 현재 시간을 뺌
 
 
                 val timeAgo = when {
@@ -245,7 +251,8 @@ class CommunityFragment : Fragment() {
                 }
 
                 community.postDateCreated = "$timeAgo"
-                communityAdapter.add(community)
+                val postImages = community.postImages as? List<String> ?: emptyList()
+
                 when (value.type) {
                     DocumentChange.Type.ADDED -> communityAdapter.add(community)
                     DocumentChange.Type.MODIFIED -> communityAdapter.update(community)

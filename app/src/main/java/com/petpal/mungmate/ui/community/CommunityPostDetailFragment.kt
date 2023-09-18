@@ -25,6 +25,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.petpal.mungmate.R
 import com.petpal.mungmate.databinding.FragmentCommunityPostDetailBinding
 import com.petpal.mungmate.model.Post
+import com.petpal.mungmate.model.PostImage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -193,7 +194,16 @@ class CommunityPostDetailFragment : Fragment() {
             val postTitle = documentSnapshot.getString("postTitle")
             val userPlace = documentSnapshot.getString("userPlace")
             val postDateCreated = documentSnapshot.getString("postDateCreated")
-            val postImages = documentSnapshot.getString("postImages")
+
+            val postImagesList = documentSnapshot.get("postImages") as? List<*>
+
+            val cleanedString = postImagesList?.get(0).toString().replace("{image=", "")
+            val imageUrl = cleanedString.trim()
+            val imageUrlWithoutBrace = imageUrl.removeSuffix("}")
+            var postImagesGetList = mutableListOf<String>()
+            postImagesGetList.add(imageUrlWithoutBrace)
+            Log.d("어떤 데이터", imageUrlWithoutBrace!!)
+
             val postLike = documentSnapshot.getLong("postLike")
             val postComment = documentSnapshot.getString("postComment")
             val postContent = documentSnapshot.getString("postContent")
@@ -222,13 +232,20 @@ class CommunityPostDetailFragment : Fragment() {
                     .diskCacheStrategy(DiskCacheStrategy.ALL)
                     .fitCenter()
                     .into(communityPostDetailProfileImage)
+                if (postImagesList != null) {
+                    Glide
+                        .with(requireContext())
+                        .load(postImagesGetList[0])
+                        .diskCacheStrategy(DiskCacheStrategy.ALL)
+                        .fitCenter()
+                        .error(R.drawable.baseline_error_24)
+                        .fallback(R.drawable.main_image)
+                        .into(communityPostDetailPostImage)
+                } else {
+                    Snackbar.make(communityPostDetailPostImage, "이미지를 가져오는데 실패했습니다.", Snackbar.LENGTH_SHORT)
+                        .show()
+                }
 
-                Glide
-                    .with(requireContext())
-                    .load(postImages)
-                    .diskCacheStrategy(DiskCacheStrategy.ALL)
-                    .fitCenter()
-                    .into(communityPostDetailPostImage)
 
                 communityPostDetailPostTitle.text = postTitle
                 communityPostUserPlace.text = userPlace
