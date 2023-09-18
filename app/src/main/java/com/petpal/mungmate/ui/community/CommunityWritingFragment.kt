@@ -11,20 +11,29 @@ import android.provider.MediaStore
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ArrayAdapter
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.navigation.findNavController
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.snackbar.Snackbar
+import com.google.firebase.Timestamp
+import com.google.firebase.firestore.FirebaseFirestore
 import com.petpal.mungmate.MainActivity
 import com.petpal.mungmate.ProductRegistrationAdapter
 import com.petpal.mungmate.R
 import com.petpal.mungmate.databinding.FragmentCommunityWritingBinding
 import com.petpal.mungmate.model.Image
+import com.petpal.mungmate.model.Post
+import java.text.SimpleDateFormat
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+import java.util.Date
+import java.util.Locale
+import java.util.TimeZone
 
 
 class CommunityWritingFragment : Fragment() {
@@ -38,6 +47,7 @@ class CommunityWritingFragment : Fragment() {
     // 갤러리 실행
     lateinit var mainGalleryLauncher: ActivityResultLauncher<Intent>
 
+    private lateinit var rootView: View
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -66,6 +76,7 @@ class CommunityWritingFragment : Fragment() {
                 layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
             }
 
+
         }
 
         return communityWritingBinding.root
@@ -89,8 +100,24 @@ class CommunityWritingFragment : Fragment() {
             setOnMenuItemClickListener {
 
                 when (it?.itemId) {
+
                     R.id.item_complete -> {
-                        Snackbar.make(requireView(), "완료", Snackbar.LENGTH_SHORT).show()
+
+                        val post = Post(
+                            "",
+                            0,
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            0,
+                            ""
+                        )
+                        saveFirestore(post)
                     }
 
                 }
@@ -134,4 +161,51 @@ class CommunityWritingFragment : Fragment() {
         return galleryLauncher
     }
 
+    private fun saveFirestore(post: Post) {
+        val db = FirebaseFirestore.getInstance()
+        db.collection("Post")
+            .add(post)
+            .addOnSuccessListener { documentReference ->
+
+                val generatedDocId = documentReference.id
+                val currentDateTime = Date()
+                val formattedDateTime = formatDateTimeToNewFormat(currentDateTime)
+                val updatedData = Post(
+                    generatedDocId,
+                    0,
+                    "https://cotieshop.co.kr/wp-content/uploads/2021/09/%ED%8E%AB%EC%86%8C%EC%8B%9C%ED%81%AC_Tiny-dog-collar%EA%B0%95%EC%95%84%EC%A7%80%EB%B0%98%EB%8B%A4%EB%82%98-Mimi-Mini_thumb002.jpg",
+                    "데이터 없음",
+                    "데이터 없음",
+                    communityWritingBinding.communityPostWritingTitleTextInputEditText.text.toString(),
+                    communityWritingBinding.categoryItem.text.toString(),
+                    formattedDateTime,
+                    "https://cotieshop.co.kr/wp-content/uploads/2021/09/%ED%8E%AB%EC%86%8C%EC%8B%9C%ED%81%AC_Tiny-dog-collar%EA%B0%95%EC%95%84%EC%A7%80%EB%B0%98%EB%8B%A4%EB%82%98-Mimi-Mini_thumb002.jpg",
+                    communityWritingBinding.communityPostWritingContentTextInputEditText.text.toString(),
+                    0,
+                    "0"
+                )
+                val documentRef = db.collection("Post").document(generatedDocId)
+                documentRef.set(updatedData)
+                documentRef
+                    .set(updatedData)
+                    .addOnSuccessListener {
+                        Snackbar.make(communityWritingBinding.communityPostWritingTitleTextInputEditText, "게시글 등록 성공", Snackbar.LENGTH_SHORT).show()
+                    }
+                    .addOnFailureListener {
+                        Snackbar.make(communityWritingBinding.communityPostWritingTitleTextInputEditText, "게시글 등록 실패", Snackbar.LENGTH_SHORT).show()
+                    }
+                    .addOnCompleteListener {
+                        val navController = findNavController()
+                        navController.popBackStack()
+                    }
+            }
+            .addOnFailureListener {
+                Snackbar.make(communityWritingBinding.communityPostWritingTitleTextInputEditText, "게시글 등록 실패", Snackbar.LENGTH_SHORT).show()
+            }
+
+    }
+    fun formatDateTimeToNewFormat(date: Date): String {
+        val format = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+        return format.format(date)
+    }
 }

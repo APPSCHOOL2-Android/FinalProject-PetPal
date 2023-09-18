@@ -13,8 +13,8 @@
         android:layout_height="wrap_content"
         android:minHeight="?attr/actionBarSize"
         android:theme="?attr/actionBarTheme"
-        app:navigationIcon="@drawable/arrow_back_24px"
-        app:title="산책 후기" />
+        app:navigationIcon="@drawable/close_24px"
+        app:title="산책 후기 작성" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -38,6 +38,7 @@
             android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
             android:textColor="@color/md_theme_light_outline" />
 
+        <!--
         <RatingBar
             android:id="@+id/ratingBarWalkReview"
             android:layout_width="wrap_content"
@@ -46,6 +47,23 @@
             android:max="5"
             android:numStars="5"
             android:rating="3.5" />
+        -->
+
+        <com.willy.ratingbar.ScaleRatingBar
+            android:id="@+id/scaleRatingBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:clickable="true"
+            app:srb_drawableEmpty="@drawable/walk_review_rating_empty"
+            app:srb_drawableFilled="@drawable/walk_review_rating_filled"
+            app:srb_minimumStars="0"
+            app:srb_numStars="5"
+            app:srb_rating="0"
+            app:srb_scrollable="true"
+            app:srb_starHeight="50dp"
+            app:srb_starWidth="50dp"
+            app:srb_stepSize="0.5" />
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/textInputLayoutWalkReview"

@@ -7,7 +7,7 @@
     <string name="chip_walk_log">산책일지</string>
     <string name="place_review">장소후기</string>
     <string name="favorite">좋아요</string>
-    <string name="comment">댓글 2</string>
+    <string name="comment">댓글 </string>
     <string name="community_title">커뮤니티</string>
     <string name="community_post_detail">게시글 상세</string>
     <string name="community_writing">글작성</string>
@@ -52,7 +52,13 @@
     <string name="product_registration_contentText">내용을 입력하세요.\n( 내용 최대 300자 이내)</string>
 
     <string name="kakao_api_key">29842459a2117277a50ac661f2f7e089</string>
+
     <string name="web_client_id">952517903388-uv2c0ms0p7abt2jk6ou9f88knb720bkt.apps.googleusercontent.com</string>
+
+    <string name="cancel">취소</string>
+    <string name="check">확인</string>
+    <string name="delete_dialog_title">정말 게시글을 삭제하시겠습니까?</string>
+
 
     <!-- 견종 문자열 배열 -->
     <string-array name="dog_breeds">
@@ -97,7 +103,6 @@
     </string-array>
 
     <string-array name="communityCategoryList">
-        <item>전체</item>
         <item>일상</item>
         <item>산책일지</item>
         <item>산책 메이트 구해요</item>
@@ -112,9 +117,6 @@
         <item>리트리버 아지트</item>
         <item>웰시 코기 아지트</item>
         <item>나머지 아이들 아지트</item>
-
     </string-array>
-
-
 
 </resources>
