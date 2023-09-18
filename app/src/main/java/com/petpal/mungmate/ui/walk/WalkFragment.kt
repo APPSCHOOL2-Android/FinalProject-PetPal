@@ -79,6 +79,11 @@ class WalkFragment : Fragment(),
 
         return fragmentWalkBinding.root
     }
+
+    private fun toggleVisibility(viewToShow: View, viewToHide: View) {
+        viewToShow.visibility = View.VISIBLE
+        viewToHide.visibility = View.GONE
+    }
     private fun setupMapView() {
         //필터 드로어 제어
         fragmentWalkBinding.drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
@@ -91,11 +96,9 @@ class WalkFragment : Fragment(),
 
     private fun setupButtonListeners() {
         fragmentWalkBinding.buttonWalk.setOnClickListener {
-            fragmentWalkBinding.LinearLayoutOnWalk.visibility = View.VISIBLE
-            fragmentWalkBinding.LinearLayoutOffWalk.visibility = View.GONE
+            toggleVisibility(fragmentWalkBinding.LinearLayoutOnWalk, fragmentWalkBinding.LinearLayoutOffWalk)
             fragmentWalkBinding.imageViewWalkToggle.setImageResource(R.drawable.dog_walk)
         }
-
 
         fragmentWalkBinding.chipMapFilter.setOnClickListener {
             fragmentWalkBinding.drawerLayout.setScrimColor(Color.parseColor("#FFFFFF"))
@@ -107,8 +110,7 @@ class WalkFragment : Fragment(),
         }
 
         fragmentWalkBinding.buttonStopWalk.setOnClickListener {
-            fragmentWalkBinding.LinearLayoutOffWalk.visibility = View.VISIBLE
-            fragmentWalkBinding.LinearLayoutOnWalk.visibility = View.GONE
+            toggleVisibility(fragmentWalkBinding.LinearLayoutOffWalk, fragmentWalkBinding.LinearLayoutOnWalk)
             fragmentWalkBinding.imageViewWalkToggle.setImageResource(R.drawable.dog_home)
         }
         fragmentWalkBinding.imageViewMylocation.setOnClickListener {
@@ -183,10 +185,7 @@ class WalkFragment : Fragment(),
     }
 
     private fun getCurrentLocation() {
-        if (ActivityCompat.checkSelfPermission(
-                requireContext(),
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED
+        if (checkPermission(Manifest.permission.ACCESS_FINE_LOCATION)
         ) {
             fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
                 location?.let {
@@ -199,12 +198,12 @@ class WalkFragment : Fragment(),
             }
         }
     }
+    private fun checkPermission(permission: String): Boolean {
+        return ActivityCompat.checkSelfPermission(requireContext(), permission) == PackageManager.PERMISSION_GRANTED
+    }
 
     private fun getLastLocation() {
-        if (ActivityCompat.checkSelfPermission(
-                requireContext(),
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED
+        if (checkPermission(Manifest.permission.ACCESS_FINE_LOCATION)
         ) {
             LastKnownLocation.let {
                 LastKnownLocation.latitude?.let { it1 ->
@@ -219,7 +218,6 @@ class WalkFragment : Fragment(),
                 }
                 fragmentWalkBinding.mapView.setMapCenterPoint(mapPoint, true)
 
-                // Clear currentMarkers and remove all POI items from the map
                 for (marker in currentMarkers) {
                     fragmentWalkBinding.mapView.removePOIItem(marker)
                 }
@@ -285,14 +283,20 @@ class WalkFragment : Fragment(),
             viewModel.fetchIsPlaceFavoritedByUser(it, "userid")
         }
         viewModel.isPlaceFavorited.observe(viewLifecycleOwner) { isPlaceFavorited ->
-            if (isPlaceFavorited) {
-                isFavorited = true
+                isFavorited = isPlaceFavorited
+            if(isFavorited) {
+                initialBottomSheetView.findViewById<ImageView>(R.id.imageViewFavoirte)
+                    .setImageResource(R.drawable.filled_heart)
+            }else{
+                initialBottomSheetView.findViewById<ImageView>(R.id.imageViewFavoirte)
+                    .setImageResource(R.drawable.favoirte_24px)
             }
+
+
         }
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.favoriteCount.collect { count ->
-                val favoriteCountTextView =
-                    initialBottomSheetView.findViewById<TextView>(R.id.textViewPlaceFavoriteCount)
+                val favoriteCountTextView = initialBottomSheetView.findViewById<TextView>(R.id.textViewPlaceFavoriteCount)
                 favoriteCountTextView.text = "${count}명의 유저가 추천합니다."
             }
         }
@@ -301,7 +305,7 @@ class WalkFragment : Fragment(),
         viewModel.placeInfo.observe(viewLifecycleOwner) { placeInfo ->
             val textViewPlaceName = initialBottomSheetView.findViewById<TextView>(R.id.textView)
             textViewPlaceName.text = placeInfo?.get("name") as? String ?: "${selectedPlace?.place_name}"
-            bottomSheetDialog.show()
+
         }
 
 
@@ -325,9 +329,6 @@ class WalkFragment : Fragment(),
 
                 placeuserRating1.visibility = View.VISIBLE
                 placeuserReview1.visibility = View.VISIBLE
-
-
-
 
 
                 if (reviews.size > 1) {
@@ -358,10 +359,9 @@ class WalkFragment : Fragment(),
 
         val buttonsubmit = initialBottomSheetView.findViewById<Button>(R.id.buttonSubmitReview)
 
-
-//        Handler(Looper.getMainLooper()).postDelayed({
-//            bottomSheetDialog.show()
-//        }, 300)  // 0.5초 딜레이
+        Handler(Looper.getMainLooper()).postDelayed({
+            bottomSheetDialog.show()
+        }, 300)  // 0.3초 딜레이
 
         bottomSheetDialog.behavior.addBottomSheetCallback(object :
             BottomSheetBehavior.BottomSheetCallback() {
@@ -456,11 +456,8 @@ class WalkFragment : Fragment(),
             detailContent.text=latestReviews!![0].comment
             latestReviews!![0].imageRes?.let { detailImage?.setImageResource(it) }
 
-
-            // detailCardView.findViewById<TextView>(R.id.)
             detailDialog.setContentView(detailCardView)
             detailDialog.show()
-
 
         }
 
@@ -472,7 +469,7 @@ class WalkFragment : Fragment(),
             detailContent.text=latestReviews!![1].comment
             latestReviews!![1].imageRes?.let { detailImage?.setImageResource(it) }
 
-                detailDialog.show()
+            detailDialog.show()
         }
 
         initialBottomSheetView.findViewById<Chip>(R.id.chipViewAllReviews).setOnClickListener {
@@ -490,15 +487,28 @@ class WalkFragment : Fragment(),
         }
     }
 
+    override fun onCalloutBalloonOfPOIItemTouched(p0: MapView?, p1: MapPOIItem?) {
+
+    }
+
+    override fun onCalloutBalloonOfPOIItemTouched(
+        p0: MapView?,
+        p1: MapPOIItem?,
+        p2: MapPOIItem.CalloutBalloonButtonType?
+    ) {
+
+    }
+
+    override fun onDraggablePOIItemMoved(p0: MapView?, p1: MapPOIItem?, p2: MapPoint?) {
+
+    }
+
+    override fun onMapViewInitialized(p0: MapView?) {
+
+    }
+
 
     @Deprecated("Deprecated in Java")
-    override fun onCalloutBalloonOfPOIItemTouched(p0: net.daum.mf.map.api.MapView?, p1: MapPOIItem?) {}
-
-    override fun onCalloutBalloonOfPOIItemTouched(p0: net.daum.mf.map.api.MapView?, p1: MapPOIItem?, p2: MapPOIItem.CalloutBalloonButtonType?) {}
-
-    override fun onDraggablePOIItemMoved(p0: net.daum.mf.map.api.MapView?, p1: MapPOIItem?, p2: MapPoint?) {}
-
-    override fun onMapViewInitialized(p0: MapView?) {}
     override fun onMapViewCenterPointMoved(p0: MapView?, p1: MapPoint?) {
         // 새로운 중심에서 검색
         p1?.mapPointGeoCoord?.let {
@@ -518,17 +528,28 @@ class WalkFragment : Fragment(),
         }
     }
 
-    override fun onMapViewSingleTapped(p0: MapView?, p1: MapPoint?) {}
+    override fun onMapViewSingleTapped(p0: MapView?, p1: MapPoint?) {
 
-    override fun onMapViewDoubleTapped(p0: MapView?, p1: MapPoint?) {}
+    }
 
-    override fun onMapViewLongPressed(p0: MapView?, p1: MapPoint?) {}
+    override fun onMapViewDoubleTapped(p0: MapView?, p1: MapPoint?) {
 
-    override fun onMapViewDragStarted(p0: MapView?, p1: MapPoint?) {}
+    }
 
-    override fun onMapViewDragEnded(p0: MapView?, p1: MapPoint?) {}
+    override fun onMapViewLongPressed(p0: MapView?, p1: MapPoint?) {
 
-    override fun onMapViewMoveFinished(p0: MapView?, p1: MapPoint?) {}
+    }
+
+    override fun onMapViewDragStarted(p0: MapView?, p1: MapPoint?) {
+
+    }
+
+    override fun onMapViewDragEnded(p0: MapView?, p1: MapPoint?) {
+
+    }
+
+    override fun onMapViewMoveFinished(p0: MapView?, p1: MapPoint?) {
+    }
 
     override fun onResume() {
         super.onResume()

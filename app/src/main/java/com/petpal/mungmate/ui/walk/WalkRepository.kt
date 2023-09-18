@@ -53,9 +53,17 @@ class WalkRepository {
     }
 
     suspend fun isPlaceFavoritedByUser(placeId: String, userId: String): Boolean {
-        val favoriteRef = db.collection("places").document(placeId).collection("favorite").document(userId)
-        val document = favoriteRef.get().await()
-        return document.exists()
+        val placeRef = db.collection("places").document(placeId)
+        val placeDocument = placeRef.get().await()
+
+        // placeId에 대한 문서가 존재하지 않으면 false 반환
+        if (!placeDocument.exists()) {
+            return false
+        }
+
+        val favoriteRef = placeRef.collection("favorite").document(userId)
+        val favoriteDocument = favoriteRef.get().await()
+        return favoriteDocument.exists()
     }
 
     suspend fun getReviewCountSuspend(placeId: String): Int {
