@@ -1,6 +1,7 @@
 package com.petpal.mungmate.ui.user
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -15,12 +16,19 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
+import com.google.android.gms.tasks.RuntimeExecutionException
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.functions.FirebaseFunctions
+import com.google.firebase.functions.ktx.functions
 import com.google.firebase.ktx.Firebase
+import com.kakao.sdk.auth.model.OAuthToken
+import com.kakao.sdk.common.model.ClientError
+import com.kakao.sdk.common.model.ClientErrorCause
+import com.kakao.sdk.user.UserApiClient
 import com.petpal.mungmate.R
 import com.petpal.mungmate.databinding.FragmentUserStartBinding
 
@@ -85,6 +93,12 @@ class UserStartFragment : Fragment() {
         }
     }
 
+    private fun googleLogIn() {
+        val signInIntent = googleSignInClient.signInIntent
+        googleLoginLauncher.launch(signInIntent)
+
+    }
+
     private fun handleGoogleSignInResult(data: Intent?) {
         val task = GoogleSignIn.getSignedInAccountFromIntent(data)
         try {
@@ -116,7 +130,7 @@ class UserStartFragment : Fragment() {
     }
 
     private fun updateUI(user: FirebaseUser?) {
-
+        Log.d("카카오", "ui 업데이트")
         if (user == null) {
             Snackbar.make(requireView(), "로그인에 실패하였습니다. 다시 시도해주세요.", Snackbar.LENGTH_SHORT).show()
         } else {
@@ -124,25 +138,93 @@ class UserStartFragment : Fragment() {
             Snackbar.make(requireView(), "환영합니다. ${user!!.displayName}", Snackbar.LENGTH_SHORT)
                 .show()
 
-            //반려견 정보 입력 화면으로 넘어가기
-            findNavController().navigate(R.id.action_userStartFragment_to_addPetFragment)
+            //사용자 정보 입력 화면으로 넘어가기
+            findNavController().navigate(R.id.action_userStartFragment_to_userInfoFragment)
         }
     }
 
 
     private fun kakaoLogIn() {
-        TODO("Not yet implemented")
+        // 카카오톡 어플이 있으면 카톡으로 로그인, 없으면 카카오 계정으로 로그인
+        if (UserApiClient.instance.isKakaoTalkLoginAvailable(requireContext())) {
+
+            UserApiClient.instance.loginWithKakaoTalk(requireContext()) { token, error ->
+                Log.d("카카오", "카톡으로 로그인")
+                if (error != null) {
+                    if (error is ClientError && error.reason == ClientErrorCause.Cancelled) {
+                        return@loginWithKakaoTalk
+                    }
+                    loginWithKaKaoAccount(requireContext())
+                } else if (token != null) {
+                    getCustomToken(token.accessToken)
+                }
+            }
+        } else {
+
+            loginWithKaKaoAccount(requireContext())
+        }
     }
 
-    private fun googleLogIn() {
-        val signInIntent = googleSignInClient.signInIntent
-        googleLoginLauncher.launch(signInIntent)
-
+    // 카카오 계정으로 로그인
+    private fun loginWithKaKaoAccount(context: Context) {
+        Log.d("카카오", "카카오 계정으로 로그인")
+        UserApiClient.instance.loginWithKakaoAccount(context) { token: OAuthToken?, error: Throwable? ->
+            if (token != null) {
+                getCustomToken(token.accessToken)
+            }
+        }
     }
+
+    // firebase functions에 배포한 kakaoCustomAuth 호출
+    private fun getCustomToken(accessToken: String) {
+
+        Log.d("카카오", "커스텀 토큰 받아오기")
+        val functions: FirebaseFunctions = Firebase.functions("asia-northeast3")
+
+        val data = hashMapOf(
+            "token" to accessToken
+        )
+
+        functions
+            .getHttpsCallable("kakaoCustomAuth")
+            .call(data)
+            .addOnCompleteListener { task ->
+                try {
+                    // 호출 성공
+                    val result = task.result?.data as HashMap<*, *>
+                    Log.d("카카오", "호출 성공")
+                    var mKey: String? = null
+                    for (key in result.keys) {
+                        mKey = key.toString()
+                    }
+                    val customToken = result[mKey!!].toString()
+
+                    // 호출 성공해서 반환받은 커스텀 토큰으로 Firebase Authentication 인증받기
+                    firebaseAuthWithKakao(customToken)
+                } catch (e: RuntimeExecutionException) {
+                    // 호출 실패
+                    Log.d("카카오", "호출 실패")
+                    Log.d("카카오", e.message!!)
+                }
+            }
+    }
+
+    private fun firebaseAuthWithKakao(customToken: String) {
+        Log.d("카카오", "Firebase authentication 받아오기")
+        auth.signInWithCustomToken(customToken).addOnCompleteListener { result ->
+            if (result.isSuccessful) {
+                updateUI(auth.currentUser)
+            } else {
+                // 실패 후 로직
+                updateUI(null)
+            }
+        }
+    }
+
+
 
     companion object {
         private const val TAG = "UserStartActivity"
     }
-
 
 }
