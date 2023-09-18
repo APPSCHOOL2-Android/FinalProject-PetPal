@@ -10,7 +10,9 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
@@ -43,6 +45,7 @@ class UserStartFragment : Fragment() {
     private lateinit var googleSignInClient: GoogleSignInClient
 
     private lateinit var googleLoginLauncher: ActivityResultLauncher<Intent>
+    private lateinit var userViewModel: UserViewModel
 
     //TODO: db에 정보가 있는 유저의 경우 반려견 정보 입력 생략하고 바로 mainFragment로 넘어가기
 
@@ -81,6 +84,8 @@ class UserStartFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        userViewModel = ViewModelProvider(requireActivity()).get(UserViewModel::class.java)
 
         fragmentUserStartBinding.run {
             googleLoginButton.setOnClickListener {
@@ -140,8 +145,11 @@ class UserStartFragment : Fragment() {
             Snackbar.make(requireView(), "환영합니다. ${user!!.displayName}", Snackbar.LENGTH_SHORT)
                 .show()
 
+            //Viewmodel통해 사용자 데이터 설정
+            userViewModel.setUser(user)
+
             //사용자 정보 입력 화면으로 넘어가기
-            findNavController().navigate(R.id.action_userStartFragment_to_userInfoFragment)
+            findNavController().navigate(R.id.action_userStartFragment_to_userInfoFragment, bundleOf("isRegister" to true))
         }
     }
 

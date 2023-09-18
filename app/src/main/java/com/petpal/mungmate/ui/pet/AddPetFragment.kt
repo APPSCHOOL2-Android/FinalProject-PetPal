@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.datepicker.MaterialDatePicker
+import com.google.android.material.snackbar.Snackbar
 import com.petpal.mungmate.R
 import com.petpal.mungmate.databinding.FragmentAddPetBinding
 import java.text.SimpleDateFormat
@@ -67,6 +68,11 @@ class AddPetFragment : Fragment() {
 
             toolbarAddPet.setNavigationOnClickListener {
                 findNavController().popBackStack()
+            }
+
+            buttonPetComplete.setOnClickListener {
+                Snackbar.make(requireView(),"반려견 정보가 저장됐습니다.",Snackbar.LENGTH_SHORT).show()
+                findNavController().navigate(R.id.action_addPetFragment_to_mainFragment)
             }
         }
         return fragmentAddPetBinding.root
