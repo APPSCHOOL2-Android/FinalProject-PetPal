@@ -12,17 +12,17 @@ data class Post(
     var postImages: List<PostImage>?=null,//게시글 이미지 목록
     val postContent: String? = null,//게시글 내용
     val postLike: Long = 0,//게시글 좋아요 수
-//    val postComment: List<Comment>//게시글 댓글
-    val postComment: String? = null
+    val postComment: List<Comment>?=null//게시글 댓글
+
 )
 
 data class Comment(
-    val commentUid: Long,//댓글 작성자 id
-    val commentNickName: String,//댓글 작성자 닉네임
-    val commentDateCreated: String,//댓글 작성 날짜
-    val commentContent: String,//댓글 내용
-    val commentLike: Long,//댓글 좋아요 수
-    val parentID: String//부모 ID(최상위인 경우 "root")
+    val commentUid: Long= 0,//댓글 작성자 id
+    val commentNickName: String? = null,//댓글 작성자 닉네임
+    val commentDateCreated: String? = null,//댓글 작성 날짜
+    val commentContent: String? = null,//댓글 내용
+    val commentLike: Long= 0,//댓글 좋아요 수
+    val parentID: String? = null//부모 ID(최상위인 경우 "root")
 )
 
 data class PostImage(

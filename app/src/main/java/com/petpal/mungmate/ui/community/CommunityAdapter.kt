@@ -1,19 +1,19 @@
 package com.petpal.mungmate.ui.community
 
+import android.app.Dialog
 import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import android.view.Window
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.navigation.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import com.airbnb.lottie.LottieAnimationView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.petpal.mungmate.MainActivity
-import com.petpal.mungmate.MainFragmentDirections
 import com.petpal.mungmate.R
 import com.petpal.mungmate.databinding.RowCommunityBinding
 import com.petpal.mungmate.model.Post
@@ -41,6 +41,7 @@ class CommunityAdapter(
         val communityFavoriteCounter: TextView = item.communityFavoriteCounter
 
         init {
+
             item.root.setOnClickListener {
                 val bundle = Bundle().apply {
                     putString("position", postList[adapterPosition].postID)
@@ -51,7 +52,6 @@ class CommunityAdapter(
                     R.id.action_mainFragment_to_communityPostDetailFragment,
                     bundle
                 )
-
             }
         }
 
@@ -89,12 +89,36 @@ class CommunityAdapter(
             .fallback(R.drawable.main_image)
             .into(holder.communityPostImage)
 
+        holder.communityPostImage.setOnClickListener {
+            val dialog = Dialog(context)
+            dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
+            dialog.setContentView(R.layout.item_full_screen_dialog)
+
+            val fullScreenImageView = dialog.findViewById<ImageView>(R.id.fullScreenImageView)
+
+            Glide
+                .with(context)
+                .load(post.postImages?.get(0)?.image.toString())
+                .diskCacheStrategy(DiskCacheStrategy.ALL)
+                .fitCenter()
+                .fallback(R.drawable.main_image)
+                .into(fullScreenImageView)
+
+            dialog.show()
+
+
+            fullScreenImageView.setOnClickListener {
+                dialog.dismiss()
+            }
+        }
+
+
         holder.communityPostTitle.text = post.postTitle
         holder.communityUserNickName.text = post.userNickName
         holder.communityUserPlace.text = post.userPlace
         holder.communityPostDateCreated.text = post.postDateCreated.toString()
         holder.communityContent.text = post.postContent
-        holder.communityCommentCounter.text= post.postComment
+//        holder.communityCommentCounter.text= post.postComment
         holder.communityFavoriteCounter.text = post.postLike.toString()
 
         var isClicked = false
@@ -114,6 +138,8 @@ class CommunityAdapter(
             }
 
         }
+
+
     }
 
     fun add(post: Post) {
@@ -144,6 +170,5 @@ class CommunityAdapter(
     fun clear() {
         postList.clear()
     }
-
 
 }

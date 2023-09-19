@@ -53,7 +53,7 @@ class CommunityWritingFragment : Fragment() {
     // 갤러리 실행
     lateinit var mainGalleryLauncher: ActivityResultLauncher<Intent>
     private var photoSelectedUri: Uri? = null
-    val postImagesList: MutableList<PostImage> = mutableListOf()
+    private val postImagesList: MutableList<PostImage> = mutableListOf()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -121,7 +121,7 @@ class CommunityWritingFragment : Fragment() {
                             emptyList(),
                             "",
                             0,
-                            ""
+                            emptyList()
                         )
                         saveFirestore(post)
                     }
@@ -203,7 +203,7 @@ class CommunityWritingFragment : Fragment() {
                             postImagesList,
                             communityWritingBinding.communityPostWritingContentTextInputEditText.text.toString(),
                             0,
-                            "0"
+                            emptyList()
                         )
 
                         val documentRef = db.collection("Post").document(generatedDocId)
