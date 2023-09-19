@@ -5,5 +5,5 @@
     <dimen name="common_small_padding">5dp</dimen>
     <dimen name="common_small_margin">5dp</dimen>
     <dimen name="bottom_navigation_icon_size">15dp</dimen>
-    <dimen name="target_scroll_position">10dp</dimen>
+    <dimen name="target_scroll_position">1000dp</dimen>
 </resources>
