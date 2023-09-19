@@ -80,12 +80,14 @@ class CommunityAdapter(
             .diskCacheStrategy(DiskCacheStrategy.ALL)
             .fitCenter()
             .into(holder.communityProfileImage)
+        Log.d("과연", post.postImages?.get(0)?.image.toString())
 
         Glide
             .with(context)
-            .load(post.postImages)
+            .load(post.postImages?.get(0)?.image.toString())
             .diskCacheStrategy(DiskCacheStrategy.ALL)
             .fitCenter()
+            .fallback(R.drawable.main_image)
             .into(holder.communityPostImage)
 
         holder.communityPostTitle.text = post.postTitle
