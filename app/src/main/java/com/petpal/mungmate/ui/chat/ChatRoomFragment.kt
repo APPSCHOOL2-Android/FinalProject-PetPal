@@ -7,9 +7,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.content.res.AppCompatResources
+import androidx.core.widget.addTextChangedListener
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 import com.petpal.mungmate.R
 import com.petpal.mungmate.databinding.FragmentChatRoomBinding
 import com.petpal.mungmate.model.Message
@@ -18,25 +21,27 @@ class ChatRoomFragment : Fragment() {
     private var _fragmentChatRoomBinding : FragmentChatRoomBinding? = null
     private val fragmentChatRoomBinding get() = _fragmentChatRoomBinding!!
 
+    private val loginUserId = "user1"
+    private val db = Firebase.firestore
+
     private var messageList = mutableListOf<Message>()
     lateinit var chatRoomId: String
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        chatRoomId = arguments?.getString("chatRoomId")!!
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         _fragmentChatRoomBinding = FragmentChatRoomBinding.inflate(inflater)
-
-        chatRoomId = arguments?.getString("chatRoomId")!!
-
         return fragmentChatRoomBinding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        // 임시 데이터 세팅
-        // setSampleData()
 
         fragmentChatRoomBinding.run {
             toolbarChatRoom.run {
@@ -58,8 +63,9 @@ class ChatRoomFragment : Fragment() {
                             true
                         }
                         R.id.menu_item_report -> {
-                            // TODO 신고하기 화면 이동 (채팅 상대 UID 전달)
-                            findNavController().navigate(R.id.action_chatRoomFragment_to_reportUserFragment)
+                            // 신고하기 화면 이동 (채팅 상대 UID 전달)
+                            val action = ChatRoomFragmentDirections.actionChatRoomFragmentToReportUserFragment("user2")
+                            findNavController().navigate(action)
                             true
                         }
                         R.id.menu_item_exit -> {
@@ -73,15 +79,32 @@ class ChatRoomFragment : Fragment() {
 
             // 산책 메이트 요청
             buttonRequestWalkMate.setOnClickListener {
-                findNavController().navigate(R.id.action_chatRoomFragment_to_walkMateRequestFragment)
+                val action = ChatRoomFragmentDirections.actionChatRoomFragmentToWalkMateRequestFragment("user1", "user2")
+                findNavController().navigate(action)
             }
 
             // 채팅방 메시지 목록
             recyclerViewMessage.run {
-                adapter = MessageAdapter(messageList)
+                // adapter = MessageAdapter(messageList)
                 layoutManager = LinearLayoutManager(requireContext())
             }
+
+            // 메시지 입력, 전송
+            editTextMessage.addTextChangedListener {
+                buttonSendMessage.isEnabled = it.toString().isNotEmpty()
+            }
+            editTextMessage.setOnEditorActionListener { v, actionId, event ->
+                sendMessage()
+                true
+            }
+            buttonSendMessage.setOnClickListener {
+                sendMessage()
+            }
         }
+    }
+    
+    private fun sendMessage(){
+        
     }
 
     private fun exitChatRoom() {
@@ -105,9 +128,9 @@ class ChatRoomFragment : Fragment() {
                 // TODO 사용자 차단 해제
                 fragmentChatRoomBinding.run {
                     buttonRequestWalkMate.isEnabled = true
-                    textInputLayoutMessage.endIconDrawable = AppCompatResources.getDrawable(requireContext(), R.drawable.send_24px)
-                    textInputEditTextMessage.hint = "메시지를 입력하세요."
-                    textInputEditTextMessage.isEnabled = true
+                    buttonSendMessage.isEnabled = true
+                    editTextMessage.hint = "메시지를 입력하세요."
+                    editTextMessage.isEnabled = true
                 }
             }
             .setNegativeButton("취소", null)
@@ -124,9 +147,9 @@ class ChatRoomFragment : Fragment() {
                 // 산책 메이트 요청, 채팅 불가
                 fragmentChatRoomBinding.run {
                     buttonRequestWalkMate.isEnabled = false
-                    textInputLayoutMessage.endIconDrawable = AppCompatResources.getDrawable(requireContext(), R.drawable.person_off_24px)
-                    textInputEditTextMessage.hint = "차단한 사용자와는 채팅할 수 없습니다."
-                    textInputEditTextMessage.isEnabled = false
+                    buttonSendMessage.isEnabled = false
+                    editTextMessage.hint = "차단한 사용자와는 채팅할 수 없습니다."
+                    editTextMessage.isEnabled = false
                 }
             }
             .setNegativeButton("취소", null)
@@ -134,15 +157,4 @@ class ChatRoomFragment : Fragment() {
         builder.show()
     }
 
-//    private fun setSampleData() {
-//        messageList = mutableListOf(
-//            Message("안녕하세요!", "오후 10:00", false),
-//            Message("멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍장문테스트멍멍멍멍멍멍멍멍멍멍", "오후 10:01", true),
-//            Message("같이 산책하실래요?", "오후 10:02", false),
-//            Message("좋아요ㅎㅎ", "오후 10:03", true),
-//            Message("그럼 몇시에 만날까요?", "오후 10:04", true),
-//            Message("테스트메시지입니다.", "오후 10:05", false),
-//            Message("테스트메시지입니다.", "오후 10:06", false)
-//        )
-//    }
 }

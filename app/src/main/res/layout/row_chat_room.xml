@@ -27,7 +27,7 @@
         android:orientation="vertical">
 
         <TextView
-            android:id="@+id/text_view_receiver_name"
+            android:id="@+id/text_view_room_name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="닉네임"

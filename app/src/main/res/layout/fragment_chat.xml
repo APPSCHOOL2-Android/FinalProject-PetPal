@@ -60,7 +60,7 @@
     <LinearLayout
         android:id="@+id/chatTestLayout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:orientation="horizontal">
 
         <EditText
@@ -72,11 +72,32 @@
             android:inputType="text" />
 
         <Button
-            android:id="@+id/buttonSendMessage"
+            android:id="@+id/buttonTestSendMessage"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:text="ID 유저에게 메시지 보내기" />
+            android:text="에게 메시지 보내기" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal">
+
+        <EditText
+            android:id="@+id/editTextChangeUserId"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:ems="10"
+            android:inputType="text" />
+
+        <Button
+            android:id="@+id/buttonTestChangeUser"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="로 유저 체인지" />
     </LinearLayout>
 
 </LinearLayout>

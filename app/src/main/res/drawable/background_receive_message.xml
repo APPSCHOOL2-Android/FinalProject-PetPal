@@ -2,7 +2,7 @@
 <!--채팅방 메시지 배경-->
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
     <stroke
-        android:color="@color/seed"
+        android:color="#F2F3F7"
         android:width="1dp"
     />
     <solid android:color="@color/md_theme_light_background"/>

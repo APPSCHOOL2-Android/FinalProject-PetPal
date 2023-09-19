@@ -19,13 +19,12 @@ import java.util.Locale
 class ChatAdapter(options: FirestoreRecyclerOptions<ChatRoom>, private val activity: MainActivity,
 ) : FirestoreRecyclerAdapter<ChatRoom, ChatAdapter.ViewHolder>(options) {
     // todo Firebase.Auth로 가져오기
-    private val loginUserId = "user1"
+    private val loginUserId = "user2"
 
     inner class ViewHolder(private val rowBinding: RowChatRoomBinding) : RecyclerView.ViewHolder(rowBinding.root) {
         fun bind(chatRoom: ChatRoom) {
             rowBinding.run {
-                // todo receiverId로 User 데이터 조인해서 닉네임으로 설정하기
-                textViewReceiverName.text = chatRoom.receiverId
+                // todo receiverId로 User 데이터 조인해서 id가 아니라 닉네임으로 설정하기
                 textViewLastMessageText.text = chatRoom.lastMessage
 
                 // timestamp 오늘, 어제, MM월 dd일 표시
@@ -47,6 +46,7 @@ class ChatAdapter(options: FirestoreRecyclerOptions<ChatRoom>, private val activ
 
                 // 현재 로그인한 사용자가 해당 채팅방에 대해 senderId일 경우
                 if (loginUserId == chatRoom.senderId) {
+                    textViewRoomName.text = chatRoom.receiverId
                     if (chatRoom.senderUnReadCount?.takeIf { it > 1 } != null) {
                         textViewUnreadCount.text = chatRoom.senderUnReadCount.toString()
                     } else {
@@ -54,6 +54,7 @@ class ChatAdapter(options: FirestoreRecyclerOptions<ChatRoom>, private val activ
                     }
                 } else {
                     // 현재 로그인한 사용자가 해당 채팅방에 대해 receiverId일 경우
+                    textViewRoomName.text = chatRoom.senderId
                     if (chatRoom.receiverUnReadCount?.takeIf { it > 1 } != null) {
                         textViewUnreadCount.text = chatRoom.receiverUnReadCount.toString()
                     } else {

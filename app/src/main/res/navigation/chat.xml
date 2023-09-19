@@ -11,10 +11,10 @@
         android:label="산책 메이트 요청"
         tools:layout="@layout/fragment_walk_mate_request" >
         <argument
-            android:name="senderId"
+            android:name="requestUserId"
             app:argType="string" />
         <argument
-            android:name="receiverId"
+            android:name="receiverUserId"
             app:argType="string" />
     </fragment>
     <fragment
@@ -38,7 +38,7 @@
         android:label="사용자 신고"
         tools:layout="@layout/fragment_report_user" >
         <argument
-            android:name="receiverId"
+            android:name="reportUserId"
             app:argType="string" />
     </fragment>
 </navigation>
