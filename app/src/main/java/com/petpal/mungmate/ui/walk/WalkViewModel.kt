@@ -17,14 +17,13 @@ class WalkViewModel(private val repository: WalkRepository) : ViewModel() {
     val reviewCount: MutableLiveData<Int> = MutableLiveData()
     val latestReviews: MutableLiveData<List<Review>> = MutableLiveData()
     val placeInfo: MutableLiveData<Map<String, Any?>?> = MutableLiveData()
-    val isPlaceFavorited: MutableLiveData<Boolean> = MutableLiveData()
+    val isPlaceFavorited = MutableStateFlow<Boolean?>(null)
     private val errorMessage: MutableLiveData<String> = MutableLiveData()
     private val _favoriteCount = MutableStateFlow<Int?>(null)
     val isDataLoading: MutableLiveData<Boolean> = MutableLiveData(false)
     val favoriteCount: StateFlow<Int?> = _favoriteCount
     val reviewsForPlace = MutableLiveData<List<Review>>()
     val averageRatingForPlace = MutableLiveData<Float>()
-    val showBottomSheet: MutableLiveData<Boolean> = MutableLiveData<Boolean>()
 
     fun searchPlacesByKeyword(latitude: Double, longitude: Double, query: String) {
         viewModelScope.launch {
@@ -60,9 +59,7 @@ class WalkViewModel(private val repository: WalkRepository) : ViewModel() {
             }
         }
     }
-    fun onDataPrepared() {
-        showBottomSheet.value = true
-    }
+
     fun fetchAverageRatingForPlace(placeId: String) {
         viewModelScope.launch {
             try {
@@ -104,16 +101,16 @@ class WalkViewModel(private val repository: WalkRepository) : ViewModel() {
             }
         }
     }
-    fun fetchIsPlaceFavoritedByUser(placeId: String,userId: String){
+    fun fetchIsPlaceFavoritedByUser(placeId: String, userId: String) {
         viewModelScope.launch {
             try {
-                val isFavorited = repository.isPlaceFavoritedByUser(placeId, userId)
-                isPlaceFavorited.postValue(isFavorited)
-            }catch (e:Exception){
+                repository.isPlaceFavoritedByUser(placeId, userId).collect { isFavorited ->
+                    isPlaceFavorited.value = isFavorited
+                }
+            } catch (e: Exception) {
                 errorMessage.postValue(e.localizedMessage ?: "Failed to check if place is favorited")
             }
         }
-
     }
 
     fun fetchLatestReviewsForPlace(placeId: String) {

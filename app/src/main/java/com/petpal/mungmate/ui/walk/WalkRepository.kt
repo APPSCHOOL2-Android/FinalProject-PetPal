@@ -10,6 +10,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.tasks.await
 import retrofit2.Retrofit
@@ -67,18 +68,19 @@ class WalkRepository {
         return favoriteCount
     }
 
-    suspend fun isPlaceFavoritedByUser(placeId: String, userId: String): Boolean {
+    fun isPlaceFavoritedByUser(placeId: String, userId: String): Flow<Boolean> = flow {
         val placeRef = db.collection("places").document(placeId)
         val placeDocument = placeRef.get().await()
 
         // placeId에 대한 문서가 존재하지 않으면 false 반환
         if (!placeDocument.exists()) {
-            return false
+            emit(false)
+            return@flow  // End the flow after emitting false
         }
 
         val favoriteRef = placeRef.collection("favorite").document(userId)
         val favoriteDocument = favoriteRef.get().await()
-        return favoriteDocument.exists()
+        emit(favoriteDocument.exists())
     }
 
     suspend fun getReviewCountSuspend(placeId: String): Int {
@@ -132,6 +134,7 @@ class WalkRepository {
         }
         awaitClose { registration.remove() }
     }
+
 }
 
 

@@ -57,13 +57,13 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
     private val viewModel: WalkViewModel by viewModels { WalkViewModelFactory(WalkRepository()) }
     private lateinit var kakaoSearchResponse: KakaoSearchResponse
     private var isLocationPermissionGranted = false
-    private var isFavorited = false
+    private var isFavorited1 = false
     private var latestReviews: List<Review>? = null
     private val currentMarkers: MutableList<MapPOIItem> = mutableListOf()
     private val avgRatingBundle = Bundle()
     private lateinit var initialBottomSheetView: View
     private lateinit var bottomSheetDialog: BottomSheetDialog
-
+    private var isHeartImageUpdated = false
     companion object {
         const val REQUEST_LOCATION_PERMISSION = 1
 
@@ -328,21 +328,28 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
             viewModel.fetchReviewCount(it)
             viewModel.fetchLatestReviewsForPlace(it)
             viewModel.fetchPlaceInfoFromFirestore(it)
-            viewModel.fetchIsPlaceFavoritedByUser(it, "userid")
+            viewModel.fetchIsPlaceFavoritedByUser(it, "userid")  // Removed the collect operation
             viewModel.fetchAverageRatingForPlace(it)
-            viewModel.onDataPrepared()
         }
-        //바텀시트의 좋아요 상태에 따라 하트 이미지 변경
-        viewModel.isPlaceFavorited.observe(viewLifecycleOwner) { isPlaceFavorited ->
-                isFavorited = isPlaceFavorited
-            if(isFavorited) {
-                initialBottomSheetView.findViewById<ImageView>(R.id.imageViewFavoirte)
-                    .setImageResource(R.drawable.filled_heart)
-            }else{
-                initialBottomSheetView.findViewById<ImageView>(R.id.imageViewFavoirte)
-                    .setImageResource(R.drawable.empty_heart)
-            }
 
+        lifecycleScope.launch {  // Launching a coroutine
+            //바텀시트의 좋아요 상태에 따라 하트 이미지 변경
+            viewModel.isPlaceFavorited.collect { isFavorited ->
+                isFavorited?.let {
+                    if (it) {
+                        initialBottomSheetView.findViewById<ImageView>(R.id.imageViewFavoirte)
+                            .setImageResource(R.drawable.filled_heart)
+                        isFavorited1=true
+
+                    } else {
+                        initialBottomSheetView.findViewById<ImageView>(R.id.imageViewFavoirte)
+                            .setImageResource(R.drawable.empty_heart)
+                        isFavorited1=false
+                    }
+
+                }
+
+            }
 
         }
         //place의 리뷰 별점 평균 표기
@@ -380,14 +387,20 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
                         }
 
                         override fun onResourceReady(resource: Drawable?, model: Any?, target: Target<Drawable>?, dataSource: DataSource?, isFirstResource: Boolean): Boolean {
-                            bottomSheetDialog.show()
+
+                            Handler(Looper.getMainLooper()).postDelayed({
+                                    bottomSheetDialog.show()
+                                    isHeartImageUpdated = false
+                                }, 200)
                             return false
                         }
                     })
                     .into(imageViewPlace)
             } else {
-                imageViewPlace.setImageResource(R.drawable.default_profile_image)
-                bottomSheetDialog.show()
+                    imageViewPlace.setImageResource(R.drawable.default_profile_image)
+                    Handler(Looper.getMainLooper()).postDelayed({
+                        bottomSheetDialog.show()
+                    }, 200)
             }
         }
 
@@ -475,18 +488,21 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
         initialBottomSheetView.findViewById<ImageView>(R.id.imageViewFavoirte).apply {
             val place = Place(selectedPlace!!.id, selectedPlace.place_name, selectedPlace.category_group_name, (selectedPlace.x).toString(), (selectedPlace.y).toString(), selectedPlace.phone, selectedPlace.road_address_name)
             setOnClickListener {
-                if (!isFavorited) {
-                    isFavorited = true
+                if (!isFavorited1) {
+                    isFavorited1 = true
                     setImageResource(R.drawable.filled_heart)
                     val favorite = Favorite("userid")
                     viewModel.addPlaceToFavorite(place, favorite)
+                    val bottomplacelayout:CoordinatorLayout=initialBottomSheetView.findViewById(R.id.bottom_place_layout)
+                    Snackbar.make(bottomplacelayout, "반영되었습니다.", Snackbar.LENGTH_SHORT).show()
                 } else {
-                    isFavorited = false
+                    isFavorited1 = false
                     setImageResource(R.drawable.empty_heart)
                     viewModel.removeFavorite(placeId!!, "userid")
+                    val bottomplacelayout:CoordinatorLayout=initialBottomSheetView.findViewById(R.id.bottom_place_layout)
+                    Snackbar.make(bottomplacelayout, "반영되었습니다.", Snackbar.LENGTH_SHORT).show()
                 }
-                val bottomplacelayout:CoordinatorLayout=initialBottomSheetView.findViewById(R.id.bottom_place_layout)
-                Snackbar.make(bottomplacelayout, "반영되었습니다.", Snackbar.LENGTH_SHORT).show()
+
 
                 viewModel.fetchFavoriteCount(placeId!!)
                 viewLifecycleOwner.lifecycleScope.launchWhenStarted {
@@ -500,7 +516,7 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
 
             }
         }
-        //리뷰 입력 버튼 
+        //리뷰 입력 버튼
         buttonsubmit.setOnClickListener {
             val bundle = Bundle()
             bundle.putString("place_name", selectedPlace?.place_name)
