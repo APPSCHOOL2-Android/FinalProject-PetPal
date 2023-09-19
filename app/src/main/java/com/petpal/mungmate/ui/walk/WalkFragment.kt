@@ -25,6 +25,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import com.bumptech.glide.Glide
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -314,6 +315,7 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
             val textViewPlaceName = initialBottomSheetView.findViewById<TextView>(R.id.textView)
             textViewPlaceName.text = placeInfo?.get("name") as? String ?: "${selectedPlace?.place_name}"
 
+
         }
 
 
@@ -457,7 +459,11 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
             detailUserName.text=latestReviews!![0].userid
             detailDate.text=latestReviews!![0].date
             detailContent.text=latestReviews!![0].comment
-            latestReviews!![0].imageRes?.let { detailImage?.setImageResource(it) }
+            latestReviews!![1].imageRes?.let { imageUrl ->
+                Glide.with(detailImage.context)
+                    .load(imageUrl)
+                    .into(detailImage)
+            }
 
             detailDialog.setContentView(detailCardView)
             detailDialog.show()
@@ -470,7 +476,11 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
             detailUserName.text=latestReviews!![1].userid
             detailDate.text=latestReviews!![1].date
             detailContent.text=latestReviews!![1].comment
-            latestReviews!![1].imageRes?.let { detailImage?.setImageResource(it) }
+            latestReviews!![1].imageRes?.let { imageUrl ->
+                Glide.with(detailImage.context)
+                    .load(imageUrl)
+                    .into(detailImage)
+            }
 
             detailDialog.show()
         }

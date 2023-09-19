@@ -1,5 +1,6 @@
 package com.petpal.mungmate.ui.placereview
 
+import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
@@ -15,6 +16,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.petpal.mungmate.R
 import com.petpal.mungmate.databinding.FragmentPlaceReviewBinding
 import com.petpal.mungmate.databinding.RowPlaceReviewBinding
@@ -100,9 +102,18 @@ class PlaceReviewFragment : Fragment() {
             holder.dateTextView.text = review.date
             holder.ratingBar.rating = review.rating!!
             holder.commentTextView.text = review.comment
-            review.imageRes?.let { holder.reviewImageView.setImageResource(it) }
-        }
+            review.imageRes?.let { Log.d("imagereal", it) }
 
+            val widthPx = dpToPx(100, holder.reviewImageView.context)
+            val heightPx = dpToPx(100, holder.reviewImageView.context)
+
+            review.imageRes?.let { imageUrl ->
+                Glide.with(holder.reviewImageView.context)
+                    .load(imageUrl)
+                    .override(widthPx, heightPx) // 추가된 부분
+                    .into(holder.reviewImageView)
+            }
+        }
         override fun getItemCount(): Int = reviews.size
 
         // This function updates the reviews list and notifies the RecyclerView of the changes
@@ -110,6 +121,11 @@ class PlaceReviewFragment : Fragment() {
             reviews = newReviews
             notifyDataSetChanged()
         }
+    }
+
+    fun dpToPx(dp: Int, context: Context): Int {
+        val density = context.resources.displayMetrics.density
+        return (dp * density).toInt()
     }
 }
 

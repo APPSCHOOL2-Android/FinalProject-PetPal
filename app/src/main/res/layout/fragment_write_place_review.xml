@@ -1,12 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_margin="@dimen/common_margin"
-    android:orientation="vertical"
     tools:context=".ui.placereview.WritePlaceReviewFragment">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
 
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/materialPlaceReviewToolbar"
@@ -33,6 +38,7 @@
         android:layout_marginTop="@dimen/common_margin"
         android:src="@drawable/photo"
         tools:src="@drawable/photo" />
+
 
     <TextView
         android:id="@+id/textViewPlaceReviewAnnouncement"
@@ -90,3 +96,18 @@
 
 
 </LinearLayout>
+    <View
+        android:id="@+id/progressBackground"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#66000000"
+        android:visibility="gone" />
+
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:visibility="gone"/>
+
+</RelativeLayout>

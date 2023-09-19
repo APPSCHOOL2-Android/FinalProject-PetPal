@@ -104,8 +104,6 @@
             android:gravity="center"
             android:text="혼자 산책하기" />
 
-
-
     </LinearLayout>
 
     <LinearLayout
@@ -204,6 +202,11 @@
 
     </LinearLayout>
 </LinearLayout>
+
+    <ScrollView
+        android:layout_width="400dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="end">
 
     <LinearLayout
         android:id="@+id/DrawerLinear"
@@ -550,6 +553,11 @@
                 android:text="적용" />
         </LinearLayout>
 
-    </LinearLayout>
+
+
+
+</LinearLayout>
+    </ScrollView>
+
 
 </androidx.drawerlayout.widget.DrawerLayout>
