@@ -83,7 +83,7 @@ class CommunityAdapter(
             .fitCenter()
             .into(holder.communityProfileImage)
 
-        if (post.postImages?.isNotEmpty() == true) {
+        if (post.postImages?.isNotEmpty()!!) {
             Glide
                 .with(context)
                 .load(post.postImages?.get(0)?.image.toString())
@@ -91,6 +91,7 @@ class CommunityAdapter(
                 .fitCenter()
                 .fallback(R.drawable.main_image)
                 .into(holder.communityPostImage)
+            holder.communityPostCardView.visibility = View.VISIBLE
         }else{
             holder.communityPostCardView.visibility = View.GONE
         }

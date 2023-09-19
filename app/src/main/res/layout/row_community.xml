@@ -192,13 +192,12 @@
 
     </LinearLayout>
 
-    <com.google.android.material.divider.MaterialDivider
+    <View
         android:id="@+id/communityDivider"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/common_margin"
+        android:layout_height="8dp"
         android:layout_marginTop="@dimen/common_margin"
-        android:layout_marginEnd="@dimen/common_margin"
+        android:background="?android:attr/listDivider"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/communityBottomLinerLayout" />
