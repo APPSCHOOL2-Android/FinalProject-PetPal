@@ -16,6 +16,15 @@ class ReportUserFragment : Fragment() {
 
     private val reportCategoryArray = arrayOf("홍보 계정이에요", "욕설을 해요", "약속 시간에 나오지 않았어요", "비매너 유저", "기타")
 
+    lateinit var reportUserId : String
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        // Safe Args 방법으로 전달받은 신고 대상 유저 id
+        val args = ReportUserFragmentArgs.fromBundle(requireArguments())
+        reportUserId = args.reportUserId
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -28,6 +37,9 @@ class ReportUserFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         fragmentReportUserBinding.run {
+            // todo reportUserId로 DB 검색해서 닉네임 가져와 표시하기
+            editTextReportNickname.setText(reportUserId)
+            
             toolbarReportUser.setNavigationOnClickListener {
                 findNavController().popBackStack()
             }
@@ -35,11 +47,15 @@ class ReportUserFragment : Fragment() {
             val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, reportCategoryArray)
             textViewReportCategory.setAdapter(adapter)
 
-            editTextReportNickname.setText("멍멍이네")
-
-            buttonReport.setOnClickListener {
+            buttonReportUser.setOnClickListener {
+                reportUser()
                 findNavController().popBackStack()
             }
         }
+    }
+
+    // todo 사용자 신고
+    private fun reportUser() {
+        
     }
 }

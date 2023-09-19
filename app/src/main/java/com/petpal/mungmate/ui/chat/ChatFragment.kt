@@ -11,7 +11,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.firebase.ui.firestore.FirestoreRecyclerOptions
 import com.google.android.material.divider.MaterialDividerItemDecoration
 import com.google.firebase.Timestamp
-import com.google.firebase.firestore.Filter
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -26,7 +26,7 @@ class ChatFragment : Fragment() {
     private val fragmentChatBinding get() = _fragmentChatBinding!!
     lateinit var mainActivity: MainActivity
 
-    private var loginUserId = "user1"
+    private var currentUserId = FirebaseAuth.getInstance().currentUser?.uid.toString()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -72,7 +72,7 @@ class ChatFragment : Fragment() {
 
             // 로그인 유저 체인지
             buttonTestChangeUser.setOnClickListener {
-                loginUserId = editTextChangeUserId.text.toString()
+                currentUserId = editTextChangeUserId.text.toString()
             }
         }
     }
@@ -83,7 +83,7 @@ class ChatFragment : Fragment() {
         // 처음 채팅방 생성하고 메시지 보내기 전까지는 상태 채팅목록에는 표시X, sender만 입장한 상태
         val db = Firebase.firestore
 
-        val chatRoomId = listOf<String>(loginUserId, receiverId).sorted().joinToString("_")
+        val chatRoomId = listOf<String>(currentUserId, receiverId).sorted().joinToString("_")
         db.collection("chatRoom").document(chatRoomId).get()
             .addOnSuccessListener { documentSnapshot ->
                 if (documentSnapshot.exists()) {
@@ -92,7 +92,7 @@ class ChatFragment : Fragment() {
                 } else {
                     // 문서가 존재하지 않는 경우
                     val chatRoom = ChatRoom(
-                        loginUserId,
+                        currentUserId,
                         receiverId,
                         "안녕하세요!",
                         Timestamp.now(),

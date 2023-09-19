@@ -18,11 +18,19 @@ class WalkMateRequestFragment : Fragment() {
     private var _fragmentWalkMateRequestBinding : FragmentWalkMateRequestBinding? = null
     private val fragmentWalkMateRequestBinding get() = _fragmentWalkMateRequestBinding!!
 
+    lateinit var senderId: String
+    lateinit var receiverId: String
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         _fragmentWalkMateRequestBinding = FragmentWalkMateRequestBinding.inflate(inflater)
+
+        // 채팅창에서 전달받은 산책 메이트 요청 송신자 -> 수신자 id
+        val args = WalkMateRequestFragmentArgs.fromBundle(requireArguments())
+        senderId = args.senderId
+        receiverId = args.receiverId
 
         return fragmentWalkMateRequestBinding.root
     }
@@ -36,6 +44,8 @@ class WalkMateRequestFragment : Fragment() {
             }
 
             buttonRequest.setOnClickListener {
+                // TODO 산책 매칭 메시지 저장
+
                 // TODO 채팅방으로 돌아가면서 데이터 전달하기
                 findNavController().popBackStack()
             }

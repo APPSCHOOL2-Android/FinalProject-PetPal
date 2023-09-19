@@ -6,11 +6,11 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.widget.addTextChangedListener
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.petpal.mungmate.R
@@ -21,7 +21,7 @@ class ChatRoomFragment : Fragment() {
     private var _fragmentChatRoomBinding : FragmentChatRoomBinding? = null
     private val fragmentChatRoomBinding get() = _fragmentChatRoomBinding!!
 
-    private val loginUserId = "user1"
+    private val currentUserId = FirebaseAuth.getInstance().currentUser?.uid.toString()
     private val db = Firebase.firestore
 
     private var messageList = mutableListOf<Message>()
@@ -79,7 +79,7 @@ class ChatRoomFragment : Fragment() {
 
             // 산책 메이트 요청
             buttonRequestWalkMate.setOnClickListener {
-                val action = ChatRoomFragmentDirections.actionChatRoomFragmentToWalkMateRequestFragment("user1", "user2")
+                val action = ChatRoomFragmentDirections.actionChatRoomFragmentToWalkMateRequestFragment(currentUserId, "user2")
                 findNavController().navigate(action)
             }
 

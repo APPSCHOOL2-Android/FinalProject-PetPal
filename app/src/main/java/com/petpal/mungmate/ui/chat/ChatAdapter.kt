@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter
 import com.firebase.ui.firestore.FirestoreRecyclerOptions
+import com.google.firebase.auth.FirebaseAuth
 import com.petpal.mungmate.MainActivity
 import com.petpal.mungmate.R
 import com.petpal.mungmate.databinding.RowChatRoomBinding
@@ -18,8 +19,7 @@ import java.util.Locale
 
 class ChatAdapter(options: FirestoreRecyclerOptions<ChatRoom>, private val activity: MainActivity,
 ) : FirestoreRecyclerAdapter<ChatRoom, ChatAdapter.ViewHolder>(options) {
-    // todo Firebase.Auth로 가져오기
-    private val loginUserId = "user2"
+    val currentUserUid = FirebaseAuth.getInstance().currentUser?.uid.toString()
 
     inner class ViewHolder(private val rowBinding: RowChatRoomBinding) : RecyclerView.ViewHolder(rowBinding.root) {
         fun bind(chatRoom: ChatRoom) {
@@ -45,7 +45,7 @@ class ChatAdapter(options: FirestoreRecyclerOptions<ChatRoom>, private val activ
                 }
 
                 // 현재 로그인한 사용자가 해당 채팅방에 대해 senderId일 경우
-                if (loginUserId == chatRoom.senderId) {
+                if (currentUserUid == chatRoom.senderId) {
                     textViewRoomName.text = chatRoom.receiverId
                     if (chatRoom.senderUnReadCount?.takeIf { it > 1 } != null) {
                         textViewUnreadCount.text = chatRoom.senderUnReadCount.toString()
