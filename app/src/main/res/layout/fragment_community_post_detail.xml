@@ -244,7 +244,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="@dimen/common_margin"
                         android:layout_marginTop="@dimen/common_margin"
-                        android:text="댓글 0"
+                        android:text=""
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toBottomOf="@id/communityPostDetailDivider" />
 

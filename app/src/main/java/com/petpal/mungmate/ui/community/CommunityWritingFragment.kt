@@ -220,7 +220,7 @@ class CommunityWritingFragment : Fragment() {
                                 communityWritingBinding.categoryItem.text.toString(),
                                 formattedDateTime,
                                 postImagesList,
-                                communityWritingBinding.communityPostWritingTitleTextInputEditText.text.toString(),
+                                communityWritingBinding.communityPostWritingContentTextInputEditText.text.toString(),
                                 0,
                                 emptyList()
                             )
@@ -265,7 +265,7 @@ class CommunityWritingFragment : Fragment() {
                         communityWritingBinding.categoryItem.text.toString(),
                         formattedDateTime,
                         postImagesList,
-                        communityWritingBinding.communityPostWritingTitleTextInputEditText.text.toString(),
+                        communityWritingBinding.communityPostWritingContentTextInputEditText.text.toString(),
                         0,
                         emptyList()
                     )

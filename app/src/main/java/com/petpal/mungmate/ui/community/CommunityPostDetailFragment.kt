@@ -72,6 +72,7 @@ class CommunityPostDetailFragment : Fragment() {
 
             commentViewModel.postCommentList.observe(viewLifecycleOwner) { commentList ->
                 communityDetailCommentAdapter.updateData(commentList)
+                communityPostDetailCommentCount.text="댓글 ${commentList.size.toString()}"
             }
             val iconColorNotInput =
                 ContextCompat.getColor(requireContext(), R.color.md_theme_light_tertiaryContainer)
@@ -295,6 +296,7 @@ class CommunityPostDetailFragment : Fragment() {
                         parentID = dataMap["parentID"] as String?
                     )
                     postCommentList.add(comment)
+                    communityPostDetailBinding.communityPostDetailCommentCount.text="댓글 ${postCommentList.size.toString()}"
                 }
                 communityDetailCommentAdapter.updateData(postCommentList)
                 Log.d("성공", postCommentList.toString())
