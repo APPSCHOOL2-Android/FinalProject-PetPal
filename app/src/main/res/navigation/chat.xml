@@ -16,6 +16,9 @@
         <argument
             android:name="receiverId"
             app:argType="string" />
+        <argument
+            android:name="chatRoomId"
+            app:argType="string" />
     </fragment>
     <fragment
         android:id="@+id/chatRoomFragment"
@@ -38,7 +41,7 @@
         android:label="사용자 신고"
         tools:layout="@layout/fragment_report_user" >
         <argument
-            android:name="reportUserId"
+            android:name="reportedUserId"
             app:argType="string" />
     </fragment>
 </navigation>

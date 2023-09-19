@@ -23,7 +23,6 @@
         android:padding="16dp">
 
         <TextView
-            android:id="@+id/textView2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="산책 일정을 설정해주세요."
@@ -35,7 +34,8 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             app:endIconDrawable="@drawable/event_24px"
-            app:endIconMode="custom">
+            app:endIconMode="custom"
+            app:errorEnabled="true">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/textInputEditTextDate"
@@ -50,9 +50,9 @@
             android:id="@+id/textInputLayoutTime"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
             app:endIconDrawable="@drawable/schedule_24px"
-            app:endIconMode="custom">
+            app:endIconMode="custom"
+            app:errorEnabled="true">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/textInputEditTextTime"
@@ -67,9 +67,9 @@
             android:id="@+id/textInputLayoutPlace"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
             app:endIconDrawable="@drawable/location_on_24px"
-            app:endIconMode="custom">
+            app:endIconMode="custom"
+            app:errorEnabled="true">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/textInputEditTextPlace"
