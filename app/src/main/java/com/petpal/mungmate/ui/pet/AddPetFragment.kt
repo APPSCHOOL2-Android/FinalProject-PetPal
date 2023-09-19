@@ -8,8 +8,10 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.snackbar.Snackbar
@@ -18,6 +20,7 @@ import com.google.firebase.ktx.Firebase
 import com.petpal.mungmate.R
 import com.petpal.mungmate.databinding.FragmentAddPetBinding
 import com.petpal.mungmate.model.PetData
+import com.petpal.mungmate.model.UserBasicInfoData
 import com.petpal.mungmate.ui.user.UserViewModel
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -29,6 +32,7 @@ class AddPetFragment : Fragment() {
     private lateinit var _fragmentAddPetBinding: FragmentAddPetBinding
     private val fragmentAddPetBinding get() = _fragmentAddPetBinding
     private var userUid = ""
+    lateinit var userBasicInfoData: UserBasicInfoData
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -39,10 +43,21 @@ class AddPetFragment : Fragment() {
 
         // StateFlow를 사용하여 사용자 데이터 관찰
         viewLifecycleOwner.lifecycleScope.launch {
-            userViewModel.user.collect { userData ->
-                // userData를 사용하여 사용자 정보 표시
-                if (userData != null) {
-                    userUid = userData.uid
+            viewLifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                launch {
+                    userViewModel.user.collect { userData ->
+                        // userData를 사용하여 사용자 정보 표시
+                        if (userData != null) {
+                            userUid = userData.uid
+                        }
+                    }
+                }
+                launch {
+                    userViewModel.userBasicInfo.collect {
+                        if (it != null) {
+                            userBasicInfoData = it
+                        }
+                    }
                 }
             }
         }
@@ -96,26 +111,47 @@ class AddPetFragment : Fragment() {
             }
 
             buttonPetComplete.setOnClickListener {
-                savePetData(
-                    if(imageViewAddPet.tag == null) null else imageViewAddPet.tag as Uri,
-                    textInputEditTextAddPetName.text.toString(),
-                    autoCompleteTextViewPetBreed.text.toString(),
-                    textInputPetBirthText.text.toString(),
-                    getPetSex(toggleButtonPetGender.checkedButtonId),
-                    isPetNeutered(toggleButtonNeuter.checkedButtonId),
-                    textInputEditTextPetWeight.text.toString().toDouble(),
-                    textInputEditTextPetCharacter.text.toString()
-                ) {
-                    Snackbar.make(requireView(), "반려견 정보가 저장됐습니다.", Snackbar.LENGTH_SHORT).show()
-                    findNavController().navigate(R.id.action_addPetFragment_to_mainFragment)
-                }
-
+                saveUserDataAndPetData()
+                Snackbar.make(requireView(), "정보가 저장됐습니다.", Snackbar.LENGTH_SHORT).show()
             }
         }
         return fragmentAddPetBinding.root
     }
 
+    private fun FragmentAddPetBinding.saveUserDataAndPetData() {
+
+        val db = Firebase.firestore
+        Log.d("user", userUid)
+
+        val userRef = db.collection("users").document(userUid)
+        val petRef = userRef.collection("pets").document()
+
+        db.runBatch { transaction ->
+            //사용자 정보 저장
+            transaction.set(userRef, userBasicInfoData)
+            transaction.set(
+                petRef, PetData(
+                    if (imageViewAddPet.tag == null) null else imageViewAddPet.tag as Uri,
+                    textInputEditTextAddPetName.text.toString(),
+                    autoCompleteTextViewPetBreed.text.toString(),
+                    textInputPetBirthText.text.toString(),
+                    getPetSex(toggleButtonPetGender.checkedButtonId).ordinal,
+                    isPetNeutered(toggleButtonNeuter.checkedButtonId),
+                    textInputEditTextPetWeight.text.toString().toDouble(),
+                    textInputEditTextPetCharacter.text.toString()
+                )
+            )
+        }.addOnSuccessListener {
+            Snackbar.make(requireView(), "정보가 저장됐습니다.", Snackbar.LENGTH_SHORT).show()
+            findNavController().navigate(R.id.action_addPetFragment_to_mainFragment)
+        }.addOnFailureListener { e ->
+            Log.w("saveUser", "Error writing document", e)
+        }
+
+    }
+
     private fun savePetData(
+        userUid: String,
         imageURI: Uri? = null,
         name: String,
         breed: String,
@@ -139,6 +175,19 @@ class AddPetFragment : Fragment() {
             .addOnFailureListener { e ->
                 Log.w("savePet", "Error writing document", e)
             }
+    }
+
+    private fun saveUserData(
+        userUid: String,
+        userBasicInfoData: UserBasicInfoData,
+    ) {
+        val db = Firebase.firestore
+        db.collection("users").document(userUid).set(
+            userBasicInfoData
+        ).addOnSuccessListener {
+            Log.d("saveUser", "DocumentSnapshot successfully written!")
+        }.addOnFailureListener { e -> Log.w("saveUser", "Error writing document", e) }
+
     }
 
     private fun isPetNeutered(checkedButtonId: Int): Boolean {

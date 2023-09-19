@@ -12,6 +12,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.datepicker.MaterialDatePicker
+import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.petpal.mungmate.MainActivity
@@ -44,6 +45,8 @@ class UserInfoFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         userViewModel = ViewModelProvider(requireActivity())[UserViewModel::class.java]
+
+        Snackbar.make(requireView(), "사용자 정보를 입력해주세요",Snackbar.LENGTH_SHORT).show()
 
         // StateFlow를 사용하여 사용자 데이터 관찰
         viewLifecycleOwner.lifecycleScope.launch {
@@ -98,23 +101,25 @@ class UserInfoFragment : Fragment() {
             }
 
             infoToNextButton.setOnClickListener {
-                //firestore에 저장하기
-                saveUserData(
-                    userUid,
-                    startMainImageView.tag as Uri,
+
+                val userInfoData = UserBasicInfoData(
+                    if (startMainImageView.tag == null) null else startMainImageView.tag as Uri,
                     textInputUserNicknameText.text.toString(),
                     textInputUserBirthText.text.toString(),
                     switchUserInfo.isChecked,
-                    getSelectedSex(toggleButtonUserSex.checkedButtonId),
-                    getSelectedWalkHour(userInfoRadiogroup.checkedRadioButtonId),
+                    getSelectedSex(toggleButtonUserSex.checkedButtonId).ordinal,
+                    getSelectedWalkHour(userInfoRadiogroup.checkedRadioButtonId).ordinal,
                     textInputStartText.text.toString(),
                     textInputEndText.text.toString()
-                ) {
-                    mainActivity.navigate(
-                        R.id.action_userInfoFragment_to_addPetFragment,
-                        bundleOf("isAdd" to true)
-                    )
-                }
+                )
+
+                //viewmodel에 저장하기
+                userViewModel.setUserBasicInfoData(userInfoData)
+
+                mainActivity.navigate(
+                    R.id.action_userInfoFragment_to_addPetFragment,
+                    bundleOf("isAdd" to true)
+                )
 
             }
 
@@ -156,44 +161,6 @@ class UserInfoFragment : Fragment() {
             }
         }
     }
-
-    //추가하거나 업데이트하기
-    private fun saveUserData(
-        userUid: String,
-        image: Uri? = null,
-        nickName: String,
-        birth: String,
-        isBirthPublic: Boolean,
-        checkedSexId: Sex,
-        checkedWalkHourId: Availability,
-        walkHoursStart: String? = null,
-        walkHoursEnd: String? = null,
-        successCallBack: () -> Unit,
-    ) {
-        Log.d(
-            "user",
-            "${image}, ${nickName}, ${birth}, ${checkedSexId}, ${checkedWalkHourId}, ${walkHoursStart}, $walkHoursEnd"
-        )
-
-        val db = Firebase.firestore
-        db.collection("users").document(userUid).set(
-            UserBasicInfoData(
-                image,
-                nickName,
-                birth,
-                isBirthPublic,
-                checkedSexId.ordinal,
-                checkedWalkHourId.ordinal,
-                walkHoursStart,
-                walkHoursEnd
-            )
-        ).addOnSuccessListener {
-            Log.d("saveUser", "DocumentSnapshot successfully written!")
-            successCallBack()
-        }.addOnFailureListener { e -> Log.w("saveUser", "Error writing document", e) }
-
-    }
-
 
 }
 
