@@ -7,8 +7,9 @@
     <com.github.chrisbanes.photoview.PhotoView
         android:id="@+id/fullScreenImageView"
         android:layout_width="match_parent"
+        android:adjustViewBounds="true"
         android:layout_height="match_parent"
-        android:scaleType="fitXY"
+        android:scaleType="centerInside"
         android:layout_gravity="center" />
 
 </RelativeLayout>

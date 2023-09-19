@@ -90,26 +90,14 @@ class CommunityAdapter(
             .into(holder.communityPostImage)
 
         holder.communityPostImage.setOnClickListener {
-            val dialog = Dialog(context)
-            dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
-            dialog.setContentView(R.layout.item_full_screen_dialog)
-
-            val fullScreenImageView = dialog.findViewById<ImageView>(R.id.fullScreenImageView)
-
-            Glide
-                .with(context)
-                .load(post.postImages?.get(0)?.image.toString())
-                .diskCacheStrategy(DiskCacheStrategy.ALL)
-                .fitCenter()
-                .fallback(R.drawable.main_image)
-                .into(fullScreenImageView)
-
-            dialog.show()
-
-
-            fullScreenImageView.setOnClickListener {
-                dialog.dismiss()
+            val bundle = Bundle().apply {
+                putString("img", post.postImages?.get(0)?.image.toString())
             }
+
+            mainActivity.navigate(
+                R.id.action_mainFragment_to_fullScreenFragment,
+                bundle
+            )
         }
 
 
