@@ -5,10 +5,12 @@ import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import android.view.Window
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.RecyclerView
 import com.airbnb.lottie.LottieAnimationView
 import com.bumptech.glide.Glide
@@ -39,6 +41,7 @@ class CommunityAdapter(
         val communityCommentCounter: TextView = item.communityCommentCounter
         val communityFavoriteLottie: LottieAnimationView = item.communityFavoriteLottie
         val communityFavoriteCounter: TextView = item.communityFavoriteCounter
+        val communityPostCardView: CardView = item.communityPostCardView
 
         init {
 
@@ -79,15 +82,19 @@ class CommunityAdapter(
             .diskCacheStrategy(DiskCacheStrategy.ALL)
             .fitCenter()
             .into(holder.communityProfileImage)
-        Log.d("과연", post.postImages?.get(0)?.image.toString())
 
-        Glide
-            .with(context)
-            .load(post.postImages?.get(0)?.image.toString())
-            .diskCacheStrategy(DiskCacheStrategy.ALL)
-            .fitCenter()
-            .fallback(R.drawable.main_image)
-            .into(holder.communityPostImage)
+        if (post.postImages?.isNotEmpty() == true) {
+            Glide
+                .with(context)
+                .load(post.postImages?.get(0)?.image.toString())
+                .diskCacheStrategy(DiskCacheStrategy.ALL)
+                .fitCenter()
+                .fallback(R.drawable.main_image)
+                .into(holder.communityPostImage)
+        }else{
+            holder.communityPostCardView.visibility = View.GONE
+        }
+
 
         holder.communityPostImage.setOnClickListener {
             val bundle = Bundle().apply {
@@ -106,7 +113,8 @@ class CommunityAdapter(
         holder.communityUserPlace.text = post.userPlace
         holder.communityPostDateCreated.text = post.postDateCreated.toString()
         holder.communityContent.text = post.postContent
-//        holder.communityCommentCounter.text= post.postComment
+        holder.communityCommentCounter.text= post.postComment?.size.toString()
+        Log.d("갯수",post.postComment?.size.toString())
         holder.communityFavoriteCounter.text = post.postLike.toString()
 
         var isClicked = false

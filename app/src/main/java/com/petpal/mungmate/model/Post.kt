@@ -19,6 +19,7 @@ data class Post(
 data class Comment(
     val commentUid: Long= 0,//댓글 작성자 id
     val commentNickName: String? = null,//댓글 작성자 닉네임
+    val commentUserPlace: String? = null,
     val commentDateCreated: String? = null,//댓글 작성 날짜
     val commentContent: String? = null,//댓글 내용
     val commentLike: Long= 0,//댓글 좋아요 수

@@ -20,9 +20,10 @@
             app:title="@string/community_post_detail" />
     </com.google.android.material.appbar.AppBarLayout>
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:orientation="vertical"
         app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
 
         <androidx.core.widget.NestedScrollView
@@ -40,8 +41,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
-                <androidx.constraintlayout.widget.ConstraintLayout
+                <LinearLayout
                     android:layout_width="match_parent"
+                    android:orientation="vertical"
                     android:layout_height="match_parent">
 
                     <androidx.constraintlayout.widget.ConstraintLayout
@@ -126,10 +128,7 @@
                         android:paddingStart="@dimen/common_padding"
                         android:paddingEnd="@dimen/common_padding"
                         app:cardCornerRadius="15dp"
-                        app:cardElevation="0dp"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/communityPostDetailProfileConstraintLayout">
+                        app:cardElevation="0dp">
 
                         <androidx.appcompat.widget.AppCompatImageView
                             android:id="@+id/communityPostDetailPostImage"
@@ -142,14 +141,13 @@
 
                     <androidx.appcompat.widget.AppCompatTextView
                         android:id="@+id/communityPostDetailContent"
-                        android:layout_width="0dp"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/common_margin"
+                        android:layout_marginEnd="@dimen/common_margin"
                         android:layout_marginTop="@dimen/common_margin"
                         android:text="내용"
-                        android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-                        app:layout_constraintEnd_toEndOf="@id/communityPostDetailPostCardView"
-                        app:layout_constraintStart_toStartOf="@id/communityPostDetailPostCardView"
-                        app:layout_constraintTop_toBottomOf="@id/communityPostDetailPostCardView" />
+                        android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
                     <LinearLayout
                         android:id="@+id/communityPostDetailBottomLinerLayout"
@@ -256,14 +254,15 @@
                         android:layout_height="match_parent"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
+                        android:layout_marginBottom="60dp"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toBottomOf="@id/communityPostDetailCommentCount"
                         tools:listitem="@layout/row_community_comment" />
 
-                </androidx.constraintlayout.widget.ConstraintLayout>
+                </LinearLayout>
             </com.faltenreich.skeletonlayout.SkeletonLayout>
         </androidx.core.widget.NestedScrollView>
-    </androidx.constraintlayout.widget.ConstraintLayout>
+    </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
