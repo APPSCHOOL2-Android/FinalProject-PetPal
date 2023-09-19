@@ -69,7 +69,7 @@ class WalkMateRequestFragment : Fragment() {
             buttonRequest.setOnClickListener {
                 // 유효성 검사, 에러 문구 표시하기
                 if (isDateValid() && isTimeValid() && isPlaceValid()) {
-                    // 1. 산책 매칭 데이터 저장
+                    // 산책 매칭 데이터 저장
                     saveMatch()
                 }
             }
@@ -97,6 +97,34 @@ class WalkMateRequestFragment : Fragment() {
                 isPlaceValid()
             }
         }
+    }
+
+    private fun showDatePicker() {
+        // DatePicker 기본값 오늘로 설정
+        val datePicker = MaterialDatePicker.Builder.datePicker()
+            .setTitleText("날짜 선택")
+            .setSelection(MaterialDatePicker.todayInUtcMilliseconds())
+            .build()
+
+        datePicker.addOnPositiveButtonClickListener { selectedDateInMillis ->
+            selectedDate = selectedDateInMillis
+            val selectDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                .format(Date(selectedDateInMillis))
+            fragmentWalkMateRequestBinding.textInputEditTextDate.setText(selectDate)
+        }
+        datePicker.show(parentFragmentManager, "tag")
+    }
+
+    private fun showTimePicker() {
+        val timePicker = MaterialTimePicker.Builder()
+            .setTitleText("시간 선택")
+            .setTimeFormat(TimeFormat.CLOCK_12H)
+            .build()
+        timePicker.addOnPositiveButtonClickListener {
+            val selectedTime = String.format("%02d:%02d", timePicker.hour, timePicker.minute)
+            fragmentWalkMateRequestBinding.textInputEditTextTime.setText(selectedTime)
+        }
+        timePicker.show(parentFragmentManager, "tag")
     }
 
     private fun isDateValid(): Boolean {
@@ -158,34 +186,6 @@ class WalkMateRequestFragment : Fragment() {
                 return true
             }
         }
-    }
-
-    private fun showDatePicker() {
-        // DatePicker 기본값 오늘로 설정
-        val datePicker = MaterialDatePicker.Builder.datePicker()
-            .setTitleText("날짜 선택")
-            .setSelection(MaterialDatePicker.todayInUtcMilliseconds())
-            .build()
-
-        datePicker.addOnPositiveButtonClickListener { selectedDateInMillis ->
-            selectedDate = selectedDateInMillis
-            val selectDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-                .format(Date(selectedDateInMillis))
-            fragmentWalkMateRequestBinding.textInputEditTextDate.setText(selectDate)
-        }
-        datePicker.show(parentFragmentManager, "tag")
-    }
-
-    private fun showTimePicker() {
-        val timePicker = MaterialTimePicker.Builder()
-            .setTitleText("시간 선택")
-            .setTimeFormat(TimeFormat.CLOCK_12H)
-            .build()
-        timePicker.addOnPositiveButtonClickListener {
-            val selectedTime = String.format("%02d:%02d", timePicker.hour, timePicker.minute)
-            fragmentWalkMateRequestBinding.textInputEditTextTime.setText(selectedTime)
-        }
-        timePicker.show(parentFragmentManager, "tag")
     }
 
     // 1. 산책 매칭 데이터 저장

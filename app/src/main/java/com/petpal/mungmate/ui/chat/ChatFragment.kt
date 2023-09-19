@@ -94,7 +94,7 @@ class ChatFragment : Fragment() {
                     val chatRoom = ChatRoom(
                         currentUserId,
                         receiverId,
-                        "안녕하세요!",
+                        null,
                         Timestamp.now(),
                         false,
                         true,
