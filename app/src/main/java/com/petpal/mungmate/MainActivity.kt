@@ -7,18 +7,17 @@ import androidx.core.os.bundleOf
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
+import androidx.navigation.NavOptions
 import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.navOptions
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
 import com.kakao.sdk.common.KakaoSdk
 import com.petpal.mungmate.databinding.ActivityMainBinding
 import com.petpal.mungmate.ui.user.UserViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 
 
@@ -66,12 +65,27 @@ class MainActivity : AppCompatActivity() {
                             "환영합니다. ${currentUser.displayName}",
                             Snackbar.LENGTH_SHORT
                         ).show()
-                        navigate(R.id.mainFragment)
+
+                        //mainFragment로 이동하기 전, userStartFragment까지 다 삭제하기
+                        navController.navigate(
+                            R.id.mainFragment,
+                            null,
+                            navOptions {
+                                popUpTo(R.id.userStartFragment) { inclusive = true }
+                            }
+                        )
+
                     } else {
 
                         Log.d(TAG, "사용자 정보 없음")
                         //로그인은 했지만 정보가 없는 경우
-                        navigate(R.id.userInfoFragment, bundleOf("isRegister" to true))
+                        navController.navigate(
+                            R.id.userInfoFragment,
+                            bundleOf("isRegister" to true),
+                            navOptions {
+                                popUpTo(R.id.userStartFragment) { inclusive = true }
+                            }
+                        )
                     }
                 }
             }
@@ -83,8 +97,12 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    fun navigate(id: Int, arg: Bundle? = null) {
-        navController.navigate(id, arg)
+    fun navigate(id: Int, arg: Bundle? = null, navOptions: NavOptions? = null) {
+        navController.navigate(id, arg, navOptions)
+    }
+
+    fun popBackStack(fragment: Int, b: Boolean) {
+        navController.popBackStack(fragment, b)
     }
 
     companion object {

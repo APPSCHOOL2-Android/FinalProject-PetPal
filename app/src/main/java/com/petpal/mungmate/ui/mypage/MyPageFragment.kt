@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import androidx.navigation.navOptions
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.petpal.mungmate.MainActivity
@@ -75,8 +76,12 @@ class MyPageFragment : Fragment() {
             //로그아웃
                 auth.signOut()
                 Snackbar.make(requireView(),"로그아웃 되었습니다.",Snackbar.LENGTH_SHORT).show()
-                //로그인 화면으로 이동
-                mainActivity.navigate(R.id.userStartFragment)
+                //로그인 화면으로 이동 -> 백스택 clear
+
+                mainActivity.popBackStack(R.id.mainFragment, true)
+                mainActivity.navigate(
+                    R.id.userStartFragment
+                )
             }
         }
         return fragmentMyPageBinding.root

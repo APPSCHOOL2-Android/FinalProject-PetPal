@@ -2,7 +2,6 @@ package com.petpal.mungmate.ui.user
 
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,10 +10,9 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.navOptions
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.snackbar.Snackbar
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
 import com.petpal.mungmate.MainActivity
 import com.petpal.mungmate.R
 import com.petpal.mungmate.databinding.FragmentUserInfoBinding
@@ -46,7 +44,7 @@ class UserInfoFragment : Fragment() {
 
         userViewModel = ViewModelProvider(requireActivity())[UserViewModel::class.java]
 
-        Snackbar.make(requireView(), "사용자 정보를 입력해주세요",Snackbar.LENGTH_SHORT).show()
+        Snackbar.make(requireView(), "사용자 정보를 입력해주세요", Snackbar.LENGTH_SHORT).show()
 
         // StateFlow를 사용하여 사용자 데이터 관찰
         viewLifecycleOwner.lifecycleScope.launch {
