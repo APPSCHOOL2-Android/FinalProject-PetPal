@@ -108,7 +108,6 @@ class CommunityAdapter(
             )
         }
 
-
         holder.communityPostTitle.text = post.postTitle
         holder.communityUserNickName.text = post.userNickName
         holder.communityUserPlace.text = post.userPlace

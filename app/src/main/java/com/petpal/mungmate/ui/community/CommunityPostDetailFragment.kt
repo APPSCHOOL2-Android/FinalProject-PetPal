@@ -47,7 +47,9 @@ class CommunityPostDetailFragment : Fragment() {
     lateinit var postGetId: String
     private lateinit var skeleton: Skeleton
     private val coroutineScope = CoroutineScope(Dispatchers.Main)
+
     private val postCommentList: MutableList<Comment> = mutableListOf()
+
     private lateinit var communityDetailCommentAdapter: CommunityDetailCommentAdapter
     private lateinit var commentViewModel: CommentViewModel
     override fun onCreateView(
@@ -59,13 +61,15 @@ class CommunityPostDetailFragment : Fragment() {
         commentViewModel = ViewModelProvider(requireActivity())[CommentViewModel::class.java]
 
         communityPostDetailBinding.run {
-            toolbar()
-            lottie()
+
             val args: CommunityPostDetailFragmentArgs by navArgs()
             val postid = args.position
             postGetId = postid
+            toolbar()
+            lottie()
             getDataFirebasFirestore()
             communityDetailRecyclerView()
+
             commentViewModel.postCommentList.observe(viewLifecycleOwner) { commentList ->
                 communityDetailCommentAdapter.updateData(commentList)
             }
@@ -114,7 +118,9 @@ class CommunityPostDetailFragment : Fragment() {
                             coroutineScope.launch(Dispatchers.IO) {
                                 val documentSnapshot = getFirestoreData(postGetId)
                                 withContext(Dispatchers.Main) {
+
                                     updateComment(documentSnapshot)
+
                                     communityPostDetailCommentTextInputEditText.text?.clear()
                                     val imm = requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
                                     imm.hideSoftInputFromWindow(view?.windowToken, 0)
@@ -137,8 +143,6 @@ class CommunityPostDetailFragment : Fragment() {
             skeleton = communityPostDetailBinding.skeletonLayout.apply { showSkeleton() }
             val documentSnapshot = getFirestoreData(postGetId)
             withContext(Dispatchers.Main) {
-
-
                 updateUI(documentSnapshot)
                 skeleton.showOriginal()
             }
@@ -292,8 +296,6 @@ class CommunityPostDetailFragment : Fragment() {
                     )
                     postCommentList.add(comment)
                 }
-
-
                 communityDetailCommentAdapter.updateData(postCommentList)
                 Log.d("성공", postCommentList.toString())
             } else {
@@ -387,18 +389,18 @@ class CommunityPostDetailFragment : Fragment() {
                 "0"
             )
 
-            val addCommentList: MutableList<Comment> =
-                commentViewModel.postCommentList.value ?: mutableListOf()
-            addCommentList.add(newComment) // 댓글 추가
-            postCommentList.addAll(addCommentList)
+            val newPostCommentList: MutableList<Comment> = mutableListOf()
+            newPostCommentList.addAll(postCommentList)
+            newPostCommentList.add(newComment)
 
             val documentRef = db.collection("Post").document(postID!!)
             documentRef.get().addOnSuccessListener { documentSnapshot ->
                 if (documentSnapshot.exists()) {
-                    documentRef.update("postComment", postCommentList)
+                    documentRef.update("postComment", newPostCommentList)
                         .addOnSuccessListener {
-                            commentViewModel.setCommentList(postCommentList)
-
+                            postCommentList.clear()
+                            postCommentList.addAll(newPostCommentList)
+                            commentViewModel.setCommentList(newPostCommentList)
                         }
                         .addOnFailureListener { e ->
                             Snackbar.make(requireView(), "실패", Snackbar.LENGTH_SHORT).show()
