@@ -90,6 +90,19 @@ class ChatRepository {
         return userReportsCollection.add(userReport)
     }
 
+    // matches 컬렉션 내 문서의 특정 필드 업데이트
+    suspend fun updateFieldInMatchDocument(matchKey: String, fieldName: String, updateValue: Any) {
+        val matchDocumentRef = db.collection(MATCHES_NAME).document(matchKey)
+        val updateData = hashMapOf<String, Any>()
+        updateData[fieldName] = updateValue
+
+        try {
+            matchDocumentRef.update(updateData).await()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
 
     // 채팅방의 모든 메시지 로드
 //    fun getSavedMessages(chatRoomId: String): CollectionReference {

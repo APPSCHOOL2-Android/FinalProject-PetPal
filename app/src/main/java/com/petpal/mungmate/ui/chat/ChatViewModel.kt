@@ -72,6 +72,13 @@ class ChatViewModel: ViewModel() {
         }
     }
 
+    // 매칭 데이터 업데이트
+    fun updateFieldInMatchDocument(matchKey: String, fieldName: String, updatedValue: Any) {
+        viewModelScope.launch(Dispatchers.IO) {
+            chatRepository.updateFieldInMatchDocument(matchKey, fieldName, updatedValue)
+        }
+    }
+
     // 채팅방 Document의 모든 메시지 로드
 //    fun getSavedMessages(chatRoomId: String): MutableLiveData<List<Message>> {
 //        chatRepository.getSavedMessages(chatRoomId).addSnapshotListener { value, error ->

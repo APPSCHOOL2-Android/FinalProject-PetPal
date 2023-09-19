@@ -17,6 +17,7 @@ import com.petpal.mungmate.R
 import com.petpal.mungmate.databinding.FragmentChatRoomBinding
 import com.petpal.mungmate.model.Message
 import com.petpal.mungmate.model.MessageType
+import com.petpal.mungmate.model.MessageVisibility
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -134,7 +135,7 @@ class ChatRoomFragment : Fragment() {
             Timestamp.now(),
             null,
             MessageType.TEXT.code,
-            null
+            MessageVisibility.ALL.code
         )
         chatViewModel.saveMessage(chatRoomId, message)
     }
@@ -147,7 +148,7 @@ class ChatRoomFragment : Fragment() {
             Timestamp.now(),
             null,
             MessageType.TEXT.code,
-            null
+            MessageVisibility.ALL.code
         )
         chatViewModel.saveMessage(chatRoomId, message)
     }

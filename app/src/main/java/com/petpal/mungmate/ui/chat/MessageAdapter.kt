@@ -11,12 +11,12 @@ import com.petpal.mungmate.databinding.RowChatWalkMateAcceptBinding
 import com.petpal.mungmate.databinding.RowChatWalkMateRejectBinding
 import com.petpal.mungmate.databinding.RowChatWalkMateRequestBinding
 import com.petpal.mungmate.model.Match
+import com.petpal.mungmate.model.MatchStatus
 import com.petpal.mungmate.model.Message
 import com.petpal.mungmate.model.MessageType
 import java.lang.IllegalArgumentException
 import java.text.SimpleDateFormat
 import java.util.Locale
-import kotlin.concurrent.fixedRateTimer
 
 // Recyceler.ViewHolder를 상속받는 자식 클래스 ViewHolder들로 이루어진 리스트를 하나의 RecyclerView로 표시
 class MessageAdapter(private val chatViewModel: ChatViewModel): RecyclerView.Adapter<RecyclerView.ViewHolder>() {
@@ -54,18 +54,34 @@ class MessageAdapter(private val chatViewModel: ChatViewModel): RecyclerView.Ada
             }
             VIEW_TYPE_DATE -> {
                 val rowBinding = RowChatDateBinding.inflate(LayoutInflater.from(parent.context))
+                rowBinding.root.layoutParams = ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT
+                )
                 DateViewHolder(rowBinding)
             }
             VIEW_TYPE_WALK_MATE_REQUEST -> {
                 val rowBinding = RowChatWalkMateRequestBinding.inflate(LayoutInflater.from(parent.context))
+                rowBinding.root.layoutParams = ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT
+                )
                 WalkMateRequestViewHolder(rowBinding)
             }
             VIEW_TYPE_WALK_MATE_ACCEPT -> {
                 val rowBinding = RowChatWalkMateAcceptBinding.inflate(LayoutInflater.from(parent.context))
+                rowBinding.root.layoutParams = ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT
+                )
                 WalkMateAcceptViewHolder(rowBinding)
             }
             VIEW_TYPE_WALK_MATE_REJECT -> {
                 val rowBinding = RowChatWalkMateRejectBinding.inflate(LayoutInflater.from(parent.context))
+                rowBinding.root.layoutParams = ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT
+                )
                 WalkMateRejectViewHolder(rowBinding)
             }
             else -> throw IllegalArgumentException("Unkown view type")
@@ -163,10 +179,14 @@ class MessageAdapter(private val chatViewModel: ChatViewModel): RecyclerView.Ada
                 }
 
                 buttonAccept.setOnClickListener {
-                    // TODO 수락 메시지 저장, match 상태 변경
+                    // TODO 수락 메시지 저장, 해당 메시지 visibility 안보이게 변경
+                    // match 상태 변경
+                    chatViewModel.updateFieldInMatchDocument(matchKey, "status", MatchStatus.ACCEPTED.code)
                 }
                 buttonReject.setOnClickListener {
-                    // TODO 거절 메시지 저장, match 상태 변경
+                    // TODO 거절 메시지 저장 -> 거절의 경우에는 Match 자체를 삭제?
+                    // match 상태 변경
+                    chatViewModel.updateFieldInMatchDocument(matchKey, "status", MatchStatus.REJECTED.code)
                 }
             }
         }
@@ -175,10 +195,13 @@ class MessageAdapter(private val chatViewModel: ChatViewModel): RecyclerView.Ada
     // 산책 수락
     inner class WalkMateAcceptViewHolder(private val rowChatWalkMateAcceptBinding: RowChatWalkMateAcceptBinding): RecyclerView.ViewHolder(rowChatWalkMateAcceptBinding.root) {
         fun bind(message: Message) {
-//            rowChatWalkMateAcceptBinding.run {
+            rowChatWalkMateAcceptBinding.run {
+                // Match 데이터 읽어오기
 //                textViewAcceptDate.text =
-//                    textviewAcceptMessage.text = ""
-//            }
+//                textviewAcceptMessage.text = "${} 님과의 약속이 설정되었습니다."
+
+
+            }
         }
     }
 
