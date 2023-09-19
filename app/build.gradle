@@ -124,4 +124,12 @@ dependencies {
 
 
 
+    // SimpleRatingBar
+    implementation 'com.github.ome450901:SimpleRatingBar:1.5.1'
+
+
+
+    // swiperefreshlayout
+    implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
+    
 }

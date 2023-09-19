@@ -4,6 +4,7 @@
 
     <item
         android:id="@+id/item_modify"
+        app:showAsAction="always"
         android:title="@string/modify_complete" />
 
 

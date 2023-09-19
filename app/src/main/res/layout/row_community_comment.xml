@@ -102,7 +102,7 @@
 
             <com.airbnb.lottie.LottieAnimationView
                 android:id="@+id/communityCommentFavoriteLottie"
-                android:layout_width="20dp"
+                android:layout_width="30dp"
                 android:layout_height="0dp"
                 app:layout_constraintBottom_toBottomOf="@id/communityCommentFavoriteTextView"
                 app:layout_constraintStart_toStartOf="parent"
@@ -113,14 +113,26 @@
                 android:id="@+id/communityCommentFavoriteTextView"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:layout_gravity="center"
-                android:text="좋아요 7"
-                android:layout_marginStart="@dimen/common_small_margin"
+                android:gravity="center"
+                android:text="좋아요"
                 android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@id/communityCommentFavoriteLottie"
                 app:layout_constraintTop_toTopOf="parent" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/communityCommentFavoriteCounter"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="0"
+                android:gravity="center"
+                android:textStyle="bold"
+                android:layout_marginStart="@dimen/common_small_margin"
+                android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1"
+                app:layout_constraintBottom_toBottomOf="@id/communityCommentFavoriteTextView"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/communityCommentFavoriteTextView"
+                app:layout_constraintTop_toTopOf="@id/communityCommentFavoriteTextView" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -136,6 +148,16 @@
             android:text="@string/comment"
             android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1" />
 
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/communityCommentCommentCounter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginStart="@dimen/common_small_margin"
+            android:text="0"
+            android:textStyle="bold"
+            android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1" />
     </LinearLayout>
 
     <com.google.android.material.divider.MaterialDivider
