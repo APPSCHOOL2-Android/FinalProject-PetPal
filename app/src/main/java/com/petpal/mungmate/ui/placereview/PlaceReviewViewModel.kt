@@ -10,7 +10,7 @@ import kotlinx.coroutines.launch
 
 class PlaceReviewViewModel(private val repository: PlaceReviewRepository) : ViewModel() {
 
-    // MutableStateFlow를 사용하여 리뷰를 관찰하고 저장합니다.
+    // MutableStateFlow로 reviews 관찰
     private val _reviews = MutableStateFlow<List<Review>>(emptyList())
     val reviews: StateFlow<List<Review>> = _reviews.asStateFlow()
 

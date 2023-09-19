@@ -1,10 +1,11 @@
 package com.petpal.mungmate.ui.walk
 
 import android.Manifest
+import android.app.Dialog
 import android.content.pm.PackageManager
 import android.graphics.Color
+import android.graphics.drawable.Drawable
 import android.location.Location
-import android.media.Rating
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -16,7 +17,6 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.RatingBar
 import android.widget.TextView
-import androidx.appcompat.app.AlertDialog
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.app.ActivityCompat
 import androidx.core.view.GravityCompat
@@ -27,6 +27,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.DataSource
+import com.bumptech.glide.load.engine.GlideException
+import com.bumptech.glide.request.RequestListener
+import com.bumptech.glide.request.target.Target
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -57,6 +61,9 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
     private var latestReviews: List<Review>? = null
     private val currentMarkers: MutableList<MapPOIItem> = mutableListOf()
     private val avgRatingBundle = Bundle()
+    private lateinit var initialBottomSheetView: View
+    private lateinit var bottomSheetDialog: BottomSheetDialog
+
     companion object {
         const val REQUEST_LOCATION_PERMISSION = 1
 
@@ -68,9 +75,14 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
         savedInstanceState: Bundle?
     ): View? {
 
+
         mainActivity = activity as MainActivity
         fragmentWalkBinding = FragmentWalkBinding.inflate(inflater)
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(mainActivity)
+
+        initialBottomSheetView = inflater.inflate(R.layout.row_walk_bottom_sheet_place, null)
+        bottomSheetDialog = BottomSheetDialog(requireContext())
+        bottomSheetDialog.setContentView(initialBottomSheetView)
 
         setupMapView()
         setupButtonListeners()
@@ -119,9 +131,11 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
                 }
                 R.id.distance3 -> {
                     //3km 원래 기본 3km임
+                    getLastLocation()
                 }
             }
             fragmentWalkBinding.drawerLayout.closeDrawer(GravityCompat.END)
+            showSnackbar("필터가 적용되었습니다.")
 
         }
 
@@ -178,6 +192,7 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
         }
     }
 
+    //메인화면 진입시 권한 요청/LastKnownLocation의 값에 따라 검색/마킹
     private fun requestLocationPermissionIfNeeded() {
         if (ActivityCompat.checkSelfPermission(
                 requireContext(),
@@ -200,6 +215,7 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
         }
     }
 
+    //내 현재 위치에서 검색/마킹
     private fun getCurrentLocation() {
         if (checkPermission(Manifest.permission.ACCESS_FINE_LOCATION)
         ) {
@@ -218,6 +234,7 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
         return ActivityCompat.checkSelfPermission(requireContext(), permission) == PackageManager.PERMISSION_GRANTED
     }
 
+    //LastKnownLocation의 위치에서 검색 마킹(원래 있던 마커들 지우고)
     private fun getLastLocation() {
         if (checkPermission(Manifest.permission.ACCESS_FINE_LOCATION)
         ) {
@@ -241,6 +258,7 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
             }
         }
     }
+    //거리 필터의 값에 따라 ㄱ
     private fun getLastLocationFilter(radius:Int) {
         if (checkPermission(Manifest.permission.ACCESS_FINE_LOCATION)
         ) {
@@ -291,22 +309,20 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
     private fun showSnackbar(message: String) {
         Snackbar.make(fragmentWalkBinding.root, message, Snackbar.LENGTH_LONG).show()
     }
-
+    //맵의 마커 클릭시
     override fun onPOIItemSelected(p0: net.daum.mf.map.api.MapView?, p1: MapPOIItem?) {
 
         val selectedPlace = kakaoSearchResponse.documents.find { it.id.hashCode() == p1?.tag }
         val detailCardView = layoutInflater.inflate(R.layout.row_place_review, null)
-        val initialBottomSheetView = layoutInflater.inflate(R.layout.row_walk_bottom_sheet_place, null)
-        val bottomSheetDialog = BottomSheetDialog(requireContext())
-        bottomSheetDialog.setContentView(initialBottomSheetView)
         val detailDialog = BottomSheetDialog(requireActivity())
         val detailRating=detailCardView.findViewById<RatingBar>(R.id.placeReviewDetailRatingBar)
         val detailUserName=detailCardView.findViewById<TextView>(R.id.textViewPlaceReviewDetailUserName)
         val detailDate=detailCardView.findViewById<TextView>(R.id.textViewPlaceReviewDetailDate)
         val detailContent=detailCardView.findViewById<TextView>(R.id.textView4)
         val detailImage=detailCardView.findViewById<ImageView>(R.id.imageView11)
-
+        val buttonsubmit = initialBottomSheetView.findViewById<Button>(R.id.buttonSubmitReview)
         val placeId = selectedPlace?.id
+        //클릭한 맵의 placeId로 메서드 실행
         placeId?.let {
             viewModel.fetchFavoriteCount(it)
             viewModel.fetchReviewCount(it)
@@ -314,7 +330,9 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
             viewModel.fetchPlaceInfoFromFirestore(it)
             viewModel.fetchIsPlaceFavoritedByUser(it, "userid")
             viewModel.fetchAverageRatingForPlace(it)
+            viewModel.onDataPrepared()
         }
+        //바텀시트의 좋아요 상태에 따라 하트 이미지 변경
         viewModel.isPlaceFavorited.observe(viewLifecycleOwner) { isPlaceFavorited ->
                 isFavorited = isPlaceFavorited
             if(isFavorited) {
@@ -327,7 +345,7 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
 
 
         }
-
+        //place의 리뷰 별점 평균 표기
         viewModel.averageRatingForPlace.observe(viewLifecycleOwner) { avgRating ->
             val roundedAvgRating = String.format("%.1f", avgRating).toFloat()
             initialBottomSheetView.findViewById<RatingBar>(R.id.placeRatingBar).rating=avgRating
@@ -337,6 +355,7 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
             Log.d("avgRating",avgRating.toString())
         }
 
+        //favorite 서브컬렉션의 문서 개수 받아와서 실시간 반영
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.favoriteCount.collect { count ->
                 val favoriteCountTextView = initialBottomSheetView.findViewById<TextView>(R.id.textViewPlaceFavoriteCount)
@@ -344,21 +363,42 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
             }
         }
 
-
+        //place 정보 받아와서 db에 있는 place인지 확인 후 분기로 이름 입력
         viewModel.placeInfo.observe(viewLifecycleOwner) { placeInfo ->
             val textViewPlaceName = initialBottomSheetView.findViewById<TextView>(R.id.textView)
+            val imageViewPlace = initialBottomSheetView.findViewById<ImageView>(R.id.ImageViewBottomRecommendPlace)
             textViewPlaceName.text = placeInfo?.get("name") as? String ?: "${selectedPlace?.place_name}"
+            val imageUrl = placeInfo?.get("imageRes") as? String
 
+            if (imageUrl != null) {
+                Glide.with(imageViewPlace.context)
+                    .load(imageUrl)
+                    .placeholder(R.drawable.default_profile_image)
+                    .listener(object : RequestListener<Drawable> {
+                        override fun onLoadFailed(e: GlideException?, model: Any?, target: Target<Drawable>?, isFirstResource: Boolean): Boolean {
+                            return false
+                        }
 
+                        override fun onResourceReady(resource: Drawable?, model: Any?, target: Target<Drawable>?, dataSource: DataSource?, isFirstResource: Boolean): Boolean {
+                            bottomSheetDialog.show()
+                            return false
+                        }
+                    })
+                    .into(imageViewPlace)
+            } else {
+                imageViewPlace.setImageResource(R.drawable.default_profile_image)
+                bottomSheetDialog.show()
+            }
         }
 
-
+        //리뷰 개수 받아와서 출력
         viewModel.reviewCount.observe(viewLifecycleOwner) { reviewCount ->
             val reviewCountTextView =
                 initialBottomSheetView.findViewById<TextView>(R.id.textViewPlaceReviewCount)
             reviewCountTextView.text = "${reviewCount}개의 리뷰가 있어요"
         }
 
+        //최신순 리뷰 두개 받아와서 바텀시트에 1,2 출력
         viewModel.latestReviews.observe(viewLifecycleOwner) { reviews ->
             latestReviews=reviews
             val placeuserRating1 = initialBottomSheetView.findViewById<RatingBar>(R.id.placeUserRatingBar1)
@@ -401,12 +441,14 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
         }
 
 
-        val buttonsubmit = initialBottomSheetView.findViewById<Button>(R.id.buttonSubmitReview)
 
-        Handler(Looper.getMainLooper()).postDelayed({
-            bottomSheetDialog.show()
-        }, 400)  // 0.3초 딜레이
+        //db에서 받아와서 데이터 입력 전에 바텀시트가 올라오는거 막는 임시조치
+//        Handler(Looper.getMainLooper()).postDelayed({
+//            bottomSheetDialog.show()
+//        }, 400)  // 0.4초 딜레이
 
+
+        //바텀시트 끌어 올렸을때 상세 리뷰 페이지로 이동
         bottomSheetDialog.behavior.addBottomSheetCallback(object :
             BottomSheetBehavior.BottomSheetCallback() {
             override fun onStateChanged(bottomSheet: View, newState: Int) {
@@ -429,16 +471,9 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
             override fun onSlide(bottomSheet: View, slideOffset: Float) {}
         })
 
+        //좋아요 버튼 눌렀을 때  userid로 favorite 서브 컬렉션에 문서 추가 / isFavorited 상태에 따라 이미지 교체,스넥바,count 출력
         initialBottomSheetView.findViewById<ImageView>(R.id.imageViewFavoirte).apply {
-            val place = Place(
-                selectedPlace!!.id,
-                selectedPlace.place_name,
-                selectedPlace.category_group_name,
-                (selectedPlace.x).toString(),
-                (selectedPlace.y).toString(),
-                selectedPlace.phone,
-                selectedPlace.road_address_name
-            )
+            val place = Place(selectedPlace!!.id, selectedPlace.place_name, selectedPlace.category_group_name, (selectedPlace.x).toString(), (selectedPlace.y).toString(), selectedPlace.phone, selectedPlace.road_address_name)
             setOnClickListener {
                 if (!isFavorited) {
                     isFavorited = true
@@ -465,7 +500,7 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
 
             }
         }
-
+        //리뷰 입력 버튼 
         buttonsubmit.setOnClickListener {
             val bundle = Bundle()
             bundle.putString("place_name", selectedPlace?.place_name)
@@ -479,23 +514,44 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
             mainActivity.navigate(R.id.action_mainFragment_to_writePlaceReviewFragment, bundle)
             bottomSheetDialog.dismiss()
         }
-
+        //최근리뷰 1 누르면 상세 카드뷰 출력
         initialBottomSheetView.findViewById<TextView>(R.id.placeUserReview1).setOnClickListener {
+            detailDialog.setContentView(detailCardView)
             detailRating.rating=latestReviews!![0].rating!!
             detailUserName.text=latestReviews!![0].userid
             detailDate.text=latestReviews!![0].date
             detailContent.text=latestReviews!![0].comment
-            latestReviews!![1].imageRes?.let { imageUrl ->
+            latestReviews!![0].imageRes?.let { imageUrl ->
                 Glide.with(detailImage.context)
                     .load(imageUrl)
+                    .listener(object : RequestListener<Drawable>{
+                        override fun onLoadFailed(
+                            e: GlideException?,
+                            model: Any?,
+                            target: Target<Drawable>?,
+                            isFirstResource: Boolean
+                        ): Boolean {
+                            return false
+                        }
+
+                        override fun onResourceReady(
+                            resource: Drawable?,
+                            model: Any?,
+                            target: Target<Drawable>?,
+                            dataSource: DataSource?,
+                            isFirstResource: Boolean
+                        ): Boolean {
+                            detailDialog.show()
+                            return false
+                        }
+                    })
                     .into(detailImage)
             }
 
-            detailDialog.setContentView(detailCardView)
-            detailDialog.show()
+
 
         }
-
+        //최근리뷰 2 누르면 상세 카드뷰 출력
         initialBottomSheetView.findViewById<TextView>(R.id.placeUserReview2).setOnClickListener {
 
             detailRating.rating=latestReviews!![1].rating!!
@@ -505,12 +561,33 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
             latestReviews!![1].imageRes?.let { imageUrl ->
                 Glide.with(detailImage.context)
                     .load(imageUrl)
+                    .listener(object : RequestListener<Drawable>{
+                        override fun onLoadFailed(
+                            e: GlideException?,
+                            model: Any?,
+                            target: Target<Drawable>?,
+                            isFirstResource: Boolean
+                        ): Boolean {
+                            detailDialog.show()
+                            return false
+                        }
+
+                        override fun onResourceReady(
+                            resource: Drawable?,
+                            model: Any?,
+                            target: Target<Drawable>?,
+                            dataSource: DataSource?,
+                            isFirstResource: Boolean
+                        ): Boolean {
+                            detailDialog.show()
+                            return false
+                        }
+                    })
                     .into(detailImage)
             }
 
-            detailDialog.show()
         }
-
+        //상세리뷰 페이지
         initialBottomSheetView.findViewById<Chip>(R.id.chipViewAllReviews).setOnClickListener {
             avgRatingBundle.putString("place_name", selectedPlace?.place_name)
             avgRatingBundle.putString("place_id", selectedPlace?.id)
@@ -523,6 +600,7 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
         }
     }
 
+    //맵 드래그 -> 맵 중심의 좌표 이동하면 실행되는 메서드
     @Deprecated("Deprecated in Java")
     override fun onMapViewCenterPointMoved(p0: MapView?, p1: MapPoint?) {
         // 새로운 중심에서 검색
@@ -534,7 +612,7 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
             Log.d("lastlocation", (LastKnownLocation.latitude).toString())
         }
     }
-    //줌 아웃 제한
+    //맵의 줌 아웃 제한
     override fun onMapViewZoomLevelChanged(p0: MapView?, zoomLevel: Int) {
         val maxZoomLevel = 3
         if (zoomLevel > maxZoomLevel) {
@@ -554,7 +632,7 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
     override fun onCalloutBalloonOfPOIItemTouched(p0: MapView?, p1: MapPOIItem?) {}
     override fun onCalloutBalloonOfPOIItemTouched(p0: MapView?, p1: MapPOIItem?, p2: MapPOIItem.CalloutBalloonButtonType?) {}
     override fun onDraggablePOIItemMoved(p0: MapView?, p1: MapPOIItem?, p2: MapPoint?) {}
-    override fun onMapViewInitialized(p0: MapView?) {}
+    override fun onMapViewInitialized(p0: MapView?) { p0?.setZoomLevel(2, true)}
     override fun onResume() {
         super.onResume()
         requestLocationPermissionIfNeeded()

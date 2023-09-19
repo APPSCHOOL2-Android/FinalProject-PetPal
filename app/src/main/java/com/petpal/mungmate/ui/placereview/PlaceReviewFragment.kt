@@ -46,15 +46,12 @@ class PlaceReviewFragment : Fragment() {
 
         fragmentPlaceReviewBinding = FragmentPlaceReviewBinding.inflate(layoutInflater)
 
-        // Initialize the adapter and set to the RecyclerView
         reviewAdapter = ReviewAdapter(emptyList())
         fragmentPlaceReviewBinding.reviewsRecyclerView.adapter = reviewAdapter
         fragmentPlaceReviewBinding.reviewsRecyclerView.layoutManager = LinearLayoutManager(requireContext())
 
 
-        if (avgRating != null) {
-            fragmentPlaceReviewBinding.placeUserRatingBar1.rating=avgRating
-        }
+        if (avgRating != null) { fragmentPlaceReviewBinding.placeUserRatingBar1.rating=avgRating }
         fragmentPlaceReviewBinding.textViewPlaceReviewTitle.text = placeName
         fragmentPlaceReviewBinding.textView22.text = roadAddressName
         fragmentPlaceReviewBinding.textView25.text = phone

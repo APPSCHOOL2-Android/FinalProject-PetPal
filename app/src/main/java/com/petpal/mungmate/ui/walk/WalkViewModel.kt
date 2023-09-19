@@ -24,7 +24,7 @@ class WalkViewModel(private val repository: WalkRepository) : ViewModel() {
     val favoriteCount: StateFlow<Int?> = _favoriteCount
     val reviewsForPlace = MutableLiveData<List<Review>>()
     val averageRatingForPlace = MutableLiveData<Float>()
-
+    val showBottomSheet: MutableLiveData<Boolean> = MutableLiveData<Boolean>()
 
     fun searchPlacesByKeyword(latitude: Double, longitude: Double, query: String) {
         viewModelScope.launch {
@@ -59,6 +59,9 @@ class WalkViewModel(private val repository: WalkRepository) : ViewModel() {
                 isDataLoading.postValue(false)  // 데이터 로딩 완료
             }
         }
+    }
+    fun onDataPrepared() {
+        showBottomSheet.value = true
     }
     fun fetchAverageRatingForPlace(placeId: String) {
         viewModelScope.launch {
