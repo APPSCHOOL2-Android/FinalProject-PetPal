@@ -17,6 +17,7 @@ import android.widget.ImageView
 import android.widget.RatingBar
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
+import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.app.ActivityCompat
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
@@ -104,7 +105,24 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
         }
 
         fragmentWalkBinding.buttonFilterSubmit.setOnClickListener {
+            val isAnyFilterSelected = fragmentWalkBinding.filterDistanceGroup.checkedChipId != -1 || fragmentWalkBinding.filterUserGenderGroup.checkedChipId != -1 || fragmentWalkBinding.filterAgeRangeGroup.checkedChipId != -1 || fragmentWalkBinding.filterPetGenderGroup.checkedChipId != -1 || fragmentWalkBinding.filterPetPropensityGroup.checkedChipId != -1 || fragmentWalkBinding.filterNeuterStatusGroup.checkedChipId != -1
+            fragmentWalkBinding.chipMapFilter.isChecked = isAnyFilterSelected
+
+            when (fragmentWalkBinding.filterDistanceGroup.checkedChipId) {
+                R.id.distance1 -> {
+                    //1km 필터에 따른 기능 실행
+                    getLastLocationFilter(1000)
+                }
+                R.id.distance2 -> {
+                    //2km 필터에 따른 기능 실행
+                    getLastLocationFilter(2000)
+                }
+                R.id.distance3 -> {
+                    //3km 원래 기본 3km임
+                }
+            }
             fragmentWalkBinding.drawerLayout.closeDrawer(GravityCompat.END)
+
         }
 
         fragmentWalkBinding.buttonStopWalk.setOnClickListener {
@@ -223,6 +241,29 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
             }
         }
     }
+    private fun getLastLocationFilter(radius:Int) {
+        if (checkPermission(Manifest.permission.ACCESS_FINE_LOCATION)
+        ) {
+            LastKnownLocation.let {
+                LastKnownLocation.latitude?.let { it1 ->
+                    LastKnownLocation.longitude?.let { it2 ->
+                        viewModel.searchPlacesByKeywordFilter(it1, it2, "동물",radius)
+                    }
+                }
+                val mapPoint = LastKnownLocation.latitude?.let { it1 ->
+                    LastKnownLocation.longitude?.let { it2 ->
+                        MapPoint.mapPointWithGeoCoord(it1, it2)
+                    }
+                }
+                fragmentWalkBinding.mapView.setMapCenterPoint(mapPoint, true)
+
+                for (marker in currentMarkers) {
+                    fragmentWalkBinding.mapView.removePOIItem(marker)
+                }
+                currentMarkers.clear()
+            }
+        }
+    }
 
     //권한 핸들링
     //앱 초기 실행시 권한 부여 여부 결정 전에 위치를 받아올 수 없는 현상 핸들링
@@ -251,13 +292,6 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
         Snackbar.make(fragmentWalkBinding.root, message, Snackbar.LENGTH_LONG).show()
     }
 
-    override fun onCurrentLocationUpdate(mapView: net.daum.mf.map.api.MapView?, mapPoint: MapPoint?, v: Float) {}
-
-    override fun onCurrentLocationDeviceHeadingUpdate(p0: MapView?, p1: Float) {}
-
-    override fun onCurrentLocationUpdateFailed(p0: MapView?) {}
-
-    override fun onCurrentLocationUpdateCancelled(p0: MapView?) {}
     override fun onPOIItemSelected(p0: net.daum.mf.map.api.MapView?, p1: MapPOIItem?) {
 
         val selectedPlace = kakaoSearchResponse.documents.find { it.id.hashCode() == p1?.tag }
@@ -416,16 +450,8 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
                     setImageResource(R.drawable.empty_heart)
                     viewModel.removeFavorite(placeId!!, "userid")
                 }
-                // 좋아요 개수 반영 ?
-                val alertDialog = AlertDialog.Builder(context)
-                    .setTitle("멍메이트")
-                    .setMessage("반영되었습니다.")
-                    .setPositiveButton("확인") { dialog, which ->
-                        dialog.dismiss()
-                    }
-                    .create()
-
-                alertDialog.show()
+                val bottomplacelayout:CoordinatorLayout=initialBottomSheetView.findViewById(R.id.bottom_place_layout)
+                Snackbar.make(bottomplacelayout, "반영되었습니다.", Snackbar.LENGTH_SHORT).show()
 
                 viewModel.fetchFavoriteCount(placeId!!)
                 viewLifecycleOwner.lifecycleScope.launchWhenStarted {
@@ -497,27 +523,6 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
         }
     }
 
-    override fun onCalloutBalloonOfPOIItemTouched(p0: MapView?, p1: MapPOIItem?) {
-
-    }
-
-    override fun onCalloutBalloonOfPOIItemTouched(
-        p0: MapView?,
-        p1: MapPOIItem?,
-        p2: MapPOIItem.CalloutBalloonButtonType?
-    ) {
-
-    }
-
-    override fun onDraggablePOIItemMoved(p0: MapView?, p1: MapPOIItem?, p2: MapPoint?) {
-
-    }
-
-    override fun onMapViewInitialized(p0: MapView?) {
-
-    }
-
-
     @Deprecated("Deprecated in Java")
     override fun onMapViewCenterPointMoved(p0: MapView?, p1: MapPoint?) {
         // 새로운 중심에서 검색
@@ -529,43 +534,31 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
             Log.d("lastlocation", (LastKnownLocation.latitude).toString())
         }
     }
-
     //줌 아웃 제한
     override fun onMapViewZoomLevelChanged(p0: MapView?, zoomLevel: Int) {
-        val maxZoomLevel = 2
+        val maxZoomLevel = 3
         if (zoomLevel > maxZoomLevel) {
             p0?.setZoomLevel(maxZoomLevel, true)
         }
     }
-
-    override fun onMapViewSingleTapped(p0: MapView?, p1: MapPoint?) {
-
-    }
-
-    override fun onMapViewDoubleTapped(p0: MapView?, p1: MapPoint?) {
-
-    }
-
-    override fun onMapViewLongPressed(p0: MapView?, p1: MapPoint?) {
-
-    }
-
-    override fun onMapViewDragStarted(p0: MapView?, p1: MapPoint?) {
-
-    }
-
-    override fun onMapViewDragEnded(p0: MapView?, p1: MapPoint?) {
-
-    }
-
-    override fun onMapViewMoveFinished(p0: MapView?, p1: MapPoint?) {
-    }
-
+    override fun onMapViewSingleTapped(p0: MapView?, p1: MapPoint?) {}
+    override fun onMapViewDoubleTapped(p0: MapView?, p1: MapPoint?) {}
+    override fun onMapViewLongPressed(p0: MapView?, p1: MapPoint?) {}
+    override fun onMapViewDragStarted(p0: MapView?, p1: MapPoint?) {}
+    override fun onMapViewDragEnded(p0: MapView?, p1: MapPoint?) {}
+    override fun onMapViewMoveFinished(p0: MapView?, p1: MapPoint?) {}
+    override fun onCurrentLocationUpdate(mapView: net.daum.mf.map.api.MapView?, mapPoint: MapPoint?, v: Float) {}
+    override fun onCurrentLocationDeviceHeadingUpdate(p0: MapView?, p1: Float) {}
+    override fun onCurrentLocationUpdateFailed(p0: MapView?) {}
+    override fun onCurrentLocationUpdateCancelled(p0: MapView?) {}
+    override fun onCalloutBalloonOfPOIItemTouched(p0: MapView?, p1: MapPOIItem?) {}
+    override fun onCalloutBalloonOfPOIItemTouched(p0: MapView?, p1: MapPOIItem?, p2: MapPOIItem.CalloutBalloonButtonType?) {}
+    override fun onDraggablePOIItemMoved(p0: MapView?, p1: MapPOIItem?, p2: MapPoint?) {}
+    override fun onMapViewInitialized(p0: MapView?) {}
     override fun onResume() {
         super.onResume()
         requestLocationPermissionIfNeeded()
     }
-
 }
 
 

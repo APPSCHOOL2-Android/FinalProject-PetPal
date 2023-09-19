@@ -1,8 +1,10 @@
 package com.petpal.mungmate.ui.placereview
 
+
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
+import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
 import android.widget.Toast
@@ -10,6 +12,9 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import com.bumptech.glide.Glide
+import com.bumptech.glide.request.target.SimpleTarget
+import com.bumptech.glide.request.transition.Transition
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
@@ -18,10 +23,10 @@ import com.petpal.mungmate.R
 import com.petpal.mungmate.databinding.FragmentWritePlaceReviewBinding
 import com.petpal.mungmate.model.Place
 import com.petpal.mungmate.model.Review
+import java.io.ByteArrayOutputStream
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.UUID
-
 class WritePlaceReviewFragment : Fragment() {
 
     lateinit var fragmentWritePlaceReviewBinding: FragmentWritePlaceReviewBinding
@@ -99,21 +104,32 @@ class WritePlaceReviewFragment : Fragment() {
     private fun uploadImageToStorage(uri: Uri, onSuccess: (String) -> Unit) {
         showProgress()
 
-        val ref = storage.reference.child("reviews/${UUID.randomUUID()}.jpg")
-        ref.putFile(uri)
-            .addOnSuccessListener {
-                ref.downloadUrl.addOnSuccessListener {
-                    hideProgress()
-                    onSuccess(it.toString())
-                    showSnackbar("리뷰가 성공적으로 등록되었습니다.")
-                }
-            }
-            .addOnFailureListener {
-                fragmentWritePlaceReviewBinding.progressBar.visibility = View.GONE
-                Toast.makeText(context, "이미지 업로드 실패", Toast.LENGTH_SHORT).show()
-            }
-    }
+        Glide.with(this)
+            .asBitmap()
+            .load(uri)
+            .override(400, 400)
+            .into(object : SimpleTarget<Bitmap>() {
+                override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
+                    val byteArrayOutputStream = ByteArrayOutputStream()
+                    resource.compress(Bitmap.CompressFormat.JPEG, 80, byteArrayOutputStream)
+                    val byteArray = byteArrayOutputStream.toByteArray()
 
+                    val ref = storage.reference.child("reviews/${UUID.randomUUID()}.jpg")
+                    ref.putBytes(byteArray)
+                        .addOnSuccessListener {
+                            ref.downloadUrl.addOnSuccessListener {
+                                hideProgress()
+                                onSuccess(it.toString())
+                                showSnackbar("리뷰가 성공적으로 등록되었습니다.")
+                            }
+                        }
+                        .addOnFailureListener {
+                            fragmentWritePlaceReviewBinding.progressBar.visibility = View.GONE
+                            Toast.makeText(context, "이미지 업로드 실패", Toast.LENGTH_SHORT).show()
+                        }
+                }
+            })
+    }
     private fun showSnackbar(message: String) {
         Snackbar.make(fragmentWritePlaceReviewBinding.root, message, Snackbar.LENGTH_SHORT).show()
     }

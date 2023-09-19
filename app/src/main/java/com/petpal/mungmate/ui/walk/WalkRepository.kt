@@ -31,6 +31,9 @@ class WalkRepository {
     suspend fun searchPlacesByKeyword(latitude: Double, longitude: Double, query: String): KakaoSearchResponse {
         return apiService.searchPlacesByKeyword(latitude, longitude, query = query)
     }
+    suspend fun searchPlacesByKeywordFilter(latitude: Double, longitude: Double, query: String,radius:Int): KakaoSearchResponse {
+        return apiService.searchPlacesByKeyword(latitude, longitude, query = query, radius = radius)
+    }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     suspend fun getPlaceInfoFromFirestore(placeId: String): Map<String, Any?>? = suspendCoroutine { continuation ->

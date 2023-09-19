@@ -36,6 +36,16 @@ class WalkViewModel(private val repository: WalkRepository) : ViewModel() {
             }
         }
     }
+    fun searchPlacesByKeywordFilter(latitude: Double, longitude: Double, query: String,radius:Int) {
+        viewModelScope.launch {
+            try {
+                val results = repository.searchPlacesByKeywordFilter(latitude, longitude, query,radius)
+                searchResults.postValue(results)
+            } catch (e: Exception) {
+                errorMessage.postValue(e.localizedMessage ?: "Unknown error")
+            }
+        }
+    }
 
     fun fetchPlaceInfoFromFirestore(placeId: String) {
         viewModelScope.launch {
