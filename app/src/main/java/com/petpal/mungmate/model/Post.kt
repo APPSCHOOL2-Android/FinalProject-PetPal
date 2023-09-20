@@ -2,7 +2,7 @@ package com.petpal.mungmate.model
 
 data class Post(
     var postID: String? = null, //게시글 id
-    val authorUid: Long = 0,//작성자 id
+    val authorUid: String? = null,//작성자 id
     val userImage: String? = null,//유저 프로필 사진
     val userNickName: String? = null,//유저 닉네임
     val userPlace: String? = null,//유저 위치
@@ -18,7 +18,7 @@ data class Post(
 
 data class Comment(
     val commentId : String? = null,// 댓글 id
-    val commentUid: Long = 0,//댓글 작성자 id
+    val commentUid: String? = null,//댓글 작성자 id
     val commentNickName: String? = null,//댓글 작성자 닉네임
     val commentUserPlace: String? = null,
     val commentDateCreated: String? = null,//댓글 작성 날짜
