@@ -1,6 +1,7 @@
 package com.petpal.mungmate.ui.walk
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Dialog
 import android.content.pm.PackageManager
 import android.graphics.Color
@@ -9,6 +10,7 @@ import android.location.Location
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.text.format.DateUtils.formatElapsedTime
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -32,6 +34,9 @@ import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
 import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
@@ -51,6 +56,10 @@ import kotlinx.coroutines.launch
 import net.daum.mf.map.api.MapPOIItem
 import net.daum.mf.map.api.MapPoint
 import net.daum.mf.map.api.MapView
+import java.security.AccessController.checkPermission
+import java.text.SimpleDateFormat
+import java.util.Date
+
 class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListener, net.daum.mf.map.api.MapView.CurrentLocationEventListener, net.daum.mf.map.api.MapView.MapViewEventListener {
 
     private lateinit var fragmentWalkBinding: FragmentWalkBinding
@@ -69,6 +78,21 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
     private val auth = Firebase.auth
     private lateinit var userId:String
     private lateinit var userNickname:String
+    private var lastLocation: Location? = null
+    private var totalDistance = 0.0
+    private var elapsedTime = 0L
+    private var userLocationMarker: MapPOIItem? = null
+    private var startTimestamp: String ="0"
+    private val handler = Handler(Looper.getMainLooper())
+
+    val timerRunnable = object : Runnable {
+        override fun run() {
+            elapsedTime += 1
+            fragmentWalkBinding.textViewWalkTime.text = formatElapsedTime(elapsedTime)
+            handler.postDelayed(this, 1000)
+        }
+    }
+
     companion object {
         const val REQUEST_LOCATION_PERMISSION = 1
 
@@ -88,6 +112,7 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
         initialBottomSheetView = inflater.inflate(R.layout.row_walk_bottom_sheet_place, null)
         bottomSheetDialog = BottomSheetDialog(requireContext())
         bottomSheetDialog.setContentView(initialBottomSheetView)
+
 
         setupMapView()
         setupButtonListeners()
@@ -114,39 +139,48 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
         fragmentWalkBinding.mapView.setPOIItemEventListener(this)
         fragmentWalkBinding.mapView.setCurrentLocationEventListener(this)
         fragmentWalkBinding.mapView.setMapViewEventListener(this)
-
         requestLocationPermissionIfNeeded()
     }
 
     private fun setupButtonListeners() {
         fragmentWalkBinding.buttonWalk.setOnClickListener {
             toggleVisibility(fragmentWalkBinding.LinearLayoutOnWalk, fragmentWalkBinding.LinearLayoutOffWalk)
+            fragmentWalkBinding.mapView.removeAllPOIItems()
             fragmentWalkBinding.imageViewWalkToggle.setImageResource(R.drawable.dog_walk)
+            handler.post(timerRunnable)
+            startLocationUpdates()
+            startTimestamp = timestampToString(System.currentTimeMillis())
+            Log.d("infooooo",lastLocation.toString())
+
+
         }
 
         fragmentWalkBinding.chipMapFilter.setOnClickListener {
             fragmentWalkBinding.drawerLayout.setScrimColor(Color.parseColor("#FFFFFF"))
             fragmentWalkBinding.drawerLayout.openDrawer(GravityCompat.END)
+
         }
 
         fragmentWalkBinding.buttonFilterSubmit.setOnClickListener {
-            val isAnyFilterSelected = fragmentWalkBinding.filterDistanceGroup.checkedChipId != -1 || fragmentWalkBinding.filterUserGenderGroup.checkedChipId != -1 || fragmentWalkBinding.filterAgeRangeGroup.checkedChipId != -1 || fragmentWalkBinding.filterPetGenderGroup.checkedChipId != -1 || fragmentWalkBinding.filterPetPropensityGroup.checkedChipId != -1 || fragmentWalkBinding.filterNeuterStatusGroup.checkedChipId != -1
+            val isAnyFilterSelected =
+                fragmentWalkBinding.filterDistanceGroup.checkedChipId != -1 || fragmentWalkBinding.filterUserGenderGroup.checkedChipId != -1 || fragmentWalkBinding.filterAgeRangeGroup.checkedChipId != -1 || fragmentWalkBinding.filterPetGenderGroup.checkedChipId != -1 || fragmentWalkBinding.filterPetPropensityGroup.checkedChipId != -1 || fragmentWalkBinding.filterNeuterStatusGroup.checkedChipId != -1
             fragmentWalkBinding.chipMapFilter.isChecked = isAnyFilterSelected
+            //맵에 대한 필터가 아니지 않아??
+//            when (fragmentWalkBinding.filterDistanceGroup.checkedChipId) {
+//                R.id.distance1 -> {
+//                    //1km 필터에 따른 기능 실행
+//                    getLastLocationFilter(1000)
+//                }
+//                R.id.distance2 -> {
+//                    //2km 필터에 따른 기능 실행
+//                    getLastLocationFilter(2000)
+//                }
+//                R.id.distance3 -> {
+//                    //3km 원래 기본 3km임
+//                    getLastLocation()
+//                }
+//        }
 
-            when (fragmentWalkBinding.filterDistanceGroup.checkedChipId) {
-                R.id.distance1 -> {
-                    //1km 필터에 따른 기능 실행
-                    getLastLocationFilter(1000)
-                }
-                R.id.distance2 -> {
-                    //2km 필터에 따른 기능 실행
-                    getLastLocationFilter(2000)
-                }
-                R.id.distance3 -> {
-                    //3km 원래 기본 3km임
-                    getLastLocation()
-                }
-            }
             fragmentWalkBinding.drawerLayout.closeDrawer(GravityCompat.END)
             showSnackbar("필터가 적용되었습니다.")
 
@@ -155,6 +189,21 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
         fragmentWalkBinding.buttonStopWalk.setOnClickListener {
             toggleVisibility(fragmentWalkBinding.LinearLayoutOffWalk, fragmentWalkBinding.LinearLayoutOnWalk)
             fragmentWalkBinding.imageViewWalkToggle.setImageResource(R.drawable.dog_home)
+
+            val endTimestamp=timestampToString(System.currentTimeMillis())
+            val bundle=Bundle()
+            bundle.putString("walkRecorduid",userId)
+            bundle.putString("walkRecordDate",getCurrentDate())
+            bundle.putString("walkRecordStartTime",startTimestamp)
+            bundle.putString("walkRecordEndTime",endTimestamp)
+            bundle.putString("walkDuration",elapsedTime.toString())
+            bundle.putString("walkDistance",totalDistance.toString())
+            bundle.putString("walkMatchingId","idid")
+            stopLocationUpdates()
+            handler.removeCallbacks(timerRunnable)
+            elapsedTime = 0L
+            fragmentWalkBinding.textViewWalkTime.text = formatElapsedTime(elapsedTime)
+            mainActivity.navigate(R.id.action_mainFragment_to_WriteWalkReviewFragment,bundle)
         }
         fragmentWalkBinding.imageViewMylocation.setOnClickListener {
             getCurrentLocation()
@@ -162,7 +211,12 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
             LastKnownLocation.longitude= null
         }
     }
-
+    @SuppressLint("SimpleDateFormat")
+    fun timestampToString(timestamp: Long): String {
+        val date = Date(timestamp)
+        val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+        return formatter.format(date)
+    }
 
     private fun observeViewModel() {
 
@@ -243,9 +297,63 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
             }
         }
     }
+
     private fun checkPermission(permission: String): Boolean {
         return ActivityCompat.checkSelfPermission(requireContext(), permission) == PackageManager.PERMISSION_GRANTED
     }
+
+    private fun showUserLocationOnMap(location: Location) {
+        userLocationMarker?.let {
+            fragmentWalkBinding.mapView.removePOIItem(it)
+        }
+        userLocationMarker = MapPOIItem().apply {
+            itemName = "Current Location"
+            mapPoint = MapPoint.mapPointWithGeoCoord(location.latitude, location.longitude)
+            markerType = MapPOIItem.MarkerType.BluePin
+            //selectedMarkerType = MapPOIItem.MarkerType.RedPin
+        }
+        fragmentWalkBinding.mapView.addPOIItem(userLocationMarker)
+        fragmentWalkBinding.mapView.setMapCenterPointAndZoomLevel(MapPoint.mapPointWithGeoCoord(location.latitude, location.longitude), 1, true)
+    }
+
+    private val locationCallback = object : LocationCallback() {
+        override fun onLocationResult(p0: LocationResult) {
+            p0  ?: return
+            for (location in p0.locations) {
+                // 정확도 체크
+                if (location.accuracy <= 3) {
+                    lastLocation?.let {
+                        totalDistance += it.distanceTo(location).toDouble()
+                        // UI 업데이트
+                        fragmentWalkBinding.textViewWalkDistance.text = "${String.format("%.1f", totalDistance)} m"
+                    }
+                    showUserLocationOnMap(location)
+                    lastLocation = location
+                    lastLocation?.let { location ->
+                        viewModel.updateLocationAndOnWalkStatus(userId, location.latitude, location.longitude)
+                    }
+                    Log.d("infooooo1",lastLocation.toString())
+                }
+            }
+        }
+    }
+    private fun startLocationUpdates() {
+        if (checkPermission(Manifest.permission.ACCESS_FINE_LOCATION)) {
+            val locationRequest = LocationRequest.create().apply {
+                interval = 2000 // 10 seconds
+                fastestInterval = 5000 // 5 seconds
+                priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+            }
+            fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper())
+        }
+    }
+
+    private fun stopLocationUpdates() {
+        fusedLocationClient.removeLocationUpdates(locationCallback)
+        totalDistance=0.0
+        fragmentWalkBinding.textViewWalkDistance.text=totalDistance.toString()
+    }
+
 
     //LastKnownLocation의 위치에서 검색 마킹(원래 있던 마커들 지우고)
     private fun getLastLocation() {
@@ -271,6 +379,7 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
             }
         }
     }
+
     //거리 필터의 값에 따라 ㄱ
     private fun getLastLocationFilter(radius:Int) {
         if (checkPermission(Manifest.permission.ACCESS_FINE_LOCATION)
@@ -321,6 +430,12 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
 
     private fun showSnackbar(message: String) {
         Snackbar.make(fragmentWalkBinding.root, message, Snackbar.LENGTH_LONG).show()
+    }
+    @SuppressLint("SimpleDateFormat")
+    fun getCurrentDate(): String {
+        val current = Date()
+        val formatter = SimpleDateFormat("yyyy-MM-dd") // 년-월-일
+        return formatter.format(current)
     }
     //맵의 마커 클릭시
     override fun onPOIItemSelected(p0: net.daum.mf.map.api.MapView?, p1: MapPOIItem?) {

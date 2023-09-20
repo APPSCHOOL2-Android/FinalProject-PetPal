@@ -44,6 +44,15 @@
         android:label="fragment_contact_us"
         tools:layout="@layout/fragment_contact_us" />
     <fragment
+        android:id="@+id/WriteWalkReviewFragment"
+        android:name="com.petpal.mungmate.ui.WalkReviewWriteFragment"
+        android:label="fragment_walk_review_write"
+        tools:layout="@layout/fragment_walk_review_write" >
+        <action
+            android:id="@+id/action_WriteWalkReviewFragment_to_mainFragment"
+            app:destination="@id/mainFragment" />
+    </fragment>
+    <fragment
         android:id="@+id/mainFragment"
         android:name="com.petpal.mungmate.MainFragment"
         android:label="fragment_main"
@@ -126,6 +135,9 @@
             app:destination="@id/fullScreenFragment"
             app:enterAnim="@anim/from_bottom"
             app:popEnterAnim="@anim/from_top" />
+        <action
+            android:id="@+id/action_mainFragment_to_WriteWalkReviewFragment"
+            app:destination="@id/WriteWalkReviewFragment" />
 
     </fragment>
     <fragment
