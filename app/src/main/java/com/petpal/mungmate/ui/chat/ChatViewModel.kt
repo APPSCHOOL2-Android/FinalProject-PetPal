@@ -1,6 +1,5 @@
 package com.petpal.mungmate.ui.chat
 
-import android.graphics.Bitmap
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -11,6 +10,8 @@ import com.google.firebase.firestore.DocumentSnapshot
 import com.petpal.mungmate.model.Message
 import com.petpal.mungmate.model.UserReport
 import com.petpal.mungmate.model.Match
+import com.petpal.mungmate.model.PetData
+import com.petpal.mungmate.model.UserBasicInfoData
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -27,9 +28,12 @@ class ChatViewModel: ViewModel() {
     private val _messages = MutableLiveData<List<Message>>()
     val messages : LiveData<List<Message>> get() = _messages
 
-    // 채팅 상대 프로필
-    private val _receiverUser = MutableLiveData<Bitmap>()
-    val receiverUser get() = _receiverUser
+    // 채팅 상대 기본 정보
+    private val _receiverUserBasicInfo = MutableLiveData<UserBasicInfoData>()
+    val receiverUser get() = _receiverUserBasicInfo
+    // 채팅 상대 대표 반려견
+    private val _receiverPetData = MutableLiveData<PetData>()
+    val receiverPetData = _receiverPetData
 
     fun setCurrentChatRoomId(currentChatRoomId: String) {
         _chatRoomId.value = currentChatRoomId
@@ -75,8 +79,20 @@ class ChatViewModel: ViewModel() {
         }
     }
 
-    fun getUserById(userId: String) {
-
+    // 채팅 상대 기본 정보 + 반려견 정보
+    fun loadUserDataById(userId: String) {
+        chatRepository.loadUserById(userId)
+            .addOnSuccessListener { documentSnapshot ->
+                if (documentSnapshot.exists()) {
+                    val user = documentSnapshot.toObject(UserBasicInfoData::class.java)
+                    // todo 반려견 정보 가져오기 
+                } else {
+                    // 사용자가 존재하지 않을 경우
+                }
+            }
+            .addOnFailureListener {
+                // 오류 처리
+            }
     }
 
     // 사용자 신고 데이터 저장

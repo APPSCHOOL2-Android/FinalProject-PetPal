@@ -86,15 +86,8 @@ class ChatRepository {
     }
 
     // 사용자 id로 사용자 Document 가져오기
-    suspend fun getUserById(userId: String): DocumentSnapshot? {
-        return try {
-            db.collection(USERS_NAME)
-                .document(userId)
-                .get()
-                .await()
-        } catch (e: Exception) {
-            null
-        }
+    fun loadUserById(userId: String): Task<DocumentSnapshot> {
+        return db.collection(USERS_NAME).document(userId).get()
     }
 
     // 사용자 신고
