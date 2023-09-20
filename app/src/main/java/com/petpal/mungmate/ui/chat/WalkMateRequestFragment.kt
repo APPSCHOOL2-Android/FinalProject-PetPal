@@ -134,7 +134,7 @@ class WalkMateRequestFragment : Fragment() {
                 // 오늘 보다 이전 날짜로 약속 잡기 불가
                 val currentDate = Calendar.getInstance().timeInMillis
                 if (selectedDate < currentDate) {
-                    textInputLayoutDate.error = "오늘에서 이미 지난 날짜는 선택할 수 없습니다."
+                    textInputLayoutDate.error = "이미 지난 날짜는 선택할 수 없습니다."
                     return false
                 } else {
                     textInputLayoutDate.error = null

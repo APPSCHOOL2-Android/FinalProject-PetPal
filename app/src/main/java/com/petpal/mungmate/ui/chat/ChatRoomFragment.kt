@@ -99,12 +99,13 @@ class ChatRoomFragment : Fragment() {
             // 채팅방 메시지 목록
             recyclerViewMessage.apply {
                 layoutManager = LinearLayoutManager(requireContext())
+                addItemDecoration(TopMarginItemDecoration(8))
                 adapter = messageAdapter
             }
 
             // 메시지 입력, 전송
             editTextMessage.addTextChangedListener {
-                buttonSendMessage.isEnabled = it.toString().isNotEmpty()
+                buttonSendMessage.isEnabled = it.toString().trim().isNotEmpty()
             }
             buttonSendMessage.setOnClickListener {
                 sendTextMessage()
