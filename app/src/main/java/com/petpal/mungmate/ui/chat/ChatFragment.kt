@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.os.bundleOf
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.firebase.ui.firestore.FirestoreRecyclerOptions
 import com.google.android.material.divider.MaterialDividerItemDecoration
@@ -19,14 +20,26 @@ import com.petpal.mungmate.MainActivity
 import com.petpal.mungmate.R
 import com.petpal.mungmate.databinding.FragmentChatBinding
 import com.petpal.mungmate.model.ChatRoom
+import com.petpal.mungmate.model.Message
+import com.petpal.mungmate.model.MessageType
+import com.petpal.mungmate.model.MessageVisibility
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class ChatFragment : Fragment() {
 
     private var _fragmentChatBinding: FragmentChatBinding? = null
     private val fragmentChatBinding get() = _fragmentChatBinding!!
     lateinit var mainActivity: MainActivity
+    lateinit var chatViewModel: ChatViewModel
 
     private var currentUserId = FirebaseAuth.getInstance().currentUser?.uid.toString()
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        chatViewModel = ViewModelProvider(this)[ChatViewModel::class.java]
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -64,15 +77,10 @@ class ChatFragment : Fragment() {
                 )
             }
 
-            // 특정 사용자에게 채팅 보내기 테스트
+            // 특정 사용자에게 채팅 보내기 테스트용
             buttonTestSendMessage.setOnClickListener {
-                val user2Id = editTextReceiverId.text.toString()
-                enterChatRoom(user2Id)
-            }
-
-            // 로그인 유저 체인지
-            buttonTestChangeUser.setOnClickListener {
-                currentUserId = editTextChangeUserId.text.toString()
+                val receiverUserId = editTextReceiverId.text.toString()
+                enterChatRoom(receiverUserId)
             }
         }
     }
@@ -101,7 +109,7 @@ class ChatFragment : Fragment() {
                         0,
                         0
                     )
-
+                    // TODO 이후 chatRoomId 난수 생성 키로 사용하는 걸로 변경하기
                     db.collection("chatRooms")
                         .document(chatRoomId)
                         .set(chatRoom)
@@ -112,11 +120,31 @@ class ChatFragment : Fragment() {
                         .addOnFailureListener {
                             Log.d("hhl", "채팅방 생성 실패")
                         }
+
+                    // 기본으로 날짜 메시지 전송
+                    sendDateMessage(chatRoomId)
                 }
             }
             .addOnFailureListener { exception ->
                 Log.e("hhl", "Error getting document: $exception")
             }
+    }
+
+    private fun sendDateMessage(chatRoomId: String) {
+        val date = Date()
+        val sdf = SimpleDateFormat("yyyy년 MM월 dd일", Locale.getDefault())
+        val formattedDate = sdf.format(date)
+
+        val message = Message(
+            currentUserId,
+            formattedDate,
+            Timestamp.now(),
+            true,
+            MessageType.DATE.code,
+            MessageVisibility.ALL.code
+        )
+
+        chatViewModel.saveMessage(chatRoomId, message)
     }
 
     override fun onDestroy() {

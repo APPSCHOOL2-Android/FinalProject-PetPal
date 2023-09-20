@@ -1,5 +1,6 @@
 package com.petpal.mungmate.ui.chat
 
+import android.graphics.Bitmap
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -20,8 +21,19 @@ class ChatViewModel: ViewModel() {
     var chatRepository = ChatRepository()
     // var savedMessages: MutableLiveData<List<Message>> = MutableLiveData()
 
+    private val _chatRoomId = MutableLiveData<String>()
+    val chatRoomId get() = _chatRoomId
+
     private val _messages = MutableLiveData<List<Message>>()
     val messages : LiveData<List<Message>> get() = _messages
+
+    // 채팅 상대 프로필
+    private val _receiverUser = MutableLiveData<Bitmap>()
+    val receiverUser get() = _receiverUser
+
+    fun setCurrentChatRoomId(currentChatRoomId: String) {
+        _chatRoomId.value = currentChatRoomId
+    }
 
     // 채팅방 Document에 메시지 저장
     fun saveMessage(chatRoomId: String, message: Message){
@@ -57,10 +69,14 @@ class ChatViewModel: ViewModel() {
     fun getMatchByKey(matchKey: String, onComplete: (DocumentSnapshot?) -> Unit) {
         viewModelScope.launch {
             val document = withContext(Dispatchers.IO){
-                chatRepository.getMatchByKey(matchKey)
+                chatRepository.getMatchById(matchKey)
             }
             onComplete(document)
         }
+    }
+
+    fun getUserById(userId: String) {
+
     }
 
     // 사용자 신고 데이터 저장

@@ -20,6 +20,7 @@ class ChatRepository {
         const val MESSAGES_NAME = "messages"
         const val MATCHES_NAME = "matches"
         const val REPORTS_NAME = "reports"
+        const val USERS_NAME = "users"
 
         const val TIMESTAMP = "timestamp"
         const val CHAT_PAGE_SIZE = 100L
@@ -73,10 +74,22 @@ class ChatRepository {
     }
 
     // Document Key 값으로 산책 매칭 데이터 가져오기
-    suspend fun getMatchByKey(matchKey: String): DocumentSnapshot? {
+    suspend fun getMatchById(matchId: String): DocumentSnapshot? {
         return try {
             db.collection(MATCHES_NAME)
-                .document(matchKey)
+                .document(matchId)
+                .get()
+                .await()
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    // 사용자 id로 사용자 Document 가져오기
+    suspend fun getUserById(userId: String): DocumentSnapshot? {
+        return try {
+            db.collection(USERS_NAME)
+                .document(userId)
                 .get()
                 .await()
         } catch (e: Exception) {

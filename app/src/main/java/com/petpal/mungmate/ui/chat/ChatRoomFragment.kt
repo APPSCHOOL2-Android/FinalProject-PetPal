@@ -38,6 +38,7 @@ class ChatRoomFragment : Fragment() {
         chatRoomId = arguments?.getString("chatRoomId")!!
 
         chatViewModel = ViewModelProvider(this)[ChatViewModel::class.java]
+        chatViewModel.setCurrentChatRoomId(chatRoomId)
     }
 
     override fun onCreateView(

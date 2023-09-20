@@ -15,6 +15,7 @@ import com.petpal.mungmate.model.Match
 import com.petpal.mungmate.model.MatchStatus
 import com.petpal.mungmate.model.Message
 import com.petpal.mungmate.model.MessageType
+import com.petpal.mungmate.model.MessageVisibility
 import java.lang.IllegalArgumentException
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -136,10 +137,7 @@ class MessageAdapter(private val chatViewModel: ChatViewModel): RecyclerView.Ada
         fun bind(message: Message){
             rowChatSendMessageBinding.run {
                 textViewMessage.text = message.content
-                val timestamp = message.timestamp?.toDate()!!
-                val sdf = SimpleDateFormat("a hh시 mm분", Locale.getDefault())
-                val formattedDate = sdf.format(timestamp)
-                textViewTime.text = formattedDate
+                textViewTime.text = formatFirebaseTimestamp(message.timestamp!!, "a hh:mm")
             }
         }
     }
@@ -148,10 +146,7 @@ class MessageAdapter(private val chatViewModel: ChatViewModel): RecyclerView.Ada
         fun bind(message: Message) {
             rowChatReceiveMessageBinding.run {
                 textViewMessage.text = message.content
-                val timestamp = message.timestamp?.toDate()!!
-                val sdf = SimpleDateFormat("a hh시 mm분", Locale.getDefault())
-                val formattedDate = sdf.format(timestamp)
-                textViewTime.text = formattedDate
+                textViewTime.text = formatFirebaseTimestamp(message.timestamp!!, "a hh:mm")
             }
         }
     }
@@ -178,6 +173,12 @@ class MessageAdapter(private val chatViewModel: ChatViewModel): RecyclerView.Ada
                     if (document != null && document.exists()) {
                         val match = document.toObject(Match::class.java)
                         if (match != null) {
+                            // 하나의 match에 대해 수락, 거절은 한 번만 선택 가능
+//                            if (match.status != MatchStatus.REQUESTED.code) {
+//                                buttonAccept.isEnabled = false
+//                                buttonReject.isEnabled = false
+//                            }
+
                             // 산책 일시, 장소 표시
                             val formattedWalkTimestamp = formatFirebaseTimestamp(match.walkTimestamp!!, "M월 d일 (E) a h:mm")
                             textViewRequestDateTime.text = "일시 : $formattedWalkTimestamp"
@@ -189,16 +190,46 @@ class MessageAdapter(private val chatViewModel: ChatViewModel): RecyclerView.Ada
                 }
 
                 buttonAccept.setOnClickListener {
-                    // TODO 수락 메시지 저장, 해당 메시지 visibility 안보이게 변경
-                    // match 상태 변경
+                    // TODO 사용자에 따라 메시지 visibility 안보이게 변경
+                    // 하나의 match에 대해 수락, 거절은 한 번만 선택 가능
+                    buttonAccept.isEnabled = false
+                    buttonReject.isEnabled = false
+                    
+                    // 매칭 상태 변경 -> 수락
                     chatViewModel.updateFieldInMatchDocument(matchKey, "status", MatchStatus.ACCEPTED.code)
 
+                    // 산책 메이트 수락 메시지 전송
+                    val message = Message(
+                        currentUserId,
+                        matchKey,
+                        Timestamp.now(),
+                        false,
+                        MessageType.WALK_MATE_ACCEPT.code,
+                        MessageVisibility.ALL.code
+                    )
+                    // chatRoomId를 viewmodel에서 가져오기 vs 매개변수로 받기??
+                    chatViewModel.saveMessage(chatViewModel.chatRoomId.value.toString(), message)
                 }
-                buttonReject.setOnClickListener {
-                    // TODO 거절 메시지 저장 -> 거절의 경우에는 Match 자체를 삭제?
-                    // match 상태 변경
-                    chatViewModel.updateFieldInMatchDocument(matchKey, "status", MatchStatus.REJECTED.code)
 
+                buttonReject.setOnClickListener {
+                    // 하나의 match에 대해 수락, 거절은 한 번만 선택 가능
+                    buttonAccept.isEnabled = false
+                    buttonReject.isEnabled = false
+
+                    // 매칭 상태 변경 -> 거절
+                    chatViewModel.updateFieldInMatchDocument(matchKey, "status", MatchStatus.REJECTED.code)
+                    
+                    // 산책 메이트 거절 메시지 전송
+                    val message = Message(
+                        currentUserId,
+                        matchKey,
+                        Timestamp.now(),
+                        false,
+                        MessageType.WALK_MATE_REJECT.code,
+                        MessageVisibility.ALL.code
+                    )
+                    // chatRoomId를 viewmodel에서 가져오기 vs 매개변수로 받기??
+                    chatViewModel.saveMessage(chatViewModel.chatRoomId.value.toString(), message)
                 }
             }
         }
@@ -215,11 +246,22 @@ class MessageAdapter(private val chatViewModel: ChatViewModel): RecyclerView.Ada
     inner class WalkMateAcceptViewHolder(private val rowChatWalkMateAcceptBinding: RowChatWalkMateAcceptBinding): RecyclerView.ViewHolder(rowChatWalkMateAcceptBinding.root) {
         fun bind(message: Message) {
             rowChatWalkMateAcceptBinding.run {
-                // Match 데이터 읽어오기
-//                textViewAcceptDate.text =
-//                textviewAcceptMessage.text = "${} 님과의 약속이 설정되었습니다."
+                // 산책 요청 Message에 저장된 document key 값으로 match 객체 가져오기
+                val matchKey = message.content!!
 
-
+                chatViewModel.getMatchByKey(matchKey) { document ->
+                    if (document != null && document.exists()) {
+                        val match = document.toObject(Match::class.java)
+                        if (match != null) {
+                            // 산책 일시, 장소 표시
+                            val formattedWalkTimestamp = formatFirebaseTimestamp(match.walkTimestamp!!, "M월 d일 (E) a h:mm")
+                            textViewAcceptDate.text = "일시 : $formattedWalkTimestamp"
+                            textViewAcceptPlace.text = "장소 : ${match.walkPlace}"
+                        }
+                    } else {
+                        // Document를 찾지 못하거나 오류가 난 경우
+                    }
+                }
             }
         }
     }

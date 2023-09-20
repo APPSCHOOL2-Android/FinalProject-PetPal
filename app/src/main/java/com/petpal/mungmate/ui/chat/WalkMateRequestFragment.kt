@@ -8,6 +8,8 @@ import android.view.ViewGroup
 import androidx.core.widget.doAfterTextChanged
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
+import com.google.android.material.datepicker.CalendarConstraints
+import com.google.android.material.datepicker.DateValidatorPointForward
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.timepicker.MaterialTimePicker
@@ -35,7 +37,7 @@ class WalkMateRequestFragment : Fragment() {
     lateinit var senderId: String
     lateinit var receiverId: String
 
-    private var selectedDate: Long = 0L
+    lateinit var selectedDate: Date
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -79,9 +81,6 @@ class WalkMateRequestFragment : Fragment() {
                 setOnClickListener {
                     showDatePicker()
                 }
-                doAfterTextChanged {
-                    isDateValid()
-                }
             }
 
             textInputEditTextTime.run {
@@ -101,13 +100,18 @@ class WalkMateRequestFragment : Fragment() {
 
     private fun showDatePicker() {
         // DatePicker 기본값 오늘로 설정
+        val calendarConstraints = CalendarConstraints.Builder()
+            .setValidator(DateValidatorPointForward.now())
+            .build()
+
         val datePicker = MaterialDatePicker.Builder.datePicker()
             .setTitleText("날짜 선택")
             .setSelection(MaterialDatePicker.todayInUtcMilliseconds())
+            .setCalendarConstraints(calendarConstraints)
             .build()
 
         datePicker.addOnPositiveButtonClickListener { selectedDateInMillis ->
-            selectedDate = selectedDateInMillis
+            selectedDate = Date(selectedDateInMillis)
             val selectDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
                 .format(Date(selectedDateInMillis))
             fragmentWalkMateRequestBinding.textInputEditTextDate.setText(selectDate)
@@ -131,15 +135,7 @@ class WalkMateRequestFragment : Fragment() {
         fragmentWalkMateRequestBinding.run {
             // 공란 체크
             if (!textInputEditTextDate.text.isNullOrBlank()) {
-                // 오늘 보다 이전 날짜로 약속 잡기 불가
-                val currentDate = Calendar.getInstance().timeInMillis
-                if (selectedDate < currentDate) {
-                    textInputLayoutDate.error = "이미 지난 날짜는 선택할 수 없습니다."
-                    return false
-                } else {
-                    textInputLayoutDate.error = null
-                    return true
-                }
+                return true
             } else {
                 textInputLayoutDate.error = "약속 날짜를 선택해주세요."
                 return false
@@ -165,7 +161,7 @@ class WalkMateRequestFragment : Fragment() {
                     val inputDateTime = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).parse("$inputDate $inputTime")
                     val currentDateTime = Date()
                     if (inputDateTime.before(currentDateTime)) {
-                        textInputLayoutTime.error = "이미 지난 시간은 선택할 수 없습니다."
+                        textInputLayoutTime.error = "오늘 이미 지난 시간은 선택할 수 없습니다."
                         return false
                     } else {
                         textInputLayoutTime.error = null
