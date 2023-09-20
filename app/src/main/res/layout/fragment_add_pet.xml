@@ -141,7 +141,7 @@
                 android:text="중성화 여부" />
 
             <com.google.android.material.button.MaterialButtonToggleGroup
-                android:id="@+id/toggleButton"
+                android:id="@+id/toggleButtonNeuter"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:singleSelection="true">
@@ -155,7 +155,7 @@
                     android:text="했어요" />
 
                 <Button
-                    android:id="@+id/button2"
+                    android:id="@+id/buttonNoNeuter"
                     style="?attr/materialButtonOutlinedStyle"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
