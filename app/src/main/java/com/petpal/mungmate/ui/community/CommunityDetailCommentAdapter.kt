@@ -13,6 +13,7 @@ import com.airbnb.lottie.LottieAnimationView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.google.android.material.snackbar.Snackbar
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.petpal.mungmate.R
@@ -99,6 +100,9 @@ class CommunityDetailCommentAdapter(
             holder.communityCommentMenuImageButton.setOnClickListener { view ->
                 val popupMenu = PopupMenu(context, view)
                 popupMenu.inflate(R.menu.community_post_detail_comment)
+                val auth = FirebaseAuth.getInstance()
+                val currentUser = auth.currentUser
+                val currentUserId = currentUser?.uid
 
                 popupMenu.setOnMenuItemClickListener {
                     when (it.itemId) {
@@ -106,20 +110,25 @@ class CommunityDetailCommentAdapter(
                             val commentToDelete = postCommentList[holder.adapterPosition]
 
                             Log.d("이건 뭐죠?",commentToDelete.toString())
+                            if (commentToDelete.commentId == currentUserId) {
+                                val db = FirebaseFirestore.getInstance()
+                                db.collection("Post").document(postGetId).update(
+                                    "postComment",
+                                    FieldValue.arrayRemove(commentToDelete)
+                                ).addOnSuccessListener {
+                                    commentViewModel.deleteComment(commentToDelete)
+                                    postCommentList.remove(commentToDelete)
+                                    notifyDataSetChanged()
+                                    Snackbar.make(view, "댓글이 삭제되었습니다.", Snackbar.LENGTH_SHORT)
+                                        .show()
+                                }.addOnFailureListener { e ->
 
-                            val db = FirebaseFirestore.getInstance()
-                            db.collection("Post").document(postGetId).update(
-                                "postComment",
-                                FieldValue.arrayRemove(commentToDelete)
-                            ).addOnSuccessListener {
-                                commentViewModel.deleteComment(commentToDelete)
-                                postCommentList.remove(commentToDelete)
-                                notifyDataSetChanged()
-                                Snackbar.make(view, "댓글이 삭제되었습니다.", Snackbar.LENGTH_SHORT).show()
-                            }.addOnFailureListener { e ->
-
-                                Log.e("Firestore", "댓글 삭제 실패: $e")
-                                Snackbar.make(view, "댓글 삭제 실패: $e", Snackbar.LENGTH_SHORT).show()
+                                    Log.e("Firestore", "댓글 삭제 실패: $e")
+                                    Snackbar.make(view, "댓글 삭제 실패: $e", Snackbar.LENGTH_SHORT)
+                                        .show()
+                                }
+                            }else{
+                                Snackbar.make(view, "댓글 작성자만 삭제할 수 있습니다.", Snackbar.LENGTH_SHORT).show()
                             }
 
                             true
