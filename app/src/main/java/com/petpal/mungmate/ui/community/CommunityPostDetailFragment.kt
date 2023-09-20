@@ -12,7 +12,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import androidx.core.content.ContextCompat
-import androidx.core.content.ContextCompat.getSystemService
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.findNavController
@@ -27,11 +26,8 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.petpal.mungmate.R
 import com.petpal.mungmate.databinding.FragmentCommunityPostDetailBinding
 import com.petpal.mungmate.model.Comment
-import com.petpal.mungmate.model.Post
-import com.petpal.mungmate.model.PostImage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
@@ -39,6 +35,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
+import java.util.UUID
 
 class CommunityPostDetailFragment : Fragment() {
 
@@ -72,7 +69,7 @@ class CommunityPostDetailFragment : Fragment() {
 
             commentViewModel.postCommentList.observe(viewLifecycleOwner) { commentList ->
                 communityDetailCommentAdapter.updateData(commentList)
-                communityPostDetailCommentCount.text="댓글 ${commentList.size.toString()}"
+                communityPostDetailCommentCount.text = "댓글 ${commentList.size.toString()}"
             }
             val iconColorNotInput =
                 ContextCompat.getColor(requireContext(), R.color.md_theme_light_tertiaryContainer)
@@ -123,7 +120,8 @@ class CommunityPostDetailFragment : Fragment() {
                                     updateComment(documentSnapshot)
 
                                     communityPostDetailCommentTextInputEditText.text?.clear()
-                                    val imm = requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                                    val imm =
+                                        requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
                                     imm.hideSoftInputFromWindow(view?.windowToken, 0)
                                 }
                             }
@@ -273,7 +271,7 @@ class CommunityPostDetailFragment : Fragment() {
             val postImagesList = documentSnapshot.get("postImages") as? List<*>
             var postImagesGetList = mutableListOf<String>()
             if (postImagesList!!.isNotEmpty()) {
-                val cleanedString = postImagesList?.get(0).toString().replace("{image=", "")
+                val cleanedString = postImagesList?.get(0).toString().replace("{image=", postGetId)
                 val imageUrl = cleanedString.trim()
                 val imageUrlWithoutBrace = imageUrl.removeSuffix("}")
                 postImagesGetList.add(imageUrlWithoutBrace)
@@ -296,8 +294,10 @@ class CommunityPostDetailFragment : Fragment() {
                         parentID = dataMap["parentID"] as String?
                     )
                     postCommentList.add(comment)
-                    communityPostDetailBinding.communityPostDetailCommentCount.text="댓글 ${postCommentList.size.toString()}"
+
                 }
+                communityPostDetailBinding.communityPostDetailCommentCount.text =
+                    "댓글 ${postCommentList.size.toString()}"
                 communityDetailCommentAdapter.updateData(postCommentList)
                 Log.d("성공", postCommentList.toString())
             } else {
@@ -330,7 +330,7 @@ class CommunityPostDetailFragment : Fragment() {
                     .diskCacheStrategy(DiskCacheStrategy.ALL)
                     .fitCenter()
                     .into(communityPostDetailProfileImage)
-
+                Log.d("확인",postImagesGetList[0].toString())
                 if (postImagesList != null) {
                     if (postImagesGetList.isNotEmpty()) {
                         Glide
@@ -366,7 +366,7 @@ class CommunityPostDetailFragment : Fragment() {
     private fun FragmentCommunityPostDetailBinding.communityDetailRecyclerView() {
         communityPostDetailCommentRecyclerView.run {
             communityDetailCommentAdapter =
-                CommunityDetailCommentAdapter(requireContext(), mutableListOf())
+                CommunityDetailCommentAdapter(requireContext(), mutableListOf(), postGetId)
             adapter = communityDetailCommentAdapter
             setHasFixedSize(true)
             layoutManager = LinearLayoutManager(requireContext())
@@ -382,6 +382,7 @@ class CommunityPostDetailFragment : Fragment() {
             val formattedDateTime = formatDateTimeToNewFormat(currentDateTime)
 
             val newComment = Comment(
+                commentId = UUID.randomUUID().toString(),
                 1,
                 "작성자",
                 "장소",
