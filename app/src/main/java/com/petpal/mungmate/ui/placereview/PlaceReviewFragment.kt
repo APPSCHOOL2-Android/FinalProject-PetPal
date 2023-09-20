@@ -17,6 +17,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.petpal.mungmate.MainActivity
 import com.petpal.mungmate.R
 import com.petpal.mungmate.databinding.FragmentPlaceReviewBinding
 import com.petpal.mungmate.databinding.RowPlaceReviewBinding
@@ -31,6 +32,7 @@ class PlaceReviewFragment : Fragment() {
     private lateinit var fragmentPlaceReviewBinding: FragmentPlaceReviewBinding
     private lateinit var reviewAdapter: ReviewAdapter
     private val viewModel: PlaceReviewViewModel by viewModels { PlaceReviewViewModelFactory(PlaceReviewRepository()) }
+    private lateinit var mainActivity: MainActivity
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -40,16 +42,21 @@ class PlaceReviewFragment : Fragment() {
         val phone = arguments?.getString("phone")
         val roadAddressName = arguments?.getString("place_road_adress_name")
         val placeCategory = arguments?.getString("place_category")
-        val placeId=arguments?.getString("place_id")
+        val placeId = arguments?.getString("place_id")
+        if(placeId!=null) {
+            Log.d("placeididid", placeId)
+        }else{
+            Log.d("placeididid", "null이야")
+        }
+        reviewAdapter = placeId?.let { ReviewAdapter(emptyList(), it) }!!
         val avgRating=arguments?.getFloat("avgRating")
-        Log.d("avgRating",avgRating.toString())
 
+        mainActivity = activity as MainActivity
         fragmentPlaceReviewBinding = FragmentPlaceReviewBinding.inflate(layoutInflater)
 
-        reviewAdapter = placeId?.let { ReviewAdapter(emptyList(), it) }!!
+       // reviewAdapter = placeId?.let { ReviewAdapter(emptyList(), it) }!!
         fragmentPlaceReviewBinding.reviewsRecyclerView.adapter = reviewAdapter
         fragmentPlaceReviewBinding.reviewsRecyclerView.layoutManager = LinearLayoutManager(requireContext())
-
 
         if (avgRating != null) { fragmentPlaceReviewBinding.placeUserRatingBar1.rating=avgRating }
         fragmentPlaceReviewBinding.textViewPlaceReviewTitle.text = placeName
@@ -88,11 +95,15 @@ class PlaceReviewFragment : Fragment() {
             val reviewImageView: ImageView = rowBinding.imageView11
             val placeReviewModify:TextView=rowBinding.textViewPlaceReviewModify
             val placeReviewDelete:TextView=rowBinding.textViewPlaceReviewDelete
+
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolderClass {
             val rowBinding = RowPlaceReviewBinding.inflate(layoutInflater, parent, false)
+            rowBinding.textViewPlaceReviewModify.visibility=View.VISIBLE
+            rowBinding.textViewPlaceReviewDelete.visibility=View.VISIBLE
             return ViewHolderClass(rowBinding)
+
         }
 
         override fun onBindViewHolder(holder: ViewHolderClass, position: Int) {
@@ -101,8 +112,7 @@ class PlaceReviewFragment : Fragment() {
             holder.dateTextView.text = review.date
             holder.ratingBar.rating = review.rating!!
             holder.commentTextView.text = review.comment
-            review.imageRes?.let { Log.d("imagereal", it) }
-
+            val reviewId = "${review.date}_${review.userid}"//리뷰의 문서 id 날짜+userid로 구성
             val widthPx = dpToPx(100, holder.reviewImageView.context)
             val heightPx = dpToPx(100, holder.reviewImageView.context)
 
@@ -113,12 +123,18 @@ class PlaceReviewFragment : Fragment() {
                     .into(holder.reviewImageView)
             }
             holder.placeReviewModify.setOnClickListener {
-
+                val bundle = Bundle()
+                bundle.putString("reviewUserId", review.userid)
+                bundle.putString("reviewDate", review.date)
+                bundle.putString("reviewContent", review.comment)
+                bundle.putFloat("reviewRating", review.rating!!)
+                bundle.putString("reviewImageURL", review.imageRes)
+                bundle.putString("placeId",placeId)
+                mainActivity.navigate(R.id.action_placeReviewFragment_to_placeReviewModifyFragment,bundle)
                 // Toast.makeText(holder.itemView.context, "Modify clicked for position $position", Toast.LENGTH_SHORT).show()
             }
 
             holder.placeReviewDelete.setOnClickListener {
-                val reviewId = "${review.date}_${review.userid}"  // 리뷰의 문서 ID를 생성
                 viewModel.deleteReviewForPlace(placeId, reviewId)
             }
         }

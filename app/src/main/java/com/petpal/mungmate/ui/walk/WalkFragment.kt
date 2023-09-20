@@ -537,6 +537,8 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
             detailUserName.text=latestReviews!![0].userid
             detailDate.text=latestReviews!![0].date
             detailContent.text=latestReviews!![0].comment
+            detailDialog.findViewById<TextView>(R.id.textViewPlaceReviewModify)?.visibility=View.GONE
+            detailDialog.findViewById<TextView>(R.id.textViewPlaceReviewDelete)?.visibility=View.GONE
             latestReviews!![0].imageRes?.let { imageUrl ->
                 Glide.with(detailImage.context)
                     .load(imageUrl)
@@ -574,6 +576,8 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
             detailUserName.text=latestReviews!![1].userid
             detailDate.text=latestReviews!![1].date
             detailContent.text=latestReviews!![1].comment
+            detailDialog.findViewById<TextView>(R.id.textViewPlaceReviewModify)?.visibility=View.GONE
+            detailDialog.findViewById<TextView>(R.id.textViewPlaceReviewDelete)?.visibility=View.GONE
             latestReviews!![1].imageRes?.let { imageUrl ->
                 Glide.with(detailImage.context)
                     .load(imageUrl)

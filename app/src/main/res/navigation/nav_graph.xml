@@ -191,7 +191,12 @@
         android:id="@+id/placeReviewFragment"
         android:name="com.petpal.mungmate.ui.placereview.PlaceReviewFragment"
         android:label="PlaceReviewFragment"
-        tools:layout="@layout/fragment_place_review"/>
+        tools:layout="@layout/fragment_place_review">
+
+        <action
+            android:id="@+id/action_placeReviewFragment_to_placeReviewModifyFragment"
+            app:destination="@id/placeReviewModifyFragment" />
+    </fragment>
 
     <include app:graph="@navigation/match_history" />
     <include app:graph="@navigation/walk_history" />
@@ -247,5 +252,16 @@
         android:name="com.petpal.mungmate.ui.walkreview.WalkReviewHistoryFragment"
         android:label="fragment_walk_review_history"
         tools:layout="@layout/fragment_walk_review_history" />
+
+    <fragment
+        android:id="@+id/placeReviewModifyFragment"
+        android:name="com.petpal.mungmate.ui.placereview.PlaceReviewModifyFragment"
+        android:label="fragment_placereviewmodify"
+        tools:layout="@layout/fragment_place_review_modify">
+
+        <action
+            android:id="@+id/action_placeReviewModifyFragment_to_placeReviewFragment"
+            app:destination="@id/placeReviewFragment" />
+    </fragment>
 
 </navigation>
