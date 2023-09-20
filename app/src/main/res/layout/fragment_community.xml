@@ -65,8 +65,38 @@
             android:layout_margin="@dimen/common_padding"
             android:clickable="true"
             android:focusable="true"
+
             android:src="@drawable/edit" />
 
-
     </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/communityPostNotDataLinearLayout"
+        android:layout_width="match_parent"
+        android:orientation="vertical"
+        android:layout_gravity="bottom"
+        android:visibility="gone"
+        android:layout_height="wrap_content">
+
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/communityPostNotDataTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="left"
+            android:layout_marginStart="@dimen/common_margin"
+            android:text="게시글이 없어요 ㅠㅠ"
+            android:gravity="center"
+            style="@style/MaterialAlertDialog.Material3.Title.Text"/>
+
+        <com.airbnb.lottie.LottieAnimationView
+            android:id="@+id/communityPostNotDataLottieView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:lottie_autoPlay="true"
+            app:lottie_loop="true"
+            app:lottie_rawRes="@raw/crying_dog" />
+    </LinearLayout>
+
+
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

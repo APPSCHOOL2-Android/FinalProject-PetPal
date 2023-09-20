@@ -69,6 +69,7 @@
                     android:layout_marginBottom="@dimen/common_small_margin" />
 
                 <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/communityCategoryDaily"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/common_margin"
@@ -83,6 +84,7 @@
                     android:layout_marginBottom="@dimen/common_small_margin" />
 
                 <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/communityCategoryWalkLog"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/common_margin"
@@ -97,6 +99,7 @@
                     android:layout_marginBottom="@dimen/common_small_margin" />
 
                 <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/communityCategoryWalkingMaidMatching"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/common_margin"
@@ -111,6 +114,7 @@
                     android:layout_marginBottom="@dimen/common_small_margin" />
 
                 <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/communityCategoryWalkingLocationReviews"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/common_margin"
@@ -125,6 +129,7 @@
                     android:layout_marginBottom="@dimen/common_small_margin" />
 
                 <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/communityCategoryDogProductReviews"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/common_margin"
@@ -139,6 +144,7 @@
                     android:layout_marginBottom="@dimen/common_small_margin" />
 
                 <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/communityCategoryShihTzu"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/common_margin"
@@ -153,6 +159,7 @@
                     android:layout_marginBottom="@dimen/common_small_margin" />
 
                 <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/communityCategoryPoodle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/common_margin"
@@ -167,6 +174,7 @@
                     android:layout_marginBottom="@dimen/common_small_margin" />
 
                 <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/communityCategoryPomeranian"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/common_margin"
@@ -181,6 +189,7 @@
                     android:layout_marginBottom="@dimen/common_small_margin" />
 
                 <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/communityCategorychihuahua"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/common_margin"
@@ -195,6 +204,7 @@
                     android:layout_marginBottom="@dimen/common_small_margin" />
 
                 <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/communityCategoryMaltese"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/common_margin"
@@ -209,6 +219,7 @@
                     android:layout_marginBottom="@dimen/common_small_margin" />
 
                 <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/communityCategoryJindoDog"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/common_margin"
@@ -223,6 +234,7 @@
                     android:layout_marginBottom="@dimen/common_small_margin" />
 
                 <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/communityCategoryRetriever"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/common_margin"
@@ -238,6 +250,7 @@
                     android:layout_marginBottom="@dimen/common_small_margin" />
 
                 <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/communityCategoryWelshCorgi"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/common_margin"
@@ -252,6 +265,7 @@
                     android:layout_marginBottom="@dimen/common_small_margin" />
 
                 <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/communityCategoryPuppies"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/common_margin"
