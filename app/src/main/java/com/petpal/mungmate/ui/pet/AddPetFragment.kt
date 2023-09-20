@@ -1,5 +1,6 @@
 package com.petpal.mungmate.ui.pet
 
+import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
@@ -7,6 +8,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
+import androidx.activity.result.ActivityResultLauncher
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
@@ -22,6 +24,9 @@ import com.petpal.mungmate.databinding.FragmentAddPetBinding
 import com.petpal.mungmate.model.PetData
 import com.petpal.mungmate.model.UserBasicInfoData
 import com.petpal.mungmate.ui.user.UserViewModel
+import com.petpal.mungmate.utils.gallerySetting
+import com.petpal.mungmate.utils.launchGallery
+import com.petpal.mungmate.utils.resizeAndCropBitmap
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -32,7 +37,10 @@ class AddPetFragment : Fragment() {
     private lateinit var _fragmentAddPetBinding: FragmentAddPetBinding
     private val fragmentAddPetBinding get() = _fragmentAddPetBinding
     private var userUid = ""
-    lateinit var userBasicInfoData: UserBasicInfoData
+    private lateinit var userBasicInfoData: UserBasicInfoData
+
+    // 갤러리 실행
+    lateinit var galleryLauncher: ActivityResultLauncher<Intent>
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -40,6 +48,14 @@ class AddPetFragment : Fragment() {
     ): View? {
         _fragmentAddPetBinding = FragmentAddPetBinding.inflate(layoutInflater)
         userViewModel = ViewModelProvider(requireActivity())[UserViewModel::class.java]
+        galleryLauncher = gallerySetting() { bitmap, uri ->
+            //크기 조정
+            val resizedBitmap = resizeAndCropBitmap(bitmap, 120, 120)
+            fragmentAddPetBinding.imageViewAddPet.setImageBitmap(resizedBitmap)
+
+            //저장할 uri 태그에 붙여두기
+            fragmentAddPetBinding.imageViewAddPet.tag = uri
+        }
 
         // StateFlow를 사용하여 사용자 데이터 관찰
         viewLifecycleOwner.lifecycleScope.launch {
@@ -82,12 +98,26 @@ class AddPetFragment : Fragment() {
                 buttonShe.isClickable = false
             }
 
+            //견종 입력 자동완성
             ArrayAdapter(
                 requireContext(),
                 android.R.layout.simple_list_item_1,
                 dogBreeds
             ).also { adapter ->
                 autoCompleteTextViewPetBreed.setAdapter(adapter)
+            }
+
+            buttonSelectPetPhoto.setOnClickListener {
+                launchGallery(galleryLauncher)
+//                //갤러리에서 이미지 불러오기
+//                loadImageFromGallery { bitmap, uri ->
+//                    //크기 조정
+//                    val resizedBitmap = resizeBitmap(bitmap, 120, 120)
+//                    imageViewAddPet.setImageBitmap(resizedBitmap)
+//
+//                    //저장할 uri 태그에 붙여두기
+//                    imageViewAddPet.tag = uri
+//                }
             }
 
 
@@ -119,6 +149,9 @@ class AddPetFragment : Fragment() {
     }
 
     private fun FragmentAddPetBinding.saveUserDataAndPetData() {
+
+        //storage에 이미지 저장해야함
+
 
         val db = Firebase.firestore
         Log.d("user", userUid)

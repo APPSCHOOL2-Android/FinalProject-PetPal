@@ -1,23 +1,27 @@
 package com.petpal.mungmate.ui.user
 
+import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.result.ActivityResultLauncher
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import androidx.navigation.navOptions
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.snackbar.Snackbar
 import com.petpal.mungmate.MainActivity
 import com.petpal.mungmate.R
 import com.petpal.mungmate.databinding.FragmentUserInfoBinding
 import com.petpal.mungmate.model.UserBasicInfoData
-import com.petpal.mungmate.utils.loadAndResizeImage
+import com.petpal.mungmate.utils.gallerySetting
+import com.petpal.mungmate.utils.launchGallery
+import com.petpal.mungmate.utils.loadAndResizeImageFromUri
+import com.petpal.mungmate.utils.resizeAndCropBitmap
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -29,13 +33,23 @@ class UserInfoFragment : Fragment() {
     private val fragmentUserInfoBinding get() = _fragmentUserInfoBinding
     private lateinit var userViewModel: UserViewModel
     private var userUid = ""
+
+    // 갤러리 실행
+    lateinit var galleryLauncher: ActivityResultLauncher<Intent>
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View? {
         _fragmentUserInfoBinding = FragmentUserInfoBinding.inflate(layoutInflater)
         mainActivity = activity as MainActivity
+        galleryLauncher = gallerySetting() { bitmap, uri ->
+            //크기 조정
+            val resizedBitmap = resizeAndCropBitmap(bitmap, 120, 120)
+            fragmentUserInfoBinding.startMainImageView.setImageBitmap(resizedBitmap)
 
+            //저장할 uri 태그에 붙여두기
+            fragmentUserInfoBinding.startMainImageView.tag = uri
+        }
 
         return fragmentUserInfoBinding.root
     }
@@ -55,8 +69,15 @@ class UserInfoFragment : Fragment() {
                     fragmentUserInfoBinding.run {
                         textInputUserNicknameText.setText(userData.displayName)
 
-                        loadAndResizeImage(requireContext(),userData.photoUrl!!,startMainImageView,120,120)
-//                        startMainImageView.setImageURI(userData.photoUrl)
+                        //사용자 photoUrl로부터 이미지 받아와서 사이즈 조정하여 보여주기
+                        loadAndResizeImageFromUri(
+                            requireContext(),
+                            userData.photoUrl!!,
+                            startMainImageView,
+                            120,
+                            120
+                        )
+                        //저장할 uri 태그에 붙여두기
                         startMainImageView.tag = userData.photoUrl
                     }
 
@@ -100,6 +121,28 @@ class UserInfoFragment : Fragment() {
                 datePicker.show(parentFragmentManager, "tag")
             }
 
+            //언제든 가능해요 옵션을 누르면 산책가능 시간 입력 칸이 없어지도록
+            userInfoRadiogroup.setOnCheckedChangeListener { radioGroup, i ->
+                if (i == R.id.radioAlways) {
+                    linearWhenSelected.visibility = View.GONE
+                } else {
+                    linearWhenSelected.visibility = View.VISIBLE
+                }
+            }
+
+            //사진 선택 버튼을 통해 갤러리에서 사진 불러오기
+            infoSelectImageButton.setOnClickListener {
+                launchGallery(galleryLauncher)
+//                loadImageFromGallery() { bitmap, uri ->
+//                    //크기 조정
+//                    val resizedBitmap = resizeBitmap(bitmap, 120, 120)
+//                    startMainImageView.setImageBitmap(resizedBitmap)
+//
+//                    //저장할 uri 태그에 붙여두기
+//                    startMainImageView.tag = uri
+//                }
+            }
+
             infoToNextButton.setOnClickListener {
 
                 val userInfoData = UserBasicInfoData(
@@ -123,20 +166,12 @@ class UserInfoFragment : Fragment() {
 
             }
 
-            //언제든 가능해요 옵션을 누르면 산책가능 시간 입력 칸이 없어지도록
-            userInfoRadiogroup.setOnCheckedChangeListener { radioGroup, i ->
-                if (i == R.id.radioAlways) {
-                    linearWhenSelected.visibility = View.GONE
-                } else {
-                    linearWhenSelected.visibility = View.VISIBLE
-                }
-            }
-
 
         }
 
 
     }
+
 
     private fun getSelectedWalkHour(checkedRadioButtonId: Int): Availability {
         return if (checkedRadioButtonId == R.id.radioAlways) {
