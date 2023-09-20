@@ -499,7 +499,7 @@ class CommunityFragment : Fragment() {
 
     override fun onPause() {
         super.onPause()
-        firestoreListener.remove()
+
         firestoreJob?.cancel()
     }
 }
