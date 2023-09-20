@@ -1,5 +1,7 @@
 package com.petpal.mungmate.ui.placereview
 
+import android.app.AlertDialog
+import android.app.Dialog
 import android.content.Context
 import android.os.Bundle
 import android.util.Log
@@ -147,17 +149,25 @@ class PlaceReviewFragment : Fragment() {
                 bundle.putString("reviewImageURL", review.imageRes)
                 bundle.putString("placeId",placeId)
                 mainActivity.navigate(R.id.action_placeReviewFragment_to_placeReviewModifyFragment,bundle)
-                // Toast.makeText(holder.itemView.context, "Modify clicked for position $position", Toast.LENGTH_SHORT).show()
             }
 
             holder.placeReviewDelete.setOnClickListener {
-                viewModel.deleteReviewForPlace(placeId, reviewId)
+                val builder = AlertDialog.Builder(it.context)
+                builder.setTitle("멍메이트")
+                builder.setMessage("정말로 이 리뷰를 삭제하시겠습니까?")
+                builder.setPositiveButton("확인") { dialog, _ ->
+                    viewModel.deleteReviewForPlace(placeId, reviewId)
+                    dialog.dismiss()
+                }
+                builder.setNegativeButton("취소") { dialog, _ ->
+                    dialog.dismiss()
+                }
+                builder.create().show()
             }
         }
 
         override fun getItemCount(): Int = reviews.size
 
-        // This function updates the reviews list and notifies the RecyclerView of the changes
         fun updateReviews(newReviews: List<Review>) {
             reviews = newReviews
             notifyDataSetChanged()
