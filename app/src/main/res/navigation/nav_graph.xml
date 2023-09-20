@@ -121,6 +121,11 @@
         <action
             android:id="@+id/action_mainFragment_to_walkReviewHistoryFragment"
             app:destination="@id/walkReviewHistoryFragment" />
+        <action
+            android:id="@+id/action_mainFragment_to_fullScreenFragment"
+            app:destination="@id/fullScreenFragment"
+            app:enterAnim="@anim/from_bottom"
+            app:popEnterAnim="@anim/from_top" />
 
     </fragment>
     <fragment
@@ -247,5 +252,13 @@
         android:name="com.petpal.mungmate.ui.walkreview.WalkReviewHistoryFragment"
         android:label="fragment_walk_review_history"
         tools:layout="@layout/fragment_walk_review_history" />
+    <fragment
+        android:id="@+id/fullScreenFragment"
+        android:name="com.petpal.mungmate.ui.community.FullScreenFragment"
+        android:label="FullScreenFragment" >
+        <argument
+            android:name="img"
+            app:argType="string" />
+    </fragment>
 
 </navigation>
