@@ -30,18 +30,6 @@
                 android:layout_marginTop="8dp"
                 android:orientation="horizontal">
 
-<!--                <ToggleButton-->
-<!--                    android:id="@+id/toggleWalk"-->
-<!--                    android:layout_width="90dp"-->
-<!--                    android:layout_height="30dp"-->
-<!--                    android:layout_marginStart="16dp"-->
-<!--                    android:background="@drawable/toggle_button_animated_background"-->
-<!--                    android:textOff="산책중"-->
-<!--                    android:textOn="산책중 아님" />-->
-
-
-                <!-- weight 속성을 사용해 빈 공간을 채워넣는 View 추가 -->
-
                 <ImageView
                     android:id="@+id/imageViewWalkToggle"
                     android:layout_width="50dp"
@@ -59,9 +47,27 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginRight="8dp"
-                    android:text="필터"
-                    android:checked="false"/>
+                    android:checked="false"
+                    android:text="필터" />
 
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1" />
+
+                <ImageView
+                    android:id="@+id/imageViewMylocation"
+                    android:layout_width="35dp"
+                    android:layout_height="35dp"
+                    android:layout_marginRight="8dp"
+                    app:srcCompat="@drawable/my_location_24px" />
             </LinearLayout>
 
         </LinearLayout>
@@ -85,8 +91,6 @@
             android:layout_margin="8dp"
             android:gravity="center"
             android:text="혼자 산책하기" />
-
-
 
     </LinearLayout>
 
@@ -186,6 +190,11 @@
 
     </LinearLayout>
 </LinearLayout>
+
+    <ScrollView
+        android:layout_width="400dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="end">
 
     <LinearLayout
         android:id="@+id/DrawerLinear"
@@ -532,6 +541,11 @@
                 android:text="적용" />
         </LinearLayout>
 
-    </LinearLayout>
+
+
+
+</LinearLayout>
+    </ScrollView>
+
 
 </androidx.drawerlayout.widget.DrawerLayout>
