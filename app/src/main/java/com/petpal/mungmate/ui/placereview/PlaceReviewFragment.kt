@@ -17,6 +17,8 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 import com.petpal.mungmate.MainActivity
 import com.petpal.mungmate.R
 import com.petpal.mungmate.databinding.FragmentPlaceReviewBinding
@@ -33,11 +35,15 @@ class PlaceReviewFragment : Fragment() {
     private lateinit var reviewAdapter: ReviewAdapter
     private val viewModel: PlaceReviewViewModel by viewModels { PlaceReviewViewModelFactory(PlaceReviewRepository()) }
     private lateinit var mainActivity: MainActivity
+    private val auth= Firebase.auth
+    private val user=auth.currentUser
+    private val userUid=user?.uid
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+
         val placeName = arguments?.getString("place_name")
         val phone = arguments?.getString("phone")
         val roadAddressName = arguments?.getString("place_road_adress_name")
@@ -100,15 +106,17 @@ class PlaceReviewFragment : Fragment() {
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolderClass {
             val rowBinding = RowPlaceReviewBinding.inflate(layoutInflater, parent, false)
-            rowBinding.textViewPlaceReviewModify.visibility=View.VISIBLE
-            rowBinding.textViewPlaceReviewDelete.visibility=View.VISIBLE
+
+
             return ViewHolderClass(rowBinding)
 
         }
 
         override fun onBindViewHolder(holder: ViewHolderClass, position: Int) {
+
+
             val review = reviews[position]
-            holder.usernameTextView.text = review.userid
+            holder.usernameTextView.text = review.userNickname
             holder.dateTextView.text = review.date
             holder.ratingBar.rating = review.rating!!
             holder.commentTextView.text = review.comment
@@ -121,6 +129,14 @@ class PlaceReviewFragment : Fragment() {
                     .load(imageUrl)
                     .override(widthPx, heightPx) // 추가된 부분
                     .into(holder.reviewImageView)
+            }
+
+            if (userUid == review.userid) {
+                holder.placeReviewModify.visibility = View.VISIBLE
+                holder.placeReviewDelete.visibility = View.VISIBLE
+            } else {
+                holder.placeReviewModify.visibility = View.GONE
+                holder.placeReviewDelete.visibility = View.GONE
             }
             holder.placeReviewModify.setOnClickListener {
                 val bundle = Bundle()

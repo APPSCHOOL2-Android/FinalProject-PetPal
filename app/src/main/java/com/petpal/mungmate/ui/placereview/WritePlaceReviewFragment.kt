@@ -16,7 +16,9 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.SimpleTarget
 import com.bumptech.glide.request.transition.Transition
 import com.google.android.material.snackbar.Snackbar
+import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import com.petpal.mungmate.MainActivity
 import com.petpal.mungmate.R
@@ -34,7 +36,8 @@ class WritePlaceReviewFragment : Fragment() {
     private val db = FirebaseFirestore.getInstance()
     private val storage = FirebaseStorage.getInstance()
     private var selectedImageUri: Uri? = null
-
+    private val auth = Firebase.auth
+    private lateinit var userId:String
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -43,7 +46,9 @@ class WritePlaceReviewFragment : Fragment() {
         fragmentWritePlaceReviewBinding = FragmentWritePlaceReviewBinding.inflate(layoutInflater)
 
         val place = createPlaceFromArguments(arguments)
-
+        val user=auth.currentUser
+        val userNickname=arguments?.getString("userNickname")
+        userId= user?.uid.toString()
         fragmentWritePlaceReviewBinding.run {
             textViewplaceReviewName.text = place?.name
 
@@ -53,14 +58,14 @@ class WritePlaceReviewFragment : Fragment() {
 
             buttonPlaceReviewSubmit.setOnClickListener {
                 val rating = placeRatingBar.rating
-                val userid = "userid"  // 이 부분을 실제 사용자 ID로 업데이트해야 합니다.
+                val userid = userId  // 이 부분을 실제 사용자 ID로 업데이트해야 합니다.
                 val comment = editTextReviewContent.text.toString()
                 val date = getCurrentDate()
 
                 val imageUri = selectedImageUri
                 if (imageUri != null) {
                     uploadImageToStorage(imageUri) { imageUrl ->
-                        val review = Review(userid, date, rating, comment, imageUrl)
+                        val review = Review(userid, userNickname, date, rating, comment, imageUrl)
                         if (place != null) {
                             addReview(place, review)
                         }
