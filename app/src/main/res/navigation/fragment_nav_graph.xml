@@ -5,7 +5,6 @@
     android:id="@+id/fragment_nav_graph.xml"
     app:startDestination="@id/item_walk">
 
-
     <fragment
         android:id="@+id/item_community"
         android:name="com.petpal.mungmate.ui.community.CommunityFragment"
