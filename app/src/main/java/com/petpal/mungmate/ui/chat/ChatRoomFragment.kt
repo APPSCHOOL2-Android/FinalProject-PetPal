@@ -142,9 +142,11 @@ class ChatRoomFragment : Fragment() {
     
     // 메시지 전송
     private fun sendTextMessage(){
+        val content = fragmentChatRoomBinding.editTextMessage.text.toString()
+        fragmentChatRoomBinding.editTextMessage.text.clear()
         val message = Message(
             currentUserId,
-            fragmentChatRoomBinding.editTextMessage.text.toString(),
+            content,
             Timestamp.now(),
             null,
             MessageType.TEXT.code,

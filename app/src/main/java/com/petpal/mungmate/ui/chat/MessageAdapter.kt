@@ -3,6 +3,7 @@ package com.petpal.mungmate.ui.chat
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.petpal.mungmate.databinding.RowChatDateBinding
 import com.petpal.mungmate.databinding.RowChatReceiveMessageBinding
@@ -93,6 +94,9 @@ class MessageAdapter(private val chatViewModel: ChatViewModel): RecyclerView.Ada
         when(holder) {
             is SendTextViewHolder -> holder.bind(message)
             is ReceiveTextViewHolder -> holder.bind(message)
+            is DateViewHolder -> holder.bind(message)
+            is WalkMateRequestViewHolder -> holder.bind(message)
+            is WalkMateAcceptViewHolder -> holder.bind(message)
         }
     }
 
@@ -120,6 +124,7 @@ class MessageAdapter(private val chatViewModel: ChatViewModel): RecyclerView.Ada
         }
     }
 
+    // ViewModel에서 messages.value가 바뀌면 이걸 감지한 observer에서 setMessages() 호출해서 RecyclerView DataSet 변경
     fun setMessages(newMessages: List<Message>) {
         messages.clear()
         messages.addAll(newMessages)
@@ -166,13 +171,18 @@ class MessageAdapter(private val chatViewModel: ChatViewModel): RecyclerView.Ada
     inner class WalkMateRequestViewHolder(private val rowChatWalkMateRequestBinding: RowChatWalkMateRequestBinding): RecyclerView.ViewHolder(rowChatWalkMateRequestBinding.root){
         fun bind(message: Message) {
             rowChatWalkMateRequestBinding.run {
+                // 산책 요청 Message에 저장된 document key 값으로 match 객체 가져오기
                 val matchKey = message.content!!
+                
                 chatViewModel.getMatchByKey(matchKey) { document ->
                     if (document != null && document.exists()) {
                         val match = document.toObject(Match::class.java)
-                        val walkTimestamp = match?.walkTimestamp
-
-//                        textViewRequestDateTime.text =
+                        if (match != null) {
+                            // 산책 일시, 장소 표시
+                            val formattedWalkTimestamp = formatFirebaseTimestamp(match.walkTimestamp!!, "M월 d일 (E) a h:mm")
+                            textViewRequestDateTime.text = "일시 : $formattedWalkTimestamp"
+                            textViewRequestPlace.text = "장소 : ${match.walkPlace}"
+                        }
                     } else {
                         // Document를 찾지 못하거나 오류가 난 경우
                     }
@@ -182,14 +192,23 @@ class MessageAdapter(private val chatViewModel: ChatViewModel): RecyclerView.Ada
                     // TODO 수락 메시지 저장, 해당 메시지 visibility 안보이게 변경
                     // match 상태 변경
                     chatViewModel.updateFieldInMatchDocument(matchKey, "status", MatchStatus.ACCEPTED.code)
+
                 }
                 buttonReject.setOnClickListener {
                     // TODO 거절 메시지 저장 -> 거절의 경우에는 Match 자체를 삭제?
                     // match 상태 변경
                     chatViewModel.updateFieldInMatchDocument(matchKey, "status", MatchStatus.REJECTED.code)
+
                 }
             }
         }
+    }
+
+    // Firebase Timestamp 타입을 포맷 패턴의 문자열로 변환
+    fun formatFirebaseTimestamp(timestamp: Timestamp, format: String): String {
+        val date = timestamp.toDate()
+        val dateFormat = SimpleDateFormat(format, Locale.getDefault())
+        return dateFormat.format(date)
     }
 
     // 산책 수락
@@ -206,7 +225,5 @@ class MessageAdapter(private val chatViewModel: ChatViewModel): RecyclerView.Ada
     }
 
     // 산책 거절
-    inner class WalkMateRejectViewHolder(private val rowChatWalkMateRejectBinding: RowChatWalkMateRejectBinding): RecyclerView.ViewHolder(rowChatWalkMateRejectBinding.root){
-
-    }
+    inner class WalkMateRejectViewHolder(private val rowChatWalkMateRejectBinding: RowChatWalkMateRejectBinding): RecyclerView.ViewHolder(rowChatWalkMateRejectBinding.root){ }
 }
