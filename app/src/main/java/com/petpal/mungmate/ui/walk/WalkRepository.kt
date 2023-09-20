@@ -1,7 +1,9 @@
 package com.petpal.mungmate.ui.walk
 
+import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
+import com.google.firebase.ktx.Firebase
 import com.petpal.mungmate.model.Favorite
 import com.petpal.mungmate.model.KakaoSearchResponse
 import com.petpal.mungmate.model.Place
@@ -28,6 +30,9 @@ class WalkRepository {
 
     private val apiService: KakaoApiService = retrofit.create(KakaoApiService::class.java)
     private val db = FirebaseFirestore.getInstance()
+    private val auth= Firebase.auth
+    private val user=auth.currentUser
+    private val userUid=user?.uid
 
     suspend fun searchPlacesByKeyword(latitude: Double, longitude: Double, query: String): KakaoSearchResponse {
         return apiService.searchPlacesByKeyword(latitude, longitude, query = query)
@@ -133,6 +138,12 @@ class WalkRepository {
             trySend(count).isSuccess
         }
         awaitClose { registration.remove() }
+    }
+
+    suspend fun fetchUserNicknameByUid(uid: String): String? {
+        val userRef = db.collection("users").document(uid)
+        val document = userRef.get().await()
+        return document.getString("nickname")
     }
 
 }

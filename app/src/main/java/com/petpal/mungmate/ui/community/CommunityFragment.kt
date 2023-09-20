@@ -59,8 +59,7 @@ class CommunityFragment : Fragment() {
         communityBinding.run {
             toolbar()
             communityRecyclerView()
-//            refreshLayout()
-
+            refreshLayout()
 
 
         }

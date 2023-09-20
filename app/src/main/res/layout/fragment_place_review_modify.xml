@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_margin="@dimen/common_margin"
+    tools:context=".ui.placereview.PlaceReviewModifyFragment">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/materialPlaceReviewToolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="?attr/actionBarSize"
+            android:theme="?attr/actionBarTheme"
+            app:title="장소 리뷰 수정" />
+
+        <TextView
+            android:id="@+id/textViewplaceReviewNameModify"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/common_margin"
+            android:gravity="center"
+            android:text="부천 동물병원"
+            android:textAppearance="@style/TextAppearance.AppCompat.Large" />
+
+        <ImageView
+            android:id="@+id/imageViewPlaceReviewModify"
+            android:layout_width="300dp"
+            android:layout_height="150dp"
+            android:layout_gravity="center"
+            android:layout_marginTop="@dimen/common_margin"
+            android:src="@drawable/photo"
+            tools:src="@drawable/photo" />
+
+
+        <TextView
+            android:id="@+id/textViewPlaceReviewAnnouncementModify"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/common_margin"
+            android:gravity="center"
+            android:text="장소가 마음에 든 만큼 별점을 주세요"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
+
+        <RatingBar
+            android:id="@+id/placeRatingBarModify"
+            style="@android:style/Widget.DeviceDefault.Light.RatingBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="@dimen/common_margin"
+            android:numStars="5"
+            android:rating="3" />
+
+        <TextView
+            android:id="@+id/textViewPlaceReviewAnnouncement2Modify"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/common_margin"
+            android:gravity="center"
+            android:text="솔직한 리뷰를 작성해 주세요." />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/textField1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="다른 견주분들에게 도움이 될 수 있는 솔직한 리뷰 부탁드려요"
+            app:hintTextAppearance="@style/HintTextAppearance"
+            >
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/editTextReviewContentModify"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="top"
+                android:inputType="textMultiLine"
+                android:textSize="12sp"
+                android:lines="5"
+                android:maxLines="5" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <Button
+            android:id="@+id/buttonPlaceReviewSubmitModify"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/common_margin"
+            android:text="리뷰 수정하기" />
+
+
+    </LinearLayout>
+    <View
+        android:id="@+id/progressBackgroundModify"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#66000000"
+        android:visibility="gone" />
+
+    <ProgressBar
+        android:id="@+id/progressBarModify"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:visibility="gone"/>
+
+</RelativeLayout>

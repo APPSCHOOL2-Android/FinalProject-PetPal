@@ -17,6 +17,9 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
+import com.petpal.mungmate.MainActivity
 import com.petpal.mungmate.R
 import com.petpal.mungmate.databinding.FragmentPlaceReviewBinding
 import com.petpal.mungmate.databinding.RowPlaceReviewBinding
@@ -31,25 +34,35 @@ class PlaceReviewFragment : Fragment() {
     private lateinit var fragmentPlaceReviewBinding: FragmentPlaceReviewBinding
     private lateinit var reviewAdapter: ReviewAdapter
     private val viewModel: PlaceReviewViewModel by viewModels { PlaceReviewViewModelFactory(PlaceReviewRepository()) }
+    private lateinit var mainActivity: MainActivity
+    private val auth= Firebase.auth
+    private val user=auth.currentUser
+    private val userUid=user?.uid
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+
         val placeName = arguments?.getString("place_name")
         val phone = arguments?.getString("phone")
         val roadAddressName = arguments?.getString("place_road_adress_name")
         val placeCategory = arguments?.getString("place_category")
-        val placeId=arguments?.getString("place_id")
+        val placeId = arguments?.getString("place_id")
+        if(placeId!=null) {
+            Log.d("placeididid", placeId)
+        }else{
+            Log.d("placeididid", "null이야")
+        }
+        reviewAdapter = placeId?.let { ReviewAdapter(emptyList(), it) }!!
         val avgRating=arguments?.getFloat("avgRating")
-        Log.d("avgRating",avgRating.toString())
 
+        mainActivity = activity as MainActivity
         fragmentPlaceReviewBinding = FragmentPlaceReviewBinding.inflate(layoutInflater)
 
-        reviewAdapter = ReviewAdapter(emptyList())
+       // reviewAdapter = placeId?.let { ReviewAdapter(emptyList(), it) }!!
         fragmentPlaceReviewBinding.reviewsRecyclerView.adapter = reviewAdapter
         fragmentPlaceReviewBinding.reviewsRecyclerView.layoutManager = LinearLayoutManager(requireContext())
-
 
         if (avgRating != null) { fragmentPlaceReviewBinding.placeUserRatingBar1.rating=avgRating }
         fragmentPlaceReviewBinding.textViewPlaceReviewTitle.text = placeName
@@ -79,28 +92,35 @@ class PlaceReviewFragment : Fragment() {
         return fragmentPlaceReviewBinding.root
     }
 
-    inner class ReviewAdapter(private var reviews: List<Review>) : RecyclerView.Adapter<ReviewAdapter.ViewHolderClass>() {
+    inner class ReviewAdapter(private var reviews: List<Review>,private val placeId: String) : RecyclerView.Adapter<ReviewAdapter.ViewHolderClass>() {
         inner class ViewHolderClass(rowBinding: RowPlaceReviewBinding) : RecyclerView.ViewHolder(rowBinding.root) {
             val ratingBar: RatingBar = rowBinding.placeReviewDetailRatingBar
             val usernameTextView: TextView = rowBinding.textViewPlaceReviewDetailUserName
             val dateTextView: TextView = rowBinding.textViewPlaceReviewDetailDate
             val commentTextView: TextView = rowBinding.textView4
             val reviewImageView: ImageView = rowBinding.imageView11
+            val placeReviewModify:TextView=rowBinding.textViewPlaceReviewModify
+            val placeReviewDelete:TextView=rowBinding.textViewPlaceReviewDelete
+
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolderClass {
             val rowBinding = RowPlaceReviewBinding.inflate(layoutInflater, parent, false)
+
+
             return ViewHolderClass(rowBinding)
+
         }
 
         override fun onBindViewHolder(holder: ViewHolderClass, position: Int) {
+
+
             val review = reviews[position]
-            holder.usernameTextView.text = review.userid
+            holder.usernameTextView.text = review.userNickname
             holder.dateTextView.text = review.date
             holder.ratingBar.rating = review.rating!!
             holder.commentTextView.text = review.comment
-            review.imageRes?.let { Log.d("imagereal", it) }
-
+            val reviewId = "${review.date}_${review.userid}"//리뷰의 문서 id 날짜+userid로 구성
             val widthPx = dpToPx(100, holder.reviewImageView.context)
             val heightPx = dpToPx(100, holder.reviewImageView.context)
 
@@ -110,7 +130,31 @@ class PlaceReviewFragment : Fragment() {
                     .override(widthPx, heightPx) // 추가된 부분
                     .into(holder.reviewImageView)
             }
+
+            if (userUid == review.userid) {
+                holder.placeReviewModify.visibility = View.VISIBLE
+                holder.placeReviewDelete.visibility = View.VISIBLE
+            } else {
+                holder.placeReviewModify.visibility = View.GONE
+                holder.placeReviewDelete.visibility = View.GONE
+            }
+            holder.placeReviewModify.setOnClickListener {
+                val bundle = Bundle()
+                bundle.putString("reviewUserId", review.userid)
+                bundle.putString("reviewDate", review.date)
+                bundle.putString("reviewContent", review.comment)
+                bundle.putFloat("reviewRating", review.rating!!)
+                bundle.putString("reviewImageURL", review.imageRes)
+                bundle.putString("placeId",placeId)
+                mainActivity.navigate(R.id.action_placeReviewFragment_to_placeReviewModifyFragment,bundle)
+                // Toast.makeText(holder.itemView.context, "Modify clicked for position $position", Toast.LENGTH_SHORT).show()
+            }
+
+            holder.placeReviewDelete.setOnClickListener {
+                viewModel.deleteReviewForPlace(placeId, reviewId)
+            }
         }
+
         override fun getItemCount(): Int = reviews.size
 
         // This function updates the reviews list and notifies the RecyclerView of the changes
@@ -125,6 +169,7 @@ class PlaceReviewFragment : Fragment() {
         return (dp * density).toInt()
     }
 }
+
 
 class PlaceReviewViewModelFactory(private val repository: PlaceReviewRepository) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {

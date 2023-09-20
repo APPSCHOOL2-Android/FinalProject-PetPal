@@ -3,16 +3,15 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_marginEnd="@dimen/common_margin"
+    android:layout_height="wrap_content"
     android:layout_marginStart="@dimen/common_margin"
-    android:layout_height="wrap_content">
+    android:layout_marginEnd="@dimen/common_margin">
 
     <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/communityCommentProfileImage"
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:layout_gravity="center"
-
         android:layout_marginTop="@dimen/common_margin"
         android:layout_marginBottom="@dimen/common_margin"
         android:background="@android:color/transparent"
@@ -34,56 +33,39 @@
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/communityCommentUserNickName"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textStyle="bold"
+        android:layout_width="41dp"
+        android:layout_height="23dp"
         android:layout_marginStart="@dimen/common_margin"
         android:text="닉네임"
         android:textAppearance="@style/TextAppearance.AppCompat.Small"
         android:textColor="@color/black"
+        android:textStyle="bold"
+
         app:layout_constraintStart_toEndOf="@id/communityCommentProfileImage"
         app:layout_constraintTop_toTopOf="@id/communityCommentProfileImage" />
 
-    <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/communityCommentUserPlace"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="제주 제주시 애월읍"
-        android:textAppearance="@style/TextAppearance.AppCompat.Small"
-        app:layout_constraintStart_toStartOf="@id/communityCommentUserNickName"
-        app:layout_constraintTop_toBottomOf="@id/communityCommentUserNickName" />
-
-    <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/placeDateDistinction"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:paddingStart="@dimen/common_small_padding"
-        android:paddingEnd="@dimen/common_small_padding"
-        android:text="@string/place_date_distinction"
-        app:layout_constraintEnd_toStartOf="@id/communityCommentPostDateCreated"
-        app:layout_constraintStart_toEndOf="@id/communityCommentUserPlace"
-        app:layout_constraintTop_toBottomOf="@id/communityCommentUserNickName" />
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/communityCommentPostDateCreated"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="30분전"
+
         android:textAppearance="@style/TextAppearance.AppCompat.Small"
-        app:layout_constraintStart_toEndOf="@id/placeDateDistinction"
+        app:layout_constraintStart_toStartOf="@id/communityCommentUserNickName"
         app:layout_constraintTop_toBottomOf="@id/communityCommentUserNickName" />
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/communityCommentContent"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:maxLength="300"
+        android:layout_height="match_parent"
         android:layout_marginTop="@dimen/common_small_margin"
-        app:layout_constraintEnd_toEndOf="@id/communityCommentMenuImageButton"
+        android:maxLength="300"
         android:text="rrrrrrrrrrrrrrrrrddddddddddddddddddddddddddddddddddddddddddddddddddddrrrrrrrrrrrrrrrrrrrrrrrr"
         android:textAppearance="@style/TextAppearance.AppCompat.Body2"
-        app:layout_constraintStart_toStartOf="@id/communityCommentUserPlace"
-        app:layout_constraintTop_toBottomOf="@id/communityCommentPostDateCreated" />
+        app:layout_constraintEnd_toEndOf="@id/communityCommentMenuImageButton"
+        app:layout_constraintStart_toStartOf="@id/communityCommentProfileImage"
+        app:layout_constraintTop_toBottomOf="@id/communityCommentProfileImage" />
 
 
     <LinearLayout
@@ -124,11 +106,11 @@
                 android:id="@+id/communityCommentFavoriteCounter"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:text="0"
-                android:gravity="center"
-                android:textStyle="bold"
                 android:layout_marginStart="@dimen/common_small_margin"
+                android:gravity="center"
+                android:text="0"
                 android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1"
+                android:textStyle="bold"
                 app:layout_constraintBottom_toBottomOf="@id/communityCommentFavoriteTextView"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@id/communityCommentFavoriteTextView"
@@ -156,8 +138,8 @@
             android:layout_gravity="center"
             android:layout_marginStart="@dimen/common_small_margin"
             android:text="0"
-            android:textStyle="bold"
-            android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1" />
+            android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1"
+            android:textStyle="bold" />
     </LinearLayout>
 
     <com.google.android.material.divider.MaterialDivider
