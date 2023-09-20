@@ -199,13 +199,20 @@
     <include app:graph="@navigation/order_history" />
     <fragment
         android:id="@+id/userInfoFragment"
-        android:name="com.petpal.mungmate.user.UserInfoFragment"
+        android:name="com.petpal.mungmate.ui.user.UserInfoFragment"
         android:label="fragment_user_info"
         tools:layout="@layout/fragment_user_info" >
         <argument
             android:name="isRegister"
             app:argType="boolean"
             android:defaultValue="false" />
+        <action
+            android:id="@+id/action_userInfoFragment_to_addPetFragment"
+            app:destination="@id/addPetFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
     </fragment>
     <fragment
         android:id="@+id/productRegistrationFragment"
@@ -220,6 +227,15 @@
             android:name="isAdd"
             app:argType="boolean"
             android:defaultValue="true" />
+        <action
+            android:id="@+id/action_addPetFragment_to_mainFragment"
+            app:destination="@id/mainFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim"
+            app:popUpTo="@id/userInfoFragment"
+            app:popUpToInclusive="true" />
     </fragment>
     <fragment
         android:id="@+id/userStartFragment"
@@ -227,19 +243,23 @@
         android:label="fragment_user_start"
         tools:layout="@layout/fragment_user_start" >
         <action
-            android:id="@+id/action_userStartFragment_to_addPetFragment"
-            app:destination="@id/addPetFragment"
-            app:enterAnim="@anim/nav_default_enter_anim"
-            app:exitAnim="@anim/nav_default_exit_anim"
-            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
-            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
-        <action
             android:id="@+id/action_userStartFragment_to_userInfoFragment"
             app:destination="@id/userInfoFragment"
             app:enterAnim="@anim/nav_default_enter_anim"
             app:exitAnim="@animator/nav_default_exit_anim"
             app:popEnterAnim="@anim/nav_default_pop_enter_anim"
-            app:popExitAnim="@animator/nav_default_pop_exit_anim" />
+            app:popExitAnim="@animator/nav_default_pop_exit_anim"
+            app:popUpTo="@id/userStartFragment"
+            app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_userStartFragment_to_mainFragment"
+            app:destination="@id/mainFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim"
+            app:popUpTo="@id/userStartFragment"
+            app:popUpToInclusive="true" />
     </fragment>
 
     <fragment
