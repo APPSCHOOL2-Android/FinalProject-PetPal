@@ -157,7 +157,6 @@ class CommunityPostDetailFragment : Fragment() {
 //
 //        fadeOut.duration = 500
 //        communityPostDetailNestedScrollView.setOnScrollChangeListener { _, _, scrollY, _, _ ->
-//            Log.d("scrollY", scrollY.toString())
 //
 //            if (scrollY >= targetScrollPosition && !isFabVisible) {
 //
@@ -271,12 +270,11 @@ class CommunityPostDetailFragment : Fragment() {
             val postImagesList = documentSnapshot.get("postImages") as? List<*>
             var postImagesGetList = mutableListOf<String>()
             if (postImagesList!!.isNotEmpty()) {
-                val cleanedString = postImagesList?.get(0).toString().replace("{image=", postGetId)
+                val cleanedString = postImagesList?.get(0).toString().replace("{image=", "")
                 val imageUrl = cleanedString.trim()
                 val imageUrlWithoutBrace = imageUrl.removeSuffix("}")
                 postImagesGetList.add(imageUrlWithoutBrace)
             }
-
 
             val postLike = documentSnapshot.getLong("postLike")
 
@@ -299,9 +297,9 @@ class CommunityPostDetailFragment : Fragment() {
                 communityPostDetailBinding.communityPostDetailCommentCount.text =
                     "댓글 ${postCommentList.size.toString()}"
                 communityDetailCommentAdapter.updateData(postCommentList)
-                Log.d("성공", postCommentList.toString())
+
             } else {
-                Log.e("오류", "postComment 데이터를 가져오지 못했습니다.")
+
             }
 
             val postContent = documentSnapshot.getString("postContent")
@@ -330,7 +328,7 @@ class CommunityPostDetailFragment : Fragment() {
                     .diskCacheStrategy(DiskCacheStrategy.ALL)
                     .fitCenter()
                     .into(communityPostDetailProfileImage)
-                Log.d("확인",postImagesGetList[0].toString())
+
                 if (postImagesList != null) {
                     if (postImagesGetList.isNotEmpty()) {
                         Glide
