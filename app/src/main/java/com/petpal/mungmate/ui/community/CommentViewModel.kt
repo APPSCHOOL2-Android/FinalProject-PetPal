@@ -12,5 +12,9 @@ class CommentViewModel : ViewModel() {
     fun setCommentList(commentList: MutableList<Comment>) {
         _postCommentList.value = commentList
     }
-
+    fun deleteComment(commentToDelete: Comment) {
+        val currentList = _postCommentList.value ?: mutableListOf()
+        currentList.remove(commentToDelete)
+        _postCommentList.value = currentList
+    }
 }

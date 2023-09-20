@@ -13,6 +13,8 @@ import com.airbnb.lottie.LottieAnimationView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.google.android.material.snackbar.Snackbar
+import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.FirebaseFirestore
 import com.petpal.mungmate.R
 import com.petpal.mungmate.databinding.RowCommunityCommentBinding
 import com.petpal.mungmate.model.Comment
@@ -23,7 +25,8 @@ import java.util.TimeZone
 class CommunityDetailCommentAdapter(
     private val context: Context,
     private val postCommentList: MutableList<Comment>,
-    private val postGetId: String
+    private val postGetId: String,
+    private val commentViewModel: CommentViewModel
 ) :
     RecyclerView.Adapter<CommunityDetailCommentAdapter.ViewHolder>() {
 
@@ -59,7 +62,7 @@ class CommunityDetailCommentAdapter(
         val commentList = postCommentList[position]
         Glide
             .with(context)
-            .load("https://mblogthumb-phinf.pstatic.net/MjAxOTEyMTNfMTQx/MDAxNTc2MjAyNzE5NDE0.B-NhNQS5QdweUBY53sWNGA8cJQUupeQeza7ognzYmGUg.1zj3ZPxEc2QrCJ2y5O--fmvMl2yljMb3uZQn6C1xsdUg.JPEG.369ginseng/1576202724454.jpg?type=w800")
+            .load(commentList.commentUserImage)
             .diskCacheStrategy(DiskCacheStrategy.ALL)
             .fitCenter()
             .into(holder.communityProfileImage)
@@ -90,19 +93,43 @@ class CommunityDetailCommentAdapter(
 
         holder.communityCommentMenuImageButton.setOnClickListener { view ->
             val popupMenu = PopupMenu(context, view)
+
             popupMenu.inflate(R.menu.community_post_detail_comment)
 
-            popupMenu.setOnMenuItemClickListener {
-                when (it.itemId) {
-                    R.id.item_comment_delete -> {
-                        Snackbar.make(view, "댓글 삭제하기", Snackbar.LENGTH_SHORT).show()
-                        true
-                    }
+            holder.communityCommentMenuImageButton.setOnClickListener { view ->
+                val popupMenu = PopupMenu(context, view)
+                popupMenu.inflate(R.menu.community_post_detail_comment)
 
-                    else -> false
+                popupMenu.setOnMenuItemClickListener {
+                    when (it.itemId) {
+                        R.id.item_comment_delete -> {
+                            val commentToDelete = postCommentList[holder.adapterPosition]
+
+                            Log.d("이건 뭐죠?",commentToDelete.toString())
+
+                            val db = FirebaseFirestore.getInstance()
+                            db.collection("Post").document(postGetId).update(
+                                "postComment",
+                                FieldValue.arrayRemove(commentToDelete)
+                            ).addOnSuccessListener {
+                                commentViewModel.deleteComment(commentToDelete)
+                                postCommentList.remove(commentToDelete)
+                                notifyDataSetChanged()
+                                Snackbar.make(view, "댓글이 삭제되었습니다.", Snackbar.LENGTH_SHORT).show()
+                            }.addOnFailureListener { e ->
+
+                                Log.e("Firestore", "댓글 삭제 실패: $e")
+                                Snackbar.make(view, "댓글 삭제 실패: $e", Snackbar.LENGTH_SHORT).show()
+                            }
+
+                            true
+                        }
+
+                        else -> false
+                    }
                 }
+                popupMenu.show()
             }
-            popupMenu.show()
         }
 
         var isClicked = false

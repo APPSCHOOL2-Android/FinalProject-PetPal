@@ -54,6 +54,7 @@ class CommunityPostDetailFragment : Fragment() {
     private val auth = FirebaseAuth.getInstance()
     val user = auth.currentUser
     var nickname = ""
+    var userImage = ""
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -75,6 +76,7 @@ class CommunityPostDetailFragment : Fragment() {
             getFireStoreUserInfo()
             commentViewModel.postCommentList.observe(viewLifecycleOwner) { commentList ->
                 communityDetailCommentAdapter.updateData(commentList)
+
                 communityPostDetailCommentCount.text = "댓글 ${commentList.size.toString()}"
             }
             val iconColorNotInput =
@@ -291,7 +293,7 @@ class CommunityPostDetailFragment : Fragment() {
                     val comment = Comment(
                         commentUid = dataMap["commentUid"] as String?,
                         commentNickName = dataMap["commentNickName"] as String?,
-                        commentUserPlace = dataMap["commentUserPlace"] as String?,
+                        commentUserImage = dataMap["commentUserImage"] as String?,
                         commentDateCreated = dataMap["commentDateCreated"] as String?,
                         commentContent = dataMap["commentContent"] as String?,
                         commentLike = dataMap["commentLike"] as Long,
@@ -370,7 +372,12 @@ class CommunityPostDetailFragment : Fragment() {
     private fun FragmentCommunityPostDetailBinding.communityDetailRecyclerView() {
         communityPostDetailCommentRecyclerView.run {
             communityDetailCommentAdapter =
-                CommunityDetailCommentAdapter(requireContext(), mutableListOf(), postGetId)
+                CommunityDetailCommentAdapter(
+                    requireContext(),
+                    mutableListOf(),
+                    postGetId,
+                    commentViewModel
+                )
             adapter = communityDetailCommentAdapter
             setHasFixedSize(true)
             layoutManager = LinearLayoutManager(requireContext())
@@ -384,12 +391,12 @@ class CommunityPostDetailFragment : Fragment() {
 
             val currentDateTime = Date()
             val formattedDateTime = formatDateTimeToNewFormat(currentDateTime)
-            Log.d("닉네임이요",nickname)
+            Log.d("닉네임이요", nickname)
             val newComment = Comment(
-                commentId = UUID.randomUUID().toString(),
+                UUID.randomUUID().toString(),
                 user?.uid,
                 nickname,
-                "장소",
+                userImage,
                 formattedDateTime,
                 communityPostDetailBinding.communityPostDetailCommentTextInputEditText.text.toString(),
                 0,
@@ -434,11 +441,15 @@ class CommunityPostDetailFragment : Fragment() {
                     if (document != null) {
 
                         val getNickname = document.getString("nickname")
+                        val getUserImage = document.getString("userImage")
 
                         Log.d("닉네임", getNickname.toString())
-
                         if (getNickname != null) {
                             nickname = getNickname
+                        }
+
+                        if (getUserImage != null) {
+                            userImage = getUserImage
                         }
 
                     } else {
@@ -450,6 +461,7 @@ class CommunityPostDetailFragment : Fragment() {
                 }
         }
     }
+
 
     override fun onDestroy() {
         super.onDestroy()
