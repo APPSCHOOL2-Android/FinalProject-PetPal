@@ -1,9 +1,9 @@
 package com.petpal.mungmate.model
 
-import android.net.Uri
+import android.graphics.Bitmap
 
 data class PetData(
-    val imageURI: Uri? = null,
+    val petImageUrl: String,
     val name: String,
     val breed: String,
     val birth: String,
@@ -12,17 +12,4 @@ data class PetData(
     val isNeutered: Boolean,
     val weight: Double,
     val character: String,
-) {
-    fun toHashMap(): HashMap<*, *> {
-        return hashMapOf(
-            "imageURI" to imageURI,
-            "name" to name,
-            "breed" to breed,
-            "birth" to birth,
-            "petSex" to petSex,
-            "isNeutered" to isNeutered,
-            "weight" to weight,
-            "character" to character
-        )
-    }
-}
+)
