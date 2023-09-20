@@ -16,15 +16,14 @@ import com.google.android.material.snackbar.Snackbar
 import com.petpal.mungmate.R
 import com.petpal.mungmate.databinding.RowCommunityCommentBinding
 import com.petpal.mungmate.model.Comment
-import com.petpal.mungmate.model.Post
 import java.text.SimpleDateFormat
 import java.util.Date
-import java.util.Locale
 import java.util.TimeZone
 
 class CommunityDetailCommentAdapter(
     private val context: Context,
-    private val postCommentList: MutableList<Comment>
+    private val postCommentList: MutableList<Comment>,
+    private val postGetId: String
 ) :
     RecyclerView.Adapter<CommunityDetailCommentAdapter.ViewHolder>() {
 
@@ -95,7 +94,7 @@ class CommunityDetailCommentAdapter(
 
             popupMenu.setOnMenuItemClickListener {
                 when (it.itemId) {
-                    R.id.item_comment_report -> {
+                    R.id.item_comment_delete -> {
                         Snackbar.make(view, "댓글 신고하기", Snackbar.LENGTH_SHORT).show()
                         true
                     }
