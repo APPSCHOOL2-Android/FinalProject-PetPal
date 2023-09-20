@@ -24,7 +24,7 @@ class WalkViewModel(private val repository: WalkRepository) : ViewModel() {
     val favoriteCount: StateFlow<Int?> = _favoriteCount
     val reviewsForPlace = MutableLiveData<List<Review>>()
     val averageRatingForPlace = MutableLiveData<Float>()
-
+    val userNickname: MutableLiveData<String?> = MutableLiveData()
     fun searchPlacesByKeyword(latitude: Double, longitude: Double, query: String) {
         viewModelScope.launch {
             try {
@@ -140,6 +140,16 @@ class WalkViewModel(private val repository: WalkRepository) : ViewModel() {
                 repository.removeUserFavorite(placeId, userId)
             } catch (e: Exception) {
                 errorMessage.postValue(e.localizedMessage ?: "Failed to remove favorite")
+            }
+        }
+    }
+    fun fetchUserNickname(userId: String) {
+        viewModelScope.launch {
+            try {
+                val nickname = repository.fetchUserNicknameByUid(userId)
+                userNickname.postValue(nickname)
+            } catch (e: Exception) {
+                errorMessage.postValue(e.localizedMessage ?: "Failed to fetch user's nickname")
             }
         }
     }

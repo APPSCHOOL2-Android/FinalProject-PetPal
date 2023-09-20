@@ -22,5 +22,10 @@ class PlaceReviewViewModel(private val repository: PlaceReviewRepository) : View
             }
         }
     }
+    fun deleteReviewForPlace(placeId: String, reviewId: String) {
+        viewModelScope.launch {
+            repository.deleteReviewForPlace(placeId, reviewId)
+        }
+    }
 }
 

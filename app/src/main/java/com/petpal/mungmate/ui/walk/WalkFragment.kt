@@ -37,6 +37,8 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.chip.Chip
 import com.google.android.material.snackbar.Snackbar
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 import com.petpal.mungmate.MainActivity
 import com.petpal.mungmate.R
 import com.petpal.mungmate.databinding.FragmentWalkBinding
@@ -64,6 +66,9 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
     private lateinit var initialBottomSheetView: View
     private lateinit var bottomSheetDialog: BottomSheetDialog
     private var isHeartImageUpdated = false
+    private val auth = Firebase.auth
+    private lateinit var userId:String
+    private lateinit var userNickname:String
     companion object {
         const val REQUEST_LOCATION_PERMISSION = 1
 
@@ -87,6 +92,14 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
         setupMapView()
         setupButtonListeners()
         observeViewModel()
+        val user=auth.currentUser
+        userId= user?.uid.toString()
+
+        viewModel.fetchUserNickname(userId)
+
+        viewModel.userNickname.observe(viewLifecycleOwner){
+            userNickname=it!!
+        }
 
         return fragmentWalkBinding.root
     }
@@ -328,11 +341,11 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
             viewModel.fetchReviewCount(it)
             viewModel.fetchLatestReviewsForPlace(it)
             viewModel.fetchPlaceInfoFromFirestore(it)
-            viewModel.fetchIsPlaceFavoritedByUser(it, "userid")  // Removed the collect operation
+            viewModel.fetchIsPlaceFavoritedByUser(it, userId)  // Removed the collect operation
             viewModel.fetchAverageRatingForPlace(it)
         }
 
-        lifecycleScope.launch {  // Launching a coroutine
+        lifecycleScope.launch {
             //바텀시트의 좋아요 상태에 따라 하트 이미지 변경
             viewModel.isPlaceFavorited.collect { isFavorited ->
                 isFavorited?.let {
@@ -491,14 +504,14 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
                 if (!isFavorited1) {
                     isFavorited1 = true
                     setImageResource(R.drawable.filled_heart)
-                    val favorite = Favorite("userid")
+                    val favorite = Favorite(userId)
                     viewModel.addPlaceToFavorite(place, favorite)
                     val bottomplacelayout:CoordinatorLayout=initialBottomSheetView.findViewById(R.id.bottom_place_layout)
                     Snackbar.make(bottomplacelayout, "반영되었습니다.", Snackbar.LENGTH_SHORT).show()
                 } else {
                     isFavorited1 = false
                     setImageResource(R.drawable.empty_heart)
-                    viewModel.removeFavorite(placeId!!, "userid")
+                    viewModel.removeFavorite(placeId!!, userId)
                     val bottomplacelayout:CoordinatorLayout=initialBottomSheetView.findViewById(R.id.bottom_place_layout)
                     Snackbar.make(bottomplacelayout, "반영되었습니다.", Snackbar.LENGTH_SHORT).show()
                 }
@@ -525,6 +538,7 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
             bundle.putString("place_long", selectedPlace?.x.toString())
             bundle.putString("place_lat", selectedPlace?.y.toString())
             bundle.putString("phone", selectedPlace?.phone)
+            bundle.putString("userNickname",userNickname)
             bundle.putString("place_road_adress_name", selectedPlace?.road_address_name)
 
             mainActivity.navigate(R.id.action_mainFragment_to_writePlaceReviewFragment, bundle)
@@ -534,9 +548,11 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
         initialBottomSheetView.findViewById<TextView>(R.id.placeUserReview1).setOnClickListener {
             detailDialog.setContentView(detailCardView)
             detailRating.rating=latestReviews!![0].rating!!
-            detailUserName.text=latestReviews!![0].userid
+            detailUserName.text=latestReviews!![0].userNickname
             detailDate.text=latestReviews!![0].date
             detailContent.text=latestReviews!![0].comment
+            detailDialog.findViewById<TextView>(R.id.textViewPlaceReviewModify)?.visibility=View.GONE
+            detailDialog.findViewById<TextView>(R.id.textViewPlaceReviewDelete)?.visibility=View.GONE
             latestReviews!![0].imageRes?.let { imageUrl ->
                 Glide.with(detailImage.context)
                     .load(imageUrl)
@@ -571,9 +587,11 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
         initialBottomSheetView.findViewById<TextView>(R.id.placeUserReview2).setOnClickListener {
 
             detailRating.rating=latestReviews!![1].rating!!
-            detailUserName.text=latestReviews!![1].userid
+            detailUserName.text=latestReviews!![1].userNickname
             detailDate.text=latestReviews!![1].date
             detailContent.text=latestReviews!![1].comment
+            detailDialog.findViewById<TextView>(R.id.textViewPlaceReviewModify)?.visibility=View.GONE
+            detailDialog.findViewById<TextView>(R.id.textViewPlaceReviewDelete)?.visibility=View.GONE
             latestReviews!![1].imageRes?.let { imageUrl ->
                 Glide.with(detailImage.context)
                     .load(imageUrl)
@@ -610,7 +628,7 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
             avgRatingBundle.putString("phone", selectedPlace?.phone)
             avgRatingBundle.putString("place_road_adress_name", selectedPlace?.road_address_name)
             avgRatingBundle.putString("place_category", selectedPlace?.category_group_name)
-
+            avgRatingBundle.putString("userNickname",userNickname)
             mainActivity.navigate(R.id.action_mainFragment_to_placeReviewFragment, avgRatingBundle)
             bottomSheetDialog.dismiss()
         }
