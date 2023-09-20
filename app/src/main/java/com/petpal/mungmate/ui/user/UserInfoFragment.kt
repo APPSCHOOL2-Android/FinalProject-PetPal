@@ -1,7 +1,7 @@
 package com.petpal.mungmate.ui.user
 
 import android.content.Intent
-import android.net.Uri
+import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -12,6 +12,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import com.bumptech.glide.Glide
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.snackbar.Snackbar
 import com.petpal.mungmate.MainActivity
@@ -20,8 +21,6 @@ import com.petpal.mungmate.databinding.FragmentUserInfoBinding
 import com.petpal.mungmate.model.UserBasicInfoData
 import com.petpal.mungmate.utils.gallerySetting
 import com.petpal.mungmate.utils.launchGallery
-import com.petpal.mungmate.utils.loadAndResizeImageFromUri
-import com.petpal.mungmate.utils.resizeAndCropBitmap
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -42,13 +41,8 @@ class UserInfoFragment : Fragment() {
     ): View? {
         _fragmentUserInfoBinding = FragmentUserInfoBinding.inflate(layoutInflater)
         mainActivity = activity as MainActivity
-        galleryLauncher = gallerySetting() { bitmap, uri ->
-            //크기 조정
-            val resizedBitmap = resizeAndCropBitmap(bitmap, 120, 120)
-            fragmentUserInfoBinding.startMainImageView.setImageBitmap(resizedBitmap)
-
-            //저장할 uri 태그에 붙여두기
-            fragmentUserInfoBinding.startMainImageView.tag = uri
+        galleryLauncher = gallerySetting() { bitmap ->
+            fragmentUserInfoBinding.startMainImageView.setImageBitmap(bitmap)
         }
 
         return fragmentUserInfoBinding.root
@@ -67,18 +61,13 @@ class UserInfoFragment : Fragment() {
                 // userData를 사용하여 사용자 정보 표시
                 if (userData != null) {
                     fragmentUserInfoBinding.run {
+                        //닉네임 표시
                         textInputUserNicknameText.setText(userData.displayName)
 
-                        //사용자 photoUrl로부터 이미지 받아와서 사이즈 조정하여 보여주기
-                        loadAndResizeImageFromUri(
-                            requireContext(),
-                            userData.photoUrl!!,
-                            startMainImageView,
-                            120,
-                            120
-                        )
-                        //저장할 uri 태그에 붙여두기
-                        startMainImageView.tag = userData.photoUrl
+                        //프로필 사진 표시
+                        Glide.with(requireContext())
+                            .load(userData.photoUrl)
+                            .into(startMainImageView)
                     }
 
                     //authentication의 uid
@@ -133,20 +122,13 @@ class UserInfoFragment : Fragment() {
             //사진 선택 버튼을 통해 갤러리에서 사진 불러오기
             infoSelectImageButton.setOnClickListener {
                 launchGallery(galleryLauncher)
-//                loadImageFromGallery() { bitmap, uri ->
-//                    //크기 조정
-//                    val resizedBitmap = resizeBitmap(bitmap, 120, 120)
-//                    startMainImageView.setImageBitmap(resizedBitmap)
-//
-//                    //저장할 uri 태그에 붙여두기
-//                    startMainImageView.tag = uri
-//                }
             }
 
             infoToNextButton.setOnClickListener {
 
+                //입력한 데이터로부터 저장할 데이터 구성하기
                 val userInfoData = UserBasicInfoData(
-                    if (startMainImageView.tag == null) null else startMainImageView.tag as Uri,
+                    (startMainImageView.drawable as BitmapDrawable).bitmap,
                     textInputUserNicknameText.text.toString(),
                     textInputUserBirthText.text.toString(),
                     switchUserInfo.isChecked,

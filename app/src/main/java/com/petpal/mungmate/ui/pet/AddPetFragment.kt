@@ -1,7 +1,8 @@
 package com.petpal.mungmate.ui.pet
 
 import android.content.Intent
-import android.net.Uri
+import android.graphics.Bitmap
+import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -19,15 +20,18 @@ import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.StorageReference
+import com.google.firebase.storage.ktx.storage
 import com.petpal.mungmate.R
 import com.petpal.mungmate.databinding.FragmentAddPetBinding
+import com.petpal.mungmate.model.FirestoreUserBasicInfoData
 import com.petpal.mungmate.model.PetData
 import com.petpal.mungmate.model.UserBasicInfoData
 import com.petpal.mungmate.ui.user.UserViewModel
 import com.petpal.mungmate.utils.gallerySetting
 import com.petpal.mungmate.utils.launchGallery
-import com.petpal.mungmate.utils.resizeAndCropBitmap
 import kotlinx.coroutines.launch
+import java.io.ByteArrayOutputStream
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -48,13 +52,8 @@ class AddPetFragment : Fragment() {
     ): View? {
         _fragmentAddPetBinding = FragmentAddPetBinding.inflate(layoutInflater)
         userViewModel = ViewModelProvider(requireActivity())[UserViewModel::class.java]
-        galleryLauncher = gallerySetting() { bitmap, uri ->
-            //크기 조정
-            val resizedBitmap = resizeAndCropBitmap(bitmap, 120, 120)
-            fragmentAddPetBinding.imageViewAddPet.setImageBitmap(resizedBitmap)
-
-            //저장할 uri 태그에 붙여두기
-            fragmentAddPetBinding.imageViewAddPet.tag = uri
+        galleryLauncher = gallerySetting() { bitmap ->
+            fragmentAddPetBinding.imageViewAddPet.setImageBitmap(bitmap)
         }
 
         // StateFlow를 사용하여 사용자 데이터 관찰
@@ -107,17 +106,9 @@ class AddPetFragment : Fragment() {
                 autoCompleteTextViewPetBreed.setAdapter(adapter)
             }
 
+            //갤러리에서 사진 선택
             buttonSelectPetPhoto.setOnClickListener {
                 launchGallery(galleryLauncher)
-//                //갤러리에서 이미지 불러오기
-//                loadImageFromGallery { bitmap, uri ->
-//                    //크기 조정
-//                    val resizedBitmap = resizeBitmap(bitmap, 120, 120)
-//                    imageViewAddPet.setImageBitmap(resizedBitmap)
-//
-//                    //저장할 uri 태그에 붙여두기
-//                    imageViewAddPet.tag = uri
-//                }
             }
 
 
@@ -150,8 +141,13 @@ class AddPetFragment : Fragment() {
 
     private fun FragmentAddPetBinding.saveUserDataAndPetData() {
 
-        //storage에 이미지 저장해야함
+        val storage = Firebase.storage
+        val userImageRef = storage.getReference("userImage").child(userUid)
+        val petImageRef = storage.getReference("petImage")
+            .child("${userUid}${fragmentAddPetBinding.textInputEditTextAddPetName.text.toString()}")
 
+        //storage에 사진 저장
+        uploadImage(userImageRef, petImageRef)
 
         val db = Firebase.firestore
         Log.d("user", userUid)
@@ -161,10 +157,22 @@ class AddPetFragment : Fragment() {
 
         db.runBatch { transaction ->
             //사용자 정보 저장
-            transaction.set(userRef, userBasicInfoData)
+            transaction.set(
+                userRef, FirestoreUserBasicInfoData(
+                    userImageRef.path,
+                    userBasicInfoData.nickname,
+                    userBasicInfoData.birthday,
+                    userBasicInfoData.ageVisible,
+                    userBasicInfoData.gender,
+                    userBasicInfoData.availability,
+                    userBasicInfoData.walkHoursStart,
+                    userBasicInfoData.walkHoursEnd
+                )
+            )
+            //반려견 정보 저장
             transaction.set(
                 petRef, PetData(
-                    if (imageViewAddPet.tag == null) null else imageViewAddPet.tag as Uri,
+                    petImageRef.path,
                     textInputEditTextAddPetName.text.toString(),
                     autoCompleteTextViewPetBreed.text.toString(),
                     textInputPetBirthText.text.toString(),
@@ -183,44 +191,28 @@ class AddPetFragment : Fragment() {
 
     }
 
-    private fun savePetData(
-        userUid: String,
-        imageURI: Uri? = null,
-        name: String,
-        breed: String,
-        birth: String,
-        petSex: PetSex,
-        isNeutered: Boolean,
-        weight: Double,
-        character: String,
-        onSuccessCallback: () -> Unit,
-    ) {
-        val db = Firebase.firestore
+    private fun uploadImage(userImageRef: StorageReference, petImageRef: StorageReference) {
+        val userImage = userBasicInfoData.userImage
+        val petImage = (fragmentAddPetBinding.imageViewAddPet.drawable as BitmapDrawable).bitmap
 
-        db.collection("users").document(userUid).collection("pets")
-            .document().set(
-                PetData(imageURI, name, breed, birth, petSex.ordinal, isNeutered, weight, character)
-            ).addOnSuccessListener {
-                Snackbar.make(requireView(), "가입을 환영합니다!", Snackbar.LENGTH_SHORT).show()
-                Log.d("savePet", "DocumentSnapshot successfully written!")
-                onSuccessCallback()
-            }
-            .addOnFailureListener { e ->
-                Log.w("savePet", "Error writing document", e)
-            }
-    }
+        //image 압축하기
+        val userBaos = ByteArrayOutputStream()
+        userImage.compress(Bitmap.CompressFormat.JPEG, 100, userBaos)
+        val userImageData = userBaos.toByteArray()
 
-    private fun saveUserData(
-        userUid: String,
-        userBasicInfoData: UserBasicInfoData,
-    ) {
-        val db = Firebase.firestore
-        db.collection("users").document(userUid).set(
-            userBasicInfoData
-        ).addOnSuccessListener {
-            Log.d("saveUser", "DocumentSnapshot successfully written!")
-        }.addOnFailureListener { e -> Log.w("saveUser", "Error writing document", e) }
+        val petBaos = ByteArrayOutputStream()
+        petImage.compress(Bitmap.CompressFormat.JPEG, 100, petBaos)
+        val petImageData = petBaos.toByteArray()
 
+        //userImage/userUid
+        userImageRef.putBytes(userImageData)
+            .addOnSuccessListener { }
+            .addOnFailureListener { }
+
+        //petImage/userUid초롱이
+        petImageRef.putBytes(petImageData)
+            .addOnSuccessListener { }
+            .addOnFailureListener { }
     }
 
     private fun isPetNeutered(checkedButtonId: Int): Boolean {
