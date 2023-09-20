@@ -42,7 +42,11 @@ class UserInfoFragment : Fragment() {
             }
 
             infoToNextButton.setOnClickListener {
-                mainActivity.navigate(R.id.action_mainFragment_to_addPetFragment, bundleOf("isAdd" to true))
+                mainActivity.navigate(
+                    R.id.action_mainFragment_to_addPetFragment,
+                    bundleOf("isAdd" to true),
+
+                )
             }
         }
         return fragmentUserInfoBinding.root

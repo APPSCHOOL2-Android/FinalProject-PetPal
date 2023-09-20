@@ -49,7 +49,8 @@ class CommunityAdapter(
                 Log.d("확인2", postList[adapterPosition].postID.toString())
                 mainActivity.navigate(
                     R.id.action_mainFragment_to_communityPostDetailFragment,
-                    bundle
+                    bundle,
+
                 )
 
             }

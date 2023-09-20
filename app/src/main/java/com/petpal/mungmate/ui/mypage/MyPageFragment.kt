@@ -39,7 +39,7 @@ class MyPageFragment : Fragment() {
             }
 
             buttonGoToManageBlock.setOnClickListener {
-               mainActivity.navigate(R.id.action_mainFragment_to_manage_block)
+                mainActivity.navigate(R.id.action_mainFragment_to_manage_block)
             }
 
             buttonGoToWalkReview.setOnClickListener {
