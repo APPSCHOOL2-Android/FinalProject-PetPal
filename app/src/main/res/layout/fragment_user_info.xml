@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".user.UserInfoFragment">
+    tools:context=".ui.user.UserInfoFragment">
 
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/userInfoToolbar"
@@ -94,7 +94,9 @@
                     android:id="@+id/textInputUserBirthText"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="생년월일"
+                    android:hint="생년월일을 입력해주세요"
+                    android:editable="false"
+                    android:focusable="false"
                     android:inputType="datetime|date" />
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -104,43 +106,38 @@
                 android:layout_height="wrap_content"
                 android:text="성별" />
 
-            <com.google.android.material.chip.ChipGroup
-                android:id="@+id/userInfoChipgroup"
+            <com.google.android.material.button.MaterialButtonToggleGroup
+                android:id="@+id/toggleButtonUserSex"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
+                android:layout_height="match_parent"
                 android:layout_marginBottom="16dp"
-                app:selectionRequired="true"
                 app:singleSelection="true">
 
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/chipMale"
-                    style="@style/Widget.Material3.Chip.Suggestion"
-                    android:layout_width="120dp"
+                <Button
+                    android:id="@+id/buttonMale"
+                    style="?attr/materialButtonOutlinedStyle"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:text="남성"
-                    android:textAlignment="center"
-                    app:chipSpacingHorizontal="42dp" />
+                    android:layout_weight="1"
+                    android:text="남성" />
 
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/chipFemale"
-                    style="@style/Widget.Material3.Chip.Suggestion"
-                    android:layout_width="120dp"
+                <Button
+                    android:id="@+id/buttonFemale"
+                    style="?attr/materialButtonOutlinedStyle"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:text="여성"
-                    android:textAlignment="center"
-                    app:chipSpacingHorizontal="42dp" />
+                    android:layout_weight="1"
+                    android:text="여성" />
 
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/chipNone"
-                    style="@style/Widget.Material3.Chip.Suggestion"
-                    android:layout_width="120dp"
+                <Button
+                    android:id="@+id/buttonNone"
+                    style="?attr/materialButtonOutlinedStyle"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:text="선택안함"
-                    android:textAlignment="center"
-                    app:chipSpacingHorizontal="42dp" />
+                    android:layout_weight="1"
+                    android:text="선택안함" />
 
-            </com.google.android.material.chip.ChipGroup>
+            </com.google.android.material.button.MaterialButtonToggleGroup>
 
             <TextView
                 android:id="@+id/userInfoHolder2"

@@ -10,8 +10,11 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.navOptions
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
@@ -31,6 +34,11 @@ import com.kakao.sdk.common.model.ClientErrorCause
 import com.kakao.sdk.user.UserApiClient
 import com.petpal.mungmate.R
 import com.petpal.mungmate.databinding.FragmentUserStartBinding
+import com.petpal.mungmate.isUserDataExists
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class UserStartFragment : Fragment() {
     private lateinit var _fragmentUserStartBinding: FragmentUserStartBinding
@@ -43,6 +51,7 @@ class UserStartFragment : Fragment() {
     private lateinit var googleSignInClient: GoogleSignInClient
 
     private lateinit var googleLoginLauncher: ActivityResultLauncher<Intent>
+    private lateinit var userViewModel: UserViewModel
 
     //TODO: db에 정보가 있는 유저의 경우 반려견 정보 입력 생략하고 바로 mainFragment로 넘어가기
 
@@ -81,6 +90,8 @@ class UserStartFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        userViewModel = ViewModelProvider(requireActivity()).get(UserViewModel::class.java)
 
         fragmentUserStartBinding.run {
             googleLoginButton.setOnClickListener {
@@ -125,7 +136,8 @@ class UserStartFragment : Fragment() {
                 } else {
                     // If sign in fails, display a message to the user.
                     Log.w(TAG, "signInWithCredential:failure", task.exception)
-                    Snackbar.make(requireView(), "로그인에 실패하였습니다. 다시 시도해주세요.", Snackbar.LENGTH_SHORT).show()
+                    Snackbar.make(requireView(), "로그인에 실패하였습니다. 다시 시도해주세요.", Snackbar.LENGTH_SHORT)
+                        .show()
                     updateUI(null)
                 }
             }
@@ -140,11 +152,39 @@ class UserStartFragment : Fragment() {
             Snackbar.make(requireView(), "환영합니다. ${user!!.displayName}", Snackbar.LENGTH_SHORT)
                 .show()
 
-            //사용자 정보 입력 화면으로 넘어가기
-            findNavController().navigate(R.id.action_userStartFragment_to_userInfoFragment)
+            //Viewmodel통해 사용자 데이터 설정
+            userViewModel.setUser(user)
+
+            GlobalScope.launch(Dispatchers.IO) {
+                val isUserDataExists = auth.isUserDataExists()
+
+                withContext(Dispatchers.Main) {
+                    if (isUserDataExists) {
+                        Log.d(TAG, "유저 정보 있음")
+                        //유저 데이터가 저장돼있다면
+                        //메인화면(산책)으로 바로 넘어가기
+                        findNavController().navigate(R.id.action_userStartFragment_to_mainFragment)
+
+                    } else {
+                        //유저 데이터가 저장돼있지 않다면
+                        //사용자 정보 입력 화면으로 넘어가기
+                        findNavController().navigate(
+                            R.id.action_userStartFragment_to_userInfoFragment,
+                            bundleOf("isRegister" to true)
+                        )
+                    }
+                }
+            }
+
+//
+//            findNavController().navigate(
+//                R.id.action_userStartFragment_to_userInfoFragment,
+//                bundleOf("isRegister" to true)
+//            )
+
+
         }
     }
-
 
     private fun kakaoLogIn() {
         // 카카오톡 어플이 있으면 카톡으로 로그인, 없으면 카카오 계정으로 로그인
@@ -206,7 +246,8 @@ class UserStartFragment : Fragment() {
                 } catch (e: RuntimeExecutionException) {
                     // 호출 실패
                     Log.d("카카오", "호출 실패")
-                    Snackbar.make(requireView(), "로그인에 실패하였습니다. 다시 시도해주세요.", Snackbar.LENGTH_SHORT).show()
+                    Snackbar.make(requireView(), "로그인에 실패하였습니다. 다시 시도해주세요.", Snackbar.LENGTH_SHORT)
+                        .show()
                     Log.d("카카오", e.message!!)
                 }
             }
@@ -219,12 +260,12 @@ class UserStartFragment : Fragment() {
                 updateUI(auth.currentUser)
             } else {
                 // 실패 후 로직
-                Snackbar.make(requireView(), "로그인에 실패하였습니다. 다시 시도해주세요.", Snackbar.LENGTH_SHORT).show()
+                Snackbar.make(requireView(), "로그인에 실패하였습니다. 다시 시도해주세요.", Snackbar.LENGTH_SHORT)
+                    .show()
                 updateUI(null)
             }
         }
     }
-
 
 
     companion object {

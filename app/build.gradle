@@ -133,4 +133,8 @@ dependencies {
     // storage
     implementation("com.google.firebase:firebase-storage-ktx")
 
+
+    // PhotoView
+    implementation 'com.github.chrisbanes:PhotoView:2.3.0'
+
 }

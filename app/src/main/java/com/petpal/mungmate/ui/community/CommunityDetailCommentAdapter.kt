@@ -1,6 +1,7 @@
 package com.petpal.mungmate.ui.community
 
 import android.content.Context
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.ImageButton
@@ -14,8 +15,17 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.google.android.material.snackbar.Snackbar
 import com.petpal.mungmate.R
 import com.petpal.mungmate.databinding.RowCommunityCommentBinding
+import com.petpal.mungmate.model.Comment
+import com.petpal.mungmate.model.Post
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+import java.util.TimeZone
 
-class CommunityDetailCommentAdapter(private val context: Context) :
+class CommunityDetailCommentAdapter(
+    private val context: Context,
+    private val postCommentList: MutableList<Comment>
+) :
     RecyclerView.Adapter<CommunityDetailCommentAdapter.ViewHolder>() {
 
     inner class ViewHolder(item: RowCommunityCommentBinding) :
@@ -27,7 +37,8 @@ class CommunityDetailCommentAdapter(private val context: Context) :
         val communityPostDateCreated: TextView = item.communityCommentPostDateCreated
         val communityContent: TextView = item.communityCommentContent
         val communityCommentFavoriteCounter: TextView = item.communityCommentFavoriteCounter
-        val communityCommentFavoriteLottie: LottieAnimationView = item.communityCommentFavoriteLottie
+        val communityCommentFavoriteLottie: LottieAnimationView =
+            item.communityCommentFavoriteLottie
         val communityCommentCommentCounter: TextView = item.communityCommentCommentCounter
 
     }
@@ -42,10 +53,11 @@ class CommunityDetailCommentAdapter(private val context: Context) :
         return viewHolderClass
     }
 
-    override fun getItemCount() = 10
+    override fun getItemCount() = postCommentList.size
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
 
+        val commentList = postCommentList[position]
         Glide
             .with(context)
             .load("https://mblogthumb-phinf.pstatic.net/MjAxOTEyMTNfMTQx/MDAxNTc2MjAyNzE5NDE0.B-NhNQS5QdweUBY53sWNGA8cJQUupeQeza7ognzYmGUg.1zj3ZPxEc2QrCJ2y5O--fmvMl2yljMb3uZQn6C1xsdUg.JPEG.369ginseng/1576202724454.jpg?type=w800")
@@ -54,14 +66,28 @@ class CommunityDetailCommentAdapter(private val context: Context) :
             .into(holder.communityProfileImage)
 
 
-        holder.communityUserNickName.text = "리트리버군"
-        holder.communityUserPlace.text = "제주시 애월읍"
+        holder.communityUserNickName.text = commentList.commentNickName.toString()
+        holder.communityUserPlace.text = commentList.commentUserPlace.toString()
 
-        holder.communityPostDateCreated.text = "30분전"
-        holder.communityContent.text =
-            "귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다.귀여운 리트리버 사진입니다."
-        holder.communityCommentFavoriteCounter.text = "7"
-        holder.communityCommentCommentCounter.text = "2"
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+        dateFormat.timeZone = TimeZone.getTimeZone("Asia/Seoul")
+
+        val snapshotTime = dateFormat.parse(commentList.commentDateCreated)
+
+        val currentTime = Date()
+        val timeDifferenceMillis = currentTime.time - snapshotTime.time  // Firestore 시간에서 현재 시간을 뺌
+
+        val timeAgo = when {
+            timeDifferenceMillis < 60_000 -> "방금 전" // 1분 미만
+            timeDifferenceMillis < 3_600_000 -> "${timeDifferenceMillis / 60_000}분 전" // 1시간 미만
+            timeDifferenceMillis < 86_400_000 -> "${timeDifferenceMillis / 3_600_000}시간 전" // 1일 미만
+            else -> "${timeDifferenceMillis / 86_400_000}일 전" // 1일 이상 전
+        }
+
+        holder.communityPostDateCreated.text = timeAgo
+        holder.communityContent.text = commentList.commentContent
+        holder.communityCommentFavoriteCounter.text = "0"
+        holder.communityCommentCommentCounter.text = "0"
 
         holder.communityCommentMenuImageButton.setOnClickListener { view ->
             val popupMenu = PopupMenu(context, view)
@@ -99,4 +125,10 @@ class CommunityDetailCommentAdapter(private val context: Context) :
 
     }
 
+    fun updateData(newData: MutableList<Comment>) {
+        Log.d("값 추적", newData.toString())
+        postCommentList.clear()
+        postCommentList.addAll(newData)
+        notifyDataSetChanged()
+    }
 }
