@@ -59,7 +59,7 @@ class CommunityFragment : Fragment() {
         communityBinding.run {
             toolbar()
             communityRecyclerView()
-            refreshLayout()
+//            refreshLayout()
 
 
 
@@ -228,8 +228,6 @@ class CommunityFragment : Fragment() {
                 val community = value.document.toObject(Post::class.java)
                 community.postID = value.document.id
 
-
-
                 val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
                 dateFormat.timeZone = TimeZone.getTimeZone("Asia/Seoul")// 시간대를 UTC로 설정
 
@@ -251,7 +249,7 @@ class CommunityFragment : Fragment() {
                 }
 
                 community.postDateCreated = "$timeAgo"
-                val postImages = community.postImages as? List<String> ?: emptyList()
+                community.postImages as? List<String> ?: emptyList()
 
                 when (value.type) {
                     DocumentChange.Type.ADDED -> communityAdapter.add(community)

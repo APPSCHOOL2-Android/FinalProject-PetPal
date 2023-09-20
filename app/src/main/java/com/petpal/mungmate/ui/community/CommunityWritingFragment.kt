@@ -53,7 +53,7 @@ class CommunityWritingFragment : Fragment() {
     // 갤러리 실행
     lateinit var mainGalleryLauncher: ActivityResultLauncher<Intent>
     private var photoSelectedUri: Uri? = null
-    val postImagesList: MutableList<PostImage> = mutableListOf()
+    private val postImagesList: MutableList<PostImage> = mutableListOf()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -121,9 +121,22 @@ class CommunityWritingFragment : Fragment() {
                             emptyList(),
                             "",
                             0,
-                            ""
+                            emptyList()
                         )
-                        saveFirestore(post)
+                        if (
+                            communityPostWritingTitleTextInputEditText.text.toString().isEmpty() ||
+                            categoryItem.text.toString().isEmpty() ||
+                            communityPostWritingContentTextInputEditText.text.toString().isEmpty()
+                        ) {
+                            Snackbar.make(
+                                communityWritingBinding.communityPostWritingTitleTextInputEditText,
+                                "제목, 카테고리, 내용을 입력해주세요!",
+                                Snackbar.LENGTH_SHORT
+                            ).show()
+                        } else {
+                            saveFirestore(post)
+                        }
+
                     }
 
                 }
@@ -178,6 +191,11 @@ class CommunityWritingFragment : Fragment() {
 
     private fun saveFirestore(post: Post) {
         val db = FirebaseFirestore.getInstance()
+        communityWritingBinding.progressBar.visibility = View.VISIBLE
+
+        // 사진 유무 확인
+        val hasImages = mainImageList.isNotEmpty()
+
         db.collection("Post")
             .add(post)
             .addOnSuccessListener { documentReference ->
@@ -185,48 +203,93 @@ class CommunityWritingFragment : Fragment() {
                 val currentDateTime = Date()
                 val formattedDateTime = formatDateTimeToNewFormat(currentDateTime)
 
+                if (hasImages) {
+                    // 사진이 있을 때
+                    uploadImage { eventPost ->
+                        val postImage = PostImage(eventPost.photoUrl)
+                        postImagesList.add(postImage)
 
-                uploadImage { eventPost ->
-                    val postImage = PostImage(eventPost.photoUrl)
-                    postImagesList.add(postImage)
+                        if (eventPost.isSuccess) {
+                            val updatedData = Post(
+                                generatedDocId,
+                                0,
+                                "https://cotieshop.co.kr/wp-content/uploads/2021/09/%ED%8E%AB%EC%86%8C%EC%8B%9C%ED%81%AC_Tiny-dog-collar%EA%B0%95%EC%95%84%EC%A7%80%EB%B0%98%EB%8B%A4%EB%82%98-Mimi-Mini_thumb002.jpg",
+                                "데이터 없음",
+                                "데이터 없음",
+                                communityWritingBinding.communityPostWritingTitleTextInputEditText.text.toString(),
+                                communityWritingBinding.categoryItem.text.toString(),
+                                formattedDateTime,
+                                postImagesList,
+                                communityWritingBinding.communityPostWritingContentTextInputEditText.text.toString(),
+                                0,
+                                emptyList()
+                            )
 
-                    if (eventPost.isSuccess) {
-                        val updatedData = Post(
-                            generatedDocId,
-                            0,
-                            "https://cotieshop.co.kr/wp-content/uploads/2021/09/%ED%8E%AB%EC%86%8C%EC%8B%9C%ED%81%AC_Tiny-dog-collar%EA%B0%95%EC%95%84%EC%A7%80%EB%B0%98%EB%8B%A4%EB%82%98-Mimi-Mini_thumb002.jpg",
-                            "데이터 없음",
-                            "데이터 없음",
-                            communityWritingBinding.communityPostWritingTitleTextInputEditText.text.toString(),
-                            communityWritingBinding.categoryItem.text.toString(),
-                            formattedDateTime,
-                            postImagesList,
-                            communityWritingBinding.communityPostWritingContentTextInputEditText.text.toString(),
-                            0,
-                            "0"
-                        )
-
-                        val documentRef = db.collection("Post").document(generatedDocId)
-                        documentRef.set(updatedData)
-                            .addOnSuccessListener {
-                                Snackbar.make(
-                                    communityWritingBinding.communityPostWritingTitleTextInputEditText,
-                                    "게시글 등록 성공",
-                                    Snackbar.LENGTH_SHORT
-                                ).show()
-                            }
-                            .addOnFailureListener {
-                                Snackbar.make(
-                                    communityWritingBinding.communityPostWritingTitleTextInputEditText,
-                                    "게시글 등록 실패",
-                                    Snackbar.LENGTH_SHORT
-                                ).show()
-                            }
-                            .addOnCompleteListener {
-                                val navController = findNavController()
-                                navController.popBackStack()
-                            }
+                            val documentRef = db.collection("Post").document(generatedDocId)
+                            documentRef.set(updatedData)
+                                .addOnSuccessListener {
+                                    Snackbar.make(
+                                        communityWritingBinding.communityPostWritingTitleTextInputEditText,
+                                        "게시글 등록 성공",
+                                        Snackbar.LENGTH_SHORT
+                                    ).show()
+                                }
+                                .addOnFailureListener {
+                                    Snackbar.make(
+                                        communityWritingBinding.communityPostWritingTitleTextInputEditText,
+                                        "게시글 등록 실패",
+                                        Snackbar.LENGTH_SHORT
+                                    ).show()
+                                }
+                                .addOnCompleteListener {
+                                    val navController = findNavController()
+                                    navController.popBackStack()
+                                }
+                        } else {
+                            Snackbar.make(
+                                communityWritingBinding.communityPostWritingTitleTextInputEditText,
+                                "사진 업로드 실패", // 실패 메시지를 원하는 내용으로 변경
+                                Snackbar.LENGTH_SHORT
+                            ).show()
+                        }
                     }
+                } else {
+                    // 사진이 없을 때
+                    val updatedData = Post(
+                        generatedDocId,
+                        0,
+                        "https://cotieshop.co.kr/wp-content/uploads/2021/09/%ED%8E%AB%EC%86%8C%EC%8B%9C%ED%81%AC_Tiny-dog-collar%EA%B0%95%EC%95%84%EC%A7%80%EB%B0%98%EB%8B%A4%EB%82%98-Mimi-Mini_thumb002.jpg",
+                        "데이터 없음",
+                        "데이터 없음",
+                        communityWritingBinding.communityPostWritingTitleTextInputEditText.text.toString(),
+                        communityWritingBinding.categoryItem.text.toString(),
+                        formattedDateTime,
+                        postImagesList,
+                        communityWritingBinding.communityPostWritingContentTextInputEditText.text.toString(),
+                        0,
+                        emptyList()
+                    )
+
+                    val documentRef = db.collection("Post").document(generatedDocId)
+                    documentRef.set(updatedData)
+                        .addOnSuccessListener {
+                            Snackbar.make(
+                                communityWritingBinding.communityPostWritingTitleTextInputEditText,
+                                "게시글 등록 성공",
+                                Snackbar.LENGTH_SHORT
+                            ).show()
+                        }
+                        .addOnFailureListener {
+                            Snackbar.make(
+                                communityWritingBinding.communityPostWritingTitleTextInputEditText,
+                                "게시글 등록 실패",
+                                Snackbar.LENGTH_SHORT
+                            ).show()
+                        }
+                        .addOnCompleteListener {
+                            val navController = findNavController()
+                            navController.popBackStack()
+                        }
                 }
             }
             .addOnFailureListener {
