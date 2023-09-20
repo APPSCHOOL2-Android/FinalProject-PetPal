@@ -84,6 +84,7 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
     private var userLocationMarker: MapPOIItem? = null
     private var startTimestamp: String ="0"
     private val handler = Handler(Looper.getMainLooper())
+
     val timerRunnable = object : Runnable {
         override fun run() {
             elapsedTime += 1
@@ -144,10 +145,13 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
     private fun setupButtonListeners() {
         fragmentWalkBinding.buttonWalk.setOnClickListener {
             toggleVisibility(fragmentWalkBinding.LinearLayoutOnWalk, fragmentWalkBinding.LinearLayoutOffWalk)
+            fragmentWalkBinding.mapView.removeAllPOIItems()
             fragmentWalkBinding.imageViewWalkToggle.setImageResource(R.drawable.dog_walk)
             handler.post(timerRunnable)
             startLocationUpdates()
             startTimestamp = timestampToString(System.currentTimeMillis())
+            Log.d("infooooo",lastLocation.toString())
+
 
         }
 
@@ -158,23 +162,25 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
         }
 
         fragmentWalkBinding.buttonFilterSubmit.setOnClickListener {
-            val isAnyFilterSelected = fragmentWalkBinding.filterDistanceGroup.checkedChipId != -1 || fragmentWalkBinding.filterUserGenderGroup.checkedChipId != -1 || fragmentWalkBinding.filterAgeRangeGroup.checkedChipId != -1 || fragmentWalkBinding.filterPetGenderGroup.checkedChipId != -1 || fragmentWalkBinding.filterPetPropensityGroup.checkedChipId != -1 || fragmentWalkBinding.filterNeuterStatusGroup.checkedChipId != -1
+            val isAnyFilterSelected =
+                fragmentWalkBinding.filterDistanceGroup.checkedChipId != -1 || fragmentWalkBinding.filterUserGenderGroup.checkedChipId != -1 || fragmentWalkBinding.filterAgeRangeGroup.checkedChipId != -1 || fragmentWalkBinding.filterPetGenderGroup.checkedChipId != -1 || fragmentWalkBinding.filterPetPropensityGroup.checkedChipId != -1 || fragmentWalkBinding.filterNeuterStatusGroup.checkedChipId != -1
             fragmentWalkBinding.chipMapFilter.isChecked = isAnyFilterSelected
+            //맵에 대한 필터가 아니지 않아??
+//            when (fragmentWalkBinding.filterDistanceGroup.checkedChipId) {
+//                R.id.distance1 -> {
+//                    //1km 필터에 따른 기능 실행
+//                    getLastLocationFilter(1000)
+//                }
+//                R.id.distance2 -> {
+//                    //2km 필터에 따른 기능 실행
+//                    getLastLocationFilter(2000)
+//                }
+//                R.id.distance3 -> {
+//                    //3km 원래 기본 3km임
+//                    getLastLocation()
+//                }
+//        }
 
-            when (fragmentWalkBinding.filterDistanceGroup.checkedChipId) {
-                R.id.distance1 -> {
-                    //1km 필터에 따른 기능 실행
-                    getLastLocationFilter(1000)
-                }
-                R.id.distance2 -> {
-                    //2km 필터에 따른 기능 실행
-                    getLastLocationFilter(2000)
-                }
-                R.id.distance3 -> {
-                    //3km 원래 기본 3km임
-                    getLastLocation()
-                }
-            }
             fragmentWalkBinding.drawerLayout.closeDrawer(GravityCompat.END)
             showSnackbar("필터가 적용되었습니다.")
 
@@ -323,6 +329,10 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
                     }
                     showUserLocationOnMap(location)
                     lastLocation = location
+                    lastLocation?.let { location ->
+                        viewModel.updateLocationAndOnWalkStatus(userId, location.latitude, location.longitude)
+                    }
+                    Log.d("infooooo1",lastLocation.toString())
                 }
             }
         }
