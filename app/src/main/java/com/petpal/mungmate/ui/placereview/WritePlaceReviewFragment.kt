@@ -164,8 +164,9 @@ class WritePlaceReviewFragment : Fragment() {
     }
 
     private fun addPlaceReview(placeId: String, review: Review) {
-        val reviewRef = db.collection("places").document(placeId).collection("reviews")
-        reviewRef.add(review)
+        val documentId = "${review.date}_${review.userid}"
+        val reviewRef = db.collection("places").document(placeId).collection("reviews").document(documentId)
+        reviewRef.set(review)
     }
 
     private fun createPlaceFromArguments(arguments: Bundle?): Place? {

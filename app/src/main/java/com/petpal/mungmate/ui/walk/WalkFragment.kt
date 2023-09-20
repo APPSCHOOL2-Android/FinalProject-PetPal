@@ -332,7 +332,7 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
             viewModel.fetchAverageRatingForPlace(it)
         }
 
-        lifecycleScope.launch {  // Launching a coroutine
+        lifecycleScope.launch {
             //바텀시트의 좋아요 상태에 따라 하트 이미지 변경
             viewModel.isPlaceFavorited.collect { isFavorited ->
                 isFavorited?.let {

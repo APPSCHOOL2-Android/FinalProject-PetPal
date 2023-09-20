@@ -30,5 +30,9 @@ class PlaceReviewRepository {
 
         return reviewsFlow.asStateFlow()
     }
+    suspend fun deleteReviewForPlace(placeId: String, reviewId: String) {
+        val reviewRef = db.collection("places").document(placeId).collection("reviews").document(reviewId)
+        reviewRef.delete().await()  // 코루틴 확장 함수 await()를 사용하여 비동기 작업을 기다립니다.
+    }
 
 }

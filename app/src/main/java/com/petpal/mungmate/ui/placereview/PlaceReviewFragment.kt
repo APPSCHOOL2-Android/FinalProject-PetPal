@@ -46,7 +46,7 @@ class PlaceReviewFragment : Fragment() {
 
         fragmentPlaceReviewBinding = FragmentPlaceReviewBinding.inflate(layoutInflater)
 
-        reviewAdapter = ReviewAdapter(emptyList())
+        reviewAdapter = placeId?.let { ReviewAdapter(emptyList(), it) }!!
         fragmentPlaceReviewBinding.reviewsRecyclerView.adapter = reviewAdapter
         fragmentPlaceReviewBinding.reviewsRecyclerView.layoutManager = LinearLayoutManager(requireContext())
 
@@ -79,13 +79,15 @@ class PlaceReviewFragment : Fragment() {
         return fragmentPlaceReviewBinding.root
     }
 
-    inner class ReviewAdapter(private var reviews: List<Review>) : RecyclerView.Adapter<ReviewAdapter.ViewHolderClass>() {
+    inner class ReviewAdapter(private var reviews: List<Review>,private val placeId: String) : RecyclerView.Adapter<ReviewAdapter.ViewHolderClass>() {
         inner class ViewHolderClass(rowBinding: RowPlaceReviewBinding) : RecyclerView.ViewHolder(rowBinding.root) {
             val ratingBar: RatingBar = rowBinding.placeReviewDetailRatingBar
             val usernameTextView: TextView = rowBinding.textViewPlaceReviewDetailUserName
             val dateTextView: TextView = rowBinding.textViewPlaceReviewDetailDate
             val commentTextView: TextView = rowBinding.textView4
             val reviewImageView: ImageView = rowBinding.imageView11
+            val placeReviewModify:TextView=rowBinding.textViewPlaceReviewModify
+            val placeReviewDelete:TextView=rowBinding.textViewPlaceReviewDelete
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolderClass {
@@ -110,7 +112,17 @@ class PlaceReviewFragment : Fragment() {
                     .override(widthPx, heightPx) // 추가된 부분
                     .into(holder.reviewImageView)
             }
+            holder.placeReviewModify.setOnClickListener {
+
+                // Toast.makeText(holder.itemView.context, "Modify clicked for position $position", Toast.LENGTH_SHORT).show()
+            }
+
+            holder.placeReviewDelete.setOnClickListener {
+                val reviewId = "${review.date}_${review.userid}"  // 리뷰의 문서 ID를 생성
+                viewModel.deleteReviewForPlace(placeId, reviewId)
+            }
         }
+
         override fun getItemCount(): Int = reviews.size
 
         // This function updates the reviews list and notifies the RecyclerView of the changes
@@ -125,6 +137,7 @@ class PlaceReviewFragment : Fragment() {
         return (dp * density).toInt()
     }
 }
+
 
 class PlaceReviewViewModelFactory(private val repository: PlaceReviewRepository) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
