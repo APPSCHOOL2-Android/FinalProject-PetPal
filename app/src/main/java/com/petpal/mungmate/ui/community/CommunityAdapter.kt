@@ -34,7 +34,6 @@ class CommunityAdapter(
         val communityProfileImage: ImageView = item.communityProfileImage
         val communityPostTitle: TextView = item.communityPostTitle
         val communityUserNickName: TextView = item.communityUserNickName
-        val communityUserPlace: TextView = item.communityUserPlace
         val communityPostDateCreated: TextView = item.communityPostDateCreated
         val communityPostImage: ImageView = item.communityPostImage
         val communityContent: TextView = item.communityContent
@@ -111,7 +110,6 @@ class CommunityAdapter(
 
         holder.communityPostTitle.text = post.postTitle
         holder.communityUserNickName.text = post.userNickName
-        holder.communityUserPlace.text = post.userPlace
         holder.communityPostDateCreated.text = post.postDateCreated.toString()
         holder.communityContent.text = post.postContent
         holder.communityCommentCounter.text= post.postComment?.size.toString()

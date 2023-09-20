@@ -24,6 +24,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.Timestamp
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import com.petpal.mungmate.MainActivity
@@ -55,6 +56,11 @@ class CommunityWritingFragment : Fragment() {
     private var photoSelectedUri: Uri? = null
     private val postImagesList: MutableList<PostImage> = mutableListOf()
 
+    private val auth = FirebaseAuth.getInstance()
+    val user = auth.currentUser
+
+    var nickname=""
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -84,7 +90,7 @@ class CommunityWritingFragment : Fragment() {
 
 
         }
-
+        getFireStoreUserInfo()
         return communityWritingBinding.root
     }
 
@@ -111,9 +117,9 @@ class CommunityWritingFragment : Fragment() {
 
                         val post = Post(
                             "",
-                            0,
+                            user?.uid,
                             "",
-                            "",
+                            nickname,
                             "",
                             "",
                             "",
@@ -209,12 +215,21 @@ class CommunityWritingFragment : Fragment() {
                         val postImage = PostImage(eventPost.photoUrl)
                         postImagesList.add(postImage)
 
+
+                        if (user != null) {
+
+                            val userId = user.uid
+                            Log.d("사용자",userId.toString())
+                        } else {
+
+                            Log.d("사용자","로그인x")
+                        }
                         if (eventPost.isSuccess) {
                             val updatedData = Post(
                                 generatedDocId,
-                                0,
+                                user?.uid,
                                 "https://cotieshop.co.kr/wp-content/uploads/2021/09/%ED%8E%AB%EC%86%8C%EC%8B%9C%ED%81%AC_Tiny-dog-collar%EA%B0%95%EC%95%84%EC%A7%80%EB%B0%98%EB%8B%A4%EB%82%98-Mimi-Mini_thumb002.jpg",
-                                "데이터 없음",
+                                nickname,
                                 "데이터 없음",
                                 communityWritingBinding.communityPostWritingTitleTextInputEditText.text.toString(),
                                 communityWritingBinding.categoryItem.text.toString(),
@@ -257,9 +272,9 @@ class CommunityWritingFragment : Fragment() {
                     // 사진이 없을 때
                     val updatedData = Post(
                         generatedDocId,
-                        0,
+                        user?.uid,
                         "https://cotieshop.co.kr/wp-content/uploads/2021/09/%ED%8E%AB%EC%86%8C%EC%8B%9C%ED%81%AC_Tiny-dog-collar%EA%B0%95%EC%95%84%EC%A7%80%EB%B0%98%EB%8B%A4%EB%82%98-Mimi-Mini_thumb002.jpg",
-                        "데이터 없음",
+                        nickname,
                         "데이터 없음",
                         communityWritingBinding.communityPostWritingTitleTextInputEditText.text.toString(),
                         communityWritingBinding.categoryItem.text.toString(),
@@ -334,6 +349,34 @@ class CommunityWritingFragment : Fragment() {
                 .addOnFailureListener {
                     eventPost.isSuccess = false
                     callback(eventPost)
+                }
+        }
+    }
+
+    private fun getFireStoreUserInfo(){
+
+        if (user != null) {
+            val db = FirebaseFirestore.getInstance()
+
+
+            db.collection("users").document(user.uid)
+                .get()
+                .addOnSuccessListener { document ->
+                    if (document != null) {
+
+                        val getNickname = document.getString("nickname")
+
+                        Log.d("닉네임",getNickname.toString())
+                        if (getNickname != null) {
+                            nickname=getNickname
+                        }
+
+                    } else {
+                       // 사용자 정보 x
+                    }
+                }
+                .addOnFailureListener { e ->
+                  // 사용자 정보 x
                 }
         }
     }

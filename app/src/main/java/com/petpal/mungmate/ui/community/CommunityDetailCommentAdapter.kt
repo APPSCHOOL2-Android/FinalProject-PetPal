@@ -32,7 +32,7 @@ class CommunityDetailCommentAdapter(
         val communityCommentMenuImageButton: ImageButton = item.communityCommentMenuImageButton
         val communityProfileImage: ImageView = item.communityCommentProfileImage
         val communityUserNickName: TextView = item.communityCommentUserNickName
-        val communityUserPlace: TextView = item.communityCommentUserPlace
+
         val communityPostDateCreated: TextView = item.communityCommentPostDateCreated
         val communityContent: TextView = item.communityCommentContent
         val communityCommentFavoriteCounter: TextView = item.communityCommentFavoriteCounter
@@ -66,7 +66,7 @@ class CommunityDetailCommentAdapter(
 
 
         holder.communityUserNickName.text = commentList.commentNickName.toString()
-        holder.communityUserPlace.text = commentList.commentUserPlace.toString()
+
 
         val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
         dateFormat.timeZone = TimeZone.getTimeZone("Asia/Seoul")
@@ -95,7 +95,7 @@ class CommunityDetailCommentAdapter(
             popupMenu.setOnMenuItemClickListener {
                 when (it.itemId) {
                     R.id.item_comment_delete -> {
-                        Snackbar.make(view, "댓글 신고하기", Snackbar.LENGTH_SHORT).show()
+                        Snackbar.make(view, "댓글 삭제하기", Snackbar.LENGTH_SHORT).show()
                         true
                     }
 
