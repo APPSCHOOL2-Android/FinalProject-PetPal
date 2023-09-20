@@ -60,6 +60,7 @@ class CommunityWritingFragment : Fragment() {
     val user = auth.currentUser
 
     var nickname=""
+    var userImage=""
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -118,7 +119,7 @@ class CommunityWritingFragment : Fragment() {
                         val post = Post(
                             "",
                             user?.uid,
-                            "",
+                            userImage,
                             nickname,
                             "",
                             "",
@@ -228,7 +229,7 @@ class CommunityWritingFragment : Fragment() {
                             val updatedData = Post(
                                 generatedDocId,
                                 user?.uid,
-                                "https://cotieshop.co.kr/wp-content/uploads/2021/09/%ED%8E%AB%EC%86%8C%EC%8B%9C%ED%81%AC_Tiny-dog-collar%EA%B0%95%EC%95%84%EC%A7%80%EB%B0%98%EB%8B%A4%EB%82%98-Mimi-Mini_thumb002.jpg",
+                                userImage,
                                 nickname,
                                 "데이터 없음",
                                 communityWritingBinding.communityPostWritingTitleTextInputEditText.text.toString(),
@@ -273,7 +274,7 @@ class CommunityWritingFragment : Fragment() {
                     val updatedData = Post(
                         generatedDocId,
                         user?.uid,
-                        "https://cotieshop.co.kr/wp-content/uploads/2021/09/%ED%8E%AB%EC%86%8C%EC%8B%9C%ED%81%AC_Tiny-dog-collar%EA%B0%95%EC%95%84%EC%A7%80%EB%B0%98%EB%8B%A4%EB%82%98-Mimi-Mini_thumb002.jpg",
+                        userImage,
                         nickname,
                         "데이터 없음",
                         communityWritingBinding.communityPostWritingTitleTextInputEditText.text.toString(),
@@ -365,10 +366,15 @@ class CommunityWritingFragment : Fragment() {
                     if (document != null) {
 
                         val getNickname = document.getString("nickname")
+                        val getUserImage = document.getString("userImage")
 
                         Log.d("닉네임",getNickname.toString())
                         if (getNickname != null) {
                             nickname=getNickname
+                        }
+
+                        if (getUserImage != null) {
+                            userImage=getUserImage
                         }
 
                     } else {
