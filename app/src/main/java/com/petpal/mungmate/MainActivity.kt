@@ -15,6 +15,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.kakao.sdk.common.KakaoSdk
 import com.petpal.mungmate.databinding.ActivityMainBinding
 import com.petpal.mungmate.ui.user.UserViewModel
+import com.petpal.mungmate.utils.isUserDataExists
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch

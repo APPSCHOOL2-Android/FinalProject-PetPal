@@ -17,6 +17,7 @@ import com.petpal.mungmate.MainActivity
 import com.petpal.mungmate.R
 import com.petpal.mungmate.databinding.FragmentUserInfoBinding
 import com.petpal.mungmate.model.UserBasicInfoData
+import com.petpal.mungmate.utils.loadAndResizeImage
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -54,7 +55,8 @@ class UserInfoFragment : Fragment() {
                     fragmentUserInfoBinding.run {
                         textInputUserNicknameText.setText(userData.displayName)
 
-                        startMainImageView.setImageURI(userData.photoUrl)
+                        loadAndResizeImage(requireContext(),userData.photoUrl!!,startMainImageView,120,120)
+//                        startMainImageView.setImageURI(userData.photoUrl)
                         startMainImageView.tag = userData.photoUrl
                     }
 
