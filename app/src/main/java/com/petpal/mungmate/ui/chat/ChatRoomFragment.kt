@@ -6,20 +6,40 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.appcompat.content.res.AppCompatResources
+import androidx.core.widget.addTextChangedListener
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.snackbar.Snackbar
+import com.google.firebase.Timestamp
+import com.google.firebase.auth.FirebaseAuth
 import com.petpal.mungmate.R
 import com.petpal.mungmate.databinding.FragmentChatRoomBinding
 import com.petpal.mungmate.model.Message
+import com.petpal.mungmate.model.MessageType
+import com.petpal.mungmate.model.MessageVisibility
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class ChatRoomFragment : Fragment() {
     private var _fragmentChatRoomBinding : FragmentChatRoomBinding? = null
     private val fragmentChatRoomBinding get() = _fragmentChatRoomBinding!!
 
-    private var messageList = mutableListOf<Message>()
+    private lateinit var chatViewModel: ChatViewModel
+    private lateinit var messageAdapter: MessageAdapter
+
+    private val currentUserId = FirebaseAuth.getInstance().currentUser?.uid.toString()
+    lateinit var chatRoomId: String
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        // 채팅 목록 화면에서 Bundle로 전달받은 현재 채팅방 id
+        chatRoomId = arguments?.getString("chatRoomId")!!
+
+        chatViewModel = ViewModelProvider(this)[ChatViewModel::class.java]
+        chatViewModel.setCurrentChatRoomId(chatRoomId)
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -31,11 +51,11 @@ class ChatRoomFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        // 임시 데이터 세팅
-        setSampleData()
+        
+        // TODO 날짜가 바뀌면 자동으로 DATE 타입 메시지 저장
 
         fragmentChatRoomBinding.run {
+
             toolbarChatRoom.run {
                 setNavigationOnClickListener {
                     findNavController().popBackStack()
@@ -55,8 +75,9 @@ class ChatRoomFragment : Fragment() {
                             true
                         }
                         R.id.menu_item_report -> {
-                            // TODO 신고하기 화면 이동 (채팅 상대 UID 전달)
-                            findNavController().navigate(R.id.action_chatRoomFragment_to_reportUserFragment)
+                            // 신고하기 화면 이동 (채팅 상대 UID 전달)
+                            val action = ChatRoomFragmentDirections.actionChatRoomFragmentToReportUserFragment("user1")
+                            findNavController().navigate(action)
                             true
                         }
                         R.id.menu_item_exit -> {
@@ -70,15 +91,70 @@ class ChatRoomFragment : Fragment() {
 
             // 산책 메이트 요청
             buttonRequestWalkMate.setOnClickListener {
-                findNavController().navigate(R.id.action_chatRoomFragment_to_walkMateRequestFragment)
+                val action = ChatRoomFragmentDirections.actionChatRoomFragmentToWalkMateRequestFragment(currentUserId, "user1", chatRoomId)
+                findNavController().navigate(action)
             }
 
+            messageAdapter = MessageAdapter(chatViewModel)
+
             // 채팅방 메시지 목록
-            recyclerViewMessage.run {
-                adapter = ChatMessageAdapter(messageList)
+            recyclerViewMessage.apply {
                 layoutManager = LinearLayoutManager(requireContext())
+                addItemDecoration(TopMarginItemDecoration(8))
+                adapter = messageAdapter
+            }
+
+            // 메시지 입력, 전송
+            editTextMessage.addTextChangedListener {
+                buttonSendMessage.isEnabled = it.toString().trim().isNotEmpty()
+            }
+            buttonSendMessage.setOnClickListener {
+                sendTextMessage()
+            }
+
+            // Observer
+            chatViewModel.run {
+                messages.observe(viewLifecycleOwner) { messages ->
+                    messageAdapter.setMessages(messages)
+                    recyclerViewMessage.scrollToPosition(messages.size - 1)
+                }
             }
         }
+
+        chatViewModel.loadMessages(chatRoomId)
+    }
+
+    // 시스템 날짜 메시지 저장 
+    // todo 텍스트 메시지를 보내는 시점 : 가장 마지막 메시지의 날짜와 다를 경우 날짜 메시지 전송 후 텍스트 메시지 전송하기
+    private fun saveDateMessage() {
+//        val currentDate = Date()
+//        val dateFormat = SimpleDateFormat("yyyy년 M월 d일", Locale.getDefault())
+//        val formattedDate = dateFormat.format(currentDate)
+
+        val message = Message(
+            currentUserId,
+            null,
+            Timestamp.now(),
+            null,
+            MessageType.TEXT.code,
+            MessageVisibility.ALL.code
+        )
+        chatViewModel.saveMessage(chatRoomId, message)
+    }
+    
+    // 메시지 전송
+    private fun sendTextMessage(){
+        val content = fragmentChatRoomBinding.editTextMessage.text.toString()
+        fragmentChatRoomBinding.editTextMessage.text.clear()
+        val message = Message(
+            currentUserId,
+            content,
+            Timestamp.now(),
+            null,
+            MessageType.TEXT.code,
+            MessageVisibility.ALL.code
+        )
+        chatViewModel.saveMessage(chatRoomId, message)
     }
 
     private fun exitChatRoom() {
@@ -102,9 +178,9 @@ class ChatRoomFragment : Fragment() {
                 // TODO 사용자 차단 해제
                 fragmentChatRoomBinding.run {
                     buttonRequestWalkMate.isEnabled = true
-                    textInputLayoutMessage.endIconDrawable = AppCompatResources.getDrawable(requireContext(), R.drawable.send_24px)
-                    textInputEditTextMessage.hint = "메시지를 입력하세요."
-                    textInputEditTextMessage.isEnabled = true
+                    buttonSendMessage.isEnabled = true
+                    editTextMessage.hint = "메시지를 입력하세요."
+                    editTextMessage.isEnabled = true
                 }
             }
             .setNegativeButton("취소", null)
@@ -121,9 +197,9 @@ class ChatRoomFragment : Fragment() {
                 // 산책 메이트 요청, 채팅 불가
                 fragmentChatRoomBinding.run {
                     buttonRequestWalkMate.isEnabled = false
-                    textInputLayoutMessage.endIconDrawable = AppCompatResources.getDrawable(requireContext(), R.drawable.person_off_24px)
-                    textInputEditTextMessage.hint = "차단한 사용자와는 채팅할 수 없습니다."
-                    textInputEditTextMessage.isEnabled = false
+                    buttonSendMessage.isEnabled = false
+                    editTextMessage.hint = "차단한 사용자와는 채팅할 수 없습니다."
+                    editTextMessage.isEnabled = false
                 }
             }
             .setNegativeButton("취소", null)
@@ -131,15 +207,4 @@ class ChatRoomFragment : Fragment() {
         builder.show()
     }
 
-    private fun setSampleData() {
-        messageList = mutableListOf(
-            Message("안녕하세요!", "오후 10:00", false),
-            Message("멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍멍장문테스트멍멍멍멍멍멍멍멍멍멍", "오후 10:01", true),
-            Message("같이 산책하실래요?", "오후 10:02", false),
-            Message("좋아요ㅎㅎ", "오후 10:03", true),
-            Message("그럼 몇시에 만날까요?", "오후 10:04", true),
-            Message("테스트메시지입니다.", "오후 10:05", false),
-            Message("테스트메시지입니다.", "오후 10:06", false)
-        )
-    }
 }

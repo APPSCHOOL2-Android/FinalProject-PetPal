@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--채팅방 메시지 배경-->
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
-    <solid android:color="@color/md_theme_dark_onPrimaryContainer"/>
+    <solid android:color="#F2F3F7"/>
     <corners android:radius="20dp"/>
 </shape>

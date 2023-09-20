@@ -18,7 +18,6 @@
         android:id="@+id/textViewMessage"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
         android:background="@drawable/background_send_message"
         android:padding="10dp"
         android:text="안녕하세요"

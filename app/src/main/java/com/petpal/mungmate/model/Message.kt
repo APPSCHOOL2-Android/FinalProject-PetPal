@@ -1,8 +1,31 @@
 package com.petpal.mungmate.model
 
-// test
+import com.google.firebase.Timestamp
+
+// 채팅방 메시지
 data class Message(
-    var messageText: String,
-    var messageTime: String,
-    var isSendMessage: Boolean
+    val senderId: String? = null,
+    val content: String? = null,
+    val timestamp: Timestamp? = null,
+    @field:JvmField
+    var isRead: Boolean? = null,
+    val type: Int? = null,
+    var visibility: Int? = null
 )
+
+// 각기 다른 뷰를 가지는 메시지 유형
+enum class MessageType(val code: Int) {
+    TEXT(0),                // 채팅 텍스트
+    DATE(1),                // 날짜
+    WALK_MATE_REQUEST(2),   // 산책 메이트 요청
+    WALK_MATE_ACCEPT(3),    // 산책 메이트 수락
+    WALK_MATE_REJECT(4)     // 산책 메이트 거절
+}
+
+// 메시지 표시 여부 : 해당 메시지를 볼 수 있는 사용자
+enum class MessageVisibility(val code: Int){
+    ALL(0),             // 전체
+    ONLY_SENDER(1),     // SENDER 사용자
+    ONLY_RECEIVER(2),   // RECEIVER 사용자
+    NONE(3)             // 표시 안 함
+}
