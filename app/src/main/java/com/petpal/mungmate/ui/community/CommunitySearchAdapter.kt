@@ -21,13 +21,13 @@ import com.petpal.mungmate.R
 import com.petpal.mungmate.databinding.RowCommunityBinding
 import com.petpal.mungmate.model.Post
 
-class CommunityAdapter(
+class CommunitySearchAdapter(
     private val context: Context,
     private val mainActivity: MainActivity,
     private val postList: MutableList<Post>
 
 ) :
-    RecyclerView.Adapter<CommunityAdapter.ViewHolder>() {
+    RecyclerView.Adapter<CommunitySearchAdapter.ViewHolder>() {
 
     inner class ViewHolder(item: RowCommunityBinding) :
         RecyclerView.ViewHolder(item.root) {
@@ -53,7 +53,7 @@ class CommunityAdapter(
 
                 Log.d("확인2", postList[adapterPosition].postID.toString())
                 mainActivity.navigate(
-                    R.id.action_mainFragment_to_communityPostDetailFragment,
+                    R.id.action_communitySearchFragment_to_communityPostDetailFragment,
                     bundle,
 
                 )
@@ -105,7 +105,7 @@ class CommunityAdapter(
             }
 
             mainActivity.navigate(
-                R.id.action_mainFragment_to_fullScreenFragment,
+                R.id.action_communitySearchFragment_to_fullScreenFragment,
                 bundle
             )
         }
@@ -211,6 +211,12 @@ class CommunityAdapter(
         }
     }
 
+    fun addAll(posts: List<Post>) {
+        val startPosition = postList.size
+        postList.addAll(posts)
+        notifyItemRangeInserted(startPosition, posts.size)
+    }
+
     fun update(post: Post) {
         val index = postList.indexOf(post)
         if (index != -1) {
@@ -230,5 +236,6 @@ class CommunityAdapter(
     fun clear() {
         postList.clear()
     }
+
 
 }
