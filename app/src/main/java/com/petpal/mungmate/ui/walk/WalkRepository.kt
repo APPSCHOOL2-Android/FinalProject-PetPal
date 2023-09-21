@@ -1,19 +1,24 @@
 package com.petpal.mungmate.ui.walk
 
+import com.google.android.gms.tasks.Tasks
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.google.firebase.ktx.Firebase
+import com.kakao.sdk.user.model.User
 import com.petpal.mungmate.model.Favorite
 import com.petpal.mungmate.model.KakaoSearchResponse
+import com.petpal.mungmate.model.Pet
 import com.petpal.mungmate.model.Place
+import com.petpal.mungmate.model.ReceiveUser
 import com.petpal.mungmate.model.Review
+import com.petpal.mungmate.model.UserBasicInfoData
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.tasks.await
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -146,7 +151,7 @@ class WalkRepository {
         return document.getString("nickname")
     }
 
-    suspend fun updateLocationAndOnWalkStatus(userId: String, latitude: Double, longitude: Double) {
+    suspend fun updateLocationAndOnWalkStatusTrue(userId: String, latitude: Double, longitude: Double) {
         val userRef = db.collection("users").document(userId)
         userRef.update(mapOf(
             "onWalk" to true,
@@ -156,6 +161,88 @@ class WalkRepository {
             )
         )).await()
     }
+    suspend fun updateOnWalkStatusFalse(userId: String) {
+        val userRef = db.collection("users").document(userId)
+        userRef.update(
+            mapOf(
+            "onWalk" to false
+            )
+
+        ).await()
+    }
+    suspend fun updateBlockUser(userId: String, blockId: String) {
+        val userRef = db.collection("users").document(userId)
+        userRef.update(
+            "blockUserList", FieldValue.arrayUnion(blockId)
+        ).await()
+    }
+//    @OptIn(ExperimentalCoroutinesApi::class)
+//    fun observeUsersOnWalk(): Flow<List<ReceiveUser>> = callbackFlow {
+//        val query = db.collection("users").whereEqualTo("onWalk", true)
+//        val listenerRegistration = query.addSnapshotListener { snapshot, e ->
+//            if (e != null) {
+//                close(e)
+//                return@addSnapshotListener
+//            }
+//
+//            val users = snapshot?.documents?.map { document ->
+//                val user = document.toObject(ReceiveUser::class.java) ?: ReceiveUser()
+//                user.uid = document.id  // 문서의 ID 설정
+//                user
+//            } ?: emptyList()
+//
+//            trySend(users).isSuccess
+//        }
+//        awaitClose { listenerRegistration.remove() }
+//    }
+    //chatgpt는 신이다
+    suspend fun fetchMatchingWalkCount(userId: String): Int {
+        // userId를 사용하여 해당 사용자의 문서를 가져옵니다.
+        val userDocRef = db.collection("users").document(userId)
+        val userDoc = userDocRef.get().await()
+
+        // walkRecordList 필드를 가져옵니다.
+        val walkRecordList = userDoc.get("walkRecordList") as? List<Map<String, Any?>> ?: emptyList()
+
+        // walkMatchingId가 null이 아닌 항목들만 필터링합니다.
+        val matchingWalks = walkRecordList.filter {
+            it["walkMatchingId"] != null
+        }
+        // 일치하는 항목의 수를 반환합니다.
+        return matchingWalks.size
+    }
+
+
+    fun observeUsersOnWalkWithPets(): Flow<List<ReceiveUser>> = callbackFlow {
+        val query = db.collection("users").whereEqualTo("onWalk", true)
+        val registration = query.addSnapshotListener { snapshot, error ->
+            if (error != null) {
+                close(error)  // 오류가 발생하면 Flow를 닫습니다.
+                return@addSnapshotListener
+            }
+
+            val tasks = snapshot?.documents?.map { userDocument ->
+                val user = userDocument.toObject(ReceiveUser::class.java) ?: ReceiveUser()
+                user.uid = userDocument.id
+
+                userDocument.reference.collection("pets").get().continueWith { petSnapshot ->
+                    val pets = petSnapshot.result?.mapNotNull { it.toObject(Pet::class.java) }
+                    if (pets != null) {
+                        user.pets = pets
+                    }
+                    user
+                }
+            } ?: emptyList()
+
+            Tasks.whenAllSuccess<ReceiveUser>(tasks).addOnSuccessListener { users ->
+                trySend(users).isSuccess
+            }
+        }
+
+        // 콜백을 제거하려면 awaitClose를 사용합니다.
+        awaitClose { registration.remove() }
+    }
+
 
 }
 

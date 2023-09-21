@@ -2,11 +2,11 @@ package com.petpal.mungmate.ui.walk
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.app.Dialog
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.location.Location
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -19,12 +19,15 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.RatingBar
 import android.widget.TextView
+import androidx.annotation.RequiresApi
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.app.ActivityCompat
+import androidx.core.os.bundleOf
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -50,14 +53,17 @@ import com.petpal.mungmate.databinding.FragmentWalkBinding
 import com.petpal.mungmate.model.Favorite
 import com.petpal.mungmate.model.KakaoSearchResponse
 import com.petpal.mungmate.model.Place
+import com.petpal.mungmate.model.ReceiveUser
 import com.petpal.mungmate.model.Review
 import com.petpal.mungmate.utils.LastKnownLocation
+import com.petpal.mungmate.utils.onWalk.onWalk
 import kotlinx.coroutines.launch
 import net.daum.mf.map.api.MapPOIItem
 import net.daum.mf.map.api.MapPoint
 import net.daum.mf.map.api.MapView
-import java.security.AccessController.checkPermission
 import java.text.SimpleDateFormat
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import java.util.Date
 
 class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListener, net.daum.mf.map.api.MapView.CurrentLocationEventListener, net.daum.mf.map.api.MapView.MapViewEventListener {
@@ -74,7 +80,8 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
     private val avgRatingBundle = Bundle()
     private lateinit var initialBottomSheetView: View
     private lateinit var bottomSheetDialog: BottomSheetDialog
-    private var isHeartImageUpdated = false
+    private lateinit var onWalkBottomSheetView: View
+    private lateinit var onWalkbottomSheetDialog: BottomSheetDialog
     private val auth = Firebase.auth
     private lateinit var userId:String
     private lateinit var userNickname:String
@@ -84,6 +91,9 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
     private var userLocationMarker: MapPOIItem? = null
     private var startTimestamp: String ="0"
     private val handler = Handler(Looper.getMainLooper())
+    private var nearbyUsers: List<ReceiveUser>?=null
+
+
 
     val timerRunnable = object : Runnable {
         override fun run() {
@@ -92,6 +102,7 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
             handler.postDelayed(this, 1000)
         }
     }
+
 
     companion object {
         const val REQUEST_LOCATION_PERMISSION = 1
@@ -113,12 +124,20 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
         bottomSheetDialog = BottomSheetDialog(requireContext())
         bottomSheetDialog.setContentView(initialBottomSheetView)
 
+        onWalkBottomSheetView=inflater.inflate(R.layout.row_walk_bottom_sheet_user,null)
+        onWalkbottomSheetDialog=BottomSheetDialog(requireContext())
+        onWalkbottomSheetDialog.setContentView(onWalkBottomSheetView)
+
 
         setupMapView()
         setupButtonListeners()
         observeViewModel()
         val user=auth.currentUser
         userId= user?.uid.toString()
+
+        if(onWalk==false){
+            viewModel.updateOnWalkStatusFalse(userId)
+        }
 
         viewModel.fetchUserNickname(userId)
 
@@ -140,18 +159,22 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
         fragmentWalkBinding.mapView.setCurrentLocationEventListener(this)
         fragmentWalkBinding.mapView.setMapViewEventListener(this)
         requestLocationPermissionIfNeeded()
+
+
     }
 
     private fun setupButtonListeners() {
         fragmentWalkBinding.buttonWalk.setOnClickListener {
+            onWalk=true
+            observeViewModelonWalk()
+            viewModel.observeUsersOnWalk()
             toggleVisibility(fragmentWalkBinding.LinearLayoutOnWalk, fragmentWalkBinding.LinearLayoutOffWalk)
             fragmentWalkBinding.mapView.removeAllPOIItems()
             fragmentWalkBinding.imageViewWalkToggle.setImageResource(R.drawable.dog_walk)
             handler.post(timerRunnable)
+            updateCurrentLocationOnce()
             startLocationUpdates()
             startTimestamp = timestampToString(System.currentTimeMillis())
-            Log.d("infooooo",lastLocation.toString())
-
 
         }
 
@@ -162,31 +185,16 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
         }
 
         fragmentWalkBinding.buttonFilterSubmit.setOnClickListener {
-            val isAnyFilterSelected =
-                fragmentWalkBinding.filterDistanceGroup.checkedChipId != -1 || fragmentWalkBinding.filterUserGenderGroup.checkedChipId != -1 || fragmentWalkBinding.filterAgeRangeGroup.checkedChipId != -1 || fragmentWalkBinding.filterPetGenderGroup.checkedChipId != -1 || fragmentWalkBinding.filterPetPropensityGroup.checkedChipId != -1 || fragmentWalkBinding.filterNeuterStatusGroup.checkedChipId != -1
+            val isAnyFilterSelected = fragmentWalkBinding.filterDistanceGroup.checkedChipId != -1 || fragmentWalkBinding.filterUserGenderGroup.checkedChipId != -1 || fragmentWalkBinding.filterAgeRangeGroup.checkedChipId != -1 || fragmentWalkBinding.filterPetGenderGroup.checkedChipId != -1 || fragmentWalkBinding.filterPetPropensityGroup.checkedChipId != -1 || fragmentWalkBinding.filterNeuterStatusGroup.checkedChipId != -1
             fragmentWalkBinding.chipMapFilter.isChecked = isAnyFilterSelected
-            //맵에 대한 필터가 아니지 않아??
-//            when (fragmentWalkBinding.filterDistanceGroup.checkedChipId) {
-//                R.id.distance1 -> {
-//                    //1km 필터에 따른 기능 실행
-//                    getLastLocationFilter(1000)
-//                }
-//                R.id.distance2 -> {
-//                    //2km 필터에 따른 기능 실행
-//                    getLastLocationFilter(2000)
-//                }
-//                R.id.distance3 -> {
-//                    //3km 원래 기본 3km임
-//                    getLastLocation()
-//                }
-//        }
-
             fragmentWalkBinding.drawerLayout.closeDrawer(GravityCompat.END)
             showSnackbar("필터가 적용되었습니다.")
 
         }
 
         fragmentWalkBinding.buttonStopWalk.setOnClickListener {
+            onWalk=false
+            fragmentWalkBinding.mapView.removeAllPOIItems()
             toggleVisibility(fragmentWalkBinding.LinearLayoutOffWalk, fragmentWalkBinding.LinearLayoutOnWalk)
             fragmentWalkBinding.imageViewWalkToggle.setImageResource(R.drawable.dog_home)
 
@@ -196,17 +204,25 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
             bundle.putString("walkRecordDate",getCurrentDate())
             bundle.putString("walkRecordStartTime",startTimestamp)
             bundle.putString("walkRecordEndTime",endTimestamp)
-            bundle.putString("walkDuration",elapsedTime.toString())
+            bundle.putLong("walkDuration",elapsedTime)
             bundle.putString("walkDistance",totalDistance.toString())
             bundle.putString("walkMatchingId","idid")
             stopLocationUpdates()
             handler.removeCallbacks(timerRunnable)
             elapsedTime = 0L
             fragmentWalkBinding.textViewWalkTime.text = formatElapsedTime(elapsedTime)
+            viewModel.updateOnWalkStatusFalse(userId)
             mainActivity.navigate(R.id.action_mainFragment_to_WriteWalkReviewFragment,bundle)
-        }
-        fragmentWalkBinding.imageViewMylocation.setOnClickListener {
             getCurrentLocation()
+        }
+
+
+        fragmentWalkBinding.imageViewMylocation.setOnClickListener {
+            if(onWalk==true) {
+                getCurrentLocationOnWalk()
+            }else {
+                getCurrentLocation()
+            }
             LastKnownLocation.latitude = null
             LastKnownLocation.longitude= null
         }
@@ -217,7 +233,51 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
         val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
         return formatter.format(date)
     }
+    private fun observeViewModelonWalk(){
+        viewModel.usersOnWalk.observe(viewLifecycleOwner, Observer { users ->
+            users.forEach { user ->
+                user.nickname?.let { Log.d("전체유저", it) }
+            }
+            if (checkPermission(Manifest.permission.ACCESS_FINE_LOCATION)) {
+                fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
+                    location?.let {
+                        val currentLocation=Location("currentLocation").apply{
+                            latitude=it.latitude ?: 0.0
+                            longitude=it.longitude ?:0.0
+                        }
+                        nearbyUsers = users.filter { user ->
+                            // user의 위치를 가져옵니다.
+                            val userLocation = Location("userLocation").apply {
+                                latitude = user.location?.get("latitude") ?: 0.0
+                                longitude = user.location?.get("longitude") ?: 0.0
+                            }
 
+                            user.uid != userId && currentLocation.distanceTo(userLocation) <= 2000
+                        }
+
+                        for (user in nearbyUsers!!) {
+                            // 마커 추가
+                            user.nickname?.let { it1 -> Log.d("진짜", it1) }
+                            val mapPoint = MapPoint.mapPointWithGeoCoord(
+                                user.location?.get("latitude") ?: 0.0, user.location?.get("longitude")
+                                    ?: 0.0)
+                            val poiItem = MapPOIItem().apply {
+                                itemName = user.nickname
+                                tag = user.nickname.hashCode()
+                                this.mapPoint = mapPoint
+                                markerType = MapPOIItem.MarkerType.CustomImage
+                                customImageResourceId = R.drawable.userlocation // 여기에 원하는 이미지 리소스 지정
+                                isCustomImageAutoscale = true
+                                setCustomImageAnchor(0.5f, 1.0f)
+                            }
+                            fragmentWalkBinding.mapView.addPOIItem(poiItem)
+                        }
+                    }
+                }
+            }
+
+        })
+    }
     private fun observeViewModel() {
 
         viewModel.searchResults.observe(viewLifecycleOwner) { response ->
@@ -231,7 +291,7 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
                     tag = place.id.hashCode() //id로 태그
                     this.mapPoint = mapPoint
                     markerType = MapPOIItem.MarkerType.CustomImage
-                    customImageResourceId = R.drawable.paw_pin
+                    customImageResourceId = R.drawable.favorite_pin
                     //마커 크기 자동조정
                     isCustomImageAutoscale = true
                     //마커 위치 조정
@@ -274,10 +334,47 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
             // 권한이 승인되어있으면 위치 가져오기
             isLocationPermissionGranted = true
             Log.d("LastKnownLocation",LastKnownLocation.latitude.toString())
+                if (LastKnownLocation.latitude != null || LastKnownLocation.longitude != null){
+                    getLastLocation()
+                } else {
+                    getCurrentLocation()
+                }
+            }
+        }
+    private fun requestLocationPermissionIfNeededOnWalk() {
+        if (ActivityCompat.checkSelfPermission(
+                requireContext(),
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            requestPermissions(
+                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                REQUEST_LOCATION_PERMISSION
+            )
+        } else {
+            // 권한이 승인되어있으면 위치 가져오기
+            isLocationPermissionGranted = true
+            Log.d("LastKnownLocation",LastKnownLocation.latitude.toString())
             if (LastKnownLocation.latitude != null || LastKnownLocation.longitude != null){
-                getLastLocation()
+                getLastLocationOnWalk()
+
             } else {
-                getCurrentLocation()
+                getCurrentLocationOnWalk()
+            }
+        }
+    }
+    private fun getCurrentLocationOnWalk() {
+        if (checkPermission(Manifest.permission.ACCESS_FINE_LOCATION)
+        ) {
+            fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
+                location?.let {
+                    LastKnownLocation.latitude=it.latitude
+                    LastKnownLocation.longitude=it.longitude
+                    viewModel.observeUsersOnWalk()
+                    val mapPoint = MapPoint.mapPointWithGeoCoord(it.latitude, it.longitude)
+                    showUserLocationOnMap(it)
+                    fragmentWalkBinding.mapView.setMapCenterPoint(mapPoint, true)
+                }
             }
         }
     }
@@ -291,29 +388,89 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
                     LastKnownLocation.latitude=it.latitude
                     LastKnownLocation.longitude=it.longitude
                     viewModel.searchPlacesByKeyword(it.latitude, it.longitude, "동물")
+                    showUserLocationOnMap1(location)
                     val mapPoint = MapPoint.mapPointWithGeoCoord(it.latitude, it.longitude)
                     fragmentWalkBinding.mapView.setMapCenterPoint(mapPoint, true)
                 }
             }
         }
     }
+    private fun getLastLocationOnWalk() {
+        if (checkPermission(Manifest.permission.ACCESS_FINE_LOCATION)
+        ) {
+            LastKnownLocation.let {
+                LastKnownLocation.latitude?.let { it1 ->
+                    LastKnownLocation.longitude?.let { it2 ->
+                        viewModel.observeUsersOnWalk()
+                    }
+                }
+                val mapPoint = LastKnownLocation.latitude?.let { it1 ->
+                    LastKnownLocation.longitude?.let { it2 ->
+                        MapPoint.mapPointWithGeoCoord(it1, it2)
+                    }
+                }
+                val location = Location("providerName")
+                location.latitude = LastKnownLocation.latitude!!
+                location.longitude = LastKnownLocation.longitude!!
+                showUserLocationOnMap(location)
+                fragmentWalkBinding.mapView.setMapCenterPoint(mapPoint, true)
+
+                for (marker in currentMarkers) {
+                    fragmentWalkBinding.mapView.removePOIItem(marker)
+                }
+                currentMarkers.clear()
+            }
+        }
+    }
+
 
     private fun checkPermission(permission: String): Boolean {
         return ActivityCompat.checkSelfPermission(requireContext(), permission) == PackageManager.PERMISSION_GRANTED
     }
 
     private fun showUserLocationOnMap(location: Location) {
+        //fragmentWalkBinding.mapView.removePOIItem(userLocationMarker)
         userLocationMarker?.let {
             fragmentWalkBinding.mapView.removePOIItem(it)
         }
         userLocationMarker = MapPOIItem().apply {
-            itemName = "Current Location"
+            itemName = "나"
             mapPoint = MapPoint.mapPointWithGeoCoord(location.latitude, location.longitude)
-            markerType = MapPOIItem.MarkerType.BluePin
-            //selectedMarkerType = MapPOIItem.MarkerType.RedPin
+            markerType = MapPOIItem.MarkerType.CustomImage
+            customImageResourceId = R.drawable.mylocation
+            isCustomImageAutoscale = true
+            setCustomImageAnchor(0.5f, 1.0f)
+
         }
         fragmentWalkBinding.mapView.addPOIItem(userLocationMarker)
-        fragmentWalkBinding.mapView.setMapCenterPointAndZoomLevel(MapPoint.mapPointWithGeoCoord(location.latitude, location.longitude), 1, true)
+//        fragmentWalkBinding.mapView.setMapCenterPoint(MapPoint.mapPointWithGeoCoord(location.latitude, location.longitude),true)
+    }
+    private fun showUserLocationOnMap1(location: Location) {
+        //fragmentWalkBinding.mapView.removePOIItem(userLocationMarker)
+        userLocationMarker?.let {
+            fragmentWalkBinding.mapView.removePOIItem(it)
+        }
+        userLocationMarker = MapPOIItem().apply {
+            itemName = "나"
+            mapPoint = MapPoint.mapPointWithGeoCoord(location.latitude, location.longitude)
+            markerType = MapPOIItem.MarkerType.CustomImage
+            customImageResourceId = R.drawable.mylocation
+            isCustomImageAutoscale = true
+            setCustomImageAnchor(0.5f, 1.0f)
+
+        }
+        fragmentWalkBinding.mapView.addPOIItem(userLocationMarker)
+//        fragmentWalkBinding.mapView.setMapCenterPoint(MapPoint.mapPointWithGeoCoord(location.latitude, location.longitude),true)
+    }
+    private fun updateCurrentLocationOnce() {
+        if (checkPermission(Manifest.permission.ACCESS_FINE_LOCATION)) {
+            fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
+                location?.let {
+                    val mapPoint = MapPoint.mapPointWithGeoCoord(it.latitude, it.longitude)
+                    fragmentWalkBinding.mapView.setMapCenterPoint(mapPoint, true)
+                }
+            }
+        }
     }
 
     private val locationCallback = object : LocationCallback() {
@@ -340,8 +497,8 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
     private fun startLocationUpdates() {
         if (checkPermission(Manifest.permission.ACCESS_FINE_LOCATION)) {
             val locationRequest = LocationRequest.create().apply {
-                interval = 2000 // 10 seconds
-                fastestInterval = 5000 // 5 seconds
+                interval = 2000 // 2초마다 갱신
+                fastestInterval = 5000 // 타앱
                 priority = LocationRequest.PRIORITY_HIGH_ACCURACY
             }
             fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper())
@@ -359,6 +516,11 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
     private fun getLastLocation() {
         if (checkPermission(Manifest.permission.ACCESS_FINE_LOCATION)
         ) {
+            fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
+                if (location != null) {
+                    //showUserLocationOnMap1(location)
+                }
+            }
             LastKnownLocation.let {
                 LastKnownLocation.latitude?.let { it1 ->
                     LastKnownLocation.longitude?.let { it2 ->
@@ -369,8 +531,13 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
                     LastKnownLocation.longitude?.let { it2 ->
                         MapPoint.mapPointWithGeoCoord(it1, it2)
                     }
+
+
                 }
-                fragmentWalkBinding.mapView.setMapCenterPoint(mapPoint, true)
+
+
+                fragmentWalkBinding.mapView.setMapCenterPoint(mapPoint,true)
+
 
                 for (marker in currentMarkers) {
                     fragmentWalkBinding.mapView.removePOIItem(marker)
@@ -391,8 +558,7 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
                     }
                 }
                 val mapPoint = LastKnownLocation.latitude?.let { it1 ->
-                    LastKnownLocation.longitude?.let { it2 ->
-                        MapPoint.mapPointWithGeoCoord(it1, it2)
+                    LastKnownLocation.longitude?.let { it2 -> MapPoint.mapPointWithGeoCoord(it1, it2)
                     }
                 }
                 fragmentWalkBinding.mapView.setMapCenterPoint(mapPoint, true)
@@ -437,328 +603,470 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
         val formatter = SimpleDateFormat("yyyy-MM-dd") // 년-월-일
         return formatter.format(current)
     }
-    //맵의 마커 클릭시
-    override fun onPOIItemSelected(p0: net.daum.mf.map.api.MapView?, p1: MapPOIItem?) {
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun calculateAgeGroup(birthday: String): String {
+        val birthYear = LocalDate.parse(birthday, DateTimeFormatter.ofPattern("yyyy-MM-dd")).year
+        val currentYear = LocalDate.now().year
+        val age = currentYear - birthYear
 
-        val selectedPlace = kakaoSearchResponse.documents.find { it.id.hashCode() == p1?.tag }
-        val detailCardView = layoutInflater.inflate(R.layout.row_place_review, null)
-        val detailDialog = BottomSheetDialog(requireActivity())
-        val detailRating=detailCardView.findViewById<RatingBar>(R.id.placeReviewDetailRatingBar)
-        val detailUserName=detailCardView.findViewById<TextView>(R.id.textViewPlaceReviewDetailUserName)
-        val detailDate=detailCardView.findViewById<TextView>(R.id.textViewPlaceReviewDetailDate)
-        val detailContent=detailCardView.findViewById<TextView>(R.id.textView4)
-        val detailImage=detailCardView.findViewById<ImageView>(R.id.imageView11)
-        val buttonsubmit = initialBottomSheetView.findViewById<Button>(R.id.buttonSubmitReview)
-        val placeId = selectedPlace?.id
-        //클릭한 맵의 placeId로 메서드 실행
-        placeId?.let {
-            viewModel.fetchFavoriteCount(it)
-            viewModel.fetchReviewCount(it)
-            viewModel.fetchLatestReviewsForPlace(it)
-            viewModel.fetchPlaceInfoFromFirestore(it)
-            viewModel.fetchIsPlaceFavoritedByUser(it, userId)  // Removed the collect operation
-            viewModel.fetchAverageRatingForPlace(it)
+        return when {
+            age in 0..9 -> "나이대 : 영유아 및 초등학생"
+            age in 10..19 -> "나이대 : 10대"
+            age in 20..29 -> "나이대 : 20대"
+            age in 30..39 -> "나이대 : 30대"
+            age in 40..49 -> "나이대 : 40대"
+            age in 50..59 -> "나이대 : 50대"
+            age in 60..69 -> "나이대 : 60대"
+            age in 70..79 -> "나이대 : 70대"
+            else -> "밝히지 않음"
+        }
+    }
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun calculateAge(birthday: String): Int {
+        val birthDate = LocalDate.parse(birthday, DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+        val currentDate = LocalDate.now()
+
+        var age = currentDate.year - birthDate.year
+
+        if (birthDate.month > currentDate.month || (birthDate.month == currentDate.month && birthDate.dayOfMonth > currentDate.dayOfMonth)) {
+            age--
         }
 
-        lifecycleScope.launch {
-            //바텀시트의 좋아요 상태에 따라 하트 이미지 변경
-            viewModel.isPlaceFavorited.collect { isFavorited ->
-                isFavorited?.let {
-                    if (it) {
-                        initialBottomSheetView.findViewById<ImageView>(R.id.imageViewFavoirte)
-                            .setImageResource(R.drawable.filled_heart)
-                        isFavorited1=true
+        return age
+    }
+    //맵의 마커 클릭시
+    @RequiresApi(Build.VERSION_CODES.O)
+    override fun onPOIItemSelected(p0: net.daum.mf.map.api.MapView?, p1: MapPOIItem?) {
+        if (p1?.itemName == "나") {
+            return
+        }
+        if (onWalk == false) {
+            val selectedPlace = kakaoSearchResponse.documents.find { it.id.hashCode() == p1?.tag }
+            val detailCardView = layoutInflater.inflate(R.layout.row_place_review, null)
+            val detailDialog = BottomSheetDialog(requireActivity())
+            val detailRating = detailCardView.findViewById<RatingBar>(R.id.placeReviewDetailRatingBar)
+            val detailUserName = detailCardView.findViewById<TextView>(R.id.textViewPlaceReviewDetailUserName)
+            val detailDate = detailCardView.findViewById<TextView>(R.id.textViewPlaceReviewDetailDate)
+            val detailContent = detailCardView.findViewById<TextView>(R.id.textView4)
+            val detailImage = detailCardView.findViewById<ImageView>(R.id.imageView11)
+            val buttonsubmit = initialBottomSheetView.findViewById<Button>(R.id.buttonSubmitReview)
+            val placeId = selectedPlace?.id
+            //클릭한 맵의 placeId로 메서드 실행
+            placeId?.let {
+                viewModel.fetchFavoriteCount(it)
+                viewModel.fetchReviewCount(it)
+                viewModel.fetchLatestReviewsForPlace(it)
+                viewModel.fetchPlaceInfoFromFirestore(it)
+                viewModel.fetchIsPlaceFavoritedByUser(it, userId)  // Removed the collect operation
+                viewModel.fetchAverageRatingForPlace(it)
+            }
+
+            lifecycleScope.launch {
+                //바텀시트의 좋아요 상태에 따라 하트 이미지 변경
+                viewModel.isPlaceFavorited.collect { isFavorited ->
+                    isFavorited?.let {
+                        if (it) {
+                            initialBottomSheetView.findViewById<ImageView>(R.id.imageViewFavoirte).setImageResource(R.drawable.filled_heart)
+                            isFavorited1 = true
+
+                        } else {
+                            initialBottomSheetView.findViewById<ImageView>(R.id.imageViewFavoirte).setImageResource(R.drawable.empty_heart)
+                            isFavorited1 = false
+                        }
+
+                    }
+
+                }
+
+            }
+            //place의 리뷰 별점 평균 표기
+            viewModel.averageRatingForPlace.observe(viewLifecycleOwner) { avgRating ->
+                val roundedAvgRating = String.format("%.1f", avgRating).toFloat()
+                initialBottomSheetView.findViewById<RatingBar>(R.id.placeRatingBar).rating = avgRating
+                initialBottomSheetView.findViewById<TextView>(R.id.textViewratingbar).text = roundedAvgRating.toString()
+                avgRatingBundle.putFloat("avgRating", avgRating)
+                Log.d("avgRating", avgRating.toString())
+            }
+
+            //favorite 서브컬렉션의 문서 개수 받아와서 실시간 반영
+            viewLifecycleOwner.lifecycleScope.launch {
+                viewModel.favoriteCount.collect { count ->
+                    val favoriteCountTextView = initialBottomSheetView.findViewById<TextView>(R.id.textViewPlaceFavoriteCount)
+                    favoriteCountTextView.text = "${count}명의 유저가 추천합니다."
+                }
+            }
+
+            //place 정보 받아와서 db에 있는 place인지 확인 후 분기로 이름 입력
+            viewModel.placeInfo.observe(viewLifecycleOwner) { placeInfo ->
+                val textViewPlaceName = initialBottomSheetView.findViewById<TextView>(R.id.textView)
+                val imageViewPlace = initialBottomSheetView.findViewById<ImageView>(R.id.ImageViewBottomRecommendPlace)
+                textViewPlaceName.text = placeInfo?.get("name") as? String ?: "${selectedPlace?.place_name}"
+                val imageUrl = placeInfo?.get("imageRes") as? String
+
+                if (imageUrl != null) {
+                    Glide.with(imageViewPlace.context)
+                        .load(imageUrl)
+                        .placeholder(R.drawable.default_profile_image)
+                        .listener(object : RequestListener<Drawable> {
+                            override fun onLoadFailed(e: GlideException?, model: Any?, target: Target<Drawable>?, isFirstResource: Boolean): Boolean {
+                                return false
+                            }
+
+                            override fun onResourceReady(resource: Drawable?, model: Any?, target: Target<Drawable>?, dataSource: DataSource?, isFirstResource: Boolean): Boolean {
+
+                                Handler(Looper.getMainLooper()).postDelayed({ bottomSheetDialog.show() }, 200)
+                                return false
+                            }
+                        })
+                        .into(imageViewPlace)
+                } else {
+                    imageViewPlace.setImageResource(R.drawable.default_profile_image)
+                    Handler(Looper.getMainLooper()).postDelayed({ bottomSheetDialog.show() }, 200)
+                }
+            }
+
+            //리뷰 개수 받아와서 출력
+            viewModel.reviewCount.observe(viewLifecycleOwner) { reviewCount ->
+                val reviewCountTextView = initialBottomSheetView.findViewById<TextView>(R.id.textViewPlaceReviewCount)
+                reviewCountTextView.text = "${reviewCount}개의 리뷰가 있어요"
+            }
+
+            //최신순 리뷰 두개 받아와서 바텀시트에 1,2 출력
+            viewModel.latestReviews.observe(viewLifecycleOwner) { reviews ->
+                latestReviews = reviews
+                val placeuserRating1 =
+                    initialBottomSheetView.findViewById<RatingBar>(R.id.placeUserRatingBar1)
+                val placeuserRating2 =
+                    initialBottomSheetView.findViewById<RatingBar>(R.id.placeUserRatingBar2)
+                val placeuserReview1 =
+                    initialBottomSheetView.findViewById<TextView>(R.id.placeUserReview1)
+                val placeuserReview2 =
+                    initialBottomSheetView.findViewById<TextView>(R.id.placeUserReview2)
+
+                if (reviews.isNotEmpty()) {
+                    val firstReview = reviews[0]
+                    placeuserRating1.rating = firstReview.rating!!
+                    placeuserReview1.text = firstReview.comment
+
+                    placeuserRating1.visibility = View.VISIBLE
+                    placeuserReview1.visibility = View.VISIBLE
+
+
+                    if (reviews.size > 1) {
+                        val secondReview = reviews[1]
+                        placeuserRating2.rating = secondReview.rating!!
+                        placeuserReview2.text = secondReview.comment
+
+                        placeuserRating2.visibility = View.VISIBLE
+                        placeuserReview2.visibility = View.VISIBLE
 
                     } else {
-                        initialBottomSheetView.findViewById<ImageView>(R.id.imageViewFavoirte)
-                            .setImageResource(R.drawable.empty_heart)
-                        isFavorited1=false
+                        placeuserRating2.visibility = View.GONE
+                        placeuserReview2.visibility = View.GONE
                     }
 
-                }
-
-            }
-
-        }
-        //place의 리뷰 별점 평균 표기
-        viewModel.averageRatingForPlace.observe(viewLifecycleOwner) { avgRating ->
-            val roundedAvgRating = String.format("%.1f", avgRating).toFloat()
-            initialBottomSheetView.findViewById<RatingBar>(R.id.placeRatingBar).rating=avgRating
-            initialBottomSheetView.findViewById<TextView>(R.id.textViewratingbar).text=roundedAvgRating.toString()
-
-            avgRatingBundle.putFloat("avgRating", avgRating)
-            Log.d("avgRating",avgRating.toString())
-        }
-
-        //favorite 서브컬렉션의 문서 개수 받아와서 실시간 반영
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.favoriteCount.collect { count ->
-                val favoriteCountTextView = initialBottomSheetView.findViewById<TextView>(R.id.textViewPlaceFavoriteCount)
-                favoriteCountTextView.text = "${count}명의 유저가 추천합니다."
-            }
-        }
-
-        //place 정보 받아와서 db에 있는 place인지 확인 후 분기로 이름 입력
-        viewModel.placeInfo.observe(viewLifecycleOwner) { placeInfo ->
-            val textViewPlaceName = initialBottomSheetView.findViewById<TextView>(R.id.textView)
-            val imageViewPlace = initialBottomSheetView.findViewById<ImageView>(R.id.ImageViewBottomRecommendPlace)
-            textViewPlaceName.text = placeInfo?.get("name") as? String ?: "${selectedPlace?.place_name}"
-            val imageUrl = placeInfo?.get("imageRes") as? String
-
-            if (imageUrl != null) {
-                Glide.with(imageViewPlace.context)
-                    .load(imageUrl)
-                    .placeholder(R.drawable.default_profile_image)
-                    .listener(object : RequestListener<Drawable> {
-                        override fun onLoadFailed(e: GlideException?, model: Any?, target: Target<Drawable>?, isFirstResource: Boolean): Boolean {
-                            return false
-                        }
-
-                        override fun onResourceReady(resource: Drawable?, model: Any?, target: Target<Drawable>?, dataSource: DataSource?, isFirstResource: Boolean): Boolean {
-
-                            Handler(Looper.getMainLooper()).postDelayed({
-                                    bottomSheetDialog.show()
-                                    isHeartImageUpdated = false
-                                }, 200)
-                            return false
-                        }
-                    })
-                    .into(imageViewPlace)
-            } else {
-                    imageViewPlace.setImageResource(R.drawable.default_profile_image)
-                    Handler(Looper.getMainLooper()).postDelayed({
-                        bottomSheetDialog.show()
-                    }, 200)
-            }
-        }
-
-        //리뷰 개수 받아와서 출력
-        viewModel.reviewCount.observe(viewLifecycleOwner) { reviewCount ->
-            val reviewCountTextView =
-                initialBottomSheetView.findViewById<TextView>(R.id.textViewPlaceReviewCount)
-            reviewCountTextView.text = "${reviewCount}개의 리뷰가 있어요"
-        }
-
-        //최신순 리뷰 두개 받아와서 바텀시트에 1,2 출력
-        viewModel.latestReviews.observe(viewLifecycleOwner) { reviews ->
-            latestReviews=reviews
-            val placeuserRating1 = initialBottomSheetView.findViewById<RatingBar>(R.id.placeUserRatingBar1)
-            val placeuserRating2 = initialBottomSheetView.findViewById<RatingBar>(R.id.placeUserRatingBar2)
-            val placeuserReview1 = initialBottomSheetView.findViewById<TextView>(R.id.placeUserReview1)
-            val placeuserReview2 = initialBottomSheetView.findViewById<TextView>(R.id.placeUserReview2)
-
-            if (reviews.isNotEmpty()) {
-                val firstReview = reviews[0]
-                placeuserRating1.rating = firstReview.rating!!
-                placeuserReview1.text = firstReview.comment
-
-                placeuserRating1.visibility = View.VISIBLE
-                placeuserReview1.visibility = View.VISIBLE
-
-
-                if (reviews.size > 1) {
-                    val secondReview = reviews[1]
-                    placeuserRating2.rating = secondReview.rating!!
-                    placeuserReview2.text = secondReview.comment
-
-                    placeuserRating2.visibility = View.VISIBLE
-                    placeuserReview2.visibility = View.VISIBLE
-
+                    initialBottomSheetView.findViewById<Chip>(R.id.chipViewAllReviews).visibility = View.VISIBLE
+                    initialBottomSheetView.findViewById<TextView>(R.id.textViewNoReview).visibility = View.GONE
                 } else {
+                    placeuserRating1.visibility = View.GONE
                     placeuserRating2.visibility = View.GONE
+                    placeuserReview1.visibility = View.GONE
                     placeuserReview2.visibility = View.GONE
+                    initialBottomSheetView.findViewById<Chip>(R.id.chipViewAllReviews).visibility = View.GONE
+                    initialBottomSheetView.findViewById<TextView>(R.id.textViewNoReview).visibility = View.VISIBLE
                 }
-
-                initialBottomSheetView.findViewById<Chip>(R.id.chipViewAllReviews).visibility = View.VISIBLE
-                initialBottomSheetView.findViewById<TextView>(R.id.textViewNoReview).visibility = View.GONE
-            } else {
-                placeuserRating1.visibility = View.GONE
-                placeuserRating2.visibility = View.GONE
-                placeuserReview1.visibility = View.GONE
-                placeuserReview2.visibility = View.GONE
-                initialBottomSheetView.findViewById<Chip>(R.id.chipViewAllReviews).visibility = View.GONE
-                initialBottomSheetView.findViewById<TextView>(R.id.textViewNoReview).visibility = View.VISIBLE
             }
-        }
 
 
 
-        //db에서 받아와서 데이터 입력 전에 바텀시트가 올라오는거 막는 임시조치
-//        Handler(Looper.getMainLooper()).postDelayed({
-//            bottomSheetDialog.show()
-//        }, 400)  // 0.4초 딜레이
-
-
-        //바텀시트 끌어 올렸을때 상세 리뷰 페이지로 이동
-        bottomSheetDialog.behavior.addBottomSheetCallback(object :
-            BottomSheetBehavior.BottomSheetCallback() {
-            override fun onStateChanged(bottomSheet: View, newState: Int) {
-                when (newState) {
-                    BottomSheetBehavior.STATE_EXPANDED -> {
-                        avgRatingBundle.putString("place_name", selectedPlace?.place_name)
-                        avgRatingBundle.putString("place_id", selectedPlace?.id)
-                        avgRatingBundle.putString("phone", selectedPlace?.phone)
-                        avgRatingBundle.putString("place_road_adress_name", selectedPlace?.road_address_name)
-                        avgRatingBundle.putString("place_category", selectedPlace?.category_group_name)
-                        mainActivity.navigate(
-                            R.id.action_mainFragment_to_placeReviewFragment,
-                            avgRatingBundle,
-                        )
-                        bottomSheetDialog.dismiss()
+            //바텀시트 끌어 올렸을때 상세 리뷰 페이지로 이동
+            bottomSheetDialog.behavior.addBottomSheetCallback(object :
+                BottomSheetBehavior.BottomSheetCallback() {
+                override fun onStateChanged(bottomSheet: View, newState: Int) {
+                    when (newState) {
+                        BottomSheetBehavior.STATE_EXPANDED -> {
+                            avgRatingBundle.putString("place_name", selectedPlace?.place_name)
+                            avgRatingBundle.putString("place_id", selectedPlace?.id)
+                            avgRatingBundle.putString("phone", selectedPlace?.phone)
+                            avgRatingBundle.putString(
+                                "place_road_adress_name",
+                                selectedPlace?.road_address_name
+                            )
+                            avgRatingBundle.putString(
+                                "place_category",
+                                selectedPlace?.category_group_name
+                            )
+                            mainActivity.navigate(R.id.action_mainFragment_to_placeReviewFragment, avgRatingBundle,)
+                            bottomSheetDialog.dismiss()
+                        }
                     }
                 }
+
+                override fun onSlide(bottomSheet: View, slideOffset: Float) {}
+            })
+
+            //좋아요 버튼 눌렀을 때  userid로 favorite 서브 컬렉션에 문서 추가 / isFavorited 상태에 따라 이미지 교체,스넥바,count 출력
+            initialBottomSheetView.findViewById<ImageView>(R.id.imageViewFavoirte).apply {
+                val place = Place(selectedPlace!!.id, selectedPlace.place_name, selectedPlace.category_group_name, (selectedPlace.x).toString(), (selectedPlace.y).toString(), selectedPlace.phone, selectedPlace.road_address_name)
+                setOnClickListener {
+                    if (!isFavorited1) {
+                        isFavorited1 = true
+                        setImageResource(R.drawable.filled_heart)
+                        val favorite = Favorite(userId)
+                        viewModel.addPlaceToFavorite(place, favorite)
+                        val bottomplacelayout: CoordinatorLayout =
+                            initialBottomSheetView.findViewById(R.id.bottom_place_layout)
+                        Snackbar.make(bottomplacelayout, "반영되었습니다.", Snackbar.LENGTH_SHORT).show()
+                    } else {
+                        isFavorited1 = false
+                        setImageResource(R.drawable.empty_heart)
+                        viewModel.removeFavorite(placeId!!, userId)
+                        val bottomplacelayout: CoordinatorLayout =
+                            initialBottomSheetView.findViewById(R.id.bottom_place_layout)
+                        Snackbar.make(bottomplacelayout, "반영되었습니다.", Snackbar.LENGTH_SHORT).show()
+                    }
+
+
+                    viewModel.fetchFavoriteCount(placeId!!)
+                    viewLifecycleOwner.lifecycleScope.launchWhenStarted {
+                        viewModel.favoriteCount.collect { favoriteCount ->
+                            Log.d("firstsubmit", favoriteCount.toString())
+                            val favoriteCountTextView =
+                                initialBottomSheetView.findViewById<TextView>(R.id.textViewPlaceFavoriteCount)
+                            favoriteCountTextView.text = "${favoriteCount}명의 유저가 추천합니다."
+                        }
+                    }
+
+                }
             }
+            //리뷰 입력 버튼
+            buttonsubmit.setOnClickListener {
+                val bundle = Bundle()
+                bundle.putString("place_name", selectedPlace?.place_name)
+                bundle.putString("place_id", selectedPlace?.id)
+                bundle.putString("place_category", selectedPlace?.category_group_name)
+                bundle.putString("place_long", selectedPlace?.x.toString())
+                bundle.putString("place_lat", selectedPlace?.y.toString())
+                bundle.putString("phone", selectedPlace?.phone)
+                bundle.putString("userNickname", userNickname)
+                bundle.putString("place_road_adress_name", selectedPlace?.road_address_name)
 
-            override fun onSlide(bottomSheet: View, slideOffset: Float) {}
-        })
+                mainActivity.navigate(R.id.action_mainFragment_to_writePlaceReviewFragment, bundle)
+                bottomSheetDialog.dismiss()
+            }
+            //최근리뷰 1 누르면 상세 카드뷰 출력
+            initialBottomSheetView.findViewById<TextView>(R.id.placeUserReview1)
+                .setOnClickListener {
+                    detailDialog.setContentView(detailCardView)
+                    detailRating.rating = latestReviews!![0].rating!!
+                    detailUserName.text = latestReviews!![0].userNickname
+                    detailDate.text = latestReviews!![0].date
+                    detailContent.text = latestReviews!![0].comment
+                    detailDialog.findViewById<TextView>(R.id.textViewPlaceReviewModify)?.visibility =
+                        View.GONE
+                    detailDialog.findViewById<TextView>(R.id.textViewPlaceReviewDelete)?.visibility =
+                        View.GONE
+                    latestReviews!![0].imageRes?.let { imageUrl ->
+                        Glide.with(detailImage.context)
+                            .load(imageUrl)
+                            .listener(object : RequestListener<Drawable> {
+                                override fun onLoadFailed(e: GlideException?, model: Any?, target: Target<Drawable>?, isFirstResource: Boolean): Boolean {
+                                    return false
+                                }
 
-        //좋아요 버튼 눌렀을 때  userid로 favorite 서브 컬렉션에 문서 추가 / isFavorited 상태에 따라 이미지 교체,스넥바,count 출력
-        initialBottomSheetView.findViewById<ImageView>(R.id.imageViewFavoirte).apply {
-            val place = Place(selectedPlace!!.id, selectedPlace.place_name, selectedPlace.category_group_name, (selectedPlace.x).toString(), (selectedPlace.y).toString(), selectedPlace.phone, selectedPlace.road_address_name)
-            setOnClickListener {
-                if (!isFavorited1) {
-                    isFavorited1 = true
-                    setImageResource(R.drawable.filled_heart)
-                    val favorite = Favorite(userId)
-                    viewModel.addPlaceToFavorite(place, favorite)
-                    val bottomplacelayout:CoordinatorLayout=initialBottomSheetView.findViewById(R.id.bottom_place_layout)
-                    Snackbar.make(bottomplacelayout, "반영되었습니다.", Snackbar.LENGTH_SHORT).show()
+                                override fun onResourceReady(resource: Drawable?, model: Any?, target: Target<Drawable>?, dataSource: DataSource?, isFirstResource: Boolean): Boolean {
+                                    detailDialog.show()
+                                    return false
+                                }
+                            })
+                            .into(detailImage)
+                    }
+                }
+            //최근리뷰 2 누르면 상세 카드뷰 출력
+            initialBottomSheetView.findViewById<TextView>(R.id.placeUserReview2)
+                .setOnClickListener {
+
+                    detailRating.rating = latestReviews!![1].rating!!
+                    detailUserName.text = latestReviews!![1].userNickname
+                    detailDate.text = latestReviews!![1].date
+                    detailContent.text = latestReviews!![1].comment
+                    detailDialog.findViewById<TextView>(R.id.textViewPlaceReviewModify)?.visibility =
+                        View.GONE
+                    detailDialog.findViewById<TextView>(R.id.textViewPlaceReviewDelete)?.visibility =
+                        View.GONE
+                    latestReviews!![1].imageRes?.let { imageUrl ->
+                        Glide.with(detailImage.context)
+                            .load(imageUrl)
+                            .listener(object : RequestListener<Drawable> { override fun onLoadFailed(e: GlideException?, model: Any?, target: Target<Drawable>?, isFirstResource: Boolean): Boolean {
+                                    detailDialog.show()
+                                    return false
+                                }
+
+                                override fun onResourceReady(resource: Drawable?, model: Any?, target: Target<Drawable>?, dataSource: DataSource?, isFirstResource: Boolean): Boolean {
+                                    detailDialog.show()
+                                    return false
+                                }
+                            })
+                            .into(detailImage)
+                    }
+                }
+            //상세리뷰 페이지
+            initialBottomSheetView.findViewById<Chip>(R.id.chipViewAllReviews).setOnClickListener {
+                avgRatingBundle.putString("place_name", selectedPlace?.place_name)
+                avgRatingBundle.putString("place_id", selectedPlace?.id)
+                avgRatingBundle.putString("phone", selectedPlace?.phone)
+                avgRatingBundle.putString(
+                    "place_road_adress_name",
+                    selectedPlace?.road_address_name
+                )
+                avgRatingBundle.putString("place_category", selectedPlace?.category_group_name)
+                avgRatingBundle.putString("userNickname", userNickname)
+                mainActivity.navigate(
+                    R.id.action_mainFragment_to_placeReviewFragment,
+                    avgRatingBundle
+                )
+                bottomSheetDialog.dismiss()
+            }
+            //산책 on 유저마커 바텀시트
+        } else {
+
+            val selectedUserNicknameHash = p1?.tag
+
+            val selectedUser = nearbyUsers?.find { it.nickname.hashCode() == selectedUserNicknameHash }
+            selectedUser?.let { user ->
+                user.uid?.let { viewModel.fetchMatchingWalkCount(it) }
+                val userNicknameTextView = onWalkBottomSheetView.findViewById<TextView>(R.id.textViewBottomUserNickname)
+                userNicknameTextView.text = user.nickname
+                val textViewBottomUserAgeRange=onWalkBottomSheetView.findViewById<TextView>(R.id.textViewBottomUserAgeRange)
+                textViewBottomUserAgeRange.text=user.birthday?.let { calculateAgeGroup(it) }
+                val imageViewUser=onWalkBottomSheetView.findViewById<ImageView>(R.id.ImageViewBottomUserProfileImage)
+                val textViewBottomUserAvailability=onWalkBottomSheetView.findViewById<TextView>(R.id.textViewBottomUserAvailability)
+                if(user.walkHoursStart?.isNotEmpty() == true) {
+                    textViewBottomUserAvailability.text = "산책 가능 시간대 : ${user.walkHoursStart} ~ ${user.walkHoursEnd}"
+                }else{
+                    textViewBottomUserAvailability.text = "산책 가능 시간대 : 언제든지 가능해요"
+                }
+                val textViewBottomUserMathcingHistory=onWalkBottomSheetView.findViewById<TextView>(R.id.textViewBottomUserMathcingHistory)
+                val textViewBottomPetName=onWalkBottomSheetView.findViewById<TextView>(R.id.textViewBottomPetName)
+                val textViewBottomPetAge=onWalkBottomSheetView.findViewById<TextView>(R.id.textViewBottomPetAge)
+                val textViewBottomPetBreed=onWalkBottomSheetView.findViewById<TextView>(R.id.textViewBottomPetBreed)
+                val textViewBottomPetPropensity=onWalkBottomSheetView.findViewById<TextView>(R.id.textViewBottomPetPropensity)
+                val textViewBottomPetGender=onWalkBottomSheetView.findViewById<TextView>(R.id.textViewBottomPetGender)
+                val textViewBottomIsPetNeutered=onWalkBottomSheetView.findViewById<TextView>(R.id.textViewBottomIsPetNeutered)
+                val imageViewBottomPetProfileImage=onWalkBottomSheetView.findViewById<ImageView>(R.id.ImageViewBottomPetProfileImage)
+                val buttonBottomWalk=onWalkBottomSheetView.findViewById<Button>(R.id.buttonBottomWalk)
+                val buttonBottomBlock=onWalkBottomSheetView.findViewById<Button>(R.id.buttonBottomBlock)
+                user.uid?.let { viewModel.blockUser(userId, it) }
+                buttonBottomWalk.setOnClickListener {
+                    val bundle=Bundle()
+                    bundle.putString("receiverId",user.uid)
+                    mainActivity.navigate(R.id.action_mainFragment_to_chat,bundle)
+                }
+                buttonBottomBlock.setOnClickListener {
+                    viewModel.isUserBlocked.observe(viewLifecycleOwner, Observer { isBlocked ->
+                        if (isBlocked) {
+                            Snackbar.make(buttonBottomBlock, "사용자가 차단되었습니다.",Snackbar.LENGTH_SHORT).show()
+                        }
+                         else {
+                            Snackbar.make(buttonBottomBlock, "사용자 차단에 실패하였습니다.",Snackbar.LENGTH_SHORT).show()
+                        }
+                    })
+
+
+
+
+//                    val bundle=Bundle()
+//                    bundle.putString("receiverId",user.uid)
+//                    mainActivity.navigate(R.id.action_mainFragment_to_manage_block,bundle)
+                }
+                user.pets.let { pets ->
+                    val firstPet = pets.firstOrNull()
+                    firstPet?.let { pet ->
+                        val petSex=when((pet.petSex)?.toInt()){
+                            0->{"남아"}
+                            1->{"여아"}
+                            else -> {"입력 안함"}
+                        }
+                        val isPetNeutered=if(pet.neutered==true){ "O" }else{ "X" }
+                        val petAge= pet.birth?.let { calculateAge(it) }
+                        textViewBottomPetName.text = "이름 : ${pet.name}"
+                        textViewBottomPetAge.text = "나이 : ${petAge}세" //나중에계산해
+                        textViewBottomPetBreed.text="견종 : ${pet.breed}"
+                        textViewBottomPetPropensity.text="성향 : ${pet.character}"
+                        textViewBottomPetGender.text="성별 : ${petSex}"
+                        textViewBottomIsPetNeutered.text="중성화 여부 : ${isPetNeutered}"
+                        if(pet.imgaeURI !=null){
+                            Glide.with(imageViewBottomPetProfileImage.context)
+                                .load(pet.imgaeURI)
+                                .placeholder(R.drawable.pets_24px)
+                                .listener(object : RequestListener<Drawable> {
+                                    override fun onLoadFailed(e: GlideException?, model: Any?, target: Target<Drawable>?, isFirstResource: Boolean): Boolean {
+                                        return false
+                                    }
+
+                                    override fun onResourceReady(resource: Drawable?, model: Any?, target: Target<Drawable>?, dataSource: DataSource?, isFirstResource: Boolean): Boolean {
+                                        return false
+                                    }
+                                })
+                                .into(imageViewBottomPetProfileImage)
+                        } else {
+                            imageViewBottomPetProfileImage.setImageResource(R.drawable.pets_24px)
+                        }
+                    }
+                }
+                viewModel.walkMatchingCount.observe(viewLifecycleOwner, Observer { count ->
+                    Log.d("매칭 기록",count.toString())
+                    if(count!=null) {
+                        textViewBottomUserMathcingHistory.text = "매칭 기록: ${count}회"
+                    }else{
+                        textViewBottomUserMathcingHistory.text = "매칭 기록: 0회"
+                    }
+                })
+                if (user.userImage != null) {
+                    Glide.with(imageViewUser.context)
+                        .load(user.userImage)
+                        .placeholder(R.drawable.default_profile_image)
+                        .listener(object : RequestListener<Drawable> {
+                            override fun onLoadFailed(e: GlideException?, model: Any?, target: Target<Drawable>?, isFirstResource: Boolean): Boolean {
+                                return false
+                            }
+
+                            override fun onResourceReady(resource: Drawable?, model: Any?, target: Target<Drawable>?, dataSource: DataSource?, isFirstResource: Boolean): Boolean {
+                                Handler(Looper.getMainLooper()).postDelayed({
+                                    onWalkbottomSheetDialog.show()
+                                }, 200)
+                                return false
+                            }
+                        })
+                        .into(imageViewUser)
                 } else {
-                    isFavorited1 = false
-                    setImageResource(R.drawable.empty_heart)
-                    viewModel.removeFavorite(placeId!!, userId)
-                    val bottomplacelayout:CoordinatorLayout=initialBottomSheetView.findViewById(R.id.bottom_place_layout)
-                    Snackbar.make(bottomplacelayout, "반영되었습니다.", Snackbar.LENGTH_SHORT).show()
-                }
-
-
-                viewModel.fetchFavoriteCount(placeId!!)
-                viewLifecycleOwner.lifecycleScope.launchWhenStarted {
-                    viewModel.favoriteCount.collect { favoriteCount ->
-                        Log.d("firstsubmit", favoriteCount.toString())
-                        val favoriteCountTextView =
-                            initialBottomSheetView.findViewById<TextView>(R.id.textViewPlaceFavoriteCount)
-                        favoriteCountTextView.text = "${favoriteCount}명의 유저가 추천합니다."
-                    }
+                    imageViewUser.setImageResource(R.drawable.default_profile_image)
+                    Handler(Looper.getMainLooper()).postDelayed({
+                        onWalkbottomSheetDialog.show()
+                    }, 200)
                 }
 
             }
-        }
-        //리뷰 입력 버튼
-        buttonsubmit.setOnClickListener {
-            val bundle = Bundle()
-            bundle.putString("place_name", selectedPlace?.place_name)
-            bundle.putString("place_id", selectedPlace?.id)
-            bundle.putString("place_category", selectedPlace?.category_group_name)
-            bundle.putString("place_long", selectedPlace?.x.toString())
-            bundle.putString("place_lat", selectedPlace?.y.toString())
-            bundle.putString("phone", selectedPlace?.phone)
-            bundle.putString("userNickname",userNickname)
-            bundle.putString("place_road_adress_name", selectedPlace?.road_address_name)
 
-            mainActivity.navigate(R.id.action_mainFragment_to_writePlaceReviewFragment, bundle)
-            bottomSheetDialog.dismiss()
-        }
-        //최근리뷰 1 누르면 상세 카드뷰 출력
-        initialBottomSheetView.findViewById<TextView>(R.id.placeUserReview1).setOnClickListener {
-            detailDialog.setContentView(detailCardView)
-            detailRating.rating=latestReviews!![0].rating!!
-            detailUserName.text=latestReviews!![0].userNickname
-            detailDate.text=latestReviews!![0].date
-            detailContent.text=latestReviews!![0].comment
-            detailDialog.findViewById<TextView>(R.id.textViewPlaceReviewModify)?.visibility=View.GONE
-            detailDialog.findViewById<TextView>(R.id.textViewPlaceReviewDelete)?.visibility=View.GONE
-            latestReviews!![0].imageRes?.let { imageUrl ->
-                Glide.with(detailImage.context)
-                    .load(imageUrl)
-                    .listener(object : RequestListener<Drawable>{
-                        override fun onLoadFailed(
-                            e: GlideException?,
-                            model: Any?,
-                            target: Target<Drawable>?,
-                            isFirstResource: Boolean
-                        ): Boolean {
-                            return false
-                        }
-
-                        override fun onResourceReady(
-                            resource: Drawable?,
-                            model: Any?,
-                            target: Target<Drawable>?,
-                            dataSource: DataSource?,
-                            isFirstResource: Boolean
-                        ): Boolean {
-                            detailDialog.show()
-                            return false
-                        }
-                    })
-                    .into(detailImage)
-            }
-
-
-
-        }
-        //최근리뷰 2 누르면 상세 카드뷰 출력
-        initialBottomSheetView.findViewById<TextView>(R.id.placeUserReview2).setOnClickListener {
-
-            detailRating.rating=latestReviews!![1].rating!!
-            detailUserName.text=latestReviews!![1].userNickname
-            detailDate.text=latestReviews!![1].date
-            detailContent.text=latestReviews!![1].comment
-            detailDialog.findViewById<TextView>(R.id.textViewPlaceReviewModify)?.visibility=View.GONE
-            detailDialog.findViewById<TextView>(R.id.textViewPlaceReviewDelete)?.visibility=View.GONE
-            latestReviews!![1].imageRes?.let { imageUrl ->
-                Glide.with(detailImage.context)
-                    .load(imageUrl)
-                    .listener(object : RequestListener<Drawable>{
-                        override fun onLoadFailed(
-                            e: GlideException?,
-                            model: Any?,
-                            target: Target<Drawable>?,
-                            isFirstResource: Boolean
-                        ): Boolean {
-                            detailDialog.show()
-                            return false
-                        }
-
-                        override fun onResourceReady(
-                            resource: Drawable?,
-                            model: Any?,
-                            target: Target<Drawable>?,
-                            dataSource: DataSource?,
-                            isFirstResource: Boolean
-                        ): Boolean {
-                            detailDialog.show()
-                            return false
-                        }
-                    })
-                    .into(detailImage)
-            }
-
-        }
-        //상세리뷰 페이지
-        initialBottomSheetView.findViewById<Chip>(R.id.chipViewAllReviews).setOnClickListener {
-            avgRatingBundle.putString("place_name", selectedPlace?.place_name)
-            avgRatingBundle.putString("place_id", selectedPlace?.id)
-            avgRatingBundle.putString("phone", selectedPlace?.phone)
-            avgRatingBundle.putString("place_road_adress_name", selectedPlace?.road_address_name)
-            avgRatingBundle.putString("place_category", selectedPlace?.category_group_name)
-            avgRatingBundle.putString("userNickname",userNickname)
-            mainActivity.navigate(R.id.action_mainFragment_to_placeReviewFragment, avgRatingBundle)
-            bottomSheetDialog.dismiss()
         }
     }
 
     //맵 드래그 -> 맵 중심의 좌표 이동하면 실행되는 메서드
     @Deprecated("Deprecated in Java")
     override fun onMapViewCenterPointMoved(p0: MapView?, p1: MapPoint?) {
-        // 새로운 중심에서 검색
-        p1?.mapPointGeoCoord?.let {
-            LastKnownLocation.latitude = it.latitude
-            LastKnownLocation.longitude = it.longitude
-            viewModel.searchPlacesByKeyword(it.latitude, it.longitude, "동물")
+        // 새로운 중심에서 검색(onWalk == true면 user검색 false면 place검색)
+        if(onWalk == false) {
+            p1?.mapPointGeoCoord?.let {
+                LastKnownLocation.latitude = it.latitude
+                LastKnownLocation.longitude = it.longitude
+                viewModel.searchPlacesByKeyword(it.latitude, it.longitude, "동물")
 
-            Log.d("lastlocation", (LastKnownLocation.latitude).toString())
+                Log.d("lastlocation", (LastKnownLocation.latitude).toString())
+            }
+        }else{
+            p1?.mapPointGeoCoord?.let {
+                viewModel.observeUsersOnWalk()
+            }
         }
     }
     //맵의 줌 아웃 제한
@@ -784,7 +1092,13 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
     override fun onMapViewInitialized(p0: MapView?) { p0?.setZoomLevel(2, true)}
     override fun onResume() {
         super.onResume()
-        requestLocationPermissionIfNeeded()
+
+        if(onWalk == true) {
+            requestLocationPermissionIfNeededOnWalk()
+        }else{
+            requestLocationPermissionIfNeeded()
+
+        }
     }
 }
 
