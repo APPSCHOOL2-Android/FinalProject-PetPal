@@ -208,7 +208,7 @@ class MessageAdapter(private val chatViewModel: ChatViewModel): RecyclerView.Ada
                         MessageVisibility.ALL.code
                     )
                     // chatRoomId를 viewmodel에서 가져오기 vs 매개변수로 받기??
-                    chatViewModel.saveMessage(chatViewModel.chatRoomId.value.toString(), message)
+                    chatViewModel.saveMessage(chatViewModel.currentChatRoomId.value.toString(), message)
                 }
 
                 buttonReject.setOnClickListener {
@@ -229,7 +229,7 @@ class MessageAdapter(private val chatViewModel: ChatViewModel): RecyclerView.Ada
                         MessageVisibility.ALL.code
                     )
                     // chatRoomId를 viewmodel에서 가져오기 vs 매개변수로 받기??
-                    chatViewModel.saveMessage(chatViewModel.chatRoomId.value.toString(), message)
+                    chatViewModel.saveMessage(chatViewModel.currentChatRoomId.value.toString(), message)
                 }
             }
         }

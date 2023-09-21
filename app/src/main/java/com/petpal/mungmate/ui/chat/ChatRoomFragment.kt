@@ -31,18 +31,18 @@ class ChatRoomFragment : Fragment() {
     private lateinit var messageAdapter: MessageAdapter
 
     private val currentUserId = FirebaseAuth.getInstance().currentUser?.uid.toString()  // 현재 사용자 id
-    lateinit var chatRoomId: String     // 채팅방 id
     lateinit var receiverId: String     // 채팅 상대 id
+    lateinit var chatRoomId: String     // 채팅방 id
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         // 채팅 -> 채팅방 : 채팅 목록 화면에서 Bundle로 전달받은 현재 채팅방 id
-        chatRoomId = arguments?.getString("chatRoomId")!!
+        // chatRoomId = arguments?.getString("chatRoomId")!!
+
         // 사용자 프로필 -> 채팅방 : 사용자 프로필 시트에서 Bundle로 전달받은 상대 user id
-        receiverId = arguments?.getString("userId")!!
+        receiverId = arguments?.getString("receiverId")!!
 
         chatViewModel = ViewModelProvider(this)[ChatViewModel::class.java]
-        chatViewModel.setCurrentChatRoomId(chatRoomId)
     }
 
     override fun onCreateView(
@@ -56,7 +56,40 @@ class ChatRoomFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // Observer
+        chatViewModel.run {
+            // 채팅방 세팅
+            currentChatRoomId.observe(viewLifecycleOwner) { currentChatRoomId ->
+                chatRoomId = currentChatRoomId
 
+                // 메세지 목록 로드
+                chatViewModel.loadMessages(chatRoomId)
+                // 사용자 프로필 표시
+                chatViewModel.getReceiverInfoById(receiverId)
+
+                // 반려견 정보 표시
+                chatViewModel.getReceiverPetInfoByUserId(receiverId)
+            }
+
+            receiverUserInfo.observe(viewLifecycleOwner) { userBasicInfoData ->
+                fragmentChatRoomBinding.textViewUserNickName.text = userBasicInfoData.nickname
+                // todo Firestore 프로필 사진 가져오기
+            }
+
+            receiverPetInfo.observe(viewLifecycleOwner) {petData ->
+                // 생일 -> 현재 나이 계산
+                val petAge = calculateAgeFromBirthDay(petData.birth)
+                fragmentChatRoomBinding.textViewUserDogInfo.text = "${petData.name}(${petData.breed}, ${petData.petSex}), $petAge"
+            }
+
+            messages.observe(viewLifecycleOwner) { messages ->
+                messageAdapter.setMessages(messages)
+                fragmentChatRoomBinding.recyclerViewMessage.scrollToPosition(messages.size - 1)
+            }
+        }
+
+        // 두 사용자 정보로 채팅방 찾아서 정보 로드
+        chatViewModel.getChatRoom(currentUserId, receiverId)
 
         // TODO 날짜가 바뀌면 자동으로 DATE 타입 메시지 저장
 
@@ -97,7 +130,7 @@ class ChatRoomFragment : Fragment() {
 
             // 산책 메이트 요청
             buttonRequestWalkMate.setOnClickListener {
-                val action = ChatRoomFragmentDirections.actionChatRoomFragmentToWalkMateRequestFragment(currentUserId, "user1", chatRoomId)
+                val action = ChatRoomFragmentDirections.actionChatRoomFragmentToWalkMateRequestFragment(currentUserId, receiverId, chatRoomId)
                 findNavController().navigate(action)
             }
 
@@ -127,36 +160,7 @@ class ChatRoomFragment : Fragment() {
             buttonSendMessage.setOnClickListener {
                 sendTextMessage()
             }
-
-            // Observer
-            chatViewModel.run {
-                receiverUserInfo.observe(viewLifecycleOwner) { userBasicInfoData ->
-                    textViewUserNickName.text = userBasicInfoData.nickname
-                    // Firestore 프로필 사진 가져오기
-
-                }
-
-                receiverPetInfo.observe(viewLifecycleOwner) {petData ->
-                    // 생일 -> 현재 나이 계산
-                    val petAge = calculateAgeFromBirthDay(petData.birth)
-                    textViewUserDogInfo.text = "${petData.name}(${petData.breed}, ${petData.petSex}), $petAge"
-                }
-
-                messages.observe(viewLifecycleOwner) { messages ->
-                    messageAdapter.setMessages(messages)
-                    recyclerViewMessage.scrollToPosition(messages.size - 1)
-                }
-
-                // todo ChatRoom 정보도 ViewModel에서 관리하기
-                // todo 전달받은 chatRoomId로 채팅방 새로 생성 or 기존 입장 분기처리하기
-            }
         }
-
-        // 프로필 표시
-        chatViewModel.getReceiverInfoById(receiverId)
-        chatViewModel.getReceiverPetInfoByUserId(receiverId)
-
-        chatViewModel.loadMessages(chatRoomId)
     }
 
     // 생일(yyyy-MM-dd)로 나이 계산 : n세, n개월
@@ -206,7 +210,7 @@ class ChatRoomFragment : Fragment() {
             currentUserId,
             null,
             Timestamp.now(),
-            null,
+            false,
             MessageType.TEXT.code,
             MessageVisibility.ALL.code
         )
@@ -221,7 +225,7 @@ class ChatRoomFragment : Fragment() {
             currentUserId,
             content,
             Timestamp.now(),
-            null,
+            false,
             MessageType.TEXT.code,
             MessageVisibility.ALL.code
         )

@@ -1,23 +1,31 @@
 package com.petpal.mungmate.ui.chat
 
+import android.util.Log
 import com.google.android.gms.tasks.Task
-import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.Timestamp
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import com.petpal.mungmate.model.ChatRoom
 import com.petpal.mungmate.model.Message
 import com.petpal.mungmate.model.UserReport
 import com.petpal.mungmate.model.Match
+import com.petpal.mungmate.model.MessageType
+import com.petpal.mungmate.model.MessageVisibility
 import com.petpal.mungmate.model.PetData
 import com.petpal.mungmate.model.UserBasicInfoData
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class ChatRepository {
     companion object {
+        // collection 이름
         const val CHAT_ROOMS_NAME = "chatRooms"
         const val MESSAGES_NAME = "messages"
         const val MATCHES_NAME = "matches"
@@ -31,7 +39,6 @@ class ChatRepository {
 
     val TAG = "CHAT_REPOSITORY"
     var db = Firebase.firestore
-    var currentUserId = FirebaseAuth.getInstance().currentUser
 
     // todo await() 추가해서 리턴값들 DocumentReference로 통일하기
     // 채팅방에 메시지 추가 = 메시지 전송
@@ -89,11 +96,11 @@ class ChatRepository {
     }
 
     // 사용자 id로 사용자 Document 가져오기
-    suspend fun getUserInfoById(userId: String): UserBasicInfoData? {
+    suspend fun getUserBasicInfoById(userId: String): UserBasicInfoData? {
         return try {
-            val document = db.collection(USERS_NAME).document(userId).get().await()
-            document.toObject(UserBasicInfoData::class.java)
+            db.collection(USERS_NAME).document(userId).get().await().toObject(UserBasicInfoData::class.java)
         } catch (e: Exception) {
+            Log.d(TAG, "getUserBasicInfo failed : ${e.printStackTrace()}")
             null
         }
     }
@@ -105,7 +112,7 @@ class ChatRepository {
             val petDocument = collectionRef.limit(1).get().await().documents.firstOrNull()
             petDocument?.toObject(PetData::class.java)
         }catch (e: Exception) {
-            // 오류 처리
+            Log.d(TAG, "getMainPetInfoByUserId failed : ${e.printStackTrace()}")
             null
         }
     }
@@ -126,6 +133,51 @@ class ChatRepository {
             matchDocumentRef.update(updateData).await()
         } catch (e: Exception) {
             e.printStackTrace()
+        }
+    }
+
+    suspend fun getOrCreateChatRoom(user1Id: String, user2Id: String): String {
+        // 사용자 ID 조합으로 chatroom Key 생성
+        val chatRoomKey = listOf(user1Id, user2Id).sorted().joinToString("_")
+
+        // chatroom 존재 확인
+        val chatRoomDocRef = db.collection(CHAT_ROOMS_NAME).document(chatRoomKey)
+        val chatRoomDocSnapshot = chatRoomDocRef.get().await()
+
+        if (chatRoomDocSnapshot.exists()) {
+            // 채팅방이 이미 존재하는 경우, 기존 채팅방의 ID를 반환
+            Log.d(TAG, "load chatroom completed")
+            return chatRoomKey
+        } else {
+            // 채팅방이 존재하지 않는 경우, 새로운 채팅방을 생성하고 ID를 반환
+            val newChatRoom = ChatRoom(
+                user1Id,
+                user2Id,
+                "",
+                Timestamp.now(),
+                false,
+                false,
+                0,
+                0
+            )
+            chatRoomDocRef.set(newChatRoom).await()
+            Log.d(TAG, "create chatroom completed")
+
+            // 최초 메시지로 오늘 DATE 전송
+            val dateContent = SimpleDateFormat("yyyy년 MM월 dd일", Locale.getDefault())
+                .format(Date())
+            val message = Message(
+                user1Id,
+                dateContent,
+                Timestamp.now(),
+                true,
+                MessageType.DATE.code,
+                MessageVisibility.ALL.code
+            )
+            saveMessage(chatRoomKey, message)
+            Log.d(TAG, "send date message completed")
+
+            return chatRoomKey
         }
     }
 

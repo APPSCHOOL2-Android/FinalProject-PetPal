@@ -22,8 +22,8 @@ class ChatViewModel: ViewModel() {
     var chatRepository = ChatRepository()
     // var savedMessages: MutableLiveData<List<Message>> = MutableLiveData()
 
-    private val _chatRoomId = MutableLiveData<String>()
-    val chatRoomId get() = _chatRoomId
+    private val _currentChatRoomId = MutableLiveData<String>()
+    val currentChatRoomId get() = _currentChatRoomId
 
     private val _messages = MutableLiveData<List<Message>>()
     val messages : LiveData<List<Message>> get() = _messages
@@ -38,16 +38,23 @@ class ChatViewModel: ViewModel() {
     private val _receiverPetInfo = MutableLiveData<PetData>()
     val receiverPetInfo: LiveData<PetData> get() = _receiverPetInfo
 
-    fun setCurrentChatRoomId(currentChatRoomId: String) {
-        _chatRoomId.value = currentChatRoomId
+    // 현재 입장한 채팅방 id 설정
+    fun getChatRoom(user1Id: String, user2Id: String) {
+        viewModelScope.launch {
+            val chatRoomId: String = withContext(Dispatchers.IO) {
+                chatRepository.getOrCreateChatRoom(user1Id, user2Id)
+            }
+            _currentChatRoomId.value = chatRoomId
+            Log.d(TAG, "currentRoomId updated")
+        }
     }
 
     // 채팅방 Document에 메시지 저장
     fun saveMessage(chatRoomId: String, message: Message){
         chatRepository.saveMessage(chatRoomId, message).addOnFailureListener {
-            Log.d(TAG, "메시지 저장 성공")
+            Log.d(TAG, "sendMessage completed")
         }.addOnFailureListener { 
-            Log.d(TAG, "메시지 저장 실패")
+            Log.d(TAG, "sendMessage failed")
         }
     }
 
@@ -56,6 +63,7 @@ class ChatViewModel: ViewModel() {
             chatRepository.getMessages(chatRoomId)
                 .collect { messageList ->
                     _messages.value = messageList
+                    Log.d(TAG, "loadMessages completed")
                 }
         }
     }
@@ -91,11 +99,13 @@ class ChatViewModel: ViewModel() {
     // 채팅 상대 기본 정보 가져오기
     fun getReceiverInfoById(userId: String) {
         viewModelScope.launch {
-            val userBasicInfoData: UserBasicInfoData? = chatRepository.getUserInfoById(userId)
+            val userBasicInfoData: UserBasicInfoData? = chatRepository.getUserBasicInfoById(userId)
             if (userBasicInfoData != null) {
                 _receiverUserInfo.value = userBasicInfoData!!
+                Log.d(TAG, "ReceiverUserInfo updated: ${userBasicInfoData.nickname}")
             } else {
                 // 오류 처리
+                Log.d(TAG, "ReceiverUserInfo failed")
             }
         }
     }
@@ -106,8 +116,10 @@ class ChatViewModel: ViewModel() {
              val petData : PetData? = chatRepository.getMainPetInfoByUserId(userId)
              if (petData != null) {
                  _receiverPetInfo.value = petData!!
+                 Log.d(TAG, "ReceiverPetInfo updated: ${petData.name}")
              } else {
                  // 오류 처리
+                 Log.d(TAG, "ReceiverPetInfo failed")
              }
          }
     }

@@ -68,8 +68,13 @@ class ChatAdapter(options: FirestoreRecyclerOptions<ChatRoom>, private val activ
             }
 
             rowBinding.root.setOnClickListener {
-                // 채팅방 이동 (roomId 전달 필요)
-                activity.navigate(R.id.action_mainFragment_to_chat, bundleOf("chatRoomId" to "${chatRoom.senderId}_${chatRoom.receiverId}"))
+                // 채팅방 이동
+                // 채팅방 정보의 참여자 중에 내가 아닌 다른 상대방의 id 전달
+                if (currentUserUid == chatRoom.senderId) {
+                    activity.navigate(R.id.action_mainFragment_to_chat, bundleOf("receiverId" to chatRoom.receiverId))
+                } else {
+                    activity.navigate(R.id.action_mainFragment_to_chat, bundleOf("receiverId" to chatRoom.senderId))
+                }
             }
         }
     }
