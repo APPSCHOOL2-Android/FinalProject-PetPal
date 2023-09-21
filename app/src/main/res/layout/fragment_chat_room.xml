@@ -86,35 +86,41 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:padding="16dp" />
+        android:padding="16dp"
+        app:stackFromEnd="true" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:gravity="bottom"
         android:orientation="horizontal"
         android:padding="8dp">
 
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/textInputLayoutMessage"
-            android:layout_width="match_parent"
+        <EditText
+            android:id="@+id/editTextMessage"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:boxCornerRadiusBottomEnd="30dp"
-            app:boxCornerRadiusBottomStart="30dp"
-            app:boxCornerRadiusTopEnd="30dp"
-            app:boxCornerRadiusTopStart="30dp"
-            app:endIconDrawable="@drawable/send_24px"
-            app:endIconMode="custom"
-            app:hintEnabled="false">
+            android:layout_marginEnd="8dp"
+            android:layout_weight="1"
+            android:background="@drawable/background_send_message"
+            android:hint="메시지를 입력하세요"
+            android:inputType="text|textMultiLine"
+            android:maxLines="4"
+            android:paddingLeft="16dp"
+            android:paddingTop="8dp"
+            android:paddingRight="16dp"
+            android:paddingBottom="8dp"
+            android:textAppearance="@style/TextAppearance.Material3.BodyLarge" />
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/textInputEditTextMessage"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="메시지를 입력하세요."
-                android:paddingTop="5dp"
-                android:paddingBottom="5dp" />
-
-        </com.google.android.material.textfield.TextInputLayout>
+        <Button
+            android:id="@+id/buttonSendMessage"
+            style="@style/Widget.Material3.Button.IconButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:enabled="false"
+            android:padding="0dp"
+            app:icon="@drawable/send_24px"
+            app:iconSize="24dp" />
     </LinearLayout>
 
 </LinearLayout>

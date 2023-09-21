@@ -20,7 +20,7 @@
     <string name="post_modify_text">글 수정하기</string>
     <string name="post_delete_text">글 삭제하기</string>
     <string name="post_report_text">글 신고하기</string>
-    <string name="post_comment_report_text">댓글 신고하기</string>
+    <string name="post_comment_delete_text">댓글 삭제하기</string>
     <string name="walk_record_title">산책기록</string>
     <string name="today_walking_record">오늘 산책 기록</string>
     <string name="monthly_walking_record">이달의 산책 기록</string>

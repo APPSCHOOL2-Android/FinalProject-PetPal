@@ -1,9 +1,11 @@
 package com.petpal.mungmate.model
 
+import android.graphics.Bitmap
 import android.net.Uri
 
+//프래그먼트 사이 사용 클래스
 data class UserBasicInfoData(
-    val userImage: Uri? = null,
+    val userImage: Bitmap,
     val nickname: String,
     val birthday: String,
     val ageVisible: Boolean,
@@ -13,6 +15,7 @@ data class UserBasicInfoData(
     val availability: Int,
     val walkHoursStart: String? = null,
     val walkHoursEnd: String? = null,
+
     val onWalk: Boolean? = null,
     val location: Map<String, Double>? = null
 
@@ -30,4 +33,7 @@ data class UserBasicInfoData(
         )
     }
 }
+
+
+
 

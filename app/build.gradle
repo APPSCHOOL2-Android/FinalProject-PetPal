@@ -122,17 +122,18 @@ dependencies {
 
     //kakao login
     implementation "com.kakao.sdk:v2-user:2.16.0" // 카카오 로그인
-    
+
     // SimpleRatingBar
     implementation 'com.github.ome450901:SimpleRatingBar:1.5.1'
+
+    // firebase firestore UI
+    implementation 'com.firebaseui:firebase-ui-firestore:8.0.0'
 
     // swiperefreshlayout
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
 
-
     // storage
     implementation("com.google.firebase:firebase-storage-ktx")
-
 
     // PhotoView
     implementation 'com.github.chrisbanes:PhotoView:2.3.0'

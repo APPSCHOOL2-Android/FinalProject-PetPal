@@ -8,7 +8,7 @@
     tools:context=".ui.chat.ReportUserFragment" >
 
     <com.google.android.material.appbar.MaterialToolbar
-        android:id="@+id/toolbar_report_user"
+        android:id="@+id/toolbarReportUser"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:minHeight="?attr/actionBarSize"
@@ -23,6 +23,7 @@
         android:padding="16dp">
 
         <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/textInputLayoutReportNickName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
@@ -36,6 +37,7 @@
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/textInputLayoutReportCategory"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense.ExposedDropdownMenu"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -50,22 +52,26 @@
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/textInputLayoutReportContent"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:hint="신고 내용">
+            android:layout_marginTop="16dp"
+            app:counterEnabled="true"
+            app:counterMaxLength="500"
+            app:hintEnabled="false">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/editTextReportContent"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="top"
+                android:hint="신고 내용을 정확하게 입력해주세요."
                 android:inputType="text|textMultiLine"
                 android:minLines="3" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <Button
-            android:id="@+id/buttonReport"
+            android:id="@+id/buttonReportUser"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
