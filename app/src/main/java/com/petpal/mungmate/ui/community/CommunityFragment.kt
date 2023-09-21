@@ -369,8 +369,6 @@ class CommunityFragment : Fragment() {
     }
 
     private fun configCategoryFirestore(categoryName: String) {
-
-
         if (categoryName == "전체") {
             val db = FirebaseFirestore.getInstance()
             val postRef = db.collection("Post")
@@ -485,7 +483,6 @@ class CommunityFragment : Fragment() {
                         else -> {}
                     }
                 }
-                commentViewModel.updateDocumentChangeCount(values!!.documentChanges.size)
                 firestoreJob?.cancel() // 이전의 Job이 있으면 취소
                 firestoreJob = CoroutineScope(Dispatchers.Main).launch {
                     skeleton.showOriginal()

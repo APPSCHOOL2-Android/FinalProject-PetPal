@@ -10,9 +10,18 @@ import com.google.android.material.snackbar.Snackbar
 import com.petpal.mungmate.databinding.RowCommunityRecentSearchesBinding
 
 
-class CommunityRecentSearchesAdapter(private val onItemDeleteListener: (SearchesEntity) -> Unit) : ListAdapter<SearchesEntity, CommunityRecentSearchesAdapter.CommunityRecentSearchesViewHolder>(DiffCallback()) {
+class CommunityRecentSearchesAdapter(
+    private val onItemDeleteListener: (SearchesEntity) -> Unit,
+    private val onItemSearchListener: (String) -> Unit
+) :
+    ListAdapter<SearchesEntity, CommunityRecentSearchesAdapter.CommunityRecentSearchesViewHolder>(
+        DiffCallback()
+    ) {
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CommunityRecentSearchesViewHolder {
+    override fun onCreateViewHolder(
+        parent: ViewGroup,
+        viewType: Int
+    ): CommunityRecentSearchesViewHolder {
         val inflater = LayoutInflater.from(parent.context)
         val binding = RowCommunityRecentSearchesBinding.inflate(inflater, parent, false)
         return CommunityRecentSearchesViewHolder(binding)
@@ -23,7 +32,8 @@ class CommunityRecentSearchesAdapter(private val onItemDeleteListener: (Searches
         holder.bind(searchHistory)
     }
 
-    inner class CommunityRecentSearchesViewHolder(private val binding: RowCommunityRecentSearchesBinding) : RecyclerView.ViewHolder(binding.root) {
+    inner class CommunityRecentSearchesViewHolder(private val binding: RowCommunityRecentSearchesBinding) :
+        RecyclerView.ViewHolder(binding.root) {
         fun bind(searchHistory: SearchesEntity) {
             binding.communityRecentSearchesTextView.text = searchHistory.searchesContent
 
@@ -34,6 +44,10 @@ class CommunityRecentSearchesAdapter(private val onItemDeleteListener: (Searches
                     // 아이템 삭제 함수 호출
                     onItemDeleteListener(deletedItem)
                 }
+            }
+            binding.communityRecentSearchesTextView.setOnClickListener {
+                val query = searchHistory.searchesContent
+                onItemSearchListener(query)
             }
         }
     }
