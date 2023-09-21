@@ -144,7 +144,11 @@
         android:id="@+id/communityWritingFragment"
         android:name="com.petpal.mungmate.ui.community.CommunityWritingFragment"
         android:label="fragment_community_writing"
-        tools:layout="@layout/fragment_community_writing" />
+        tools:layout="@layout/fragment_community_writing" >
+        <action
+            android:id="@+id/action_communityWritingFragment_to_mainFragment"
+            app:destination="@id/mainFragment" />
+    </fragment>
     <fragment
         android:id="@+id/communityPostDetailFragment"
         android:name="com.petpal.mungmate.ui.community.CommunityPostDetailFragment"

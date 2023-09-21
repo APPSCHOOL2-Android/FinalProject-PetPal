@@ -85,6 +85,7 @@ class CommunitySearchFragment : Fragment() {
                     searchWord=query
                     searchRecyclerView(communitySearchBinding, this@CommunitySearchFragment)
                     configCategoryFirestore(searchWord)
+                    communitySearchBinding.searchBar.text = query
                     searchView.hide()
                 }
             )
