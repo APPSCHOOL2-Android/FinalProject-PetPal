@@ -13,7 +13,10 @@ data class UserBasicInfoData(
     val availability: Int,
     val walkHoursStart: String? = null,
     val walkHoursEnd: String? = null,
-) {
+    val onWalk: Boolean? = null,
+    val location: Map<String, Double>? = null
+
+    ) {
     fun toHashMap(): HashMap<*, *> {
         return hashMapOf(
             "userImage" to userImage,

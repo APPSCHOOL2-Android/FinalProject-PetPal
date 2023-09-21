@@ -17,21 +17,6 @@
         android:orientation="horizontal">
 
 
-        <TextView
-            android:id="@+id/textViewBottomUserAgeRange"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="8dp"
-            android:text="나이대" />
-
-        <RatingBar
-            android:id="@+id/userRatingBar"
-            style="?android:attr/ratingBarStyleSmall"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="8dp"
-            android:numStars="5"
-            android:rating="3" />
     </LinearLayout>
 
     <LinearLayout
@@ -66,7 +51,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="8dp"
                     android:layout_marginTop="8dp"
-                    android:layout_weight="1"
+
                     android:text="닉네임"
                     android:textAppearance="@style/TextAppearance.AppCompat.Large" />
 
@@ -75,25 +60,34 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="8dp"
-                    android:layout_marginTop="8dp"
-                    android:layout_weight="1"
+
+                    android:layout_marginTop="6dp"
                     android:text="매칭 기록 :00회" />
             </LinearLayout>
 
             <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:orientation="horizontal">
 
                 <TextView
-                    android:id="@+id/textViewBottomUserIntroduction"
+                    android:id="@+id/textViewBottomUserAvailability"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="8dp"
+                    android:layout_marginTop="8dp"
                     android:layout_weight="1"
-                    android:text="자기소개 : 안녕하세요!"
+                    android:text="산책 가능 시간대: 06:00~08:00"
                     android:textAppearance="@style/TextAppearance.AppCompat.Small" />
             </LinearLayout>
+
+            <TextView
+                android:id="@+id/textViewBottomUserAgeRange"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="8dp"
+                android:layout_marginTop="8dp"
+                android:text="나이대" />
 
         </LinearLayout>
 
@@ -180,7 +174,7 @@
                     android:text="성별 : 여아" />
 
                 <TextView
-                    android:id="@+id/textView9"
+                    android:id="@+id/textViewBottomIsPetNeutered"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="8dp"
