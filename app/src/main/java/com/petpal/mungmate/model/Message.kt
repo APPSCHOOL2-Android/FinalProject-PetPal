@@ -4,14 +4,15 @@ import com.google.firebase.Timestamp
 
 // 채팅방 메시지
 data class Message(
-    val senderId: String? = null,
-    val content: String? = null,
-    val timestamp: Timestamp? = null,
-    @field:JvmField
-    var isRead: Boolean? = null,
-    val type: Int? = null,
-    var visibility: Int? = null
-)
+    val senderId: String,
+    val content: String?,
+    val timestamp: Timestamp,
+    val receiverIsRead: Boolean,
+    val type: Int,
+    val visibility: Int
+) {
+    constructor(): this("", null, Timestamp.now(), true, MessageType.TEXT.code, MessageVisibility.ALL.code)
+}
 
 // 각기 다른 뷰를 가지는 메시지 유형
 enum class MessageType(val code: Int) {

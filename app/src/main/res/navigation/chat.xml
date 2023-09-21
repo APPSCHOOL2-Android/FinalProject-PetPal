@@ -32,7 +32,7 @@
             android:id="@+id/action_chatRoomFragment_to_reportUserFragment"
             app:destination="@id/reportUserFragment" />
         <argument
-            android:name="chatRoomId"
+            android:name="receiverId"
             app:argType="string" />
     </fragment>
     <fragment
