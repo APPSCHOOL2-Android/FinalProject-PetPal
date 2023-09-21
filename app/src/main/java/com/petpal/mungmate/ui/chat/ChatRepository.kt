@@ -9,6 +9,8 @@ import com.google.firebase.ktx.Firebase
 import com.petpal.mungmate.model.Message
 import com.petpal.mungmate.model.UserReport
 import com.petpal.mungmate.model.Match
+import com.petpal.mungmate.model.PetData
+import com.petpal.mungmate.model.UserBasicInfoData
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
@@ -21,6 +23,7 @@ class ChatRepository {
         const val MATCHES_NAME = "matches"
         const val REPORTS_NAME = "reports"
         const val USERS_NAME = "users"
+        const val PETS_NAME = "pets"
 
         const val TIMESTAMP = "timestamp"
         const val CHAT_PAGE_SIZE = 100L
@@ -86,8 +89,25 @@ class ChatRepository {
     }
 
     // 사용자 id로 사용자 Document 가져오기
-    fun loadUserById(userId: String): Task<DocumentSnapshot> {
-        return db.collection(USERS_NAME).document(userId).get()
+    suspend fun getUserInfoById(userId: String): UserBasicInfoData? {
+        return try {
+            val document = db.collection(USERS_NAME).document(userId).get().await()
+            document.toObject(UserBasicInfoData::class.java)
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    suspend fun getMainPetInfoByUserId(userId: String): PetData? {
+        return try {
+            // 대표 반려견으로 첫 번째 Document 가져오기
+            val collectionRef = db.collection(USERS_NAME).document(userId).collection(PETS_NAME)
+            val petDocument = collectionRef.limit(1).get().await().documents.firstOrNull()
+            petDocument?.toObject(PetData::class.java)
+        }catch (e: Exception) {
+            // 오류 처리
+            null
+        }
     }
 
     // 사용자 신고

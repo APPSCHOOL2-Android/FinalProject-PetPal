@@ -19,7 +19,7 @@ import com.petpal.mungmate.model.Message
 import com.petpal.mungmate.model.MessageType
 import com.petpal.mungmate.model.MessageVisibility
 import java.text.SimpleDateFormat
-import java.util.Date
+import java.util.Calendar
 import java.util.Locale
 
 class ChatRoomFragment : Fragment() {
@@ -27,15 +27,19 @@ class ChatRoomFragment : Fragment() {
     private val fragmentChatRoomBinding get() = _fragmentChatRoomBinding!!
 
     private lateinit var chatViewModel: ChatViewModel
+
     private lateinit var messageAdapter: MessageAdapter
 
-    private val currentUserId = FirebaseAuth.getInstance().currentUser?.uid.toString()
-    lateinit var chatRoomId: String
+    private val currentUserId = FirebaseAuth.getInstance().currentUser?.uid.toString()  // 현재 사용자 id
+    lateinit var chatRoomId: String     // 채팅방 id
+    lateinit var receiverId: String     // 채팅 상대 id
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // 채팅 목록 화면에서 Bundle로 전달받은 현재 채팅방 id
+        // 채팅 -> 채팅방 : 채팅 목록 화면에서 Bundle로 전달받은 현재 채팅방 id
         chatRoomId = arguments?.getString("chatRoomId")!!
+        // 사용자 프로필 -> 채팅방 : 사용자 프로필 시트에서 Bundle로 전달받은 상대 user id
+        receiverId = arguments?.getString("userId")!!
 
         chatViewModel = ViewModelProvider(this)[ChatViewModel::class.java]
         chatViewModel.setCurrentChatRoomId(chatRoomId)
@@ -51,7 +55,9 @@ class ChatRoomFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        
+
+
+
         // TODO 날짜가 바뀌면 자동으로 DATE 타입 메시지 저장
 
         fragmentChatRoomBinding.run {
@@ -105,23 +111,88 @@ class ChatRoomFragment : Fragment() {
             }
 
             // 메시지 입력, 전송
-            editTextMessage.addTextChangedListener {
-                buttonSendMessage.isEnabled = it.toString().trim().isNotEmpty()
+            editTextMessage.run {
+                // 공백 또는 엔터만 입력시에는 전송 버튼 비활성화
+                addTextChangedListener {
+                    buttonSendMessage.isEnabled = it.toString().trim().isNotEmpty()
+                }
+                // EditText에 포커스가 주어지면 RecyclerView를 스크롤하여 키보드 위로 밀기
+                setOnFocusChangeListener { v, hasFocus ->
+                    recyclerViewMessage.post {
+                        recyclerViewMessage.scrollToPosition(messageAdapter.itemCount - 1)
+                    }
+                }
             }
+
             buttonSendMessage.setOnClickListener {
                 sendTextMessage()
             }
 
             // Observer
             chatViewModel.run {
+                receiverUserInfo.observe(viewLifecycleOwner) { userBasicInfoData ->
+                    textViewUserNickName.text = userBasicInfoData.nickname
+                    // Firestore 프로필 사진 가져오기
+
+                }
+
+                receiverPetInfo.observe(viewLifecycleOwner) {petData ->
+                    // 생일 -> 현재 나이 계산
+                    val petAge = calculateAgeFromBirthDay(petData.birth)
+                    textViewUserDogInfo.text = "${petData.name}(${petData.breed}, ${petData.petSex}), $petAge"
+                }
+
                 messages.observe(viewLifecycleOwner) { messages ->
                     messageAdapter.setMessages(messages)
                     recyclerViewMessage.scrollToPosition(messages.size - 1)
                 }
+
+                // todo ChatRoom 정보도 ViewModel에서 관리하기
+                // todo 전달받은 chatRoomId로 채팅방 새로 생성 or 기존 입장 분기처리하기
             }
         }
 
+        // 프로필 표시
+        chatViewModel.getReceiverInfoById(receiverId)
+        chatViewModel.getReceiverPetInfoByUserId(receiverId)
+
         chatViewModel.loadMessages(chatRoomId)
+    }
+
+    // 생일(yyyy-MM-dd)로 나이 계산 : n세, n개월
+    private fun calculateAgeFromBirthDay(birthday: String): String {
+        // String -> Date
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+        val birthDate = dateFormat.parse(birthday) ?: return "Invalid Date"
+
+        // Date -> Calendar
+        val currentCalender = Calendar.getInstance()
+        val birthCalendar = Calendar.getInstance()
+        birthCalendar.time = birthDate
+
+        // 현재 날짜, 생년월일 날짜 비교
+        var ageYear = currentCalender.get(Calendar.YEAR) - birthCalendar.get(Calendar.YEAR)
+        var ageMonth = currentCalender.get(Calendar.MONTH) - birthCalendar.get(Calendar.MONTH)
+
+        // 만 나이 계산시 현재 날짜의 일(day)와 생년월일의 일(day)을 비교해 생일이 지났는지 체크
+        // 오늘 시점 생일이 지나지 않았을 시 개월 수 감소 
+        if (currentCalender.get(Calendar.DAY_OF_MONTH) < birthCalendar.get(Calendar.DAY_OF_MONTH)) {
+            ageMonth--
+        }
+        
+        // 월이 음수인 경우 연도를 내려서 보정
+        if(ageMonth < 0) {
+            ageYear--
+            ageMonth += 12
+        }
+        
+        // 1년 미만일 경우 개월 수
+        if (ageYear == 0){
+            return "$ageMonth 개월"
+        }
+        
+        // 1년 이상일 경우 나이
+        return "$ageYear 세"
     }
 
     // 시스템 날짜 메시지 저장 

@@ -28,12 +28,15 @@ class ChatViewModel: ViewModel() {
     private val _messages = MutableLiveData<List<Message>>()
     val messages : LiveData<List<Message>> get() = _messages
 
-    // 채팅 상대 기본 정보
-    private val _receiverUserBasicInfo = MutableLiveData<UserBasicInfoData>()
-    val receiverUser get() = _receiverUserBasicInfo
-    // 채팅 상대 대표 반려견
-    private val _receiverPetData = MutableLiveData<PetData>()
-    val receiverPetData = _receiverPetData
+    // 채팅 상대 정보
+    private val _receiverUserId = MutableLiveData<String>()
+    val receiverUserId: LiveData<String> get() = _receiverUserId
+
+    private val _receiverUserInfo = MutableLiveData<UserBasicInfoData>()
+    val receiverUserInfo: LiveData<UserBasicInfoData> get() = _receiverUserInfo
+
+    private val _receiverPetInfo = MutableLiveData<PetData>()
+    val receiverPetInfo: LiveData<PetData> get() = _receiverPetInfo
 
     fun setCurrentChatRoomId(currentChatRoomId: String) {
         _chatRoomId.value = currentChatRoomId
@@ -79,20 +82,34 @@ class ChatViewModel: ViewModel() {
         }
     }
 
-    // 채팅 상대 기본 정보 + 반려견 정보
-    fun loadUserDataById(userId: String) {
-        chatRepository.loadUserById(userId)
-            .addOnSuccessListener { documentSnapshot ->
-                if (documentSnapshot.exists()) {
-                    val user = documentSnapshot.toObject(UserBasicInfoData::class.java)
-                    // todo 반려견 정보 가져오기 
-                } else {
-                    // 사용자가 존재하지 않을 경우
-                }
-            }
-            .addOnFailureListener {
+    fun setReceiverUser(userId: String){
+        _receiverUserId.value = userId
+        getReceiverInfoById(userId)
+        getReceiverPetInfoByUserId(userId)
+    }
+
+    // 채팅 상대 기본 정보 가져오기
+    fun getReceiverInfoById(userId: String) {
+        viewModelScope.launch {
+            val userBasicInfoData: UserBasicInfoData? = chatRepository.getUserInfoById(userId)
+            if (userBasicInfoData != null) {
+                _receiverUserInfo.value = userBasicInfoData!!
+            } else {
                 // 오류 처리
             }
+        }
+    }
+    
+    // 채팅 상대 대표 반려견 정보 가져오기
+    fun getReceiverPetInfoByUserId(userId: String) {
+         viewModelScope.launch {
+             val petData : PetData? = chatRepository.getMainPetInfoByUserId(userId)
+             if (petData != null) {
+                 _receiverPetInfo.value = petData!!
+             } else {
+                 // 오류 처리
+             }
+         }
     }
 
     // 사용자 신고 데이터 저장
