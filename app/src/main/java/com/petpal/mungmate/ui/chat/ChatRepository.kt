@@ -182,6 +182,8 @@ class ChatRepository {
         }
     }
 
+    // Storage 이미지 다운로드
+
 
     // 채팅방의 모든 메시지 로드
 //    fun getSavedMessages(chatRoomId: String): CollectionReference {

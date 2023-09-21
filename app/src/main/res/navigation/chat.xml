@@ -43,5 +43,8 @@
         <argument
             android:name="reportedUserId"
             app:argType="string" />
+        <argument
+            android:name="reportedUserNickname"
+            app:argType="string" />
     </fragment>
 </navigation>

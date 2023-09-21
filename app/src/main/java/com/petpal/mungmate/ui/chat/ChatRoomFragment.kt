@@ -74,7 +74,9 @@ class ChatRoomFragment : Fragment() {
 
             receiverUserInfo.observe(viewLifecycleOwner) { userBasicInfoData ->
                 fragmentChatRoomBinding.textViewUserNickName.text = userBasicInfoData.nickname
-                // todo Firestore 프로필 사진 가져오기
+                //
+
+//                fragmentChatRoomBinding.imageViewUserProfile.setImageBitmap()
             }
 
             receiverPetInfo.observe(viewLifecycleOwner) { petData ->
@@ -120,7 +122,7 @@ class ChatRoomFragment : Fragment() {
                         }
                         R.id.menu_item_report -> {
                             // 신고하기 화면 이동 (채팅 상대 UID 전달)
-                            val action = ChatRoomFragmentDirections.actionChatRoomFragmentToReportUserFragment("user1")
+                            val action = ChatRoomFragmentDirections.actionChatRoomFragmentToReportUserFragment(receiverId, chatViewModel.receiverUserInfo.value?.nickname!!)
                             findNavController().navigate(action)
                             true
                         }

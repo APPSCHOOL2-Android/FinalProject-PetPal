@@ -100,7 +100,7 @@ class ChatViewModel: ViewModel() {
     // 채팅 상대 기본 정보 가져오기
     fun getReceiverInfoById(userId: String) {
         viewModelScope.launch {
-            val userBasicInfoData: FirestoreUserBasicInfoData? = chatRepository.getUserBasicInfoById(userId)
+            val userBasicInfoData = chatRepository.getUserBasicInfoById(userId)
             if (userBasicInfoData != null) {
                 _receiverUserInfo.value = userBasicInfoData!!
                 Log.d(TAG, "ReceiverUserInfo updated: ${userBasicInfoData.nickname}")
@@ -114,7 +114,7 @@ class ChatViewModel: ViewModel() {
     // 채팅 상대 대표 반려견 정보 가져오기
     fun getReceiverPetInfoByUserId(userId: String) {
          viewModelScope.launch {
-             val petData : PetData? = chatRepository.getMainPetInfoByUserId(userId)
+             val petData = chatRepository.getMainPetInfoByUserId(userId)
              if (petData != null) {
                  _receiverPetInfo.value = petData!!
                  Log.d(TAG, "ReceiverPetInfo updated: ${petData.name}")
