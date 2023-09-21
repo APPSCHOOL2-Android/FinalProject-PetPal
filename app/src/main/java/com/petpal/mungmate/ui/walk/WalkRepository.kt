@@ -2,6 +2,7 @@ package com.petpal.mungmate.ui.walk
 
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.google.firebase.ktx.Firebase
@@ -169,25 +170,31 @@ class WalkRepository {
 
         ).await()
     }
-    @OptIn(ExperimentalCoroutinesApi::class)
-    fun observeUsersOnWalk(): Flow<List<ReceiveUser>> = callbackFlow {
-        val query = db.collection("users").whereEqualTo("onWalk", true)
-        val listenerRegistration = query.addSnapshotListener { snapshot, e ->
-            if (e != null) {
-                close(e)
-                return@addSnapshotListener
-            }
-
-            val users = snapshot?.documents?.map { document ->
-                val user = document.toObject(ReceiveUser::class.java) ?: ReceiveUser()
-                user.uid = document.id  // 문서의 ID 설정
-                user
-            } ?: emptyList()
-
-            trySend(users).isSuccess
-        }
-        awaitClose { listenerRegistration.remove() }
+    suspend fun updateBlockUser(userId: String, blockId: String) {
+        val userRef = db.collection("users").document(userId)
+        userRef.update(
+            "blockUserList", FieldValue.arrayUnion(blockId)
+        ).await()
     }
+//    @OptIn(ExperimentalCoroutinesApi::class)
+//    fun observeUsersOnWalk(): Flow<List<ReceiveUser>> = callbackFlow {
+//        val query = db.collection("users").whereEqualTo("onWalk", true)
+//        val listenerRegistration = query.addSnapshotListener { snapshot, e ->
+//            if (e != null) {
+//                close(e)
+//                return@addSnapshotListener
+//            }
+//
+//            val users = snapshot?.documents?.map { document ->
+//                val user = document.toObject(ReceiveUser::class.java) ?: ReceiveUser()
+//                user.uid = document.id  // 문서의 ID 설정
+//                user
+//            } ?: emptyList()
+//
+//            trySend(users).isSuccess
+//        }
+//        awaitClose { listenerRegistration.remove() }
+//    }
     //chatgpt는 신이다
     suspend fun fetchMatchingWalkCount(userId: String): Int {
         // userId를 사용하여 해당 사용자의 문서를 가져옵니다.
@@ -204,6 +211,7 @@ class WalkRepository {
         // 일치하는 항목의 수를 반환합니다.
         return matchingWalks.size
     }
+
 
     fun observeUsersOnWalkWithPets(): Flow<List<ReceiveUser>> = callbackFlow {
         val query = db.collection("users").whereEqualTo("onWalk", true)

@@ -22,6 +22,7 @@ import android.widget.TextView
 import androidx.annotation.RequiresApi
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.app.ActivityCompat
+import androidx.core.os.bundleOf
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
@@ -356,6 +357,7 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
             Log.d("LastKnownLocation",LastKnownLocation.latitude.toString())
             if (LastKnownLocation.latitude != null || LastKnownLocation.longitude != null){
                 getLastLocationOnWalk()
+
             } else {
                 getCurrentLocationOnWalk()
             }
@@ -386,6 +388,7 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
                     LastKnownLocation.latitude=it.latitude
                     LastKnownLocation.longitude=it.longitude
                     viewModel.searchPlacesByKeyword(it.latitude, it.longitude, "동물")
+                    showUserLocationOnMap1(location)
                     val mapPoint = MapPoint.mapPointWithGeoCoord(it.latitude, it.longitude)
                     fragmentWalkBinding.mapView.setMapCenterPoint(mapPoint, true)
                 }
@@ -426,6 +429,23 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
     }
 
     private fun showUserLocationOnMap(location: Location) {
+        //fragmentWalkBinding.mapView.removePOIItem(userLocationMarker)
+        userLocationMarker?.let {
+            fragmentWalkBinding.mapView.removePOIItem(it)
+        }
+        userLocationMarker = MapPOIItem().apply {
+            itemName = "나"
+            mapPoint = MapPoint.mapPointWithGeoCoord(location.latitude, location.longitude)
+            markerType = MapPOIItem.MarkerType.CustomImage
+            customImageResourceId = R.drawable.mylocation
+            isCustomImageAutoscale = true
+            setCustomImageAnchor(0.5f, 1.0f)
+
+        }
+        fragmentWalkBinding.mapView.addPOIItem(userLocationMarker)
+//        fragmentWalkBinding.mapView.setMapCenterPoint(MapPoint.mapPointWithGeoCoord(location.latitude, location.longitude),true)
+    }
+    private fun showUserLocationOnMap1(location: Location) {
         //fragmentWalkBinding.mapView.removePOIItem(userLocationMarker)
         userLocationMarker?.let {
             fragmentWalkBinding.mapView.removePOIItem(it)
@@ -496,6 +516,11 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
     private fun getLastLocation() {
         if (checkPermission(Manifest.permission.ACCESS_FINE_LOCATION)
         ) {
+            fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
+                if (location != null) {
+                    //showUserLocationOnMap1(location)
+                }
+            }
             LastKnownLocation.let {
                 LastKnownLocation.latitude?.let { it1 ->
                     LastKnownLocation.longitude?.let { it2 ->
@@ -506,6 +531,8 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
                     LastKnownLocation.longitude?.let { it2 ->
                         MapPoint.mapPointWithGeoCoord(it1, it2)
                     }
+
+
                 }
 
 
@@ -870,24 +897,12 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
                     latestReviews!![1].imageRes?.let { imageUrl ->
                         Glide.with(detailImage.context)
                             .load(imageUrl)
-                            .listener(object : RequestListener<Drawable> {
-                                override fun onLoadFailed(
-                                    e: GlideException?,
-                                    model: Any?,
-                                    target: Target<Drawable>?,
-                                    isFirstResource: Boolean
-                                ): Boolean {
+                            .listener(object : RequestListener<Drawable> { override fun onLoadFailed(e: GlideException?, model: Any?, target: Target<Drawable>?, isFirstResource: Boolean): Boolean {
                                     detailDialog.show()
                                     return false
                                 }
 
-                                override fun onResourceReady(
-                                    resource: Drawable?,
-                                    model: Any?,
-                                    target: Target<Drawable>?,
-                                    dataSource: DataSource?,
-                                    isFirstResource: Boolean
-                                ): Boolean {
+                                override fun onResourceReady(resource: Drawable?, model: Any?, target: Target<Drawable>?, dataSource: DataSource?, isFirstResource: Boolean): Boolean {
                                     detailDialog.show()
                                     return false
                                 }
@@ -914,6 +929,7 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
             }
             //산책 on 유저마커 바텀시트
         } else {
+
             val selectedUserNicknameHash = p1?.tag
 
             val selectedUser = nearbyUsers?.find { it.nickname.hashCode() == selectedUserNicknameHash }
@@ -938,6 +954,31 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
                 val textViewBottomPetGender=onWalkBottomSheetView.findViewById<TextView>(R.id.textViewBottomPetGender)
                 val textViewBottomIsPetNeutered=onWalkBottomSheetView.findViewById<TextView>(R.id.textViewBottomIsPetNeutered)
                 val imageViewBottomPetProfileImage=onWalkBottomSheetView.findViewById<ImageView>(R.id.ImageViewBottomPetProfileImage)
+                val buttonBottomWalk=onWalkBottomSheetView.findViewById<Button>(R.id.buttonBottomWalk)
+                val buttonBottomBlock=onWalkBottomSheetView.findViewById<Button>(R.id.buttonBottomBlock)
+                user.uid?.let { viewModel.blockUser(userId, it) }
+                buttonBottomWalk.setOnClickListener {
+                    val bundle=Bundle()
+                    bundle.putString("receiverId",user.uid)
+                    mainActivity.navigate(R.id.action_mainFragment_to_chat,bundle)
+                }
+                buttonBottomBlock.setOnClickListener {
+                    viewModel.isUserBlocked.observe(viewLifecycleOwner, Observer { isBlocked ->
+                        if (isBlocked) {
+                            Snackbar.make(buttonBottomBlock, "사용자가 차단되었습니다.",Snackbar.LENGTH_SHORT).show()
+                        }
+                         else {
+                            Snackbar.make(buttonBottomBlock, "사용자 차단에 실패하였습니다.",Snackbar.LENGTH_SHORT).show()
+                        }
+                    })
+
+
+
+
+//                    val bundle=Bundle()
+//                    bundle.putString("receiverId",user.uid)
+//                    mainActivity.navigate(R.id.action_mainFragment_to_manage_block,bundle)
+                }
                 user.pets.let { pets ->
                     val firstPet = pets.firstOrNull()
                     firstPet?.let { pet ->

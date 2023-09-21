@@ -1,5 +1,6 @@
 package com.petpal.mungmate.ui.walk
 
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -29,6 +30,8 @@ class WalkViewModel(private val repository: WalkRepository) : ViewModel() {
     val userNickname: MutableLiveData<String?> = MutableLiveData()
     val usersOnWalk: MutableLiveData<List<ReceiveUser>> = MutableLiveData()
     val walkMatchingCount: MutableLiveData<Int> = MutableLiveData()
+    private val _isUserBlocked = MutableLiveData<Boolean>()
+    val isUserBlocked: LiveData<Boolean> get() = _isUserBlocked
     fun searchPlacesByKeyword(latitude: Double, longitude: Double, query: String) {
         viewModelScope.launch {
             try {
@@ -191,6 +194,17 @@ class WalkViewModel(private val repository: WalkRepository) : ViewModel() {
                 walkMatchingCount.postValue(count)
             } catch (e: Exception) {
                 errorMessage.postValue(e.localizedMessage ?: "Failed to fetch matching walk count")
+            }
+        }
+    }
+    fun blockUser(userId: String, blockId: String) {
+        viewModelScope.launch {
+            try {
+                repository.updateBlockUser(userId, blockId)
+                _isUserBlocked.value = true
+            } catch (e: Exception) {
+                // 에러 처리
+                _isUserBlocked.value = false
             }
         }
     }

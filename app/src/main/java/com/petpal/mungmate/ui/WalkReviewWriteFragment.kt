@@ -135,7 +135,7 @@ class WalkReviewWriteFragment : Fragment() {
                                 hideProgress()
                                 onSuccess(it.toString())
                                 //showSnackbar("리뷰가 성공적으로 등록되었습니다.")
-                                Toast.makeText(context, "리뷰가 성공적으로 등록되었습니다.", Toast.LENGTH_SHORT).show()
+                                //Toast.makeText(context, "리뷰가 성공적으로 등록되었습니다.", Toast.LENGTH_SHORT).show()
                             }
                         }
                         .addOnFailureListener {
