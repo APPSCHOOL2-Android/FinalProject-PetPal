@@ -120,12 +120,10 @@
                         app:cardCornerRadius="15dp"
                         app:cardElevation="0dp">
 
-                        <androidx.appcompat.widget.AppCompatImageView
-                            android:id="@+id/communityPostDetailPostImage"
+                        <androidx.viewpager2.widget.ViewPager2
+                            android:id="@+id/communityPostDetailViewPager2"
                             android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:adjustViewBounds="true"
-                            android:scaleType="fitCenter" />
+                            android:layout_height="match_parent" />
 
                     </com.google.android.material.card.MaterialCardView>
 
