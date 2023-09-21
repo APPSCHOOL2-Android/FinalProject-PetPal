@@ -68,6 +68,7 @@ class UserInfoFragment : Fragment() {
                         Glide.with(requireContext())
                             .load(userData.photoUrl)
                             .placeholder(R.drawable.user_profile)
+                            .fallback(R.drawable.user_profile)
                             .into(startMainImageView)
                     }
 
