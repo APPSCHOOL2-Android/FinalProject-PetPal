@@ -69,4 +69,17 @@
     <color name="delete">#F61023</color>
     <color name="dialog_cancel_color">#EAEAEA</color>
 
+    <color name="category_daily">#FF707C</color>
+    <color name="category_walk_log">#FF7A70</color>
+    <color name="category_walking_maid_matching">#FFF385</color>
+    <color name="category_place_reviews">#C5FA88</color>
+    <color name="category_dog_product_reviews">#95D0FF</color>
+    <color name="category_shih_tzu">#8699FF</color>
+    <color name="category_poodle">#B991FF</color>
+    <color name="category_pomeranian">#9E7D73</color>
+    <color name="category_maltese">#C9FFFA</color>
+    <color name="category_jindo_dog">#000000</color>
+    <color name="category_retriever">#F5B9FF</color>
+    <color name="category_welsh_corgi">#FFC8B7</color>
+    <color name="category_puppies">#B8D2FF</color>
 </resources>

@@ -11,6 +11,7 @@ import android.view.Window
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.cardview.widget.CardView
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.airbnb.lottie.LottieAnimationView
 import com.bumptech.glide.Glide
@@ -41,6 +42,8 @@ class CommunityAdapter(
         val communityFavoriteLottie: LottieAnimationView = item.communityFavoriteLottie
         val communityFavoriteCounter: TextView = item.communityFavoriteCounter
         val communityPostCardView: CardView = item.communityPostCardView
+        val communityPostCategoryCard: CardView = item.communityPostCategoryCard
+        val communityPostCategoryTextView: TextView = item.communityPostCategoryTextView
 
         init {
             item.root.setOnClickListener {
@@ -112,8 +115,71 @@ class CommunityAdapter(
         holder.communityPostDateCreated.text = post.postDateCreated.toString()
         holder.communityContent.text = post.postContent
         holder.communityCommentCounter.text= post.postComment?.size.toString()
-        Log.d("갯수",post.postComment?.size.toString())
         holder.communityFavoriteCounter.text = post.postLike.toString()
+
+        Log.d("어떤 카테고리",post.postCategory.toString())
+        when(post.postCategory.toString()){
+            "일상"->{
+                holder.communityPostCategoryCard.setCardBackgroundColor(ContextCompat.getColor(context, R.color.category_daily))
+                holder.communityPostCategoryTextView.text= post.postCategory.toString()
+            }
+            "산책일지"->{
+                holder.communityPostCategoryCard.setCardBackgroundColor(ContextCompat.getColor(context, R.color.category_walk_log))
+                holder.communityPostCategoryTextView.text= post.postCategory.toString()
+            }
+            "산책 메이트 구해요"->{
+                holder.communityPostCategoryCard.setCardBackgroundColor(ContextCompat.getColor(context, R.color.category_walking_maid_matching))
+                holder.communityPostCategoryTextView.text= post.postCategory.toString()
+            }
+            "장소 후기"->{
+                holder.communityPostCategoryCard.setCardBackgroundColor(ContextCompat.getColor(context, R.color.category_place_reviews
+                ))
+                holder.communityPostCategoryTextView.text= post.postCategory.toString()
+            }
+            "애견용품 후기"->{
+                holder.communityPostCategoryCard.setCardBackgroundColor(ContextCompat.getColor(context, R.color.category_dog_product_reviews))
+                holder.communityPostCategoryTextView.text= post.postCategory.toString()
+            }
+            "시츄 아지트"->{
+                holder.communityPostCategoryCard.setCardBackgroundColor(ContextCompat.getColor(context, R.color.category_shih_tzu))
+                holder.communityPostCategoryTextView.text= post.postCategory.toString()
+            }
+            "푸들 아지트"->{
+                holder.communityPostCategoryCard.setCardBackgroundColor(ContextCompat.getColor(context, R.color.category_poodle))
+                holder.communityPostCategoryTextView.text= post.postCategory.toString()
+            }
+            "포메라니안 아지트"->{
+                holder.communityPostCategoryCard.setCardBackgroundColor(ContextCompat.getColor(context, R.color.category_pomeranian))
+                holder.communityPostCategoryTextView.text= post.postCategory.toString()
+            }
+            "치와와 아지트"->{
+                holder.communityPostCategoryTextView.text= post.postCategory.toString()
+            }
+            "몰티즈 아지트"->{
+                holder.communityPostCategoryCard.setCardBackgroundColor(ContextCompat.getColor(context, R.color.category_maltese))
+                holder.communityPostCategoryTextView.text= post.postCategory.toString()
+            }
+            "진돗개 아지트"->{
+                holder.communityPostCategoryCard.setCardBackgroundColor(ContextCompat.getColor(context, R.color.category_jindo_dog))
+                holder.communityPostCategoryTextView.setTextColor(ContextCompat.getColor(context, R.color.white))
+                holder.communityPostCategoryTextView.text= post.postCategory.toString()
+            }
+            "리트리버 아지트"->{
+                holder.communityPostCategoryCard.setCardBackgroundColor(ContextCompat.getColor(context, R.color.category_retriever))
+
+                holder.communityPostCategoryTextView.text= post.postCategory.toString()
+            }
+            "웰시 코기 아지트"->{
+                holder.communityPostCategoryCard.setCardBackgroundColor(ContextCompat.getColor(context, R.color.category_welsh_corgi))
+                holder.communityPostCategoryTextView.text= post.postCategory.toString()
+            }
+            else->{
+                holder.communityPostCategoryCard.setCardBackgroundColor(ContextCompat.getColor(context, R.color.category_puppies))
+                holder.communityPostCategoryTextView.text= post.postCategory.toString()
+            }
+        }
+
+
 
         var isClicked = false
 
