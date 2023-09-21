@@ -17,6 +17,8 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.viewpager.widget.PagerAdapter
+import androidx.viewpager2.widget.ViewPager2
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.faltenreich.skeletonlayout.Skeleton
@@ -27,6 +29,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.petpal.mungmate.R
 import com.petpal.mungmate.databinding.FragmentCommunityPostDetailBinding
 import com.petpal.mungmate.model.Comment
+import com.petpal.mungmate.model.PostImage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -46,6 +49,8 @@ class CommunityPostDetailFragment : Fragment() {
     private lateinit var skeleton: Skeleton
     private val coroutineScope = CoroutineScope(Dispatchers.Main)
 
+    private lateinit var viewPagerAdapter: CommunityDetailViewPager2Adapter
+
     private val postCommentList: MutableList<Comment> = mutableListOf()
 
     private lateinit var communityDetailCommentAdapter: CommunityDetailCommentAdapter
@@ -53,8 +58,11 @@ class CommunityPostDetailFragment : Fragment() {
 
     private val auth = FirebaseAuth.getInstance()
     val user = auth.currentUser
+
     var nickname = ""
     var userImage = ""
+    var getAuthorUid = ""
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -63,86 +71,88 @@ class CommunityPostDetailFragment : Fragment() {
         communityPostDetailBinding = FragmentCommunityPostDetailBinding.inflate(inflater)
         commentViewModel = ViewModelProvider(requireActivity())[CommentViewModel::class.java]
 
-        communityPostDetailBinding.run {
+        val args: CommunityPostDetailFragmentArgs by navArgs()
+        val postid = args.position
+        postGetId = postid
 
-            val args: CommunityPostDetailFragmentArgs by navArgs()
-            val postid = args.position
-            postGetId = postid
+        communityPostDetailBinding.run {
             toolbar()
             lottie()
-
             getDataFirebasFirestore()
             communityDetailRecyclerView()
             getFireStoreUserInfo()
-            commentViewModel.postCommentList.observe(viewLifecycleOwner) { commentList ->
-                communityDetailCommentAdapter.updateData(commentList)
+            comment()
+        }
 
-                communityPostDetailCommentCount.text = "댓글 ${commentList.size.toString()}"
+        return communityPostDetailBinding.root
+    }
+
+    private fun FragmentCommunityPostDetailBinding.comment() {
+        commentViewModel.postCommentList.observe(viewLifecycleOwner) { commentList ->
+            communityDetailCommentAdapter.updateData(commentList)
+
+            communityPostDetailCommentCount.text = "댓글 ${commentList.size.toString()}"
+        }
+        val iconColorNotInput =
+            ContextCompat.getColor(requireContext(), R.color.md_theme_light_tertiaryContainer)
+        val iconColorInput = ContextCompat.getColor(requireContext(), R.color.black)
+        communityPostDetailCommentTextInputLayout.setEndIconOnClickListener {
+            if (communityPostDetailCommentTextInputEditText.text.toString().isEmpty()) {
+                val snackbar = Snackbar.make(
+                    communityPostDetailCommentTextInputLayout,
+                    "댓글을 입력해주세요",
+                    Snackbar.LENGTH_SHORT
+                )
+
+                // Snackbar 위치 변경 바로 위로..
+                snackbar.anchorView = communityPostDetailCommentTextInputLayout
+                snackbar.show()
             }
-            val iconColorNotInput =
-                ContextCompat.getColor(requireContext(), R.color.md_theme_light_tertiaryContainer)
-            val iconColorInput = ContextCompat.getColor(requireContext(), R.color.black)
-            communityPostDetailCommentTextInputLayout.setEndIconOnClickListener {
-                if (communityPostDetailCommentTextInputEditText.text.toString().isEmpty()) {
-                    val snackbar = Snackbar.make(
-                        communityPostDetailCommentTextInputLayout,
-                        "댓글을 입력해주세요",
-                        Snackbar.LENGTH_SHORT
+        }
+
+        communityPostDetailCommentTextInputEditText.addTextChangedListener(object :
+            TextWatcher {
+            override fun beforeTextChanged(
+                s: CharSequence?,
+                start: Int,
+                count: Int,
+                after: Int
+            ) {
+            }
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                if (s.isNullOrEmpty()) {
+                    communityPostDetailCommentTextInputLayout.setEndIconTintList(
+                        ColorStateList.valueOf(
+                            iconColorNotInput
+                        )
                     )
+                } else {
 
-                    // Snackbar 위치 변경 바로 위로..
-                    snackbar.anchorView = communityPostDetailCommentTextInputLayout
-                    snackbar.show()
-                }
-            }
-
-            communityPostDetailCommentTextInputEditText.addTextChangedListener(object :
-                TextWatcher {
-                override fun beforeTextChanged(
-                    s: CharSequence?,
-                    start: Int,
-                    count: Int,
-                    after: Int
-                ) {
-                }
-
-                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                    if (s.isNullOrEmpty()) {
-                        communityPostDetailCommentTextInputLayout.setEndIconTintList(
-                            ColorStateList.valueOf(
-                                iconColorNotInput
-                            )
+                    communityPostDetailCommentTextInputLayout.setEndIconTintList(
+                        ColorStateList.valueOf(
+                            iconColorInput
                         )
-                    } else {
+                    )
+                    communityPostDetailCommentTextInputLayout.setEndIconOnClickListener {
+                        coroutineScope.launch(Dispatchers.IO) {
+                            val documentSnapshot = getFirestoreData(postGetId)
+                            withContext(Dispatchers.Main) {
 
-                        communityPostDetailCommentTextInputLayout.setEndIconTintList(
-                            ColorStateList.valueOf(
-                                iconColorInput
-                            )
-                        )
-                        communityPostDetailCommentTextInputLayout.setEndIconOnClickListener {
-                            coroutineScope.launch(Dispatchers.IO) {
-                                val documentSnapshot = getFirestoreData(postGetId)
-                                withContext(Dispatchers.Main) {
+                                updateComment(documentSnapshot)
 
-                                    updateComment(documentSnapshot)
-
-                                    communityPostDetailCommentTextInputEditText.text?.clear()
-                                    val imm =
-                                        requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-                                    imm.hideSoftInputFromWindow(view?.windowToken, 0)
-                                }
+                                communityPostDetailCommentTextInputEditText.text?.clear()
+                                val imm =
+                                    requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                                imm.hideSoftInputFromWindow(view?.windowToken, 0)
                             }
                         }
                     }
                 }
+            }
 
-                override fun afterTextChanged(s: Editable?) {}
-            })
-
-        }
-
-        return communityPostDetailBinding.root
+            override fun afterTextChanged(s: Editable?) {}
+        })
     }
 
     private fun getDataFirebasFirestore() {
@@ -213,13 +223,12 @@ class CommunityPostDetailFragment : Fragment() {
                     .popBackStack()
             }
             setOnMenuItemClickListener {
-
+            if (getAuthorUid==user?.uid.toString()) {
                 when (it?.itemId) {
                     R.id.item_modify -> {
                         val bundle = Bundle().apply {
                             putString("positionPostId", postGetId)
                         }
-
                         findNavController().navigate(
                             R.id.action_communityPostDetailFragment_to_communityDetailModifyFragment,
                             bundle
@@ -255,6 +264,10 @@ class CommunityPostDetailFragment : Fragment() {
                         dlg.start()
                     }
                 }
+            }else{
+                Snackbar.make(rootView, "권한이 없습니다.", Snackbar.LENGTH_SHORT)
+                    .show()
+            }
                 false
             }
         }
@@ -276,15 +289,21 @@ class CommunityPostDetailFragment : Fragment() {
             val postDateCreated = documentSnapshot.getString("postDateCreated")
 
             val postImagesList = documentSnapshot.get("postImages") as? List<*>
-            var postImagesGetList = mutableListOf<String>()
+            var postImagesGetList = mutableListOf<PostImage>()
             if (postImagesList!!.isNotEmpty()) {
-                val cleanedString = postImagesList?.get(0).toString().replace("{image=", "")
-                val imageUrl = cleanedString.trim()
-                val imageUrlWithoutBrace = imageUrl.removeSuffix("}")
-                postImagesGetList.add(imageUrlWithoutBrace)
+
+                val cleanedString = postImagesList?.toString()?.replace("{image=", "")
+                val imageUrl = cleanedString?.trim()
+                val imageUrlWithoutBrace = imageUrl?.removeSuffix("}")
+
+                val postImage = PostImage(imageUrlWithoutBrace)
+                postImagesGetList.add(postImage)
+                Log.d("어떤 리스트가..",postImagesGetList.toString())
             }
 
             val postLike = documentSnapshot.getLong("postLike")
+            val authorUid = documentSnapshot.getString("authorUid")
+            getAuthorUid = authorUid.toString()
 
             val postCommentData = documentSnapshot.get("postComment") as? List<HashMap<String, Any>>
 
@@ -337,27 +356,6 @@ class CommunityPostDetailFragment : Fragment() {
                     .fitCenter()
                     .into(communityPostDetailProfileImage)
 
-                if (postImagesList != null) {
-                    if (postImagesGetList.isNotEmpty()) {
-                        Glide
-                            .with(requireContext())
-                            .load(postImagesGetList[0])
-                            .diskCacheStrategy(DiskCacheStrategy.ALL)
-                            .fitCenter()
-                            .error(R.drawable.baseline_error_24)
-                            .fallback(R.drawable.main_image)
-                            .into(communityPostDetailPostImage)
-                    } else {
-                        communityPostDetailPostCardView.visibility = View.GONE
-                    }
-                } else {
-                    Snackbar.make(
-                        communityPostDetailPostImage,
-                        "이미지를 가져오는데 실패했습니다.",
-                        Snackbar.LENGTH_SHORT
-                    )
-                        .show()
-                }
 
                 communityPostDetailPostTitle.text = postTitle
                 communityPostDateCreated.text = timeAgo
@@ -461,7 +459,21 @@ class CommunityPostDetailFragment : Fragment() {
                 }
         }
     }
+    private fun initViewPager2() {
+        communityPostDetailBinding.communityPostDetailViewPager2.run {
+            viewPagerAdapter = CommunityDetailViewPager2Adapter()
+            adapter = viewPagerAdapter
+            registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+            })
+        }
+    }
 
+    private fun subscribeObservers() {
+        commentViewModel.bannerItemList.observe(viewLifecycleOwner) { imageList->
+            viewPagerAdapter.submitList(imageList)
+        }
+
+    }
 
     override fun onDestroy() {
         super.onDestroy()

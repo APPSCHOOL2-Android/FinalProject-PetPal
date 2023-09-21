@@ -53,7 +53,7 @@ class WalkReviewWriteFragment : Fragment() {
         val walkRecordDate=arguments?.getString("walkRecordDate")
         val walkRecordStartTime=arguments?.getString("walkRecordStartTime")
         val walkRecordEndTime=arguments?.getString("walkRecordEndTime")
-        val walkDuration=arguments?.getString("walkDuration")
+        val walkDuration=arguments?.getLong("walkDuration") //초단위로 올라감 1분40초 ->walkDuration:100
         val walkDistance=arguments?.getString("walkDistance")
         val walkMatchingId=arguments?.getString("walkMatchingId")
 
@@ -72,6 +72,11 @@ class WalkReviewWriteFragment : Fragment() {
                     // 리뷰 등록 후 Navigation 이동
                     mainActivity.navigate(R.id.action_WriteWalkReviewFragment_to_mainFragment)
                 }
+            }else{
+                val walkReview=WalkRecord(walkRecorduid!!,walkRecordDate!!,walkRecordStartTime!!,walkRecordEndTime!!,walkDuration!!,walkDistance!!.toDouble(),walkMatchingId,
+                    walkMemo)
+                addWalkReview(userId,walkReview)
+                mainActivity.navigate(R.id.action_WriteWalkReviewFragment_to_mainFragment)
             }
         }
 
@@ -130,7 +135,7 @@ class WalkReviewWriteFragment : Fragment() {
                                 hideProgress()
                                 onSuccess(it.toString())
                                 //showSnackbar("리뷰가 성공적으로 등록되었습니다.")
-                                Toast.makeText(context, "리뷰가 성공적으로 등록되었습니다.", Toast.LENGTH_SHORT).show()
+                                //Toast.makeText(context, "리뷰가 성공적으로 등록되었습니다.", Toast.LENGTH_SHORT).show()
                             }
                         }
                         .addOnFailureListener {

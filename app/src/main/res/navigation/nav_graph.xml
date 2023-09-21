@@ -144,7 +144,11 @@
         android:id="@+id/communityWritingFragment"
         android:name="com.petpal.mungmate.ui.community.CommunityWritingFragment"
         android:label="fragment_community_writing"
-        tools:layout="@layout/fragment_community_writing" />
+        tools:layout="@layout/fragment_community_writing" >
+        <action
+            android:id="@+id/action_communityWritingFragment_to_mainFragment"
+            app:destination="@id/mainFragment" />
+    </fragment>
     <fragment
         android:id="@+id/communityPostDetailFragment"
         android:name="com.petpal.mungmate.ui.community.CommunityPostDetailFragment"
@@ -174,6 +178,18 @@
             app:exitAnim="@anim/to_right"
             app:popEnterAnim="@anim/from_right"
             app:popExitAnim="@anim/to_left" />
+        <action
+            android:id="@+id/action_communitySearchFragment_to_communityPostDetailFragment"
+            app:destination="@id/communityPostDetailFragment"
+            app:enterAnim="@anim/from_right"
+            app:exitAnim="@anim/to_left"
+            app:popEnterAnim="@anim/from_left"
+            app:popExitAnim="@anim/to_right" />
+        <action
+            android:id="@+id/action_communitySearchFragment_to_fullScreenFragment"
+            app:destination="@id/fullScreenFragment"
+            app:enterAnim="@anim/from_bottom"
+            app:popEnterAnim="@anim/from_top" />
     </fragment>
     <fragment
         android:id="@+id/communityDetailModifyFragment"

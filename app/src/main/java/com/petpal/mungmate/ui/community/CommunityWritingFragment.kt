@@ -18,6 +18,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -34,6 +35,10 @@ import com.petpal.mungmate.databinding.FragmentCommunityWritingBinding
 import com.petpal.mungmate.model.Image
 import com.petpal.mungmate.model.Post
 import com.petpal.mungmate.model.PostImage
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
 import java.text.SimpleDateFormat
 import java.time.LocalDateTime
@@ -41,6 +46,7 @@ import java.time.format.DateTimeFormatter
 import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
+import java.util.concurrent.atomic.AtomicInteger
 
 
 class CommunityWritingFragment : Fragment() {
@@ -212,64 +218,70 @@ class CommunityWritingFragment : Fragment() {
 
                 if (hasImages) {
                     // 사진이 있을 때
-                    uploadImage { eventPost ->
-                        val postImage = PostImage(eventPost.photoUrl)
-                        postImagesList.add(postImage)
+                    val uploadedImageCount = AtomicInteger(0) // 업로드된 이미지 수를 추적하기 위한 AtomicInteger
 
+                    for (i in 0 until mainImageList.size) {
+                        uploadImage { eventPost ->
+                            // 이미지 업로드 로직
 
-                        if (user != null) {
+                            if (eventPost.isSuccess) {
+                                // 업로드 성공 시
+                                val postImage = PostImage(eventPost.photoUrl)
+                                postImagesList.add(postImage)
 
-                            val userId = user.uid
-                            Log.d("사용자",userId.toString())
-                        } else {
+                                uploadedImageCount.incrementAndGet() // 업로드된 이미지 수 증가
 
-                            Log.d("사용자","로그인x")
-                        }
-                        if (eventPost.isSuccess) {
-                            val updatedData = Post(
-                                generatedDocId,
-                                user?.uid,
-                                userImage,
-                                nickname,
-                                "데이터 없음",
-                                communityWritingBinding.communityPostWritingTitleTextInputEditText.text.toString(),
-                                communityWritingBinding.categoryItem.text.toString(),
-                                formattedDateTime,
-                                postImagesList,
-                                communityWritingBinding.communityPostWritingContentTextInputEditText.text.toString(),
-                                0,
-                                emptyList()
-                            )
+                                if (uploadedImageCount.get() == mainImageList.size) {
+                                    // 모든 이미지가 업로드되었을 때 스낵바 표시
+                                    val updatedData = Post(
+                                        generatedDocId,
+                                        user?.uid,
+                                        userImage,
+                                        nickname,
+                                        "데이터 없음",
+                                        communityWritingBinding.communityPostWritingTitleTextInputEditText.text.toString(),
+                                        communityWritingBinding.categoryItem.text.toString(),
+                                        formattedDateTime,
+                                        postImagesList,
+                                        communityWritingBinding.communityPostWritingContentTextInputEditText.text.toString(),
+                                        0,
+                                        emptyList()
+                                    )
 
-                            val documentRef = db.collection("Post").document(generatedDocId)
-                            documentRef.set(updatedData)
-                                .addOnSuccessListener {
-                                    Snackbar.make(
-                                        communityWritingBinding.communityPostWritingTitleTextInputEditText,
-                                        "게시글 등록 성공",
-                                        Snackbar.LENGTH_SHORT
-                                    ).show()
+                                    val documentRef = db.collection("Post").document(generatedDocId)
+                                    documentRef.set(updatedData)
+                                        .addOnSuccessListener {
+
+                                            lifecycleScope.launch {
+                                                Snackbar.make(
+                                                    communityWritingBinding.communityPostWritingTitleTextInputEditText,
+                                                    "게시글 등록 성공",
+                                                    Snackbar.LENGTH_SHORT
+                                                ).show()
+                                                delay(5000)
+                                                withContext(Dispatchers.Main) {
+                                                    findNavController().popBackStack()
+                                                }
+                                            }
+                                        }
+                                        .addOnFailureListener {
+                                            Snackbar.make(
+                                                communityWritingBinding.communityPostWritingTitleTextInputEditText,
+                                                "게시글 등록 실패",
+                                                Snackbar.LENGTH_SHORT
+                                            ).show()
+                                        }
                                 }
-                                .addOnFailureListener {
-                                    Snackbar.make(
-                                        communityWritingBinding.communityPostWritingTitleTextInputEditText,
-                                        "게시글 등록 실패",
-                                        Snackbar.LENGTH_SHORT
-                                    ).show()
-                                }
-                                .addOnCompleteListener {
-                                    val navController = findNavController()
-                                    navController.popBackStack()
-                                }
-                        } else {
-                            Snackbar.make(
-                                communityWritingBinding.communityPostWritingTitleTextInputEditText,
-                                "사진 업로드 실패", // 실패 메시지를 원하는 내용으로 변경
-                                Snackbar.LENGTH_SHORT
-                            ).show()
+                            } else {
+                                Snackbar.make(
+                                    communityWritingBinding.communityPostWritingTitleTextInputEditText,
+                                    "사진 업로드 실패", // 실패 메시지를 원하는 내용으로 변경
+                                    Snackbar.LENGTH_SHORT
+                                ).show()
+                            }
                         }
                     }
-                } else {
+                }  else {
                     // 사진이 없을 때
                     val updatedData = Post(
                         generatedDocId,
@@ -301,10 +313,6 @@ class CommunityWritingFragment : Fragment() {
                                 "게시글 등록 실패",
                                 Snackbar.LENGTH_SHORT
                             ).show()
-                        }
-                        .addOnCompleteListener {
-                            val navController = findNavController()
-                            navController.popBackStack()
                         }
                 }
             }

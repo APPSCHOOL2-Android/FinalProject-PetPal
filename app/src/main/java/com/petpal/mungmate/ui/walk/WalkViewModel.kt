@@ -1,12 +1,15 @@
 package com.petpal.mungmate.ui.walk
 
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.petpal.mungmate.model.Favorite
 import com.petpal.mungmate.model.KakaoSearchResponse
 import com.petpal.mungmate.model.PlaceData
+import com.petpal.mungmate.model.ReceiveUser
 import com.petpal.mungmate.model.Review
+import com.petpal.mungmate.model.UserBasicInfoData
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -25,6 +28,10 @@ class WalkViewModel(private val repository: WalkRepository) : ViewModel() {
     val reviewsForPlace = MutableLiveData<List<Review>>()
     val averageRatingForPlace = MutableLiveData<Float>()
     val userNickname: MutableLiveData<String?> = MutableLiveData()
+    val usersOnWalk: MutableLiveData<List<ReceiveUser>> = MutableLiveData()
+    val walkMatchingCount: MutableLiveData<Int> = MutableLiveData()
+    private val _isUserBlocked = MutableLiveData<Boolean>()
+    val isUserBlocked: LiveData<Boolean> get() = _isUserBlocked
     fun searchPlacesByKeyword(latitude: Double, longitude: Double, query: String) {
         viewModelScope.launch {
             try {
@@ -137,7 +144,17 @@ class WalkViewModel(private val repository: WalkRepository) : ViewModel() {
     fun updateLocationAndOnWalkStatus(userId: String, latitude: Double, longitude: Double) {
         viewModelScope.launch {
             try {
-                repository.updateLocationAndOnWalkStatus(userId, latitude, longitude)
+                repository.updateLocationAndOnWalkStatusTrue(userId, latitude, longitude)
+                // 필요한 경우 성공 메시지나 상태 업데이트
+            } catch (e: Exception) {
+                errorMessage.postValue(e.localizedMessage ?: "Failed to update location")
+            }
+        }
+    }
+    fun updateOnWalkStatusFalse(userId: String) {
+        viewModelScope.launch {
+            try {
+                repository.updateOnWalkStatusFalse(userId)
                 // 필요한 경우 성공 메시지나 상태 업데이트
             } catch (e: Exception) {
                 errorMessage.postValue(e.localizedMessage ?: "Failed to update location")
@@ -160,6 +177,34 @@ class WalkViewModel(private val repository: WalkRepository) : ViewModel() {
                 userNickname.postValue(nickname)
             } catch (e: Exception) {
                 errorMessage.postValue(e.localizedMessage ?: "Failed to fetch user's nickname")
+            }
+        }
+    }
+    fun observeUsersOnWalk() {
+        viewModelScope.launch {
+            repository.observeUsersOnWalkWithPets().collect { users ->
+                usersOnWalk.postValue(users)
+            }
+        }
+    }
+    fun fetchMatchingWalkCount(userId: String) {
+        viewModelScope.launch {
+            try {
+                val count = repository.fetchMatchingWalkCount(userId)
+                walkMatchingCount.postValue(count)
+            } catch (e: Exception) {
+                errorMessage.postValue(e.localizedMessage ?: "Failed to fetch matching walk count")
+            }
+        }
+    }
+    fun blockUser(userId: String, blockId: String) {
+        viewModelScope.launch {
+            try {
+                repository.updateBlockUser(userId, blockId)
+                _isUserBlocked.value = true
+            } catch (e: Exception) {
+                // 에러 처리
+                _isUserBlocked.value = false
             }
         }
     }
