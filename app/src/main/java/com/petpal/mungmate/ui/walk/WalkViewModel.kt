@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.petpal.mungmate.model.Favorite
 import com.petpal.mungmate.model.KakaoSearchResponse
-import com.petpal.mungmate.model.Place
+import com.petpal.mungmate.model.PlaceData
 import com.petpal.mungmate.model.Review
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -124,12 +124,12 @@ class WalkViewModel(private val repository: WalkRepository) : ViewModel() {
         }
     }
 
-    fun addPlaceToFavorite(place: Place, favorite: Favorite) {
+    fun addPlaceToFavorite(placeData: PlaceData, favorite: Favorite) {
         viewModelScope.launch {
             try {
-                repository.addFavorite(place, favorite)
+                repository.addFavorite(placeData, favorite)
             } catch (e: Exception) {
-                errorMessage.postValue(e.localizedMessage ?: "Failed to add place to favorites")
+                errorMessage.postValue(e.localizedMessage ?: "Failed to add placeData to favorites")
             }
         }
     }

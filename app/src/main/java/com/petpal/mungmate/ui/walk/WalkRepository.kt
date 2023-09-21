@@ -6,14 +6,13 @@ import com.google.firebase.firestore.Query
 import com.google.firebase.ktx.Firebase
 import com.petpal.mungmate.model.Favorite
 import com.petpal.mungmate.model.KakaoSearchResponse
-import com.petpal.mungmate.model.Place
+import com.petpal.mungmate.model.PlaceData
 import com.petpal.mungmate.model.Review
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.tasks.await
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -107,19 +106,19 @@ class WalkRepository {
         return reviews
     }
 
-    suspend fun addFavorite(place: Place, favorite: Favorite) {
+    suspend fun addFavorite(placeData: PlaceData, favorite: Favorite) {
         val placesRef = db.collection("places")
-        val placeDocument = placesRef.document(place.id)
+        val placeDocument = placesRef.document(placeData.id)
 
         val document = placeDocument.get().await()
 
         if (!document.exists()) {
             //Place가 db에 없음
-            placeDocument.set(place).await()
+            placeDocument.set(placeData).await()
         }
 
         //Place가 이미 db에 있거나 추가된 다음에 실행됨(await)
-        val favoriteRef = db.collection("places").document(place.id).collection("favorite")
+        val favoriteRef = db.collection("places").document(placeData.id).collection("favorite")
         favoriteRef.document(favorite.userid).set(favorite).await()
     }
 

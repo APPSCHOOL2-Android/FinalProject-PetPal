@@ -23,10 +23,7 @@ import com.petpal.mungmate.MainActivity
 
 import com.petpal.mungmate.R
 import com.petpal.mungmate.databinding.FragmentWalkReviewWriteBinding
-import com.petpal.mungmate.model.Place
-import com.petpal.mungmate.model.Review
 import com.petpal.mungmate.model.WalkRecord
-import com.petpal.mungmate.ui.placereview.WritePlaceReviewFragment
 import java.io.ByteArrayOutputStream
 import java.util.UUID
 
