@@ -9,8 +9,8 @@ import com.google.firebase.ktx.Firebase
 import com.kakao.sdk.user.model.User
 import com.petpal.mungmate.model.Favorite
 import com.petpal.mungmate.model.KakaoSearchResponse
+import com.petpal.mungmate.model.PlaceData
 import com.petpal.mungmate.model.Pet
-import com.petpal.mungmate.model.Place
 import com.petpal.mungmate.model.ReceiveUser
 import com.petpal.mungmate.model.Review
 import com.petpal.mungmate.model.UserBasicInfoData
@@ -112,19 +112,19 @@ class WalkRepository {
         return reviews
     }
 
-    suspend fun addFavorite(place: Place, favorite: Favorite) {
+    suspend fun addFavorite(placeData: PlaceData, favorite: Favorite) {
         val placesRef = db.collection("places")
-        val placeDocument = placesRef.document(place.id)
+        val placeDocument = placesRef.document(placeData.id)
 
         val document = placeDocument.get().await()
 
         if (!document.exists()) {
             //Place가 db에 없음
-            placeDocument.set(place).await()
+            placeDocument.set(placeData).await()
         }
 
         //Place가 이미 db에 있거나 추가된 다음에 실행됨(await)
-        val favoriteRef = db.collection("places").document(place.id).collection("favorite")
+        val favoriteRef = db.collection("places").document(placeData.id).collection("favorite")
         favoriteRef.document(favorite.userid).set(favorite).await()
     }
 

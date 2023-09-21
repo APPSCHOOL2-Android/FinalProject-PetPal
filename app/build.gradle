@@ -5,6 +5,7 @@ plugins {
     id 'kotlin-kapt'
     id 'kotlin-parcelize'
     id 'com.google.gms.google-services'
+    id 'com.google.android.libraries.mapsplatform.secrets-gradle-plugin'
 }
 
 //추가
@@ -137,5 +138,8 @@ dependencies {
 
     // PhotoView
     implementation 'com.github.chrisbanes:PhotoView:2.3.0'
+
+    //places sdk
+    implementation 'com.google.android.libraries.places:places:3.1.0'
 
 }

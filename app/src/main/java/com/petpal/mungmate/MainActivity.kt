@@ -10,6 +10,8 @@ import androidx.navigation.NavController
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.navOptions
+import com.google.android.libraries.places.api.Places
+import com.google.android.libraries.places.api.net.PlacesClient
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.kakao.sdk.common.KakaoSdk
@@ -30,6 +32,7 @@ class MainActivity : AppCompatActivity() {
     private val activityMainBinding get() = _activityMainBinding
 
     private val auth = FirebaseAuth.getInstance()
+    lateinit var placesClient: PlacesClient
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val splashScreen = installSplashScreen()
@@ -37,7 +40,9 @@ class MainActivity : AppCompatActivity() {
         setContentView(activityMainBinding.root)
 
         //네이티브 앱 키로 카카오 초기화
-        KakaoSdk.init(this, BuildConfig.KAKAO_NATIVE_APP_KEY)
+        initKakaoSDK()
+
+        initPlacesAPI()
 
         userViewModel = ViewModelProvider(this)[UserViewModel::class.java]
         mainViewModel = ViewModelProvider(this)[MainActivityViewModel::class.java]
@@ -96,6 +101,18 @@ class MainActivity : AppCompatActivity() {
             navigate(R.id.userStartFragment)
         }
 
+    }
+
+    private fun initPlacesAPI() {
+        // Initialize the SDK
+        Places.initialize(applicationContext, BuildConfig.MAPS_API_KEY)
+
+        // Create a new PlacesClient instance
+        placesClient = Places.createClient(this)
+    }
+
+    private fun initKakaoSDK() {
+        KakaoSdk.init(this, BuildConfig.KAKAO_NATIVE_APP_KEY)
     }
 
     fun navigate(id: Int, arg: Bundle? = null, navOptions: NavOptions? = null) {
