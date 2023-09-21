@@ -8,6 +8,7 @@ import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.petpal.mungmate.model.ChatRoom
+import com.petpal.mungmate.model.FirestoreUserBasicInfoData
 import com.petpal.mungmate.model.Message
 import com.petpal.mungmate.model.UserReport
 import com.petpal.mungmate.model.Match
@@ -96,9 +97,9 @@ class ChatRepository {
     }
 
     // 사용자 id로 사용자 Document 가져오기
-    suspend fun getUserBasicInfoById(userId: String): UserBasicInfoData? {
+    suspend fun getUserBasicInfoById(userId: String): FirestoreUserBasicInfoData? {
         return try {
-            db.collection(USERS_NAME).document(userId).get().await().toObject(UserBasicInfoData::class.java)
+            db.collection(USERS_NAME).document(userId).get().await().toObject(FirestoreUserBasicInfoData::class.java)
         } catch (e: Exception) {
             Log.d(TAG, "getUserBasicInfo failed : ${e.printStackTrace()}")
             null

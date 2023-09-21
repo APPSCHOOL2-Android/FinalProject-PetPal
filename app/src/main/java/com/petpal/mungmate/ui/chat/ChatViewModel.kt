@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.tasks.Task
 import com.google.firebase.firestore.DocumentSnapshot
+import com.petpal.mungmate.model.FirestoreUserBasicInfoData
 import com.petpal.mungmate.model.Message
 import com.petpal.mungmate.model.UserReport
 import com.petpal.mungmate.model.Match
@@ -32,8 +33,8 @@ class ChatViewModel: ViewModel() {
     private val _receiverUserId = MutableLiveData<String>()
     val receiverUserId: LiveData<String> get() = _receiverUserId
 
-    private val _receiverUserInfo = MutableLiveData<UserBasicInfoData>()
-    val receiverUserInfo: LiveData<UserBasicInfoData> get() = _receiverUserInfo
+    private val _receiverUserInfo = MutableLiveData<FirestoreUserBasicInfoData>()
+    val receiverUserInfo: LiveData<FirestoreUserBasicInfoData> get() = _receiverUserInfo
 
     private val _receiverPetInfo = MutableLiveData<PetData>()
     val receiverPetInfo: LiveData<PetData> get() = _receiverPetInfo
@@ -99,7 +100,7 @@ class ChatViewModel: ViewModel() {
     // 채팅 상대 기본 정보 가져오기
     fun getReceiverInfoById(userId: String) {
         viewModelScope.launch {
-            val userBasicInfoData: UserBasicInfoData? = chatRepository.getUserBasicInfoById(userId)
+            val userBasicInfoData: FirestoreUserBasicInfoData? = chatRepository.getUserBasicInfoById(userId)
             if (userBasicInfoData != null) {
                 _receiverUserInfo.value = userBasicInfoData!!
                 Log.d(TAG, "ReceiverUserInfo updated: ${userBasicInfoData.nickname}")

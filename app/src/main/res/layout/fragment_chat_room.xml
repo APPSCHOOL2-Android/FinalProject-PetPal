@@ -44,14 +44,14 @@
                     android:id="@+id/textViewUserNickName"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:text="오늘도멍멍"
+                    android:text="닉네임"
                     android:textAppearance="@style/TextAppearance.Material3.TitleMedium" />
 
                 <TextView
                     android:id="@+id/textViewUserDogInfo"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:text="멍멍이(믹스, 여), 3세" />
+                    android:text="이름(종, 성별), 나이" />
             </LinearLayout>
 
         </LinearLayout>

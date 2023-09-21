@@ -18,6 +18,7 @@ import com.petpal.mungmate.databinding.FragmentChatRoomBinding
 import com.petpal.mungmate.model.Message
 import com.petpal.mungmate.model.MessageType
 import com.petpal.mungmate.model.MessageVisibility
+import com.petpal.mungmate.ui.pet.PetSex
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
@@ -76,10 +77,14 @@ class ChatRoomFragment : Fragment() {
                 // todo Firestore 프로필 사진 가져오기
             }
 
-            receiverPetInfo.observe(viewLifecycleOwner) {petData ->
+            receiverPetInfo.observe(viewLifecycleOwner) { petData ->
+                val petGender = when(petData.petSex) {
+                    PetSex.MALE.ordinal -> "남"
+                    else -> "여"
+                }
                 // 생일 -> 현재 나이 계산
                 val petAge = calculateAgeFromBirthDay(petData.birth)
-                fragmentChatRoomBinding.textViewUserDogInfo.text = "${petData.name}(${petData.breed}, ${petData.petSex}), $petAge"
+                fragmentChatRoomBinding.textViewUserDogInfo.text = "${petData.name}(${petData.breed}, ${petGender}), $petAge"
             }
 
             messages.observe(viewLifecycleOwner) { messages ->
@@ -192,11 +197,11 @@ class ChatRoomFragment : Fragment() {
         
         // 1년 미만일 경우 개월 수
         if (ageYear == 0){
-            return "$ageMonth 개월"
+            return "${ageMonth}개월"
         }
         
         // 1년 이상일 경우 나이
-        return "$ageYear 세"
+        return "${ageYear}세"
     }
 
     // 시스템 날짜 메시지 저장 
