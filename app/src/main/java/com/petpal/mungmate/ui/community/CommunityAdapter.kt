@@ -43,7 +43,6 @@ class CommunityAdapter(
         val communityPostCardView: CardView = item.communityPostCardView
 
         init {
-
             item.root.setOnClickListener {
                 val bundle = Bundle().apply {
                     putString("position", postList[adapterPosition].postID)

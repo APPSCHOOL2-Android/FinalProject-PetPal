@@ -134,6 +134,16 @@ class WalkViewModel(private val repository: WalkRepository) : ViewModel() {
         }
     }
 
+    fun updateLocationAndOnWalkStatus(userId: String, latitude: Double, longitude: Double) {
+        viewModelScope.launch {
+            try {
+                repository.updateLocationAndOnWalkStatus(userId, latitude, longitude)
+                // 필요한 경우 성공 메시지나 상태 업데이트
+            } catch (e: Exception) {
+                errorMessage.postValue(e.localizedMessage ?: "Failed to update location")
+            }
+        }
+    }
     fun removeFavorite(placeId: String, userId: String) {
         viewModelScope.launch {
             try {

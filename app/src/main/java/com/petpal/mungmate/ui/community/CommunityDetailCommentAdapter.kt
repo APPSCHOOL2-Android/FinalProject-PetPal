@@ -109,8 +109,9 @@ class CommunityDetailCommentAdapter(
                         R.id.item_comment_delete -> {
                             val commentToDelete = postCommentList[holder.adapterPosition]
 
-                            Log.d("이건 뭐죠?",commentToDelete.toString())
-                            if (commentToDelete.commentId == currentUserId) {
+                            Log.d("이건 뭐죠?",commentToDelete.commentUid.toString())
+                            Log.d("이건 뭐죠?",currentUserId.toString())
+                            if (commentToDelete.commentUid.toString() == currentUserId.toString()) {
                                 val db = FirebaseFirestore.getInstance()
                                 db.collection("Post").document(postGetId).update(
                                     "postComment",

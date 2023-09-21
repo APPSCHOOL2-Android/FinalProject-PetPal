@@ -1,22 +1,26 @@
 package com.petpal.mungmate.ui.user
 
-import android.net.Uri
+import android.content.Intent
+import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.result.ActivityResultLauncher
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import androidx.navigation.navOptions
+import com.bumptech.glide.Glide
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.snackbar.Snackbar
 import com.petpal.mungmate.MainActivity
 import com.petpal.mungmate.R
 import com.petpal.mungmate.databinding.FragmentUserInfoBinding
 import com.petpal.mungmate.model.UserBasicInfoData
+import com.petpal.mungmate.utils.gallerySetting
+import com.petpal.mungmate.utils.launchGallery
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -28,13 +32,18 @@ class UserInfoFragment : Fragment() {
     private val fragmentUserInfoBinding get() = _fragmentUserInfoBinding
     private lateinit var userViewModel: UserViewModel
     private var userUid = ""
+
+    // 갤러리 실행
+    lateinit var galleryLauncher: ActivityResultLauncher<Intent>
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View? {
         _fragmentUserInfoBinding = FragmentUserInfoBinding.inflate(layoutInflater)
         mainActivity = activity as MainActivity
-
+        galleryLauncher = gallerySetting() { bitmap ->
+            fragmentUserInfoBinding.startMainImageView.setImageBitmap(bitmap)
+        }
 
         return fragmentUserInfoBinding.root
     }
@@ -52,10 +61,13 @@ class UserInfoFragment : Fragment() {
                 // userData를 사용하여 사용자 정보 표시
                 if (userData != null) {
                     fragmentUserInfoBinding.run {
+                        //닉네임 표시
                         textInputUserNicknameText.setText(userData.displayName)
 
-                        startMainImageView.setImageURI(userData.photoUrl)
-                        startMainImageView.tag = userData.photoUrl
+                        //프로필 사진 표시
+                        Glide.with(requireContext())
+                            .load(userData.photoUrl)
+                            .into(startMainImageView)
                     }
 
                     //authentication의 uid
@@ -98,10 +110,25 @@ class UserInfoFragment : Fragment() {
                 datePicker.show(parentFragmentManager, "tag")
             }
 
+            //언제든 가능해요 옵션을 누르면 산책가능 시간 입력 칸이 없어지도록
+            userInfoRadiogroup.setOnCheckedChangeListener { radioGroup, i ->
+                if (i == R.id.radioAlways) {
+                    linearWhenSelected.visibility = View.GONE
+                } else {
+                    linearWhenSelected.visibility = View.VISIBLE
+                }
+            }
+
+            //사진 선택 버튼을 통해 갤러리에서 사진 불러오기
+            infoSelectImageButton.setOnClickListener {
+                launchGallery(galleryLauncher)
+            }
+
             infoToNextButton.setOnClickListener {
 
+                //입력한 데이터로부터 저장할 데이터 구성하기
                 val userInfoData = UserBasicInfoData(
-                    if (startMainImageView.tag == null) null else startMainImageView.tag as Uri,
+                    (startMainImageView.drawable as BitmapDrawable).bitmap,
                     textInputUserNicknameText.text.toString(),
                     textInputUserBirthText.text.toString(),
                     switchUserInfo.isChecked,
@@ -121,20 +148,12 @@ class UserInfoFragment : Fragment() {
 
             }
 
-            //언제든 가능해요 옵션을 누르면 산책가능 시간 입력 칸이 없어지도록
-            userInfoRadiogroup.setOnCheckedChangeListener { radioGroup, i ->
-                if (i == R.id.radioAlways) {
-                    linearWhenSelected.visibility = View.GONE
-                } else {
-                    linearWhenSelected.visibility = View.VISIBLE
-                }
-            }
-
 
         }
 
 
     }
+
 
     private fun getSelectedWalkHour(checkedRadioButtonId: Int): Availability {
         return if (checkedRadioButtonId == R.id.radioAlways) {
