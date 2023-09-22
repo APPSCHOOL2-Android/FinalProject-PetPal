@@ -5,7 +5,7 @@ data class WalkRecord(
     val walkRecordDate:String, //기록한 날짜
     val walkRecordStartTime:String, //시작시간
     val walkRecordEndTime:String, //종료시간
-    val walkDuration:String, //소요시간
+    val walkDuration: Long, //소요시간
     val walkDistance:Double, //거리
     val walkMatchingId:String?=null, //산책 상대 uid
     val walkMemo:String, //메모

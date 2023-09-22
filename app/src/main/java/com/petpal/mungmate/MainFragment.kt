@@ -33,7 +33,8 @@ class MainFragment : Fragment() {
             .setEnterAnim(R.anim.from_right) // 화면 진입 애니메이션
             .setExitAnim(R.anim.to_left)   // 화면 나가는 애니메이션
             .setPopEnterAnim(R.anim.from_left) // 백스택에서 화면으로 돌아올 때 애니메이션
-            .setPopExitAnim(R.anim.to_right) // 백스택에서 화면으로 돌아올 때 애니메이션
+            .setPopExitAnim(R.anim.to_right)
+            //.setPopUpTo(R.id.item_walk, false)// 백스택에서 화면으로 돌아올 때 애니메이션
             .build()
 
         // <- 방향
@@ -42,6 +43,7 @@ class MainFragment : Fragment() {
             .setExitAnim(R.anim.to_right)
             .setPopEnterAnim(R.anim.from_right)
             .setPopExitAnim(R.anim.to_left)
+            //.setPopUpTo(R.id.item_walk, false)
             .build()
 
         //  setOnItemSelectedListener : 탭을 선택할 때 발생하는 이벤트 리스너

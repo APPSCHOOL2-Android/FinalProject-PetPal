@@ -1,6 +1,6 @@
 package com.petpal.mungmate.model
 
-data class Place(
+data class PlaceData(
     val id: String,
     val name: String,
     val category: String,

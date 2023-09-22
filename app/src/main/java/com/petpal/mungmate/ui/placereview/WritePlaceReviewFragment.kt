@@ -23,7 +23,7 @@ import com.google.firebase.storage.FirebaseStorage
 import com.petpal.mungmate.MainActivity
 import com.petpal.mungmate.R
 import com.petpal.mungmate.databinding.FragmentWritePlaceReviewBinding
-import com.petpal.mungmate.model.Place
+import com.petpal.mungmate.model.PlaceData
 import com.petpal.mungmate.model.Review
 import java.io.ByteArrayOutputStream
 import java.text.SimpleDateFormat
@@ -148,22 +148,22 @@ class WritePlaceReviewFragment : Fragment() {
         fragmentWritePlaceReviewBinding.progressBar.visibility = View.GONE
         fragmentWritePlaceReviewBinding.progressBackground.visibility = View.GONE
     }
-    fun addReview(place: Place, review: Review) {
+    fun addReview(placeData: PlaceData, review: Review) {
         val placesRef = db.collection("places")
-        val placeDocument = placesRef.document(place.id)
+        val placeDocument = placesRef.document(placeData.id)
 
         placeDocument.get()
             .addOnSuccessListener { document ->
                 if (!document.exists()) {
                     // Place가 Firestore에 없는 경우
-                    placeDocument.set(place)
+                    placeDocument.set(placeData)
                         .addOnSuccessListener {
-                            // Place 추가 성공 후 review 추가
-                            addPlaceReview(place.id, review)
+                            // PlaceData 추가 성공 후 review 추가
+                            addPlaceReview(placeData.id, review)
                         }
                 } else {
                     // Place가 이미 Firestore에 있는 경우
-                    addPlaceReview(place.id, review)
+                    addPlaceReview(placeData.id, review)
                 }
             }
     }
@@ -174,9 +174,9 @@ class WritePlaceReviewFragment : Fragment() {
         reviewRef.set(review)
     }
 
-    private fun createPlaceFromArguments(arguments: Bundle?): Place? {
+    private fun createPlaceFromArguments(arguments: Bundle?): PlaceData? {
         return arguments?.let {
-            Place(
+            PlaceData(
                 id = it.getString("place_id") ?: "",
                 name = it.getString("place_name") ?: "",
                 category = it.getString("place_category") ?: "",

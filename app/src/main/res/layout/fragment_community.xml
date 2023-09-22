@@ -27,8 +27,8 @@
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:id="@+id/refreshLayout"
         android:layout_width="match_parent"
-        app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/communityPostRecyclerView"
@@ -65,38 +65,43 @@
             android:layout_margin="@dimen/common_padding"
             android:clickable="true"
             android:focusable="true"
-
             android:src="@drawable/edit" />
 
     </LinearLayout>
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/communityPostNotDataLinearLayout"
         android:layout_width="match_parent"
-        android:orientation="vertical"
+        android:layout_height="match_parent"
         android:layout_gravity="bottom"
         android:visibility="gone"
-        android:layout_height="wrap_content">
+        android:orientation="vertical">
 
 
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/communityPostNotDataTitle"
+            style="@style/MaterialAlertDialog.Material3.Title.Text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="left"
             android:layout_marginStart="@dimen/common_margin"
-            android:text="게시글이 없어요 ㅠㅠ"
             android:gravity="center"
-            style="@style/MaterialAlertDialog.Material3.Title.Text"/>
+            android:text="게시글이 없어요 ㅠㅠ"
+            app:layout_constraintBottom_toTopOf="@id/communityPostNotDataLottieView"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
 
         <com.airbnb.lottie.LottieAnimationView
             android:id="@+id/communityPostNotDataLottieView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
             app:lottie_autoPlay="true"
             app:lottie_loop="true"
             app:lottie_rawRes="@raw/crying_dog" />
-    </LinearLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

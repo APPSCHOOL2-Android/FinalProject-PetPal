@@ -6,7 +6,8 @@ data class PetUiState(
     val sex: String,
     val age: Long,
     val character: String,
-    val weigh: Long,
+    val weigh: String,
+    val image:String
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -20,7 +21,7 @@ data class PetUiState(
         if (age != other.age) return false
         if (character != other.character) return false
         if (weigh != other.weigh) return false
-
+        if (image != other.image) return false
         return true
     }
 
@@ -31,6 +32,7 @@ data class PetUiState(
         result = 31 * result + age.hashCode()
         result = 31 * result + character.hashCode()
         result = 31 * result + weigh.hashCode()
+        result = 31 * result + image.hashCode()
         return result
     }
 }

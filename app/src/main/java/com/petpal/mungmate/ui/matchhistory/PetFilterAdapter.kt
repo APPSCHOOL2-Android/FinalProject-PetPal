@@ -1,13 +1,16 @@
 package com.petpal.mungmate.ui.matchhistory
 
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.petpal.mungmate.R
 import com.petpal.mungmate.databinding.RowPetSimpleBinding
 
-class PetFilterAdapter :
+class PetFilterAdapter(private val context: Context) :
     ListAdapter<PetFilterUiState, PetFilterAdapter.PetFilterViewHolder>(PetFilterUiStateDiffCallback()) {
 
     inner class PetFilterViewHolder(private val rowPetSimpleBinding: RowPetSimpleBinding) :
@@ -16,8 +19,18 @@ class PetFilterAdapter :
         fun bind(petFilterUiState: PetFilterUiState) {
             rowPetSimpleBinding.run {
                 //TODO: 받아온 이미지로 바꾸기
-                imageRowSimplePet.setImageResource(R.drawable.pets_24px)
+//                imageRowSimplePet.setImageResource(R.drawable.pets_24px)
 //                imageRowSimplePet.setImageResource(petFilterUiState.image)
+
+
+                Glide
+                    .with(context)
+                    .load(petFilterUiState.image)
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .fitCenter()
+                    .into(imageRowSimplePet)
+
+
                 textView.text = petFilterUiState.name
 
                 root.setOnClickListener {
