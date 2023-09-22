@@ -880,7 +880,7 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
 
             //좋아요 버튼 눌렀을 때  userid로 favorite 서브 컬렉션에 문서 추가 / isFavorited 상태에 따라 이미지 교체,스넥바,count 출력
             initialBottomSheetView.findViewById<ImageView>(R.id.imageViewFavoirte).apply {
-                val place = Place(selectedPlace!!.id, selectedPlace.place_name, selectedPlace.category_group_name, (selectedPlace.x).toString(), (selectedPlace.y).toString(), selectedPlace.phone, selectedPlace.road_address_name)
+                val place = PlaceData(selectedPlace!!.id, selectedPlace.place_name, selectedPlace.category_group_name, (selectedPlace.x).toString(), (selectedPlace.y).toString(), selectedPlace.phone, selectedPlace.road_address_name)
                 setOnClickListener {
                     if (!isFavorited1) {
                         isFavorited1 = true

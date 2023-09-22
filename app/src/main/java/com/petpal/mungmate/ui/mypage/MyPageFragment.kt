@@ -20,12 +20,19 @@ import com.google.firebase.storage.StorageReference
 import com.petpal.mungmate.MainActivity
 import com.petpal.mungmate.R
 import com.petpal.mungmate.databinding.FragmentMyPageBinding
+import com.petpal.mungmate.ui.matchhistory.MatchHistoryUiState
+import com.petpal.mungmate.ui.matchhistory.PetFilterUiState
 import com.petpal.mungmate.ui.user.UserViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Calendar
+import java.util.Collections
+import java.util.Date
 import java.util.Locale
 
 class MyPageFragment : Fragment() {
@@ -36,7 +43,9 @@ class MyPageFragment : Fragment() {
     private val auth = FirebaseAuth.getInstance()
     val user = auth.currentUser
     private lateinit var userViewModel: UserViewModel
+    val db = FirebaseFirestore.getInstance()
 
+    val dateList: MutableList<Date> = ArrayList()
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?,
@@ -128,6 +137,64 @@ class MyPageFragment : Fragment() {
                 }
             }
 
+            val matchesCollection = db.collection("matches")
+
+            matchesCollection.whereEqualTo("senderId", user?.uid)
+                .get()
+                .addOnSuccessListener { documents ->
+                    for (document in documents) {
+                        val timestamp = document.getTimestamp("timestamp")
+                        val walkPlace= document.getString("walkPlace")
+                        val receiverId= document.getString("receiverId")
+                        val date = timestamp?.toDate()
+                        val walkTimestamp =
+                            SimpleDateFormat("yyyy년 MM월 dd일 a hh시 mm분", Locale.getDefault()).format(
+                                date
+                            )
+
+                        db.collection("users").document(receiverId.toString())
+                            .get()
+                            .addOnSuccessListener { document ->
+                                if (document != null) {
+                                    // userImage,nickname, birthday, walkHoursStart, walkHoursEnd
+                                    val nickname = document.getString("nickname")
+                                    textViewMatchPlace.text="${nickname}님과 ${walkPlace}에서"
+                                }
+                            }
+
+                        Log.d("walkTimestamp", walkTimestamp.toString())
+                        textViewMatchPlace.text=walkPlace
+
+                        if (date != null) {
+                            dateList.add(date)
+                        }
+                    }
+
+                    dateList.sort()
+
+                    if (dateList.isNotEmpty()) {
+                        val closestDate = dateList[0]
+                        val formattedDate =
+                            SimpleDateFormat("M.dd", Locale.getDefault()).format(closestDate)
+                        val dayOfWeek =
+                            SimpleDateFormat("EEEE", Locale.getDefault()).format(closestDate)
+                        val time = SimpleDateFormat("a hh:mm", Locale.getDefault()).format(closestDate)
+                        textViewDate.text = formattedDate
+                        textViewDay.text = dayOfWeek
+                        textViewMatchTime.text=time
+                    } else {
+                        // 리스트가 비어있는 경우 처리
+                        textViewDate.text = "예정된 약속이 없음"
+                        textViewDay.visibility=View.GONE
+                        imageViewMatchProfile.visibility=View.GONE
+                        textViewMatchPlace.visibility=View.GONE
+                        textViewMatchTime.visibility=View.GONE
+                        imageView5.visibility=View.GONE
+                    }
+                }
+                .addOnFailureListener { exception ->
+
+                }
         }
         return fragmentMyPageBinding.root
     }
@@ -135,7 +202,6 @@ class MyPageFragment : Fragment() {
     private fun getFireStoreUserInfo() {
 
         if (user != null) {
-            val db = FirebaseFirestore.getInstance()
 
             db.collection("users").document(user.uid)
                 .get()
@@ -171,19 +237,20 @@ class MyPageFragment : Fragment() {
 
                         fragmentMyPageBinding.textViewNickname.text = nickname.toString()
                         var whatGender = "남"
-                        if(gender!!.toInt()==1){
-                            whatGender="여"
+                        if (gender!!.toInt() == 1) {
+                            whatGender = "여"
                         }
                         var genderAge = "${whatGender}/${calculateAge(birthday.toString())}"
-                        fragmentMyPageBinding.textViewGenderAge.text=genderAge
+                        fragmentMyPageBinding.textViewGenderAge.text = genderAge
 
                         walkHoursStart
                         walkHoursEnd
 
-                        if (walkHoursStart!!.isEmpty() || walkHoursEnd!!.isEmpty()){
-                            fragmentMyPageBinding.textViewAvailable.text="언제든 가능해요"
-                        }else{
-                            fragmentMyPageBinding.textViewAvailable.text="$walkHoursStart ~ $walkHoursEnd 가능해요"
+                        if (walkHoursStart!!.isEmpty() || walkHoursEnd!!.isEmpty()) {
+                            fragmentMyPageBinding.textViewAvailable.text = "언제든 가능해요"
+                        } else {
+                            fragmentMyPageBinding.textViewAvailable.text =
+                                "$walkHoursStart ~ $walkHoursEnd 가능해요"
                         }
                     }
                 }
@@ -204,6 +271,13 @@ class MyPageFragment : Fragment() {
 
         // 연령을 정수로 변환하여 반환
         return ageInMillis.toInt()
+    }
+
+    class DateComparator : Comparator<Date> {
+        override fun compare(date1: Date, date2: Date): Int {
+            // date1과 date2를 비교하여 정렬 순서를 결정
+            return date1.compareTo(date2)
+        }
     }
 
 }
