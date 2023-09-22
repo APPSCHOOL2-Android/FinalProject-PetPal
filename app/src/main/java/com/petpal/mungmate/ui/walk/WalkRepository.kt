@@ -1,5 +1,6 @@
 package com.petpal.mungmate.ui.walk
 
+import android.util.Log
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FieldValue
@@ -241,7 +242,7 @@ class WalkRepository {
         val query = db.collection("users").whereEqualTo("onWalk", true)
         val registration = query.addSnapshotListener { snapshot, error ->
             if (error != null) {
-                close(error)  // 오류가 발생하면 Flow를 닫습니다.
+                close(error)
                 return@addSnapshotListener
             }
 
@@ -263,25 +264,61 @@ class WalkRepository {
             }
         }
 
-        // 콜백을 제거하려면 awaitClose를 사용합니다.
         awaitClose { registration.remove() }
     }
-    suspend fun fetchMatchesByUserId(userId: String): List<Match> {
+    fun fetchMatchesByUserId(userId: String, onSuccess: (List<Match>) -> Unit, onFailure: (Exception) -> Unit) {
         val matchRef = db.collection("matches")
-
-        // userId가 receiverId 또는 senderId 중 하나로 포함된 문서들을 찾습니다.
-        val matchesByReceiverId = matchRef.whereEqualTo("receiverId", userId).get().await()
-        val matchesBySenderId = matchRef.whereEqualTo("senderId", userId).get().await()
+        Log.d("MATCH_LOG", userId)
 
         val allMatches = mutableListOf<Match>()
-        for (document in matchesByReceiverId) {
-            document.toObject(Match::class.java)?.let { allMatches.add(it) }
-        }
-        for (document in matchesBySenderId) {
-            document.toObject(Match::class.java)?.let { allMatches.add(it) }
-        }
+        matchRef.whereEqualTo("receiverId", userId).get().addOnSuccessListener { matchesByReceiverId ->
+            for (document in matchesByReceiverId) {
+                val match = document.toObject(Match::class.java)
+                Log.d("MATCH_LOG", "Match from ReceiverId: ${match.senderId}")
+                match.walkRecordId = document.id
+                match.let {
+                    allMatches.add(it)
+                    Log.d("MATCH_LOG", "Match from ReceiverId: ${document.id} -> ${document.data}")
+                }
+            }
 
-        return allMatches
+
+            matchRef.whereEqualTo("senderId", userId).get().addOnSuccessListener { matchesBySenderId ->
+                for (document in matchesBySenderId) {
+                    val match = document.toObject(Match::class.java)
+                    match.walkRecordId = document.id
+                    match?.let {
+                        allMatches.add(it)
+                        Log.d("MATCH_LOG", "Match from SenderId: ${document.id} -> ${document.data}")
+                    }
+                }
+
+
+                onSuccess(allMatches)
+
+            }.addOnFailureListener { exception ->
+
+                onFailure(exception)
+            }
+
+        }.addOnFailureListener { exception ->
+
+            onFailure(exception)
+        }
+    }
+    suspend fun fetchAverageRatingForUser(userId: String): Double {
+        val userDocSnapshot = db.collection("users").document(userId).get().await()
+
+        val walkMateReviewList = userDocSnapshot.get("walkMateReview") as? List<Map<String, Any>> ?: emptyList()
+
+        val ratings = walkMateReviewList.mapNotNull { it["rating"] as? Double }
+
+        val totalRating = ratings.sum()
+        val count = ratings.size
+        Log.d("에바야",totalRating.toString())
+        Log.d("에바야",count.toString())
+        return if (count > 0) totalRating / count else 0.0
+
     }
 
 }

@@ -11,8 +11,8 @@ data class Match(
     var timestamp: Timestamp?,
     var status: Int?,
     var walkRecordId: String?,
-    var senderWalkReview: WalkReview?,
-    var receiverWalkReview: WalkReview?
+    var senderWalkReview: List<WalkReview>?,
+    var receiverWalkReview: List<WalkReview>?
 ) {
     constructor(): this("", "", null, "", null, MatchStatus.REQUESTED.code, null, null, null)
 }

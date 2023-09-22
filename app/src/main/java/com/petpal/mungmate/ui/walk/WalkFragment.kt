@@ -107,7 +107,7 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
     private val countDownInterval = 1000
     private var countDownTimer: CountDownTimer? = null
     private var countdownValue = 3 //
-
+    var matches1: MutableList<Match> = mutableListOf()
     val storage = Firebase.storage
     val storageReference = storage.reference
 
@@ -185,9 +185,9 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
             if(walkWithUser!=null)
             {
                 if(userId==walkWithUser!!.senderId)
-                builder.setMessage("${walkWithUser!!.receiverId}와의산책을 시작하시겠습니까?")
+                builder.setMessage("${walkWithUser!!.receiverId}와 산책을 시작하시겠습니까?")
                 else if(userId!=walkWithUser!!.senderId){
-                    builder.setMessage("${walkWithUser!!.senderId}와의산책을 시작하시겠습니까?")
+                    builder.setMessage("${walkWithUser!!.senderId}와 산책을 시작하시겠습니까?")
                 }
             }else {
                 builder.setMessage("산책을 시작하시겠습니까?")
@@ -236,20 +236,41 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
             bundle.putString("walkRecordEndTime",endTimestamp)
             bundle.putLong("walkDuration",elapsedTime)
             bundle.putString("walkDistance",totalDistance.toString())
-            bundle.putString("walkMatchingId","idid")
-            val bundlewith=Bundle()
+            if(walkWithUser!=null) {
+                if (userId != walkWithUser!!.receiverId) {
+                    bundle.putString("walkMatchingId", walkWithUser!!.receiverId)
+                    bundle.putString("walkMatchingRecorId",walkWithUser!!.walkRecordId)
+                } else {
+                    bundle.putString("walkMatchingId", walkWithUser!!.senderId)
+                    bundle.putString("walkMatchingRecorId",walkWithUser!!.walkRecordId)
+                }
+            }
+
+
+
             viewModel.stopTimer()
             totalDistance=0.0f
             viewModel.distanceMoved.value=totalDistance
             elapsedTime = 0L
             viewModel.elapsedTimeLiveData.value= elapsedTime.toString()
             viewModel.updateOnWalkStatusFalse(userId)
-            if(walkWithUser==null) {
-                mainActivity.navigate(R.id.action_mainFragment_to_WriteWalkReviewFragment, bundle)
-            }else{
-                mainActivity.navigate(R.id.action_mainFragment_to_WriteWalkReviewFragment, bundle)
-            }
+            mainActivity.navigate(R.id.action_mainFragment_to_WriteWalkReviewFragment, bundle)
             getCurrentLocation()
+            matches1.remove(walkWithUser)
+            val currentTimestamp = com.google.firebase.Timestamp.now()
+            val differences = matches1.map { match ->
+                kotlin.math.abs(currentTimestamp.seconds - match.walkTimestamp!!.seconds)
+            }
+            val closestIndex = differences.indexOf(differences.minOrNull())
+            walkWithUser = if (closestIndex != -1) matches1[closestIndex] else null
+            if (matches1.isNotEmpty()) {
+                fragmentWalkBinding.buttonWalk.text = "같이 산책하기"
+            } else {
+                fragmentWalkBinding.buttonWalk.text = "혼자 산책하기"
+            }
+            // 이제 가장 가까운 약속이 있으면 그것을 walkWithUser로 설정, 없으면 null로 설정
+            walkWithUser = if (closestIndex != -1) matches1[closestIndex] else null
+
         }
 
 
@@ -988,7 +1009,9 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
 
             val selectedUser = nearbyUsers?.find { it.nickname.hashCode() == selectedUserNicknameHash }
             selectedUser?.let { user ->
-                user.uid?.let { viewModel.fetchMatchingWalkCount(it) }
+                user.uid?.let { viewModel.fetchMatchingWalkCount(it)
+                    viewModel.fetchAverageRatingForUser(it)
+                }
                 val userNicknameTextView = onWalkBottomSheetView.findViewById<TextView>(R.id.textViewBottomUserNickname)
                 userNicknameTextView.text = user.nickname
                 val textViewBottomUserAgeRange=onWalkBottomSheetView.findViewById<TextView>(R.id.textViewBottomUserAgeRange)
@@ -1010,6 +1033,7 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
                 val imageViewBottomPetProfileImage=onWalkBottomSheetView.findViewById<ImageView>(R.id.ImageViewBottomPetProfileImage)
                 val buttonBottomWalk=onWalkBottomSheetView.findViewById<Button>(R.id.buttonBottomWalk)
                 val buttonBottomBlock=onWalkBottomSheetView.findViewById<Button>(R.id.buttonBottomBlock)
+                val userRating= onWalkBottomSheetView.findViewById<RatingBar>(R.id.ratingBarUser2)
                 user.uid?.let { viewModel.blockUser(userId, it) }
                 buttonBottomWalk.setOnClickListener {
                     val bundle=Bundle()
@@ -1062,6 +1086,12 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
                         }
                     }
                 }
+                viewModel.averageRatingForUser.observe(this, Observer { ratings ->
+                    userRating.rating= ratings.toFloat()
+                    val roundedAvgRating = String.format("%.1f", ratings).toDouble()
+                    Log.d("에바야viewㄹㅇ",roundedAvgRating.toString())
+                    userRating.rating=roundedAvgRating.toFloat()
+                })
                 viewModel.walkMatchingCount.observe(viewLifecycleOwner, Observer { count ->
                     Log.d("매칭 기록",count.toString())
                     if(count!=null) {
@@ -1094,6 +1124,7 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
                 }.addOnFailureListener {
                     // 이미지 다운로드에 실패한 경우
                     Log.e("FirebaseStorage", "이미지 다운로드 실패: $it")
+                    onWalkbottomSheetDialog.show()
                 }
 
 
@@ -1101,6 +1132,8 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
 
 
             }
+
+
         }
 
 
@@ -1147,14 +1180,17 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
     override fun onResume() {
         super.onResume()
         viewModel.matchesLiveData.observe(viewLifecycleOwner) { matches ->
-
+            matches1= matches as MutableList<Match>
+            for(match in matches) {
+                println("매치스: ${match.senderId}, Receiver ID: ${match.receiverId}, Timestamp: ${match.walkTimestamp}")
+            }
             val currentTimestamp = com.google.firebase.Timestamp.now()
             val differences = matches.map { match ->
                 kotlin.math.abs(currentTimestamp.seconds - match.walkTimestamp!!.seconds)
             }
             val closestIndex = differences.indexOf(differences.minOrNull())
             walkWithUser=matches[closestIndex]
-           // println("가장 가까운 시간의 인덱스: $closestIndex")
+            println("매치스1: ${walkWithUser!!.senderId}, Receiver ID: ${walkWithUser!!.receiverId}, Timestamp: ${walkWithUser!!.walkTimestamp}")
 
             if (matches.isNotEmpty()) {
                 fragmentWalkBinding.buttonWalk.text = "같이 산책하기"

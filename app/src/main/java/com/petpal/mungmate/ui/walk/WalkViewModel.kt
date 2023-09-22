@@ -52,6 +52,8 @@ class WalkViewModel(private val repository: WalkRepository,application: Applicat
     private var lastLocation: Location? = null
     val distanceMoved: MutableLiveData<Float> = MutableLiveData(0f)
     val matchesLiveData: MutableLiveData<List<Match>> = MutableLiveData()
+    val averageRatingForUser: LiveData<Double> get() = _averageRatingForUser
+    private val _averageRatingForUser = MutableLiveData<Double>()
     val isUserBlocked: LiveData<Boolean> get() = _isUserBlocked
     val timerRunnable = object : Runnable {
         override fun run() {
@@ -297,14 +299,36 @@ class WalkViewModel(private val repository: WalkRepository,application: Applicat
             }
         }
     }
+//    fun fetchMatchesByUserId(userId: String) {
+//        viewModelScope.launch {
+//            try {
+//                val matches = repository.fetchMatchesByUserId(userId)
+//                matchesLiveData.postValue(matches)
+//            } catch (e: Exception) {
+//                //
+//            }
+//        }
+//    }
     fun fetchMatchesByUserId(userId: String) {
+    repository.fetchMatchesByUserId(userId,
+        onSuccess = { matches ->
+            matchesLiveData.postValue(matches)
+        },
+        onFailure = { exception ->
+            // Handle the error here, if necessary.
+            // For example, you might post a different value to a LiveData or log the exception.
+        })
+    }
+    fun fetchAverageRatingForUser(userId: String) {
         viewModelScope.launch {
             try {
-                val matches = repository.fetchMatchesByUserId(userId)
-                matchesLiveData.postValue(matches)
+                val averageRating = repository.fetchAverageRatingForUser(userId)
+                _averageRatingForUser.postValue(averageRating)
+                Log.d("에바야view",averageRating.toString())
             } catch (e: Exception) {
-                //
+                // 필요한 경우 에러 처리 로직
             }
         }
     }
+
 }
