@@ -4,6 +4,7 @@ import android.Manifest
 import android.app.Application
 import android.content.pm.PackageManager
 import android.location.Location
+import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import androidx.core.content.ContextCompat
@@ -27,9 +28,10 @@ import kotlinx.coroutines.launch
 
 class WalkViewModel(private val repository: WalkRepository,application: Application) : AndroidViewModel(application) {
 
-    init {
-        Log.d("WalkViewModel", "ViewModel created!")
-    }
+    val walkStartTime: Long = System.currentTimeMillis()
+    private var startTimestamp: Long = 0
+    private val handler = Handler(Looper.getMainLooper())
+    val elapsedTimeLiveData = MutableLiveData<String>()
     val searchResults: MutableLiveData<KakaoSearchResponse> = MutableLiveData()
     val reviewCount: MutableLiveData<Int> = MutableLiveData()
     val latestReviews: MutableLiveData<List<Review>> = MutableLiveData()
@@ -49,13 +51,41 @@ class WalkViewModel(private val repository: WalkRepository,application: Applicat
     private var lastLocation: Location? = null
     val distanceMoved: MutableLiveData<Float> = MutableLiveData(0f)
     val isUserBlocked: LiveData<Boolean> get() = _isUserBlocked
+    val timerRunnable = object : Runnable {
+        override fun run() {
+            val elapsedTime = (System.currentTimeMillis() - startTimestamp) / 1000
+            elapsedTimeLiveData.value = elapsedTime.toString()
+            handler.postDelayed(this, 1000)
+        }
+    }
+
+    // 타이머 시작
+    fun startTimer() {
+        startTimestamp = System.currentTimeMillis()
+        handler.post(timerRunnable)
+    }
+
+    // 타이머 중지
+    fun stopTimer() {
+        handler.removeCallbacks(timerRunnable)
+    }
+
+
+    override fun onCleared() {
+        super.onCleared()
+        // ViewModel이 파괴될 때 Handler 콜백을 취소하여 메모리 누수를 방지합니다.
+        handler.removeCallbacks(timerRunnable)
+    }
+
 
     private val locationCallback = object : LocationCallback() {
         override fun onLocationResult(p0: LocationResult) {
             p0 ?: return
+            val locationList = mutableListOf<Location>()
             for (location in p0.locations) {
                 updateDistance(location)
             }
+
         }
     }
     private fun updateDistance(location: Location) {
