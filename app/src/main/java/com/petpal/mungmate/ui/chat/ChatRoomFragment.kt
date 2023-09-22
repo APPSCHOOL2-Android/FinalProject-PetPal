@@ -4,6 +4,7 @@ import android.accessibilityservice.AccessibilityService.SoftKeyboardController
 import android.content.Context
 import android.content.DialogInterface
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -15,9 +16,13 @@ import androidx.core.widget.addTextChangedListener
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.bumptech.glide.Glide
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.ktx.storage
 import com.petpal.mungmate.MainActivity
 import com.petpal.mungmate.R
 import com.petpal.mungmate.databinding.FragmentChatRoomBinding
@@ -30,6 +35,7 @@ import java.util.Calendar
 import java.util.Locale
 
 class ChatRoomFragment : Fragment() {
+    private val TAG = "CHAT_ROOM"
     private var _fragmentChatRoomBinding : FragmentChatRoomBinding? = null
     private val fragmentChatRoomBinding get() = _fragmentChatRoomBinding!!
 
@@ -80,9 +86,16 @@ class ChatRoomFragment : Fragment() {
 
             receiverUserInfo.observe(viewLifecycleOwner) { userBasicInfoData ->
                 fragmentChatRoomBinding.textViewUserNickName.text = userBasicInfoData.nickname
-                //
+                // 채팅 상대 프로필 이미지 TODO 나중에 MVVM 맞춰서 분리하기
+                val userImageRef = Firebase.storage.reference.child(userBasicInfoData.userImage)
+                userImageRef.downloadUrl.addOnSuccessListener { uri ->
+                    Glide.with(requireContext())
+                        .load(uri)
+                        .into(fragmentChatRoomBinding.imageViewUserProfile)
+                }.addOnFailureListener { exception ->
+                    Log.d(TAG, "load user image failed")
+                }
 
-//                fragmentChatRoomBinding.imageViewUserProfile.setImageBitmap()
             }
 
             receiverPetInfo.observe(viewLifecycleOwner) { petData ->
