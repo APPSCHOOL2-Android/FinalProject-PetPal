@@ -136,6 +136,9 @@ dependencies {
     // storage
     implementation("com.google.firebase:firebase-storage-ktx")
 
+    // FirebaseUI Storage only
+    implementation 'com.firebaseui:firebase-ui-storage:7.2.0'
+
     // PhotoView
     implementation 'com.github.chrisbanes:PhotoView:2.3.0'
 

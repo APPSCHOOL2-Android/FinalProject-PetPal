@@ -23,6 +23,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
         android:orientation="vertical"
         app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
 
@@ -43,70 +44,101 @@
 
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:orientation="vertical"
-                    android:layout_height="match_parent">
+                    android:layout_height="match_parent"
+                    android:orientation="vertical">
 
-                    <androidx.constraintlayout.widget.ConstraintLayout
-                        android:id="@+id/communityPostDetailProfileConstraintLayout"
+                    <LinearLayout
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent">
+                        android:layout_height="match_parent"
+                        android:orientation="vertical">
 
-                        <de.hdodenhof.circleimageview.CircleImageView
-                            android:id="@+id/communityPostDetailProfileImage"
-                            android:layout_width="50dp"
-                            android:layout_height="50dp"
+                        <com.google.android.material.card.MaterialCardView
+                            android:id="@+id/communityPostDetailCategoryCard"
+                            style="@style/Widget.Material3.CardView.Filled"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
                             android:layout_marginStart="@dimen/common_padding"
-                            android:layout_marginEnd="@dimen/common_padding"
-                            android:background="@android:color/transparent"
-                            app:layout_constraintBottom_toBottomOf="parent"
-                            app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toTopOf="parent" />
+                            android:elevation="0dp"
+                            app:cardBackgroundColor="?attr/colorSurfaceVariant"
+                            app:contentPadding="6dp"
+                            app:layout_constraintBottom_toTopOf="@id/communityProfileImage"
+                            app:layout_constraintStart_toStartOf="@+id/communityProfileImage">
 
-                        <androidx.appcompat.widget.AppCompatTextView
-                            android:id="@+id/communityPostDetailPostTitle"
-                            android:layout_width="wrap_content"
+                            <TextView
+                                android:id="@+id/communityPostDetailCategoryTextView"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:drawablePadding="4dp"
+                                android:gravity="center_vertical"
+                                android:paddingStart="@dimen/common_small_padding"
+                                android:paddingEnd="@dimen/common_small_padding"
+                                android:textAppearance="@style/TextAppearance.Material3.BodySmall"
+                                tools:text="일상" />
+                        </com.google.android.material.card.MaterialCardView>
+
+                        <LinearLayout
+                            android:id="@+id/communityPostDetailProfileConstraintLayout"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginStart="@dimen/common_small_margin"
-                            android:text="제목"
-                            android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
-                            android:textStyle="bold"
-                            app:layout_constraintStart_toEndOf="@id/communityPostDetailProfileImage"
-                            app:layout_constraintTop_toTopOf="@id/communityPostDetailProfileImage" />
+                            android:layout_marginTop="12dp"
+                            android:orientation="horizontal">
 
-                        <androidx.appcompat.widget.AppCompatTextView
-                            android:id="@+id/communityPostDetailUserNickName"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="닉네임"
-                            android:textAppearance="@style/TextAppearance.AppCompat.Small"
-                            android:textColor="@color/black"
-                            app:layout_constraintStart_toStartOf="@id/communityPostDetailPostTitle"
-                            app:layout_constraintTop_toBottomOf="@id/communityPostDetailPostTitle" />
+                            <de.hdodenhof.circleimageview.CircleImageView
+                                android:id="@+id/communityPostDetailProfileImage"
+                                android:layout_width="50dp"
+                                android:layout_height="50dp"
+                                android:layout_marginStart="@dimen/common_padding"
+                                android:background="@android:color/transparent" />
 
-                        <androidx.appcompat.widget.AppCompatTextView
-                            android:id="@+id/placeDateDistinction"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:paddingStart="@dimen/common_small_padding"
-                            android:paddingEnd="@dimen/common_small_padding"
-                            android:text="@string/place_date_distinction"
-                            app:layout_constraintEnd_toStartOf="@id/communityPostDateCreated"
-                            app:layout_constraintStart_toEndOf="@id/communityPostDetailUserNickName"
-                            app:layout_constraintTop_toBottomOf="@id/communityPostDetailPostTitle" />
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="match_parent"
+                                android:layout_marginStart="@dimen/common_padding"
+                                android:orientation="vertical">
 
-                        <androidx.appcompat.widget.AppCompatTextView
-                            android:id="@+id/communityPostDateCreated"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="시간"
-                            android:textAppearance="@style/TextAppearance.AppCompat.Small"
-                            app:layout_constraintStart_toEndOf="@id/placeDateDistinction"
-                            app:layout_constraintTop_toBottomOf="@id/communityPostDetailPostTitle" />
+                                <androidx.appcompat.widget.AppCompatTextView
+                                    android:id="@+id/communityPostDetailPostTitle"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="제목"
+                                    android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
+                                    android:textStyle="bold" />
 
-                    </androidx.constraintlayout.widget.ConstraintLayout>
+                                <LinearLayout
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="4dp"
+                                    android:orientation="horizontal">
+
+                                    <androidx.appcompat.widget.AppCompatTextView
+                                        android:id="@+id/communityPostDetailUserNickName"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:text="닉네임"
+                                        android:textAppearance="@style/TextAppearance.AppCompat.Small"
+                                        android:textColor="@color/black" />
+
+                                    <androidx.appcompat.widget.AppCompatTextView
+                                        android:id="@+id/placeDateDistinction"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:paddingStart="@dimen/common_small_padding"
+                                        android:paddingEnd="@dimen/common_small_padding"
+                                        android:text="@string/place_date_distinction" />
+
+                                    <androidx.appcompat.widget.AppCompatTextView
+                                        android:id="@+id/communityPostDateCreated"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:text="시간"
+                                        android:textAppearance="@style/TextAppearance.AppCompat.Small" />
+                                </LinearLayout>
+
+                            </LinearLayout>
+
+
+                        </LinearLayout>
+                    </LinearLayout>
 
                     <com.google.android.material.card.MaterialCardView
                         android:id="@+id/communityPostDetailPostCardView"
@@ -132,8 +164,8 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="@dimen/common_margin"
-                        android:layout_marginEnd="@dimen/common_margin"
                         android:layout_marginTop="@dimen/common_margin"
+                        android:layout_marginEnd="@dimen/common_margin"
                         android:text="내용"
                         android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
@@ -213,13 +245,12 @@
                             android:textStyle="bold" />
                     </LinearLayout>
 
-                    <com.google.android.material.divider.MaterialDivider
+                    <View
                         android:id="@+id/communityPostDetailDivider"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/common_margin"
+                        android:layout_height="8dp"
                         android:layout_marginTop="@dimen/common_margin"
-                        android:layout_marginEnd="@dimen/common_margin"
+                        android:background="?android:attr/listDivider"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toBottomOf="@id/communityPostDetailBottomLinerLayout" />
@@ -232,7 +263,8 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="@dimen/common_margin"
                         android:layout_marginTop="@dimen/common_margin"
-                        android:text=""
+                        android:text="댓글 n"
+                        android:textStyle="bold"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toBottomOf="@id/communityPostDetailDivider" />
 
@@ -240,9 +272,9 @@
                         android:id="@+id/communityPostDetailCommentRecyclerView"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
+                        android:layout_marginBottom="80dp"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
-                        android:layout_marginBottom="60dp"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toBottomOf="@id/communityPostDetailCommentCount"
                         tools:listitem="@layout/row_community_comment" />
@@ -256,7 +288,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
-        android:background="@color/white"
+        android:background="?attr/colorSurface"
         android:orientation="horizontal"
         android:padding="8dp">
 

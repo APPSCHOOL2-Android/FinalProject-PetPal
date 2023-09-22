@@ -116,9 +116,10 @@ class CommunitySearchAdapter(
         holder.communityContent.text = post.postContent
         holder.communityCommentCounter.text= post.postComment?.size.toString()
         holder.communityFavoriteCounter.text = post.postLike.toString()
+        holder.communityPostCategoryTextView.text= post.postCategory.toString()
 
         Log.d("어떤 카테고리",post.postCategory.toString())
-        when(post.postCategory.toString()){
+        /*when(post.postCategory.toString()){
             "일상"->{
                 holder.communityPostCategoryCard.setCardBackgroundColor(ContextCompat.getColor(context, R.color.category_daily))
                 holder.communityPostCategoryTextView.text= post.postCategory.toString()
@@ -177,7 +178,7 @@ class CommunitySearchAdapter(
                 holder.communityPostCategoryCard.setCardBackgroundColor(ContextCompat.getColor(context, R.color.category_puppies))
                 holder.communityPostCategoryTextView.text= post.postCategory.toString()
             }
-        }
+        }*/
 
 
 

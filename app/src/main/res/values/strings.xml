@@ -10,8 +10,8 @@
     <string name="comment">댓글 </string>
     <string name="community_title">커뮤니티</string>
     <string name="community_post_detail">게시글 상세</string>
-    <string name="community_writing">글작성</string>
-    <string name="community_modify">글수정</string>
+    <string name="community_writing">글 작성</string>
+    <string name="community_modify">글 수정</string>
     <string name="complete">완료</string>
     <string name="modify_complete">수정완료</string>
     <string name="community_post_title">제목을 입력하세요.</string>
