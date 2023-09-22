@@ -66,6 +66,8 @@ class CommunityDetailCommentAdapter(
             .load(commentList.commentUserImage)
             .diskCacheStrategy(DiskCacheStrategy.ALL)
             .fitCenter()
+            .error(R.drawable.main_image)
+            .fallback(R.drawable.main_image)
             .into(holder.communityProfileImage)
 
 
@@ -109,8 +111,8 @@ class CommunityDetailCommentAdapter(
                         R.id.item_comment_delete -> {
                             val commentToDelete = postCommentList[holder.adapterPosition]
 
-                            Log.d("이건 뭐죠?",commentToDelete.commentUid.toString())
-                            Log.d("이건 뭐죠?",currentUserId.toString())
+                            Log.d("이건 뭐죠?", commentToDelete.commentUid.toString())
+                            Log.d("이건 뭐죠?", currentUserId.toString())
                             if (commentToDelete.commentUid.toString() == currentUserId.toString()) {
                                 val db = FirebaseFirestore.getInstance()
                                 db.collection("Post").document(postGetId).update(
@@ -128,8 +130,9 @@ class CommunityDetailCommentAdapter(
                                     Snackbar.make(view, "댓글 삭제 실패: $e", Snackbar.LENGTH_SHORT)
                                         .show()
                                 }
-                            }else{
-                                Snackbar.make(view, "댓글 작성자만 삭제할 수 있습니다.", Snackbar.LENGTH_SHORT).show()
+                            } else {
+                                Snackbar.make(view, "댓글 작성자만 삭제할 수 있습니다.", Snackbar.LENGTH_SHORT)
+                                    .show()
                             }
 
                             true
