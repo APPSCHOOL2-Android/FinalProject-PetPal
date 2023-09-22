@@ -6,6 +6,7 @@ import com.google.firebase.Timestamp
 
 // 채팅방
 data class ChatRoom (
+    val participants: List<String>,
     val senderId: String,
     val receiverId: String,
     val lastMessage: String?,
@@ -15,5 +16,5 @@ data class ChatRoom (
     val senderUnReadCount: Long?,
     val receiverUnReadCount: Long?
 ) {
-    constructor() : this("", "", null, null, false, false, null, null)
+    constructor() : this(listOf(), "", "", null, null, false, false, null, null)
 }

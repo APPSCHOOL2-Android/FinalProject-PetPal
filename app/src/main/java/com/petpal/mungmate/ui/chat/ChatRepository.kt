@@ -152,6 +152,7 @@ class ChatRepository {
         } else {
             // 채팅방이 존재하지 않는 경우, 새로운 채팅방을 생성하고 ID를 반환
             val newChatRoom = ChatRoom(
+                listOf(user1Id, user2Id),
                 user1Id,
                 user2Id,
                 "",

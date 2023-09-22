@@ -1,7 +1,6 @@
 package com.petpal.mungmate.ui.chat
 
 import android.os.Bundle
-import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -11,7 +10,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.firebase.ui.firestore.FirestoreRecyclerOptions
 import com.google.android.material.divider.MaterialDividerItemDecoration
-import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.ktx.firestore
@@ -20,12 +18,6 @@ import com.petpal.mungmate.MainActivity
 import com.petpal.mungmate.R
 import com.petpal.mungmate.databinding.FragmentChatBinding
 import com.petpal.mungmate.model.ChatRoom
-import com.petpal.mungmate.model.Message
-import com.petpal.mungmate.model.MessageType
-import com.petpal.mungmate.model.MessageVisibility
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 
 class ChatFragment : Fragment() {
 
@@ -57,7 +49,9 @@ class ChatFragment : Fragment() {
             recyclerViewChatRoom.run {
                 // firebaseUI 라이브러리 사용해서 firestore를 RecyclerView에 바인딩
                 // 로그인 유저가 참여하고 있는 채팅방, 최신순 정렬
-                val query = Firebase.firestore.collection("chatRooms")
+                val query = Firebase.firestore
+                    .collection("chatRooms")
+                    .whereArrayContains("participants", currentUserId)
                     .orderBy("lastMessageTime", Query.Direction.DESCENDING)
 
                 // FirestoreRecyclerOptions : DB 데이터 변경되면 RecyclerView 실시간 업데이트
