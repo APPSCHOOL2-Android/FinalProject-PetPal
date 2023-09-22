@@ -1,12 +1,15 @@
 package com.petpal.mungmate.ui.matchhistory
 
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.petpal.mungmate.databinding.RowMatchHistoryBinding
 
-class MatchHistoryAdapter :
+class MatchHistoryAdapter(private val context: Context) :
     ListAdapter<MatchHistoryUiState, MatchHistoryAdapter.MatchHistoryViewHolder>(
         MatchHistoryUiStateDiffCallback()
     ) {
@@ -16,7 +19,15 @@ class MatchHistoryAdapter :
 
         fun bind(matchHistoryUiState: MatchHistoryUiState) {
             rowMatchHistoryBinding.run {
-//                matchHistoryUserImage.setImageResource(matchHistoryUiState.userImage)
+
+
+                Glide
+                    .with(context)
+                    .load(matchHistoryUiState.userImage)
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .fitCenter()
+                    .into(matchHistoryUserImage)
+
                 textViewPlanUserNickname.text = matchHistoryUiState.userNickName
                 textViewPlanDog.text = matchHistoryUiState.petName
                 textViewPlanPlace.text = matchHistoryUiState.place
