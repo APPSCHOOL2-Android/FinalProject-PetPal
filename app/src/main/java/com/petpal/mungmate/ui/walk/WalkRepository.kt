@@ -195,7 +195,6 @@ class WalkRepository {
 //        }
 //        awaitClose { listenerRegistration.remove() }
 //    }
-    //chatgpt는 신이다
     suspend fun fetchMatchingWalkCount(userId: String): Int {
         // userId를 사용하여 해당 사용자의 문서를 가져옵니다.
         val userDocRef = db.collection("users").document(userId)
