@@ -1,11 +1,16 @@
 package com.petpal.mungmate.ui.chat
 
+import android.accessibilityservice.AccessibilityService.SoftKeyboardController
+import android.content.Context
 import android.content.DialogInterface
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewTreeObserver
+import android.view.inputmethod.InputMethodManager
+import androidx.core.view.ViewCompat
 import androidx.core.widget.addTextChangedListener
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
@@ -13,6 +18,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
+import com.petpal.mungmate.MainActivity
 import com.petpal.mungmate.R
 import com.petpal.mungmate.databinding.FragmentChatRoomBinding
 import com.petpal.mungmate.model.Message
@@ -28,7 +34,6 @@ class ChatRoomFragment : Fragment() {
     private val fragmentChatRoomBinding get() = _fragmentChatRoomBinding!!
 
     private lateinit var chatViewModel: ChatViewModel
-
     private lateinit var messageAdapter: MessageAdapter
 
     private val currentUserId = FirebaseAuth.getInstance().currentUser?.uid.toString()  // 현재 사용자 id
@@ -51,6 +56,7 @@ class ChatRoomFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         _fragmentChatRoomBinding = FragmentChatRoomBinding.inflate(inflater)
+
         return fragmentChatRoomBinding.root
     }
 
@@ -144,10 +150,19 @@ class ChatRoomFragment : Fragment() {
             messageAdapter = MessageAdapter(chatViewModel)
 
             // 채팅방 메시지 목록
-            recyclerViewMessage.apply {
+            recyclerViewMessage.run {
                 layoutManager = LinearLayoutManager(requireContext())
                 addItemDecoration(TopMarginItemDecoration(8))
                 adapter = messageAdapter
+
+                addOnLayoutChangeListener { v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom ->
+                    // 소프트 키보드가 올라올 때 RecyclerView 마지막으로 스크롤
+                    if(bottom < oldBottom) {
+                        postDelayed({
+                            scrollToPosition(messageAdapter.itemCount - 1)
+                        }, 100)
+                    }
+                }
             }
 
             // 메시지 입력, 전송
