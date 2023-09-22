@@ -15,6 +15,7 @@ import com.bumptech.glide.Glide
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.storage
 import com.petpal.mungmate.R
@@ -36,6 +37,9 @@ class ChatRoomFragment : Fragment() {
 
     private lateinit var chatRoomViewModel: ChatRoomViewModel
     private lateinit var messageAdapter: MessageAdapter
+
+    // 채팅 창 이동시 messages에 등록된 실시간 리스너 해제, 감시 종료 목적
+    private var messageListenerRegistration: ListenerRegistration? = null
 
     private val currentUserId = FirebaseAuth.getInstance().currentUser?.uid.toString()  // 현재 사용자 id
     lateinit var receiverId: String     // 채팅 상대 id
@@ -71,7 +75,8 @@ class ChatRoomFragment : Fragment() {
                 chatRoomId = currentChatRoomId
 
                 // 메세지 목록 로드
-                chatRoomViewModel.loadMessages(chatRoomId)
+                chatRoomViewModel.getMessages(chatRoomId)
+
                 // 사용자 프로필 표시
                 chatRoomViewModel.getReceiverInfoById(receiverId)
 

@@ -69,7 +69,7 @@ class ChatRoomViewModel: ViewModel() {
         chatRepository.saveMessage(chatRoomId, message)
     }
 
-    fun loadMessages(chatRoomId: String) {
+    fun getMessages(chatRoomId: String) {
         viewModelScope.launch {
             chatRepository.getMessages(chatRoomId)
                 .collect { messageList ->

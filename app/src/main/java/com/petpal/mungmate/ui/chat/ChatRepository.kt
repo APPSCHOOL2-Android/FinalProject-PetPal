@@ -227,7 +227,7 @@ class ChatRepository {
         }
     }
 
-    // TODO 프로필 등 외부에서 날 차단했을 때도 실시간으로 반영하려면 users/USERID/blockUserList에 snapshotlistener 장착?
+    // TODO 프로필 등 외부에서 날 차단했을 때도 실시간으로 반영하려면 각 users/USERID/blockUserList에 snapshotlistener 장착?
     // 채팅 참여자 간의 차단 여부 확인
     suspend fun checkBlockedStatus(myUserId: String, receiverId: String): Boolean {
         // 상대 정보 가져오기
