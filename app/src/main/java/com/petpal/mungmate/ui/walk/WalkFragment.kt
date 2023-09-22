@@ -96,8 +96,7 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
     private var totalDistance = 0.0f
     private var elapsedTime = 0L
     private var userLocationMarker: MapPOIItem? = null
-    private var startTimestamp: String ="0"
-    private val handler = Handler(Looper.getMainLooper())
+
     private var nearbyUsers: List<ReceiveUser>?=null
     private val countDownInterval = 1000
     private var countDownTimer: CountDownTimer? = null
@@ -130,11 +129,9 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
         onWalkBottomSheetView=inflater.inflate(R.layout.row_walk_bottom_sheet_user,null)
         onWalkbottomSheetDialog=BottomSheetDialog(requireContext())
         onWalkbottomSheetDialog.setContentView(onWalkBottomSheetView)
-
-
         setupMapView()
         setupButtonListeners()
-        observeViewModel()
+
         val user=auth.currentUser
         userId= user?.uid.toString()
 
@@ -171,12 +168,9 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
             onWalk=true
             observeViewModelonWalk()
             viewModel.observeUsersOnWalk()
-            toggleVisibility(fragmentWalkBinding.LinearLayoutOnWalk, fragmentWalkBinding.LinearLayoutOffWalk)
             fragmentWalkBinding.mapView.removeAllPOIItems()
-            fragmentWalkBinding.imageViewWalkToggle.setImageResource(R.drawable.dog_walk)
             updateCurrentLocationOnce()
             startLocationUpdates()
-
             val builder = AlertDialog.Builder(requireContext())
             builder.setTitle("멍메이트")
             builder.setMessage("산책을 시작하시겠습니까?")
@@ -227,7 +221,7 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
             totalDistance=0.0f
             viewModel.distanceMoved.value=totalDistance
             elapsedTime = 0L
-            fragmentWalkBinding.textViewWalkTime.text = formatElapsedTime(elapsedTime)
+            viewModel.elapsedTimeLiveData.value= elapsedTime.toString()
             viewModel.updateOnWalkStatusFalse(userId)
             mainActivity.navigate(R.id.action_mainFragment_to_WriteWalkReviewFragment,bundle)
             getCurrentLocation()
@@ -453,8 +447,8 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
         userLocationMarker = MapPOIItem().apply {
             itemName = "나"
             mapPoint = MapPoint.mapPointWithGeoCoord(location.latitude, location.longitude)
-            markerType = MapPOIItem.MarkerType.CustomImage
-            customImageResourceId = R.drawable.mylocation
+            markerType = MapPOIItem.MarkerType.RedPin
+            //customImageResourceId = R.drawable.mylocation
             isCustomImageAutoscale = true
             setCustomImageAnchor(0.5f, 1.0f)
 
@@ -470,8 +464,8 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
         userLocationMarker = MapPOIItem().apply {
             itemName = "나"
             mapPoint = MapPoint.mapPointWithGeoCoord(location.latitude, location.longitude)
-            markerType = MapPOIItem.MarkerType.CustomImage
-            customImageResourceId = R.drawable.mylocation
+            markerType = MapPOIItem.MarkerType.RedPin
+            //customImageResourceId = R.drawable.mylocation
             isCustomImageAutoscale = true
             setCustomImageAnchor(0.5f, 1.0f)
 
@@ -619,6 +613,8 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
             }
             override fun onFinish() {
                 // 카운트다운이 끝나면 시작 작업을 수행하고 다이얼로그를 숨깁니다.
+                toggleVisibility(fragmentWalkBinding.LinearLayoutOnWalk, fragmentWalkBinding.LinearLayoutOffWalk)
+                fragmentWalkBinding.imageViewWalkToggle.setImageResource(R.drawable.dog_walk)
                 viewModel.distanceMoved.value=0.0f
                 viewModel.startTimer()
                 startLocationUpdates()
@@ -1010,12 +1006,6 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
                         }
                     })
 
-
-
-
-//                    val bundle=Bundle()
-//                    bundle.putString("receiverId",user.uid)
-//                    mainActivity.navigate(R.id.action_mainFragment_to_manage_block,bundle)
                 }
                 user.pets.let { pets ->
                     val firstPet = pets.firstOrNull()
@@ -1130,19 +1120,20 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
     override fun onMapViewInitialized(p0: MapView?) { p0?.setZoomLevel(2, true)}
     override fun onResume() {
         super.onResume()
-        observeViewModelonWalk()
         viewModel.stopLocationUpdates()
         viewModel.startLocationUpdates()
         if(onWalk == true) {
+            observeViewModelonWalk()
             requestLocationPermissionIfNeededOnWalk()
         }else{
+            observeViewModel()
             requestLocationPermissionIfNeeded()
         }
         viewModel.elapsedTimeLiveData.observe(viewLifecycleOwner, Observer { elapsedTime1 ->
             val hours = elapsedTime1.toLong() / 3600
             val minutes = (elapsedTime1.toLong() % 3600) / 60
             val seconds = elapsedTime1.toLong() % 60
-
+            elapsedTime=elapsedTime1.toLong()
             val formattedElapsedTime = String.format("%02d:%02d:%02d", hours, minutes, seconds)
             fragmentWalkBinding.textViewWalkTime.text = formattedElapsedTime
         })
