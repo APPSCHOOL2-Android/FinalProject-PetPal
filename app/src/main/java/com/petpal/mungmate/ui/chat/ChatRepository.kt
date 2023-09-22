@@ -5,6 +5,7 @@ import com.google.android.gms.tasks.Task
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.petpal.mungmate.model.ChatRoom
@@ -15,7 +16,6 @@ import com.petpal.mungmate.model.Match
 import com.petpal.mungmate.model.MessageType
 import com.petpal.mungmate.model.MessageVisibility
 import com.petpal.mungmate.model.PetData
-import com.petpal.mungmate.model.UserBasicInfoData
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
@@ -50,7 +50,7 @@ class ChatRepository {
         return messagesCollection.add(message)
     }
 
-    // 변화 감지, 새 메시지 실시간 로드
+    // 메시지 목록 실시간 로드
     fun getMessages(chatRoomId: String): Flow<List<Message>> = callbackFlow {
         // 메시지 리스트
         val messages = mutableListOf<Message>()
@@ -78,6 +78,35 @@ class ChatRepository {
         awaitClose { listenerRegistration.remove() }
     }
 
+    // 채팅방 목록 실시간 로드
+    fun getChatRooms(userId: String): Flow<List<ChatRoom>> = callbackFlow {
+        val chatRooms = mutableListOf<ChatRoom>()
+
+        val chatRoomsRef = db.collection(CHAT_ROOMS_NAME)
+            .whereArrayContains("participants", userId)
+            .orderBy("participants")
+            .orderBy("lastMessageTime", Query.Direction.DESCENDING)
+
+        // 콜백 리스너 등록
+        val listenerRegistration = chatRoomsRef.addSnapshotListener { value, error ->
+            if (error != null) {
+                return@addSnapshotListener
+            }
+
+            chatRooms.clear()
+            value?.documents?.forEach { document ->
+                val chatRoom = document.toObject(ChatRoom::class.java)
+                chatRoom?.let { chatRooms.add(it) }
+            }
+
+            trySend(chatRooms)
+        }
+
+        // Flow가 완료될 때 콜백을 취소
+        awaitClose { listenerRegistration.remove() }
+    }
+
+
     // 산책 매칭 저장
     fun saveMatch(match: Match): Task<DocumentReference> {
         val matchesCollection = db.collection(MATCHES_NAME)
@@ -89,6 +118,17 @@ class ChatRepository {
         return try {
             db.collection(MATCHES_NAME)
                 .document(matchId)
+                .get()
+                .await()
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    suspend fun getUserInfoById(userId: String): DocumentSnapshot? {
+        return try {
+            db.collection(USERS_NAME)
+                .document(userId)
                 .get()
                 .await()
         } catch (e: Exception) {
@@ -166,8 +206,10 @@ class ChatRepository {
             Log.d(TAG, "create chatroom completed")
 
             // 최초 메시지로 오늘 DATE 전송
+            // TODO 채팅 보낼 때 lastMessageTime이 오늘이 아닐 경우 보내는 걸로 나중에 수정하기
             val dateContent = SimpleDateFormat("yyyy년 MM월 dd일", Locale.getDefault())
                 .format(Date())
+            
             val message = Message(
                 user1Id,
                 dateContent,
@@ -182,9 +224,6 @@ class ChatRepository {
             return chatRoomKey
         }
     }
-
-    // Storage 이미지 다운로드
-
 
     // 채팅방의 모든 메시지 로드
 //    fun getSavedMessages(chatRoomId: String): CollectionReference {

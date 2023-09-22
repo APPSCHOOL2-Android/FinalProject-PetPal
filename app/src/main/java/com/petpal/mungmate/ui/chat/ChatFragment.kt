@@ -23,8 +23,11 @@ class ChatFragment : Fragment() {
 
     private var _fragmentChatBinding: FragmentChatBinding? = null
     private val fragmentChatBinding get() = _fragmentChatBinding!!
+
     lateinit var mainActivity: MainActivity
+
     lateinit var chatViewModel: ChatViewModel
+    private lateinit var chatAdapter: ChatAdapter
 
     private var currentUserId = FirebaseAuth.getInstance().currentUser?.uid.toString()
 
@@ -45,25 +48,24 @@ class ChatFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        chatViewModel.run {
+            chatRooms.observe(viewLifecycleOwner) { chatRooms ->
+                // 채팅방 데이터로 RecyclerView Adapter 데이터 세팅
+                chatAdapter.setChatRooms(chatRooms)
+                fragmentChatBinding.recyclerViewChatRoom.scrollToPosition(0)
+            }
+        }
+
+        // 현재 로그인 사용자가 참여한 채팅방 가져와서 ViewModel에 세팅
+        chatViewModel.getChatRooms(currentUserId)
+        // RecyclerView Adapter 생성
+        chatAdapter = ChatAdapter(chatViewModel, mainActivity)
+
         fragmentChatBinding.run {
             recyclerViewChatRoom.run {
-                // firebaseUI 라이브러리 사용해서 firestore를 RecyclerView에 바인딩
-                // 로그인 유저가 참여하고 있는 채팅방, 최신순 정렬
-                val query = Firebase.firestore
-                    .collection("chatRooms")
-                    .whereArrayContains("participants", currentUserId)
-                    .orderBy("lastMessageTime", Query.Direction.DESCENDING)
-
-                // FirestoreRecyclerOptions : DB 데이터 변경되면 RecyclerView 실시간 업데이트
-                val options = FirestoreRecyclerOptions.Builder<ChatRoom>()
-                    .setQuery(query, ChatRoom::class.java)
-                    .build()
-
-                adapter = ChatAdapter(options, mainActivity)
-                (adapter as ChatAdapter).startListening()
-
                 layoutManager = LinearLayoutManager(requireContext())
                 addItemDecoration(MaterialDividerItemDecoration(context, MaterialDividerItemDecoration.VERTICAL))
+                adapter = chatAdapter
             }
 
             // 특정 사용자에게 채팅 보내기 테스트용

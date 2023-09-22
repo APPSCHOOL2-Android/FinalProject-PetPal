@@ -18,7 +18,7 @@ class ReportUserFragment : Fragment() {
     private var _fragmentReportUserBinding :FragmentReportUserBinding? = null
     private val fragmentReportUserBinding get() = _fragmentReportUserBinding!!
 
-    private lateinit var viewModel: ChatViewModel
+    private lateinit var viewModel: ChatRoomViewModel
 
     private val reportCategoryArray = arrayOf("홍보 계정이에요", "욕설을 해요", "약속 시간에 나오지 않았어요", "비매너 유저", "기타")
 
@@ -27,7 +27,7 @@ class ReportUserFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        viewModel = ViewModelProvider(this)[ChatViewModel::class.java]
+        viewModel = ViewModelProvider(this)[ChatRoomViewModel::class.java]
 
         // Safe Args 방법으로 전달받은 신고 대상 유저 id
         val args = ReportUserFragmentArgs.fromBundle(requireArguments())
