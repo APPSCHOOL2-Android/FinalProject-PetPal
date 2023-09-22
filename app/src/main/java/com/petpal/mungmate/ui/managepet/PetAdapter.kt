@@ -1,15 +1,21 @@
 package com.petpal.mungmate.ui.managepet
 
+import android.content.Context
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.os.bundleOf
 import androidx.navigation.Navigation
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.StorageReference
 import com.petpal.mungmate.R
 import com.petpal.mungmate.databinding.RowPetBinding
 
-class PetAdapter :
+class PetAdapter( private val context: Context) :
     ListAdapter<PetUiState, PetAdapter.PetViewHolder>(PetUiStateDiffCallback()) {
 
     inner class PetViewHolder(private val rowPetBinding: RowPetBinding) :
@@ -18,6 +24,24 @@ class PetAdapter :
 
         fun bind(pet: PetUiState) {
             rowPetBinding.run {
+
+                val storage = FirebaseStorage.getInstance()
+                val storageRef = storage.reference
+
+                val profileImage: StorageReference = storageRef.child(pet.image)
+                profileImage.downloadUrl
+                    .addOnSuccessListener { uri ->
+                        val imageUrl = uri.toString()
+                        Glide
+                            .with(context)
+                            .load(imageUrl)
+                            .diskCacheStrategy(DiskCacheStrategy.ALL)
+                            .fitCenter()
+                            .fallback(R.drawable.main_image)
+                            .into(imageViewPet)
+                    }
+
+
                 textViewPetName.text = pet.name
                 textViewPetInfo.text = "${pet.age}살 • ${pet.breed} • ${pet.weigh}kg"
                 textViewPetDesc.text = pet.character

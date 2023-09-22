@@ -289,16 +289,19 @@ class CommunityPostDetailFragment : Fragment() {
             val postDateCreated = documentSnapshot.getString("postDateCreated")
 
             val postImagesList = documentSnapshot.get("postImages") as? List<*>
+
             var postImagesGetList = mutableListOf<PostImage>()
-            if (postImagesList!!.isNotEmpty()) {
 
-                val cleanedString = postImagesList?.toString()?.replace("{image=", "")
-                val imageUrl = cleanedString?.trim()
-                val imageUrlWithoutBrace = imageUrl?.removeSuffix("}")
+            if (postImagesList != null && postImagesList.isNotEmpty()) {
+                for (postImage in postImagesList) {
+                    val imageUrl = postImage.toString()
+                    val cleanedImageUrl = imageUrl.replace("{image=", "").removeSuffix("}")
+                    val postImageObject = PostImage(cleanedImageUrl)
+                    postImagesGetList.add(postImageObject)
+                }
 
-                val postImage = PostImage(imageUrlWithoutBrace)
-                postImagesGetList.add(postImage)
-                Log.d("어떤 리스트가..",postImagesGetList.toString())
+                val imageUrls = postImagesGetList.map { it.image }.joinToString(", ")
+                Log.d("어떤 리스트가..", imageUrls)
             }
 
             val postLike = documentSnapshot.getLong("postLike")
