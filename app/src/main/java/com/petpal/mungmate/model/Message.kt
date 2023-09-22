@@ -9,7 +9,7 @@ data class Message(
     val timestamp: Timestamp,
     val receiverIsRead: Boolean,
     val type: Int,
-    val visibility: Int
+    val visible: Int
 ) {
     constructor(): this("", "", Timestamp.now(), true, MessageType.TEXT.code, MessageVisibility.ALL.code)
 }
