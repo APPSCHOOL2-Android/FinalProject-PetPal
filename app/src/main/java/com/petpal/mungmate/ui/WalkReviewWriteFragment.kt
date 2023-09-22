@@ -5,6 +5,7 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -55,6 +56,7 @@ class WalkReviewWriteFragment : Fragment() {
         val walkRecordEndTime=arguments?.getString("walkRecordEndTime")
         val walkDuration=arguments?.getLong("walkDuration") //초단위로 올라감 1분40초 ->walkDuration:100
         val walkDistance=arguments?.getString("walkDistance")
+        Log.d("온거리",walkDistance.toString())
         val walkMatchingId=arguments?.getString("walkMatchingId")
 
         fragmentWalkReviewWriteBinding.imageViewWalk.setOnClickListener {
