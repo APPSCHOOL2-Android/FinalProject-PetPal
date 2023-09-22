@@ -174,10 +174,10 @@ class MessageAdapter(private val chatViewModel: ChatViewModel): RecyclerView.Ada
                         val match = document.toObject(Match::class.java)
                         if (match != null) {
                             // 하나의 match에 대해 수락, 거절은 한 번만 선택 가능
-//                            if (match.status != MatchStatus.REQUESTED.code) {
-//                                buttonAccept.isEnabled = false
-//                                buttonReject.isEnabled = false
-//                            }
+                            if (match.status === MatchStatus.REQUESTED.code) {
+                                buttonAccept.isEnabled = true
+                                buttonReject.isEnabled = true
+                            }
 
                             // 산책 일시, 장소 표시
                             val formattedWalkTimestamp = formatFirebaseTimestamp(match.walkTimestamp!!, "M월 d일 (E) a h:mm")
