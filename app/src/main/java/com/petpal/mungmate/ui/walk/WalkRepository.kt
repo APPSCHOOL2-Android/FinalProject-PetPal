@@ -1,14 +1,17 @@
 package com.petpal.mungmate.ui.walk
 
+import android.util.Log
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
+import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.ktx.Firebase
 import com.kakao.sdk.user.model.User
 import com.petpal.mungmate.model.Favorite
 import com.petpal.mungmate.model.KakaoSearchResponse
+import com.petpal.mungmate.model.Match
 import com.petpal.mungmate.model.PlaceData
 import com.petpal.mungmate.model.Pet
 import com.petpal.mungmate.model.ReceiveUser
@@ -35,30 +38,41 @@ class WalkRepository {
 
     private val apiService: KakaoApiService = retrofit.create(KakaoApiService::class.java)
     private val db = FirebaseFirestore.getInstance()
-    private val auth= Firebase.auth
-    private val user=auth.currentUser
-    private val userUid=user?.uid
+    private val auth = Firebase.auth
+    private val user = auth.currentUser
+    private val userUid = user?.uid
 
-    suspend fun searchPlacesByKeyword(latitude: Double, longitude: Double, query: String): KakaoSearchResponse {
+    suspend fun searchPlacesByKeyword(
+        latitude: Double,
+        longitude: Double,
+        query: String
+    ): KakaoSearchResponse {
         return apiService.searchPlacesByKeyword(latitude, longitude, query = query)
     }
-    suspend fun searchPlacesByKeywordFilter(latitude: Double, longitude: Double, query: String,radius:Int): KakaoSearchResponse {
+
+    suspend fun searchPlacesByKeywordFilter(
+        latitude: Double,
+        longitude: Double,
+        query: String,
+        radius: Int
+    ): KakaoSearchResponse {
         return apiService.searchPlacesByKeyword(latitude, longitude, query = query, radius = radius)
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    suspend fun getPlaceInfoFromFirestore(placeId: String): Map<String, Any?>? = suspendCoroutine { continuation ->
-        val placeRef = db.collection("places").document(placeId)
-        placeRef.get().addOnSuccessListener { document ->
-            if (document.exists()) {
-                continuation.resume(document.data)
-            } else {
-                continuation.resume(null)
+    suspend fun getPlaceInfoFromFirestore(placeId: String): Map<String, Any?>? =
+        suspendCoroutine { continuation ->
+            val placeRef = db.collection("places").document(placeId)
+            placeRef.get().addOnSuccessListener { document ->
+                if (document.exists()) {
+                    continuation.resume(document.data)
+                } else {
+                    continuation.resume(null)
+                }
+            }.addOnFailureListener { exception ->
+                continuation.resumeWithException(exception)
             }
-        }.addOnFailureListener { exception ->
-            continuation.resumeWithException(exception)
         }
-    }
 
     suspend fun fetchAllReviewsForPlace(placeId: String): List<Review> {
         val reviews = mutableListOf<Review>()
@@ -129,9 +143,11 @@ class WalkRepository {
     }
 
     suspend fun removeUserFavorite(placeId: String, userid: String) {
-        val favoriteRef = db.collection("places").document(placeId).collection("favorite").document(userid)
+        val favoriteRef =
+            db.collection("places").document(placeId).collection("favorite").document(userid)
         favoriteRef.delete().await()
     }
+
     fun observeFavoritesChanges(placeId: String): Flow<Int> = callbackFlow {
         val favoriteRef = db.collection("places").document(placeId).collection("favorite")
         val registration = favoriteRef.addSnapshotListener { snapshot, e ->
@@ -151,32 +167,41 @@ class WalkRepository {
         return document.getString("nickname")
     }
 
-    suspend fun updateLocationAndOnWalkStatusTrue(userId: String, latitude: Double, longitude: Double) {
+    suspend fun updateLocationAndOnWalkStatusTrue(
+        userId: String,
+        latitude: Double,
+        longitude: Double
+    ) {
         val userRef = db.collection("users").document(userId)
-        userRef.update(mapOf(
-            "onWalk" to true,
-            "location" to mapOf(
-                "latitude" to latitude,
-                "longitude" to longitude
+        userRef.update(
+            mapOf(
+                "onWalk" to true,
+                "location" to mapOf(
+                    "latitude" to latitude,
+                    "longitude" to longitude
+                )
             )
-        )).await()
+        ).await()
     }
+
     suspend fun updateOnWalkStatusFalse(userId: String) {
         val userRef = db.collection("users").document(userId)
         userRef.update(
             mapOf(
-            "onWalk" to false
+                "onWalk" to false
             )
 
         ).await()
     }
+
     suspend fun updateBlockUser(userId: String, blockId: String) {
         val userRef = db.collection("users").document(userId)
         userRef.update(
             "blockUserList", FieldValue.arrayUnion(blockId)
         ).await()
     }
-//    @OptIn(ExperimentalCoroutinesApi::class)
+
+    //    @OptIn(ExperimentalCoroutinesApi::class)
 //    fun observeUsersOnWalk(): Flow<List<ReceiveUser>> = callbackFlow {
 //        val query = db.collection("users").whereEqualTo("onWalk", true)
 //        val listenerRegistration = query.addSnapshotListener { snapshot, e ->
@@ -201,7 +226,8 @@ class WalkRepository {
         val userDoc = userDocRef.get().await()
 
         // walkRecordList 필드를 가져옵니다.
-        val walkRecordList = userDoc.get("walkRecordList") as? List<Map<String, Any?>> ?: emptyList()
+        val walkRecordList =
+            userDoc.get("walkRecordList") as? List<Map<String, Any?>> ?: emptyList()
 
         // walkMatchingId가 null이 아닌 항목들만 필터링합니다.
         val matchingWalks = walkRecordList.filter {
@@ -216,7 +242,7 @@ class WalkRepository {
         val query = db.collection("users").whereEqualTo("onWalk", true)
         val registration = query.addSnapshotListener { snapshot, error ->
             if (error != null) {
-                close(error)  // 오류가 발생하면 Flow를 닫습니다.
+                close(error)
                 return@addSnapshotListener
             }
 
@@ -238,10 +264,62 @@ class WalkRepository {
             }
         }
 
-        // 콜백을 제거하려면 awaitClose를 사용합니다.
         awaitClose { registration.remove() }
     }
+    fun fetchMatchesByUserId(userId: String, onSuccess: (List<Match>) -> Unit, onFailure: (Exception) -> Unit) {
+        val matchRef = db.collection("matches")
+        Log.d("MATCH_LOG", userId)
 
+        val allMatches = mutableListOf<Match>()
+        matchRef.whereEqualTo("receiverId", userId).get().addOnSuccessListener { matchesByReceiverId ->
+            for (document in matchesByReceiverId) {
+                val match = document.toObject(Match::class.java)
+                Log.d("MATCH_LOG", "Match from ReceiverId: ${match.senderId}")
+                match.walkRecordId = document.id
+                match.let {
+                    allMatches.add(it)
+                    Log.d("MATCH_LOG", "Match from ReceiverId: ${document.id} -> ${document.data}")
+                }
+            }
+
+
+            matchRef.whereEqualTo("senderId", userId).get().addOnSuccessListener { matchesBySenderId ->
+                for (document in matchesBySenderId) {
+                    val match = document.toObject(Match::class.java)
+                    match.walkRecordId = document.id
+                    match?.let {
+                        allMatches.add(it)
+                        Log.d("MATCH_LOG", "Match from SenderId: ${document.id} -> ${document.data}")
+                    }
+                }
+
+
+                onSuccess(allMatches)
+
+            }.addOnFailureListener { exception ->
+
+                onFailure(exception)
+            }
+
+        }.addOnFailureListener { exception ->
+
+            onFailure(exception)
+        }
+    }
+    suspend fun fetchAverageRatingForUser(userId: String): Double {
+        val userDocSnapshot = db.collection("users").document(userId).get().await()
+
+        val walkMateReviewList = userDocSnapshot.get("walkMateReview") as? List<Map<String, Any>> ?: emptyList()
+
+        val ratings = walkMateReviewList.mapNotNull { it["rating"] as? Double }
+
+        val totalRating = ratings.sum()
+        val count = ratings.size
+        Log.d("에바야",totalRating.toString())
+        Log.d("에바야",count.toString())
+        return if (count > 0) totalRating / count else 0.0
+
+    }
 
 }
 
