@@ -64,7 +64,6 @@ class ChatRepository {
             if (error != null) {
                 return@addSnapshotListener
             }
-
             messages.clear()
             value?.documents?.forEach { document ->
                 val message = document.toObject(Message::class.java)
@@ -82,10 +81,8 @@ class ChatRepository {
     fun getChatRooms(userId: String): Flow<List<ChatRoom>> = callbackFlow {
         val chatRooms = mutableListOf<ChatRoom>()
 
+        // 추가, 삭제 감지를 위해 리스너는 chatRooms 컬렉션 전체에 등록
         val chatRoomsRef = db.collection(CHAT_ROOMS_NAME)
-            .whereArrayContains("participants", userId)
-            .orderBy("participants")
-            .orderBy("lastMessageTime", Query.Direction.DESCENDING)
 
         // 콜백 리스너 등록
         val listenerRegistration = chatRoomsRef.addSnapshotListener { value, error ->
@@ -192,7 +189,6 @@ class ChatRepository {
         } else {
             // 채팅방이 존재하지 않는 경우, 새로운 채팅방을 생성하고 ID를 반환
             val newChatRoom = ChatRoom(
-                listOf(user1Id, user2Id),
                 user1Id,
                 user2Id,
                 "",

@@ -226,24 +226,6 @@ class ChatRoomFragment : Fragment() {
         // 1년 이상일 경우 나이
         return "${ageYear}세"
     }
-
-    // 시스템 날짜 메시지 저장 
-    // todo 텍스트 메시지를 보내는 시점 : 가장 마지막 메시지의 날짜와 다를 경우 날짜 메시지 전송 후 텍스트 메시지 전송하기
-    private fun saveDateMessage() {
-//        val currentDate = Date()
-//        val dateFormat = SimpleDateFormat("yyyy년 M월 d일", Locale.getDefault())
-//        val formattedDate = dateFormat.format(currentDate)
-
-        val message = Message(
-            currentUserId,
-            null,
-            Timestamp.now(),
-            false,
-            MessageType.TEXT.code,
-            MessageVisibility.ALL.code
-        )
-        chatRoomViewModel.saveMessage(chatRoomId, message)
-    }
     
     // 메시지 전송
     private fun sendTextMessage(){

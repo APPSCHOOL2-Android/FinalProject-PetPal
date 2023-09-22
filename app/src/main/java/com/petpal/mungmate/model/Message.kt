@@ -5,13 +5,13 @@ import com.google.firebase.Timestamp
 // 채팅방 메시지
 data class Message(
     val senderId: String,
-    val content: String?,
+    val content: String,
     val timestamp: Timestamp,
     val receiverIsRead: Boolean,
     val type: Int,
     val visibility: Int
 ) {
-    constructor(): this("", null, Timestamp.now(), true, MessageType.TEXT.code, MessageVisibility.ALL.code)
+    constructor(): this("", "", Timestamp.now(), true, MessageType.TEXT.code, MessageVisibility.ALL.code)
 }
 
 // 각기 다른 뷰를 가지는 메시지 유형

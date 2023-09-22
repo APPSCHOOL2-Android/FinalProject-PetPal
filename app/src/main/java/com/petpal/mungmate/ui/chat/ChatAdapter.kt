@@ -129,8 +129,10 @@ class ChatAdapter(private val chatViewModel: ChatViewModel, private val activity
 
     // ViewModel의 observer에서 호출하는 메서드 -> 데이터 세팅
     fun setChatRooms(newChatRooms: List<ChatRoom>) {
+        // 내가 참여중인 채팅방만 필터링
+        val myChatRooms = newChatRooms.filter { it.senderId == currentUserUid || it.receiverId == currentUserUid }
         chatRooms.clear()
-        chatRooms.addAll(newChatRooms)
+        chatRooms.addAll(myChatRooms)
         notifyDataSetChanged()
     }
 }
