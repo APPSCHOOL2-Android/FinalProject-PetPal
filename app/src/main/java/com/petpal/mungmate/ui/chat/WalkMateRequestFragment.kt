@@ -231,6 +231,7 @@ class WalkMateRequestFragment : Fragment() {
 
         // content에 walkmatching id 저장 -> RecyclerView ViewHolder에서 데이터 가져와서 사용
         val message = Message(
+            "",
             senderId,
             matchDocumentKey,
             Timestamp.now(),
@@ -240,7 +241,7 @@ class WalkMateRequestFragment : Fragment() {
         )
         // todo currentUser가 senderId, receiverId인지에 따라 visibility 설정
         // todo 채팅방의 sender, receiver 문구가 헷갈리는데 user1, user2로 하는 게 나을지
-        chatRoomViewModel.saveMessage(chatRoomId, message)
+        chatRoomViewModel.sendMessage(chatRoomId, message)
         Snackbar.make(requireView(), "산책 메이트 요청 메시지를 전송했습니다.", Snackbar.LENGTH_SHORT).show()
         findNavController().popBackStack()
     }

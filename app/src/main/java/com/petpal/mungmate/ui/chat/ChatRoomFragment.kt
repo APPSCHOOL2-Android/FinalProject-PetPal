@@ -27,8 +27,10 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 
+private const val TAG = "CHAT_ROOM"
+
 class ChatRoomFragment : Fragment() {
-    private val TAG = "CHAT_ROOM"
+
     private var _fragmentChatRoomBinding : FragmentChatRoomBinding? = null
     private val fragmentChatRoomBinding get() = _fragmentChatRoomBinding!!
 
@@ -77,6 +79,11 @@ class ChatRoomFragment : Fragment() {
                 chatRoomViewModel.getReceiverPetInfoByUserId(receiverId)
             }
 
+            isBlocked.observe(viewLifecycleOwner) {
+                // 차단 여부에 따라 UI 변경
+                updateUIBasedOnBlockStatus(it)
+            }
+
             receiverUserInfo.observe(viewLifecycleOwner) { userBasicInfoData ->
                 fragmentChatRoomBinding.textViewUserNickName.text = userBasicInfoData.nickname
                 // 채팅 상대 프로필 이미지 TODO 나중에 MVVM 맞춰서 분리하기
@@ -88,7 +95,6 @@ class ChatRoomFragment : Fragment() {
                 }.addOnFailureListener { exception ->
                     Log.d(TAG, "load user image failed")
                 }
-
             }
 
             receiverPetInfo.observe(viewLifecycleOwner) { petData ->
@@ -102,10 +108,14 @@ class ChatRoomFragment : Fragment() {
             }
 
             messages.observe(viewLifecycleOwner) { messages ->
+                // RecyclerView 데이터 세팅
                 messageAdapter.setMessages(messages)
                 fragmentChatRoomBinding.recyclerViewMessage.scrollToPosition(messages.size - 1)
             }
         }
+
+        // 차단 여부 체크
+        chatRoomViewModel.checkBlockedStatus(currentUserId, receiverId)
 
         // 두 사용자 정보로 채팅방 찾아서 정보 로드
         chatRoomViewModel.getChatRoom(currentUserId, receiverId)
@@ -224,7 +234,7 @@ class ChatRoomFragment : Fragment() {
         }
         
         // 1년 이상일 경우 나이
-        return "${ageYear}세"
+        return "${ageYear}살"
     }
     
     // 메시지 전송
@@ -232,6 +242,7 @@ class ChatRoomFragment : Fragment() {
         val content = fragmentChatRoomBinding.editTextMessage.text.toString()
         fragmentChatRoomBinding.editTextMessage.text.clear()
         val message = Message(
+            "",
             currentUserId,
             content,
             Timestamp.now(),
@@ -239,53 +250,66 @@ class ChatRoomFragment : Fragment() {
             MessageType.TEXT.code,
             MessageVisibility.ALL.code
         )
-        chatRoomViewModel.saveMessage(chatRoomId, message)
+        chatRoomViewModel.sendMessage(chatRoomId, message)
     }
 
-    private fun exitChatRoom() {
-        val builder = MaterialAlertDialogBuilder(requireContext())
-            .setTitle("채팅방 나가기")
-            .setMessage("채팅방을 나가면 대화내용이 모두 삭제되고 채팅목록에서도 삭제됩니다.")
-            .setPositiveButton("나가기"){ dialogInterface: DialogInterface, i: Int ->
-                // TODO 채팅방 나가기
-                findNavController().popBackStack()
-            }
-            .setNegativeButton("취소", null)
-            .create()
-        builder.show()
-    }
-
-    private fun unblockUser() {
-        val builder = MaterialAlertDialogBuilder(requireContext())
-            .setTitle("차단해제")
-            .setMessage("차단을 해제하면 다시 채팅을 주고받을 수 있으며 산책 메이트 요청이 가능해집니다.")
-            .setPositiveButton("해제하기"){ dialogInterface: DialogInterface, i: Int ->
-                // TODO 사용자 차단 해제
-                fragmentChatRoomBinding.run {
-                    buttonRequestWalkMate.isEnabled = true
-                    buttonSendMessage.isEnabled = true
-                    editTextMessage.hint = "메시지를 입력하세요."
-                    editTextMessage.isEnabled = true
-                }
-            }
-            .setNegativeButton("취소", null)
-            .create()
-        builder.show()
-    }
-
+    // 차단
     private fun blockUser() {
         val builder = MaterialAlertDialogBuilder(requireContext())
             .setTitle("차단하기")
             .setMessage("차단한 사용자와는 채팅을 할 수 없으며 산책 메이트를 요청할 수 없습니다.")
             .setPositiveButton("차단하기"){ dialogInterface: DialogInterface, i: Int ->
                 // TODO 사용자 차단 -> 채팅 상대 차단 상태 정보 가져와서 적용하도록 수정 예정
-                // 산책 메이트 요청, 채팅 불가
-                fragmentChatRoomBinding.run {
-                    buttonRequestWalkMate.isEnabled = false
-                    buttonSendMessage.isEnabled = false
-                    editTextMessage.hint = "차단한 사용자와는 채팅할 수 없습니다."
-                    editTextMessage.isEnabled = false
-                }
+                chatRoomViewModel.setIsBlocked(true)
+            }
+            .setNegativeButton("취소", null)
+            .create()
+        builder.show()
+    }
+
+    // 차단 해제
+    private fun unblockUser() {
+        val builder = MaterialAlertDialogBuilder(requireContext())
+            .setTitle("차단해제")
+            .setMessage("차단을 해제하면 다시 채팅을 주고받을 수 있으며 산책 메이트 요청이 가능해집니다.")
+            .setPositiveButton("해제하기"){ dialogInterface: DialogInterface, i: Int ->
+                // TODO 사용자 차단 해제
+                chatRoomViewModel.setIsBlocked(false)
+            }
+            .setNegativeButton("취소", null)
+            .create()
+        builder.show()
+    }
+
+    // 차단 여부에 따라 UI 변경
+    private fun updateUIBasedOnBlockStatus(isBlocked: Boolean) {
+        if (isBlocked) {
+            // 차단 -> 산책 메이트 요청, 채팅 불가
+            fragmentChatRoomBinding.run {
+                buttonRequestWalkMate.isEnabled = false
+                buttonSendMessage.isEnabled = false
+                editTextMessage.hint = "차단 사용자와는 채팅할 수 없습니다."
+                editTextMessage.isEnabled = false
+            }
+        } else {
+            // 차단 해제 -> 산책 메이트 요청, 채팅 가능
+            fragmentChatRoomBinding.run {
+                buttonRequestWalkMate.isEnabled = true
+                buttonSendMessage.isEnabled = true
+                editTextMessage.hint = "메시지를 입력하세요."
+                editTextMessage.isEnabled = true
+            }
+        }
+    }
+
+    // 채팅방 나가기
+    private fun exitChatRoom() {
+        val builder = MaterialAlertDialogBuilder(requireContext())
+            .setTitle("채팅방 나가기")
+            .setMessage("채팅방을 나가면 대화내용이 모두 삭제되고 채팅목록에서도 삭제됩니다.")
+            .setPositiveButton("나가기"){ dialogInterface: DialogInterface, i: Int ->
+                // TODO 채팅방 나가기 로직 구현
+                findNavController().popBackStack()
             }
             .setNegativeButton("취소", null)
             .create()

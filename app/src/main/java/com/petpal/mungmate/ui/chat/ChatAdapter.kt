@@ -19,8 +19,10 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 
+private const val TAG = "CHAT_ADAPTER"
+
 class ChatAdapter(private val chatViewModel: ChatViewModel, private val activity: MainActivity) : RecyclerView.Adapter<ChatAdapter.ViewHolder>() {
-    val TAG = "CHAT_ADAPTER"
+
     val currentUserUid = FirebaseAuth.getInstance().currentUser?.uid.toString()
     private val chatRooms = mutableListOf<ChatRoom>()
 

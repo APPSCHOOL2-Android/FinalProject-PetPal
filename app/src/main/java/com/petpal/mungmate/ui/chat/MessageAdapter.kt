@@ -200,6 +200,7 @@ class MessageAdapter(private val chatRoomViewModel: ChatRoomViewModel): Recycler
 
                     // 산책 메이트 수락 메시지 전송
                     val message = Message(
+                        "",
                         currentUserId,
                         matchKey,
                         Timestamp.now(),
@@ -208,7 +209,7 @@ class MessageAdapter(private val chatRoomViewModel: ChatRoomViewModel): Recycler
                         MessageVisibility.ALL.code
                     )
                     // chatRoomId를 viewmodel에서 가져오기 vs 매개변수로 받기??
-                    chatRoomViewModel.saveMessage(chatRoomViewModel.currentChatRoomId.value.toString(), message)
+                    chatRoomViewModel.sendMessage(chatRoomViewModel.currentChatRoomId.value.toString(), message)
                 }
 
                 buttonReject.setOnClickListener {
@@ -221,6 +222,7 @@ class MessageAdapter(private val chatRoomViewModel: ChatRoomViewModel): Recycler
                     
                     // 산책 메이트 거절 메시지 전송
                     val message = Message(
+                        "",
                         currentUserId,
                         matchKey,
                         Timestamp.now(),
@@ -229,7 +231,7 @@ class MessageAdapter(private val chatRoomViewModel: ChatRoomViewModel): Recycler
                         MessageVisibility.ALL.code
                     )
                     // chatRoomId를 viewmodel에서 가져오기 vs 매개변수로 받기??
-                    chatRoomViewModel.saveMessage(chatRoomViewModel.currentChatRoomId.value.toString(), message)
+                    chatRoomViewModel.sendMessage(chatRoomViewModel.currentChatRoomId.value.toString(), message)
                 }
             }
         }

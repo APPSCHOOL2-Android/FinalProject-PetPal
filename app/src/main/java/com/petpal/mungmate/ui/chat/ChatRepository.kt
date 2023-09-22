@@ -5,7 +5,6 @@ import com.google.android.gms.tasks.Task
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
-import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.petpal.mungmate.model.ChatRoom
@@ -24,9 +23,11 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+private const val TAG = "CHAT_REPOSITORY"
+
 class ChatRepository {
     companion object {
-        // collection 이름
+        // collection 이름 : 오타 방지, 재사용
         const val CHAT_ROOMS_NAME = "chatRooms"
         const val MESSAGES_NAME = "messages"
         const val MATCHES_NAME = "matches"
@@ -37,17 +38,21 @@ class ChatRepository {
         const val TIMESTAMP = "timestamp"
         const val CHAT_PAGE_SIZE = 100L
     }
-
-    val TAG = "CHAT_REPOSITORY"
     var db = Firebase.firestore
 
     // todo await() 추가해서 리턴값들 DocumentReference로 통일하기
     // 채팅방에 메시지 추가 = 메시지 전송
-    fun saveMessage(chatRoomId: String, message: Message): Task<DocumentReference> {
-        var messagesCollection = db.collection(CHAT_ROOMS_NAME)
+    fun saveMessage(chatRoomId: String, message: Message) {
+        var messageDocRef = db.collection(CHAT_ROOMS_NAME)
             .document(chatRoomId)
             .collection(MESSAGES_NAME)
-        return messagesCollection.add(message)
+            .document()
+        message.id = messageDocRef.id
+        messageDocRef.set(message).addOnSuccessListener {
+            Log.d(TAG, "save message completed")
+        }.addOnFailureListener {
+            Log.d(TAG, "save message failed")
+        }
     }
 
     // 메시지 목록 실시간 로드
@@ -174,9 +179,9 @@ class ChatRepository {
         }
     }
 
-    suspend fun getOrCreateChatRoom(user1Id: String, user2Id: String): String {
+    suspend fun getOrCreateChatRoom(myUserId: String, receiverId: String): String {
         // 사용자 ID 조합으로 chatroom Key 생성
-        val chatRoomKey = listOf(user1Id, user2Id).sorted().joinToString("_")
+        val chatRoomKey = listOf(myUserId, receiverId).sorted().joinToString("_")
 
         // chatroom 존재 확인
         val chatRoomDocRef = db.collection(CHAT_ROOMS_NAME).document(chatRoomKey)
@@ -189,8 +194,8 @@ class ChatRepository {
         } else {
             // 채팅방이 존재하지 않는 경우, 새로운 채팅방을 생성하고 ID를 반환
             val newChatRoom = ChatRoom(
-                user1Id,
-                user2Id,
+                myUserId,
+                receiverId,
                 "",
                 Timestamp.now(),
                 false,
@@ -207,7 +212,8 @@ class ChatRepository {
                 .format(Date())
             
             val message = Message(
-                user1Id,
+                "",
+                myUserId,
                 dateContent,
                 Timestamp.now(),
                 true,
@@ -219,6 +225,36 @@ class ChatRepository {
 
             return chatRoomKey
         }
+    }
+
+    // TODO 외부에서 날 차단했을 때도 실시간으로 반영하려면 users/USERID/blockUserList에 snapshotlistener 장착?
+    // 채팅 참여자 간의 차단 여부 확인
+    suspend fun checkBlockedStatus(myUserId: String, receiverId: String): Boolean {
+        // 상대 정보 가져오기
+        var isBlockedByReceiver = false
+        val receiverDocumentSnapshot = db.collection(USERS_NAME).document(receiverId).get().await()
+        if (receiverDocumentSnapshot != null && receiverDocumentSnapshot.exists()) {
+            // 상대방이 날 차단했는지 확인
+            val receiverBlockUsers = receiverDocumentSnapshot.get("blockUserList") as? List<String>
+            // blockUserList 필드가 아예 없는 경우 : 아직 차단한 사용자가 없음
+            if (receiverBlockUsers != null && myUserId != null) {
+                isBlockedByReceiver = receiverBlockUsers.contains(myUserId)
+            }
+        }
+
+        // 내 정보 가져오기
+        var isBlockedByMe = false
+        val myDocumentSnapshot = db.collection(USERS_NAME).document(myUserId).get().await()
+        if (myDocumentSnapshot != null && myDocumentSnapshot.exists()) {
+            // 내가 상대를 차단했는지 확인
+            val myBlockList = myDocumentSnapshot.get("blockUserList") as? List<String>
+            if (myBlockList != null) {
+                isBlockedByMe = myBlockList.contains(receiverId)
+            }
+        }
+
+        // 두 경우 중 하나라도 차단 상태인지 확인
+        return isBlockedByMe || isBlockedByReceiver
     }
 
     // 채팅방의 모든 메시지 로드

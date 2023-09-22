@@ -16,11 +16,14 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+private const val TAG = "CHAT_ROOM_VIEW_MODEL"
+
 class ChatRoomViewModel: ViewModel() {
 
-    private val TAG = "CHAT_ROOM_VIEW_MODEL"
     var chatRepository = ChatRepository()
-    // var savedMessages: MutableLiveData<List<Message>> = MutableLiveData()
+
+    private val _isBlocked = MutableLiveData<Boolean>()
+    val isBlocked get() = _isBlocked
 
     private val _currentChatRoomId = MutableLiveData<String>()
     val currentChatRoomId get() = _currentChatRoomId
@@ -49,13 +52,21 @@ class ChatRoomViewModel: ViewModel() {
         }
     }
 
-    // 채팅방 Document에 메시지 저장
-    fun saveMessage(chatRoomId: String, message: Message){
-        chatRepository.saveMessage(chatRoomId, message).addOnFailureListener {
-            Log.d(TAG, "sendMessage completed")
-        }.addOnFailureListener { 
-            Log.d(TAG, "sendMessage failed")
+    // 참여자 중 한명이라도 상대를 차단했는지 여부 체크
+    fun checkBlockedStatus(myUserId: String, receiverId: String) {
+        viewModelScope.launch {
+            val isBlocked = chatRepository.checkBlockedStatus(myUserId, receiverId)
+            setIsBlocked(isBlocked)
         }
+    }
+
+    fun setIsBlocked(value: Boolean) {
+        _isBlocked.value = value
+    }
+
+    // 채팅방 Document에 메시지 저장
+    fun sendMessage(chatRoomId: String, message: Message){
+        chatRepository.saveMessage(chatRoomId, message)
     }
 
     fun loadMessages(chatRoomId: String) {
@@ -92,8 +103,6 @@ class ChatRoomViewModel: ViewModel() {
 
     fun setReceiverUser(userId: String){
         _receiverUserId.value = userId
-        getReceiverInfoById(userId)
-        getReceiverPetInfoByUserId(userId)
     }
 
     // 채팅 상대 기본 정보 가져오기
@@ -139,25 +148,4 @@ class ChatRoomViewModel: ViewModel() {
             chatRepository.updateFieldInMatchDocument(matchKey, fieldName, updatedValue)
         }
     }
-
-    // 채팅방 Document의 모든 메시지 로드
-//    fun getSavedMessages(chatRoomId: String): MutableLiveData<List<Message>> {
-//        chatRepository.getSavedMessages(chatRoomId).addSnapshotListener { value, error ->
-//            if (error != null) {
-//                Log.w(TAG, "실시간 리스너 실패", error)
-//                savedMessages.value = listOf()  // null
-//                return@addSnapshotListener
-//            }
-//
-//            var savedMessageList: MutableList<Message> = mutableListOf()
-//            for (doc in value!!) {
-//                var message = doc.toObject(Message::class.java)
-//                savedMessageList.add(message)
-//            }
-//            savedMessages.value = savedMessageList
-//        }
-//
-//        return savedMessages
-//    }
-
 }
