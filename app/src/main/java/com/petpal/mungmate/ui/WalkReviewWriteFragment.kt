@@ -10,6 +10,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.activity.addCallback
 import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.SimpleTarget
@@ -48,6 +49,10 @@ class WalkReviewWriteFragment : Fragment() {
         fragmentWalkReviewWriteBinding= FragmentWalkReviewWriteBinding.inflate(layoutInflater)
         mainActivity=activity as MainActivity
 
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
+
+        }
+
         val user=auth.currentUser
         userId=user!!.uid
         val walkRecorduid=arguments?.getString("walkRecorduid")
@@ -59,6 +64,8 @@ class WalkReviewWriteFragment : Fragment() {
         Log.d("온거리",walkDistance.toString())
         val walkMatchingId=arguments?.getString("walkMatchingId")
 
+
+        fragmentWalkReviewWriteBinding.textViewWalkReviewDate.text=walkRecordDate
         fragmentWalkReviewWriteBinding.imageViewWalk.setOnClickListener {
             selectImageFromGallery()
         }

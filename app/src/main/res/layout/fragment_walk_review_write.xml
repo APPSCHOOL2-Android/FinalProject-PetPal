@@ -29,6 +29,15 @@
             android:gravity="center"
             android:text="날짜"
             android:textAppearance="@style/TextAppearance.AppCompat.Large" />
+        <TextView
+            android:id="@+id/textViewWalkReviewUser"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/common_margin"
+            android:gravity="center"
+            android:text="ㅇㅇㅇ 와의 산책"
+            android:textAppearance="@style/TextAppearance.AppCompat.Large" />
+
 
         <ImageView
             android:id="@+id/imageViewWalk"

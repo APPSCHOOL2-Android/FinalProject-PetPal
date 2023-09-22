@@ -19,6 +19,7 @@ import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.petpal.mungmate.model.Favorite
 import com.petpal.mungmate.model.KakaoSearchResponse
+import com.petpal.mungmate.model.Match
 import com.petpal.mungmate.model.PlaceData
 import com.petpal.mungmate.model.ReceiveUser
 import com.petpal.mungmate.model.Review
@@ -50,6 +51,7 @@ class WalkViewModel(private val repository: WalkRepository,application: Applicat
     private val fusedLocationClient = LocationServices.getFusedLocationProviderClient(application)
     private var lastLocation: Location? = null
     val distanceMoved: MutableLiveData<Float> = MutableLiveData(0f)
+    val matchesLiveData: MutableLiveData<List<Match>> = MutableLiveData()
     val isUserBlocked: LiveData<Boolean> get() = _isUserBlocked
     val timerRunnable = object : Runnable {
         override fun run() {
@@ -292,6 +294,16 @@ class WalkViewModel(private val repository: WalkRepository,application: Applicat
             } catch (e: Exception) {
                 // 에러 처리
                 _isUserBlocked.value = false
+            }
+        }
+    }
+    fun fetchMatchesByUserId(userId: String) {
+        viewModelScope.launch {
+            try {
+                val matches = repository.fetchMatchesByUserId(userId)
+                matchesLiveData.postValue(matches)
+            } catch (e: Exception) {
+                //
             }
         }
     }
