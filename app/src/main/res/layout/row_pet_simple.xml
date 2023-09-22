@@ -6,11 +6,10 @@
     android:orientation="vertical"
     android:paddingEnd="12dp">
 
-    <ImageView
+    <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/imageRowSimplePet"
         android:layout_width="40dp"
         android:layout_height="40dp"
-        android:background="@drawable/circular_shape"
         android:clickable="true"
         android:focusable="true"
         android:padding="4dp"
