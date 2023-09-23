@@ -96,7 +96,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/common_margin"
-            android:text="후기 보내기" />
+            android:text="리뷰 작성 완료" />
 
 
     </LinearLayout>

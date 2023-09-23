@@ -72,6 +72,9 @@ import com.petpal.mungmate.model.ReceiveUser
 import com.petpal.mungmate.model.Review
 import com.petpal.mungmate.utils.LastKnownLocation
 import com.petpal.mungmate.utils.onWalk.onWalk
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import net.daum.mf.map.api.MapPOIItem
 import net.daum.mf.map.api.MapPoint
@@ -122,6 +125,8 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
     private var savedUri: Uri? = null
     var matches1: MutableList<Match> = mutableListOf()
     val storage = Firebase.storage
+    private val userMarkers = HashMap<String, MapPOIItem>()
+    private var observeJob: Job? = null
     //val storageReference = storage.reference
 
 
@@ -207,7 +212,13 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
                 startCountdown()
                 onWalk=true
                 observeViewModelonWalk()
-                viewModel.observeUsersOnWalk()
+                observeJob?.cancel()  // 기존의 Job이 실행 중이면 취소
+                observeJob = lifecycleScope.launch {
+                    while (isActive) {
+                        viewModel.observeUsersOnWalk()
+                        delay(60000)  // 1분 대기
+                    }
+                }
                 fragmentWalkBinding.mapView.removeAllPOIItems()
                 updateCurrentLocationOnce()
                 startLocationUpdates()
@@ -260,19 +271,16 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
                 }
             }
 
-
-            if (locationList.size > 1) {
-                val polyline=MapPolyline()
-                polyline.tag=1000
-                polyline.lineColor = Color.argb(128, 255, 51, 0);
-                for (location in locationList) {
-                    polyline.addPoint(MapPoint.mapPointWithGeoCoord(location.latitude, location.longitude))
-                }
-                fragmentWalkBinding.mapView.addPolyline(polyline)
-            }
-
-            val handler = Handler()
-            handler.postDelayed({
+            //맵에 이동 경로 그리기 -> 근데 그려도 보안정책상 캡쳐가 안됨
+//            if (locationList.size > 1) {
+//                val polyline=MapPolyline()
+//                polyline.tag=1000
+//                polyline.lineColor = Color.argb(128, 255, 51, 0);
+//                for (location in locationList) {
+//                    polyline.addPoint(MapPoint.mapPointWithGeoCoord(location.latitude, location.longitude))
+//                }
+//                fragmentWalkBinding.mapView.addPolyline(polyline)
+//            }
                 viewModel.stopTimer()
                 totalDistance=0.0f
                 viewModel.distanceMoved.value=totalDistance
@@ -280,7 +288,6 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
                 viewModel.elapsedTimeLiveData.value= elapsedTime.toString()
                 viewModel.updateOnWalkStatusFalse(userId)
                 mainActivity.navigate(R.id.action_mainFragment_to_WriteWalkReviewFragment, bundle)
-            }, 3000)
             getCurrentLocation()
             matches1.remove(walkWithUser)
             val currentTimestamp = com.google.firebase.Timestamp.now()
@@ -337,7 +344,7 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
         }
         return uri
     }
-    private fun observeViewModelonWalk(){
+    private fun observeViewModelonWalk() {
         viewModel.usersOnWalk.observe(viewLifecycleOwner, Observer { users ->
             users.forEach { user ->
                 user.nickname?.let { Log.d("전체유저", it) }
@@ -345,9 +352,9 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
             if (checkPermission(Manifest.permission.ACCESS_FINE_LOCATION)) {
                 fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
                     location?.let {
-                        val currentLocation=Location("currentLocation").apply{
-                            latitude=it.latitude ?: 0.0
-                            longitude=it.longitude ?:0.0
+                        val currentLocation = Location("currentLocation").apply {
+                            latitude = it.latitude ?: 0.0
+                            longitude = it.longitude ?: 0.0
                         }
                         nearbyUsers = users.filter { user ->
                             // user의 위치를 가져옵니다.
@@ -360,26 +367,31 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
                         }
 
                         for (user in nearbyUsers!!) {
-                            // 마커 추가
-                            user.nickname?.let { it1 -> Log.d("진짜", it1) }
                             val mapPoint = MapPoint.mapPointWithGeoCoord(
-                                user.location?.get("latitude") ?: 0.0, user.location?.get("longitude")
-                                    ?: 0.0)
-                            val poiItem = MapPOIItem().apply {
-                                itemName = user.nickname
-                                tag = user.nickname.hashCode()
-                                this.mapPoint = mapPoint
-                                markerType = MapPOIItem.MarkerType.CustomImage
-                                customImageResourceId = R.drawable.location // 여기에 원하는 이미지 리소스 지정
-                                isCustomImageAutoscale = true
-                                setCustomImageAnchor(0.5f, 1.0f)
+                                user.location?.get("latitude") ?: 0.0, user.location?.get("longitude") ?: 0.0)
+
+                            if (userMarkers.containsKey(user.uid)) {
+                                // 기존 마커 업데이트
+                                val existingMarker = userMarkers[user.uid]
+                                existingMarker?.mapPoint = mapPoint
+                            } else {
+                                // 새로운 마커 추가
+                                val poiItem = MapPOIItem().apply {
+                                    itemName = user.nickname
+                                    tag = user.nickname.hashCode()
+                                    this.mapPoint = mapPoint
+                                    markerType = MapPOIItem.MarkerType.CustomImage
+                                    customImageResourceId = R.drawable.location // 여기에 원하는 이미지 리소스 지정
+                                    isCustomImageAutoscale = true
+                                    setCustomImageAnchor(0.5f, 1.0f)
+                                }
+                                fragmentWalkBinding.mapView.addPOIItem(poiItem)
+                                userMarkers[user.uid!!] = poiItem
                             }
-                            fragmentWalkBinding.mapView.addPOIItem(poiItem)
                         }
                     }
                 }
             }
-
         })
     }
     private fun observeViewModel() {
@@ -536,8 +548,8 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
             itemName = "나"
             mapPoint = MapPoint.mapPointWithGeoCoord(location.latitude, location.longitude)
             //custome으로하면 로드가 안되서 깨지는 현상
-            markerType = MapPOIItem.MarkerType.RedPin
-            //customImageResourceId = R.drawable.mylocation
+            markerType = MapPOIItem.MarkerType.CustomImage
+            customImageResourceId = R.drawable.paw_pin
             isCustomImageAutoscale = true
             setCustomImageAnchor(0.5f, 1.0f)
 
@@ -553,8 +565,8 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
         userLocationMarker = MapPOIItem().apply {
             itemName = "나"
             mapPoint = MapPoint.mapPointWithGeoCoord(location.latitude, location.longitude)
-            markerType = MapPOIItem.MarkerType.RedPin
-            //customImageResourceId = R.drawable.mylocation
+            markerType = MapPOIItem.MarkerType.CustomImage
+            customImageResourceId = R.drawable.paw_pin
             isCustomImageAutoscale = true
             setCustomImageAnchor(0.5f, 1.0f)
 
@@ -722,7 +734,8 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
         fragmentWalkBinding.progressBackgroundWalk1.visibility = View.GONE
     }
     @SuppressLint("SimpleDateFormat")
-    fun getCurrentDate(): String {
+    fun getCurrentDate(): String
+    {
         val current = Date()
         val formatter = SimpleDateFormat("yyyy-MM-dd") // 년-월-일
         return formatter.format(current)
