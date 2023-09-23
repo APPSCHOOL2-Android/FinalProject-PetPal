@@ -15,7 +15,8 @@ data class FirestoreUserBasicInfoData(
     // enum AVAILABILITY
     val availability: Int,
     val walkHoursStart: String? = null,
-    val walkHoursEnd: String? = null
+    val walkHoursEnd: String? = null,
+    val blockUserList: List<String>? = null
 ) {
-    constructor() : this("", "", "", false, Sex.NONE.ordinal, Availability.WHENEVER.ordinal, null, null )
+    constructor() : this("", "", "", false, Sex.NONE.ordinal, Availability.WHENEVER.ordinal, null, null, null)
 }
