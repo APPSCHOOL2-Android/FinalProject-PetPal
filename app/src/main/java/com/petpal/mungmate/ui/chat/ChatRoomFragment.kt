@@ -19,6 +19,7 @@ import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.storage
 import com.petpal.mungmate.R
 import com.petpal.mungmate.databinding.FragmentChatRoomBinding
+import com.petpal.mungmate.model.ChatRoom
 import com.petpal.mungmate.model.FirestoreUserBasicInfoData
 import com.petpal.mungmate.model.Message
 import com.petpal.mungmate.model.MessageType
@@ -40,7 +41,7 @@ class ChatRoomFragment : Fragment() {
 
     private val currentUserId = FirebaseAuth.getInstance().currentUser?.uid.toString()  // 현재 사용자 id
     lateinit var receiverId: String     // 채팅 상대 id
-    lateinit var chatRoomId: String     // 채팅방 id
+    lateinit var chatRoom: ChatRoom     // 채팅방
 
     private var currentUserInfo: FirestoreUserBasicInfoData? = null
     private var receiverUserInfo: FirestoreUserBasicInfoData? = null
@@ -68,12 +69,11 @@ class ChatRoomFragment : Fragment() {
         // Observer
         chatRoomViewModel.run {
             // 채팅방 세팅
-            currentChatRoomId.observe(viewLifecycleOwner) { currentChatRoomId ->
-                // 현재 채팅방 id 저장
-                chatRoomId = currentChatRoomId
+            currentChatRoom.observe(viewLifecycleOwner) {
+                chatRoom = it
 
                 // 메세지 목록 로드
-                chatRoomViewModel.startObservingMessages(chatRoomId)
+                chatRoomViewModel.startObservingMessages(it.id)
             }
 
             currentUserInfoData.observe(viewLifecycleOwner) { userInfoData ->
@@ -126,7 +126,7 @@ class ChatRoomFragment : Fragment() {
         chatRoomViewModel.startObservingReceiverUserInfo(receiverId)
 
         // 두 사용자 정보로 채팅방 찾아서 정보 로드
-        chatRoomViewModel.getChatRoom(currentUserId, receiverId)
+        chatRoomViewModel.getOrCreateChatRoom(currentUserId, receiverId)
 
         // TODO 날짜가 바뀌면 자동으로 DATE 타입 메시지 저장
 
@@ -161,7 +161,7 @@ class ChatRoomFragment : Fragment() {
 
             // 산책 메이트 요청
             buttonRequestWalkMate.setOnClickListener {
-                val action = ChatRoomFragmentDirections.actionChatRoomFragmentToWalkMateRequestFragment(currentUserId, receiverId, chatRoomId)
+                val action = ChatRoomFragmentDirections.actionChatRoomFragmentToWalkMateRequestFragment(receiverId, chatRoom)
                 findNavController().navigate(action)
             }
 
@@ -252,7 +252,7 @@ class ChatRoomFragment : Fragment() {
             MessageType.TEXT.code,
             MessageVisibility.ALL.code
         )
-        chatRoomViewModel.sendMessage(chatRoomId, message)
+        chatRoomViewModel.sendMessage(chatRoom.id, message)
     }
     
     // 차단 상태 반전
