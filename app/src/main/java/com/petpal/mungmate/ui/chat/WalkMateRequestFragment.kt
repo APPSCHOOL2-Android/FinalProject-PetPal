@@ -274,8 +274,7 @@ class WalkMateRequestFragment : Fragment() {
         )
 
         chatRoomViewModel.sendMessage(currentChatRoom.id, receiverMessage)
-
-        Snackbar.make(requireView(), "산책 메이트 요청 메시지를 전송했습니다.", Snackbar.LENGTH_SHORT).show()
+        // Snackbar.make(requireView(), "산책 메이트 요청 메시지를 전송했습니다.", Snackbar.LENGTH_SHORT).show()
 
         findNavController().popBackStack()
     }
