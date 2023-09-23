@@ -128,7 +128,18 @@ class MessageAdapter(private val chatRoomViewModel: ChatRoomViewModel): Recycler
     // ViewModel에서 messages.value가 바뀌면 이걸 감지한 observer에서 setMessages() 호출해서 RecyclerView DataSet 변경
     fun setMessages(newMessages: List<Message>) {
         messages.clear()
-        messages.addAll(newMessages)
+        // 채팅방에서 내가 어느 사용자인지에 따라 보일 메시지 제한
+        val senderId = chatRoomViewModel.currentChatRoom.value?.senderId!!
+        val messageVisibility = if (currentUserId == senderId) {
+            MessageVisibility.ONLY_SENDER
+        }else  {
+            MessageVisibility.ONLY_RECEIVER
+        }
+
+        // 모두 OR 내가 볼 수 있는 메시지만 표시
+        val myMessages = newMessages
+            .filter { it.visible == MessageVisibility.ALL.code || it.visible == messageVisibility.code }
+        messages.addAll(myMessages)
         notifyDataSetChanged()
     }
 
@@ -167,18 +178,13 @@ class MessageAdapter(private val chatRoomViewModel: ChatRoomViewModel): Recycler
         fun bind(message: Message) {
             rowChatWalkMateRequestBinding.run {
                 // 산책 요청 Message에 저장된 document key 값으로 match 객체 가져오기
-                val matchKey = message.content!!
+                val matchId = message.content!!
                 
-                chatRoomViewModel.getMatchByKey(matchKey) { document ->
+                chatRoomViewModel.getMatchById(matchId) { document ->
+                    // TODO match id 값만 저장해두고 일시, 장소는 content에 텍스트로 저장하는 방식으로 변경하기?
                     if (document != null && document.exists()) {
                         val match = document.toObject(Match::class.java)
                         if (match != null) {
-                            // 하나의 match에 대해 수락, 거절은 한 번만 선택 가능
-                            if (match.status === MatchStatus.REQUESTED.code) {
-                                buttonAccept.isEnabled = true
-                                buttonReject.isEnabled = true
-                            }
-
                             // 산책 일시, 장소 표시
                             val formattedWalkTimestamp = formatFirebaseTimestamp(match.walkTimestamp!!, "M월 d일 (E) a h:mm")
                             textViewRequestDateTime.text = "일시 : $formattedWalkTimestamp"
@@ -190,26 +196,28 @@ class MessageAdapter(private val chatRoomViewModel: ChatRoomViewModel): Recycler
                 }
 
                 buttonAccept.setOnClickListener {
-                    // TODO 사용자에 따라 메시지 visibility 안보이게 변경
                     // 하나의 match에 대해 수락, 거절은 한 번만 선택 가능
                     buttonAccept.isEnabled = false
                     buttonReject.isEnabled = false
                     
                     // 매칭 상태 변경 -> 수락
-                    chatRoomViewModel.updateFieldInMatchDocument(matchKey, "status", MatchStatus.ACCEPTED.code)
+                    chatRoomViewModel.updateFieldInMatchDocument(matchId, "status", MatchStatus.ACCEPTED.code)
+
+                    // 산책 메이트 요청 메시지 숨기기
+                    chatRoomViewModel.hideMessage(message.id)
 
                     // 산책 메이트 수락 메시지 전송
                     val message = Message(
                         "",
                         currentUserId,
-                        matchKey,
+                        matchId,
                         Timestamp.now(),
                         false,
                         MessageType.WALK_MATE_ACCEPT.code,
                         MessageVisibility.ALL.code
                     )
-                    // chatRoomId를 viewmodel에서 가져오기 vs 매개변수로 받기??
-                    chatRoomViewModel.sendMessage(chatRoomViewModel.currentChatRoomId.value.toString(), message)
+                    val chatRoomId = chatRoomViewModel.currentChatRoom.value?.id!!
+                    chatRoomViewModel.sendMessage(chatRoomId, message)
                 }
 
                 buttonReject.setOnClickListener {
@@ -218,20 +226,23 @@ class MessageAdapter(private val chatRoomViewModel: ChatRoomViewModel): Recycler
                     buttonReject.isEnabled = false
 
                     // 매칭 상태 변경 -> 거절
-                    chatRoomViewModel.updateFieldInMatchDocument(matchKey, "status", MatchStatus.REJECTED.code)
+                    chatRoomViewModel.updateFieldInMatchDocument(matchId, "status", MatchStatus.REJECTED.code)
+
+                    // 산책 메이트 요청 메시지 숨기기
+                    chatRoomViewModel.hideMessage(message.id)
                     
                     // 산책 메이트 거절 메시지 전송
                     val message = Message(
                         "",
                         currentUserId,
-                        matchKey,
+                        matchId,
                         Timestamp.now(),
                         false,
                         MessageType.WALK_MATE_REJECT.code,
                         MessageVisibility.ALL.code
                     )
-                    // chatRoomId를 viewmodel에서 가져오기 vs 매개변수로 받기??
-                    chatRoomViewModel.sendMessage(chatRoomViewModel.currentChatRoomId.value.toString(), message)
+                    val chatRoomId = chatRoomViewModel.currentChatRoom.value?.id!!
+                    chatRoomViewModel.sendMessage(chatRoomId, message)
                 }
             }
         }
@@ -251,7 +262,7 @@ class MessageAdapter(private val chatRoomViewModel: ChatRoomViewModel): Recycler
                 // 산책 요청 Message에 저장된 document key 값으로 match 객체 가져오기
                 val matchKey = message.content!!
 
-                chatRoomViewModel.getMatchByKey(matchKey) { document ->
+                chatRoomViewModel.getMatchById(matchKey) { document ->
                     if (document != null && document.exists()) {
                         val match = document.toObject(Match::class.java)
                         if (match != null) {

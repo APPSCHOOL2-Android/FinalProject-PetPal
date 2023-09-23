@@ -1,6 +1,7 @@
 package com.petpal.mungmate.ui.chat
 
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -15,7 +16,9 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.timepicker.MaterialTimePicker
 import com.google.android.material.timepicker.TimeFormat
 import com.google.firebase.Timestamp
+import com.google.firebase.auth.FirebaseAuth
 import com.petpal.mungmate.databinding.FragmentWalkMateRequestBinding
+import com.petpal.mungmate.model.ChatRoom
 import com.petpal.mungmate.model.Message
 import com.petpal.mungmate.model.MessageType
 import com.petpal.mungmate.model.Match
@@ -27,13 +30,15 @@ import java.util.Date
 import java.util.Locale
 
 class WalkMateRequestFragment : Fragment() {
+    private val TAG = "CHAT_WALK_MATE_REQUEST"
+
     private var _fragmentWalkMateRequestBinding : FragmentWalkMateRequestBinding? = null
     private val fragmentWalkMateRequestBinding get() = _fragmentWalkMateRequestBinding!!
 
     private lateinit var chatRoomViewModel: ChatRoomViewModel
 
-    lateinit var chatRoomId: String
-    lateinit var senderId: String
+    val currentUserId = FirebaseAuth.getInstance().currentUser?.uid!!
+    lateinit var currentChatRoom: ChatRoom
     lateinit var receiverId: String
 
     lateinit var selectedDate: Date
@@ -52,8 +57,7 @@ class WalkMateRequestFragment : Fragment() {
 
         // 채팅창에서 전달받은 산책 메이트 요청 송신자 -> 수신자 id
         val args = WalkMateRequestFragmentArgs.fromBundle(requireArguments())
-        chatRoomId = args.chatRoomId
-        senderId = args.senderId
+        currentChatRoom = args.chatRoom
         receiverId = args.receiverId
 
         return fragmentWalkMateRequestBinding.root
@@ -192,7 +196,7 @@ class WalkMateRequestFragment : Fragment() {
         val walkTimestamp = parseStringToTimeStamp("$walkDate $walkTime")
 
         val match = Match(
-            senderId,
+            currentUserId,
             receiverId,
             walkTimestamp,
             walkPlace,
@@ -227,21 +231,25 @@ class WalkMateRequestFragment : Fragment() {
 
     // 2. 산책 매칭 메시지 저장
     private fun sendMatchMessage(matchDocumentKey: String) {
-//        val messageVisibility = if (senderId ==  )
+        // 메시지 표시 대상 제한 = currentUser가 senderId, receiverId인지에 따라 visibility 설정
+        val messageVisibility = if (currentUserId == currentChatRoom.senderId) {
+            MessageVisibility.ONLY_RECEIVER
+        } else {
+            MessageVisibility.ONLY_SENDER
+        }
 
         // content에 walkmatching id 저장 -> RecyclerView ViewHolder에서 데이터 가져와서 사용
         val message = Message(
             "",
-            senderId,
+            currentUserId,
             matchDocumentKey,
             Timestamp.now(),
             false,
             MessageType.WALK_MATE_REQUEST.code,
-            MessageVisibility.ALL.code
+            messageVisibility.code
         )
-        // todo currentUser가 senderId, receiverId인지에 따라 visibility 설정
-        // todo 채팅방의 sender, receiver 문구가 헷갈리는데 user1, user2로 하는 게 나을지
-        chatRoomViewModel.sendMessage(chatRoomId, message)
+
+        chatRoomViewModel.sendMessage(currentChatRoom.id, message)
         Snackbar.make(requireView(), "산책 메이트 요청 메시지를 전송했습니다.", Snackbar.LENGTH_SHORT).show()
         findNavController().popBackStack()
     }

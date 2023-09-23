@@ -51,6 +51,7 @@ class ChatRepository {
             .document()
         message.id = messageDocRef.id
         messageDocRef.set(message).addOnSuccessListener {
+            // TODO 채팅방 최신 메시지, 시간 갱신
             Log.d(TAG, "save message completed")
         }.addOnFailureListener {
             Log.d(TAG, "save message failed")
@@ -110,25 +111,6 @@ class ChatRepository {
         awaitClose { listenerRegistration.remove() }
     }
 
-
-    // 산책 매칭 저장
-    fun saveMatch(match: Match): Task<DocumentReference> {
-        val matchesCollection = db.collection(MATCHES_NAME)
-        return matchesCollection.add(match)
-    }
-
-    // Document Key 값으로 산책 매칭 데이터 가져오기
-    suspend fun getMatchById(matchId: String): DocumentSnapshot? {
-        return try {
-            db.collection(MATCHES_NAME)
-                .document(matchId)
-                .get()
-                .await()
-        } catch (e: Exception) {
-            null
-        }
-    }
-
     // 사용자 id로 정보 객체 가져오기
     suspend fun getUserInfoById(userId: String): DocumentSnapshot? {
         return try {
@@ -179,20 +161,7 @@ class ChatRepository {
         return userReportsCollection.add(userReport)
     }
 
-    // matches 컬렉션 내 문서의 특정 필드 업데이트
-    suspend fun updateFieldInMatchDocument(matchKey: String, fieldName: String, updateValue: Any) {
-        val matchDocumentRef = db.collection(MATCHES_NAME).document(matchKey)
-        val updateData = hashMapOf<String, Any>()
-        updateData[fieldName] = updateValue
-
-        try {
-            matchDocumentRef.update(updateData).await()
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-    }
-
-    suspend fun getOrCreateChatRoom(myUserId: String, receiverId: String): String {
+    suspend fun getOrCreateChatRoom(myUserId: String, receiverId: String): ChatRoom {
         // 사용자 ID 조합으로 chatroom Key 생성
         val chatRoomKey = listOf(myUserId, receiverId).sorted().joinToString("_")
 
@@ -203,10 +172,11 @@ class ChatRepository {
         if (chatRoomDocSnapshot.exists()) {
             // 채팅방이 이미 존재하는 경우, 기존 채팅방의 ID를 반환
             Log.d(TAG, "load chatroom completed")
-            return chatRoomKey
+            return chatRoomDocSnapshot.toObject(ChatRoom::class.java) ?: ChatRoom()
         } else {
             // 채팅방이 존재하지 않는 경우, 새로운 채팅방을 생성하고 ID를 반환
             val newChatRoom = ChatRoom(
+                chatRoomKey,
                 myUserId,
                 receiverId,
                 "",
@@ -236,7 +206,7 @@ class ChatRepository {
             saveMessage(chatRoomKey, message)
             Log.d(TAG, "send date message completed")
 
-            return chatRoomKey
+            return newChatRoom
         }
     }
 
@@ -307,5 +277,60 @@ class ChatRepository {
 
         // 업데이트된 차단 목록을 DB에 저장
         userRef.update(BLOCK_USER_LIST, blockedUserList).await()
+    }
+
+    // 산책 매칭 저장
+    fun saveMatch(match: Match): Task<DocumentReference> {
+        val matchesCollection = db.collection(MATCHES_NAME)
+        return matchesCollection.add(match)
+    }
+
+    // Document Key 값으로 산책 매칭 데이터 가져오기
+    suspend fun getMatchById(matchId: String): DocumentSnapshot? {
+        return try {
+            db.collection(MATCHES_NAME)
+                .document(matchId)
+                .get()
+                .await()
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    // matches 컬렉션 내 문서의 특정 필드 업데이트
+    suspend fun updateFieldInMatchDocument(matchId: String, fieldName: String, updateValue: Any) {
+        val matchDocRef = db.collection(MATCHES_NAME).document(matchId)
+        val updateData = hashMapOf<String, Any>()
+        updateData[fieldName] = updateValue
+
+        try {
+            matchDocRef.update(updateData).await()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    suspend fun getChatRoomById(chatRoomId: String): DocumentSnapshot? {
+        return try {
+            db.collection(CHAT_ROOMS_NAME)
+                .document(chatRoomId)
+                .get()
+                .await()
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    suspend fun updateFieldInMessageDocument(messageId: String, fieldName: String, updateValue: Any) {
+        val messageDocRef = db.collection(MESSAGES_NAME).document(messageId)
+        val updateData = hashMapOf<String, Any>()
+        updateData[fieldName] = updateValue
+
+        try {
+            messageDocRef.update(updateData).await()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+
     }
 }

@@ -7,10 +7,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.tasks.Task
 import com.google.firebase.firestore.DocumentSnapshot
+import com.petpal.mungmate.model.ChatRoom
 import com.petpal.mungmate.model.FirestoreUserBasicInfoData
 import com.petpal.mungmate.model.Message
 import com.petpal.mungmate.model.UserReport
 import com.petpal.mungmate.model.Match
+import com.petpal.mungmate.model.MessageVisibility
 import com.petpal.mungmate.model.PetData
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -23,8 +25,11 @@ class ChatRoomViewModel: ViewModel() {
     var chatRepository = ChatRepository()
     
     // 현재 채팅방 ID
-    private val _currentChatRoomId = MutableLiveData<String>()
-    val currentChatRoomId get() = _currentChatRoomId
+//    private val _currentChatRoomId = MutableLiveData<String>()
+//    val currentChatRoomId get() = _currentChatRoomId
+
+    private val _currentChatRoom = MutableLiveData<ChatRoom>()
+    val currentChatRoom: LiveData<ChatRoom> get() = _currentChatRoom
 
     // 현재 채팅방의 메시지 목록
     private val _messages = MutableLiveData<List<Message>>()
@@ -41,13 +46,13 @@ class ChatRoomViewModel: ViewModel() {
     val receiverPetInfo: LiveData<PetData> get() = _receiverPetInfo
 
     // 현재 입장한 채팅방 id 설정
-    fun getChatRoom(user1Id: String, user2Id: String) {
+    fun getOrCreateChatRoom(user1Id: String, user2Id: String) {
         viewModelScope.launch {
-            val chatRoomId: String = withContext(Dispatchers.IO) {
+            val chatRoom = withContext(Dispatchers.IO) {
                 chatRepository.getOrCreateChatRoom(user1Id, user2Id)
             }
-            _currentChatRoomId.value = chatRoomId
-            Log.d(TAG, "currentRoomId updated")
+            _currentChatRoom.value = chatRoom
+            Log.d(TAG, "currentChatRoom updated")
         }
     }
 
@@ -80,7 +85,7 @@ class ChatRoomViewModel: ViewModel() {
     }
 
     // Document Key 값으로 산책 매칭 데이터 가져오기
-    fun getMatchByKey(matchKey: String, onComplete: (DocumentSnapshot?) -> Unit) {
+    fun getMatchById(matchKey: String, onComplete: (DocumentSnapshot?) -> Unit) {
         viewModelScope.launch {
             val document = withContext(Dispatchers.IO){
                 chatRepository.getMatchById(matchKey)
@@ -88,6 +93,15 @@ class ChatRoomViewModel: ViewModel() {
             onComplete(document)
         }
     }
+
+//    fun getChatRoomById(chatRoomId: String, onComplete: (DocumentSnapshot?) -> Unit) {
+//        viewModelScope.launch {
+//            val document = withContext(Dispatchers.IO) {
+//                chatRepository.getChatRoomById(chatRoomId)
+//            }
+//            onComplete(document)
+//        }
+//    }
 
     // 채팅 상대 대표 반려견 정보 가져오기
     fun getReceiverPetInfoByUserId(userId: String) {
@@ -155,6 +169,13 @@ class ChatRoomViewModel: ViewModel() {
                     _currentUserInfo.value = userInfo
                 }
         }
+    }
+
+    fun hideMessage(messageId: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            chatRepository.updateFieldInMessageDocument(messageId, "visible", MessageVisibility.NONE.code)
+        }
+
     }
 }
 
