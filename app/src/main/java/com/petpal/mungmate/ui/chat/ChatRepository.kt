@@ -49,13 +49,27 @@ class ChatRepository {
             .document(chatRoomId)
             .collection(MESSAGES_NAME)
             .document()
+
         message.id = messageDocRef.id
-        messageDocRef.set(message).addOnSuccessListener {
-            // TODO 채팅방 최신 메시지, 시간 갱신
-            Log.d(TAG, "save message completed")
-        }.addOnFailureListener {
-            Log.d(TAG, "save message failed")
-        }
+
+        messageDocRef.set(message)
+            .addOnSuccessListener {
+                Log.d(TAG, "Success add message")
+                // 메시지가 성공적으로 저장되면 해당 채팅방 마지막 메시지, 마지막 시간 갱신
+                val chatRoomRef = db.collection(CHAT_ROOMS_NAME).document(chatRoomId)
+                val updateData: HashMap<String, Any> = hashMapOf(
+                    "lastMessage" to message.content,
+                    "lastMessageTime" to message.timestamp
+                )
+                chatRoomRef.update(updateData)
+                    .addOnSuccessListener {
+                        Log.d(TAG, "Success updating chatRoom")
+                    }.addOnFailureListener { e ->
+                        Log.d(TAG, "Error updating chatRoom: $e")
+                    }
+            }.addOnFailureListener { e ->
+                Log.d(TAG, "Error add message: $e")
+            }
     }
 
     // 메시지 목록 실시간 로드

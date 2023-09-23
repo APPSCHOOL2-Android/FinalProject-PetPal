@@ -59,24 +59,31 @@ class ChatAdapter(private val chatViewModel: ChatViewModel, private val activity
                     }
                 }
 
-                // 마지막 메시지 TODO 메시지 보낼때마다 실시간 반영하기
+                // 마지막 메시지
                 textViewLastMessageText.text = chatRoom.lastMessage
 
-                // 마지막 메시지 시간 TODO 메시지 보낼때마다 실시간 반영하기
-                // timestamp 오늘, 어제, MM월 dd일 표시
+                // 마지막 메시지 시간 timestamp 오늘, 어제, MM월 dd일 표시
                 val timestamp = chatRoom.lastMessageTime
                 val currentTime = Calendar.getInstance().time
                 val timeDifferenceMillis = currentTime.time - timestamp?.toDate()?.time!!
 
                 // 밀리초를 날짜로 변환
                 val daysAgo = timeDifferenceMillis / (1000 * 60 * 60 * 24)
+
                 // 오늘, 어제, 날짜로 표시 분기
                 val formatter = SimpleDateFormat("MM월 dd일", Locale.getDefault())
-                textViewLastMessageTime.text = when(daysAgo) {
-                    0L -> "오늘"
-                    1L -> "어제"
-                    else -> formatter.format(timestamp.toDate())
+
+                // 오늘의 timestamp 여부를 확인하여 표시 형식 선택
+                val formattedTime = if (daysAgo == 0L) {
+                    SimpleDateFormat("a HH:mm", Locale.getDefault()).format(timestamp.toDate())
+                } else {
+                    when(daysAgo) {
+                        1L -> "어제"
+                        else -> formatter.format(timestamp.toDate())
+                    }
                 }
+
+                textViewLastMessageTime.text = formattedTime
 
                 // 아직 안읽은 메시지 수
                 if (currentUserUid == chatRoom.senderId) {
@@ -132,7 +139,9 @@ class ChatAdapter(private val chatViewModel: ChatViewModel, private val activity
     // ViewModel의 observer에서 호출하는 메서드 -> 데이터 세팅
     fun setChatRooms(newChatRooms: List<ChatRoom>) {
         // 내가 참여중인 채팅방만 필터링
-        val myChatRooms = newChatRooms.filter { it.senderId == currentUserUid || it.receiverId == currentUserUid }
+        val myChatRooms = newChatRooms
+            .filter { it.senderId == currentUserUid || it.receiverId == currentUserUid }
+            .sortedByDescending { it.lastMessageTime }
         chatRooms.clear()
         chatRooms.addAll(myChatRooms)
         notifyDataSetChanged()
