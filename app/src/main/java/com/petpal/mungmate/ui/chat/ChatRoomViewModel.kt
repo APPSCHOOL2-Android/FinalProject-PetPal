@@ -127,9 +127,9 @@ class ChatRoomViewModel: ViewModel() {
     }
 
     // 매칭 데이터 업데이트
-    fun updateFieldInMatchDocument(matchKey: String, fieldName: String, updatedValue: Any) {
+    fun updateFieldInMatchDocument(matchId: String, fieldName: String, updatedValue: Any) {
         viewModelScope.launch(Dispatchers.IO) {
-            chatRepository.updateFieldInMatchDocument(matchKey, fieldName, updatedValue)
+            chatRepository.updateFieldInMatchDocument(matchId, fieldName, updatedValue)
         }
     }
 
@@ -171,9 +171,9 @@ class ChatRoomViewModel: ViewModel() {
         }
     }
 
-    fun hideMessage(messageId: String) {
+    fun hideMessage(chatRoomId: String, messageId: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            chatRepository.updateFieldInMessageDocument(messageId, "visible", MessageVisibility.NONE.code)
+            chatRepository.updateFieldInMessageDocument(chatRoomId, messageId, "visible", MessageVisibility.NONE.code)
         }
         
     }

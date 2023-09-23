@@ -64,8 +64,9 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:layout_weight="1"
-                android:text="상대가 요청을 수락하면 산책 매칭이 성사됩니다."
-                android:textColor="@color/md_theme_dark_onTertiary" />
+                android:text="★ 상대가 요청을 수락하면 산책 매칭이 성사됩니다."
+                android:textColor="@color/md_theme_dark_secondaryContainer" />
+
         </LinearLayout>
 
     </LinearLayout>

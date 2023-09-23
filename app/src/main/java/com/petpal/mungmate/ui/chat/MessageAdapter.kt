@@ -221,18 +221,15 @@ class MessageAdapter(private val chatRoomViewModel: ChatRoomViewModel): Recycler
                     textViewRequestPlace.text = matchPlace
                 }
 
+                val chatRoomId = chatRoomViewModel.currentChatRoom.value?.id!!
                 val matchId = message.matchId!!
 
                 buttonAccept.setOnClickListener {
-                    // 하나의 match에 대해 수락, 거절은 한 번만 선택 가능
-                    buttonAccept.isEnabled = false
-                    buttonReject.isEnabled = false
-                    
                     // 매칭 상태 변경 -> 수락
                     chatRoomViewModel.updateFieldInMatchDocument(matchId, "status", MatchStatus.ACCEPTED.code)
 
                     // 산책 메이트 요청 메시지 숨기기
-                    chatRoomViewModel.hideMessage(message.id)
+                    chatRoomViewModel.hideMessage(chatRoomId, message.id)
 
                     // 산책 메이트 수락 메시지 전송
                     val message = Message(
@@ -249,14 +246,11 @@ class MessageAdapter(private val chatRoomViewModel: ChatRoomViewModel): Recycler
                 }
 
                 buttonReject.setOnClickListener {
-                    buttonAccept.isEnabled = false
-                    buttonReject.isEnabled = false
-
                     // 매칭 상태 변경 -> 거절
                     chatRoomViewModel.updateFieldInMatchDocument(matchId, "status", MatchStatus.REJECTED.code)
 
                     // 산책 메이트 요청 메시지 숨기기
-                    chatRoomViewModel.hideMessage(message.id)
+                    chatRoomViewModel.hideMessage(chatRoomId, message.id)
                     
                     // 산책 메이트 거절 메시지 전송
                     val message = Message(

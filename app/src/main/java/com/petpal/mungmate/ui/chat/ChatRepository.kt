@@ -321,16 +321,31 @@ class ChatRepository {
         }
     }
 
-    suspend fun updateFieldInMessageDocument(messageId: String, fieldName: String, updateValue: Any) {
-        val messageDocRef = db.collection(MESSAGES_NAME).document(messageId)
+    suspend fun updateFieldInMessageDocument(chatRoomId: String, messageId: String, fieldName: String, updateValue: Any) {
+        val messageDocRef = db.collection(CHAT_ROOMS_NAME)
+            .document(chatRoomId)
+            .collection(MESSAGES_NAME)
+            .document(messageId)
         val updateData = hashMapOf<String, Any>()
         updateData[fieldName] = updateValue
 
         try {
+            val snapshot = messageDocRef.get().await()
+            if (snapshot.exists()) {
+                val existingData = snapshot.data
+                Log.d(TAG, "Existing Data : $existingData")
+            }
+
             messageDocRef.update(updateData).await()
+
+            val updatedSnapshot = messageDocRef.get().await()
+            if (updatedSnapshot.exists()) {
+                val updatedData = updatedSnapshot.data
+                Log.d(TAG, "Updated Data : $updatedData")
+            }
         } catch (e: Exception) {
             e.printStackTrace()
+            Log.d(TAG, "Error updating field in message document: ${e.message}")
         }
-
     }
 }
