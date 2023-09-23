@@ -25,6 +25,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
 import com.petpal.mungmate.MainActivity
 import com.petpal.mungmate.R
 import com.petpal.mungmate.databinding.FragmentCommunityPostDetailBinding
@@ -41,7 +42,7 @@ import java.util.Locale
 import java.util.TimeZone
 import java.util.UUID
 
-class CommunityPostDetailFragment : Fragment() {
+class CommunityPostDetailFragment : Fragment(),AdapterCallback {
 
     private lateinit var communityPostDetailBinding: FragmentCommunityPostDetailBinding
     var isClicked = false
@@ -81,6 +82,9 @@ class CommunityPostDetailFragment : Fragment() {
             communityDetailRecyclerView()
             getFireStoreUserInfo()
             comment()
+
+
+
         }
 
         return communityPostDetailBinding.root
@@ -197,17 +201,64 @@ class CommunityPostDetailFragment : Fragment() {
 
     private fun FragmentCommunityPostDetailBinding.lottie() {
 
-        communityPostDetailFavoriteLottie.scaleX = 2.0f
-        communityPostDetailFavoriteLottie.scaleY = 2.0f
 
-        communityPostDetailFavoriteLottie.setOnClickListener {
-            isClicked = !isClicked // 클릭할 때마다 변수를 반전시킴
-            if (isClicked) {
-                communityPostDetailFavoriteLottie.playAnimation()
+        val db = FirebaseFirestore.getInstance()
+        val collectionName = "Post"
+        val documentId = postGetId
+        val docRef = db.collection(collectionName).document(documentId)
 
+        docRef.addSnapshotListener { documentSnapshot, e ->
+            if (e != null) {
+                // 오류 처리
+                return@addSnapshotListener
+            }
+            communityPostDetailFavoriteLottie.scaleX = 2.0f
+            communityPostDetailFavoriteLottie.scaleY = 2.0f
+            if (documentSnapshot != null && documentSnapshot.exists()) {
+                // 문서가 존재하고 데이터가 변경됨
+                val likedUserIds = documentSnapshot.get("likedUserIds") as? List<String>
+
+                // 사용자 ID가 likedUserIds에 포함되어 있는지 확인
+                val isLiked = likedUserIds?.contains(user!!.uid) == true
+                val numberOfLikes = likedUserIds?.size ?: 0
+
+                Log.d("numberOfLikes", numberOfLikes.toString())
+                communityPostDetailFavoriteCounter.text = numberOfLikes.toString()
+
+                // 좋아요 상태에 따라 버튼 색상 설정
+                if (isLiked) {
+                    communityPostDetailFavoriteLottie.playAnimation()
+                } else {
+                    communityPostDetailFavoriteLottie.cancelAnimation()
+                    communityPostDetailFavoriteLottie.progress = 0f
+                }
+
+                communityPostDetailFavoriteLottie.setOnClickListener {
+                    // 좋아요 토글 로직 추가
+                    val updatedLikedUserIds = likedUserIds?.toMutableList() ?: mutableListOf()
+
+                    if (isLiked) {
+                        // 사용자가 이미 좋아요를 누른 경우: 좋아요 취소
+                        updatedLikedUserIds.remove(user?.uid)
+                        communityPostDetailFavoriteLottie.cancelAnimation()
+                        communityPostDetailFavoriteLottie.progress = 0f
+                    } else {
+                        // 사용자가 좋아요를 누르지 않은 경우: 좋아요 추가
+                        updatedLikedUserIds.add(user!!.uid)
+                        communityPostDetailFavoriteLottie.playAnimation()
+                    }
+
+                    // Firestore 업데이트
+                    docRef.update("likedUserIds", updatedLikedUserIds)
+                        .addOnSuccessListener {
+                            // 업데이트 성공
+                        }
+                        .addOnFailureListener { e ->
+                            Log.d("CommunityAdapter", e.toString())
+                        }
+                }
             } else {
-                communityPostDetailFavoriteLottie.cancelAnimation()
-                communityPostDetailFavoriteLottie.progress = 0f
+                // 문서가 존재하지 않음 또는 삭제됨
             }
 
         }
@@ -359,22 +410,23 @@ class CommunityPostDetailFragment : Fragment() {
                 timeDifferenceMillis < 86_400_000 -> "${timeDifferenceMillis / 3_600_000}시간 전" // 1일 미만
                 else -> "${timeDifferenceMillis / 86_400_000}일 전" // 1일 이상 전
             }
+            val storage = FirebaseStorage.getInstance()
+            val storageRef = storage.reference.child(userImage.toString())
+            storageRef.downloadUrl.addOnSuccessListener { uri ->
+                communityPostDetailBinding.run {
+                    Glide
+                        .with(requireContext())
+                        .load(uri)
+                        .diskCacheStrategy(DiskCacheStrategy.ALL)
+                        .fitCenter()
+                        .into(communityPostDetailProfileImage)
 
-            communityPostDetailBinding.run {
-                Glide
-                    .with(requireContext())
-                    .load(userImage)
-                    .diskCacheStrategy(DiskCacheStrategy.ALL)
-                    .fitCenter()
-                    .into(communityPostDetailProfileImage)
 
-
-                communityPostDetailPostTitle.text = postTitle
-                communityPostDateCreated.text = timeAgo
-                communityPostDetailFavoriteCounter.text = postLike.toString()
-                communityPostDetailCommentCounter.text = postCommentList.size.toString()
-                communityPostDetailContent.text = postContent
-                communityPostDetailUserNickName.text = userNickName
+                    communityPostDetailPostTitle.text = postTitle
+                    communityPostDateCreated.text = timeAgo
+                    communityPostDetailContent.text = postContent
+                    communityPostDetailUserNickName.text = userNickName
+                }
             }
         }
         initViewPager2()
@@ -388,7 +440,8 @@ class CommunityPostDetailFragment : Fragment() {
                     requireContext(),
                     mutableListOf(),
                     postGetId,
-                    commentViewModel
+                    commentViewModel,
+                    this@CommunityPostDetailFragment
                 )
             adapter = communityDetailCommentAdapter
             setHasFixedSize(true)
@@ -495,5 +548,13 @@ class CommunityPostDetailFragment : Fragment() {
         super.onDestroy()
         postCommentList.clear()
     }
+
+    override fun onReplyButtonClicked(commentList: Comment) {
+//        Snackbar.make(requireView(), "답글", Snackbar.LENGTH_SHORT).show()
+        communityPostDetailBinding.communityPostDetailCommentTextInputEditText.requestFocus()
+        val imm = requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.showSoftInput(communityPostDetailBinding.communityPostDetailCommentTextInputEditText, InputMethodManager.SHOW_IMPLICIT)
+    }
+
 
 }

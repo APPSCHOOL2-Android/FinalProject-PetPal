@@ -1,13 +1,11 @@
 package com.petpal.mungmate.ui.community
 
-import android.app.Dialog
 import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.Window
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.cardview.widget.CardView
@@ -16,6 +14,9 @@ import androidx.recyclerview.widget.RecyclerView
 import com.airbnb.lottie.LottieAnimationView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
 import com.petpal.mungmate.MainActivity
 import com.petpal.mungmate.R
 import com.petpal.mungmate.databinding.RowCommunityBinding
@@ -77,14 +78,18 @@ class CommunityAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val post = postList[position]
-
-        Glide
-            .with(context)
-            .load(post.userImage)
-            .diskCacheStrategy(DiskCacheStrategy.ALL)
-            .fitCenter()
-            .into(holder.communityProfileImage)
-
+        val storage = FirebaseStorage.getInstance()
+        val storageRef = storage.reference.child(post.userImage.toString())
+        storageRef.downloadUrl.addOnSuccessListener { uri ->
+            Glide
+                .with(context)
+                .load(uri)
+                .diskCacheStrategy(DiskCacheStrategy.ALL)
+                .fitCenter()
+                .fallback(R.drawable.main_image)
+                .error(R.drawable.main_image)
+                .into(holder.communityProfileImage)
+        }
         if (post.postImages?.isNotEmpty()!!) {
             Glide
                 .with(context)
@@ -115,7 +120,7 @@ class CommunityAdapter(
         holder.communityPostDateCreated.text = post.postDateCreated.toString()
         holder.communityContent.text = post.postContent
         holder.communityCommentCounter.text= post.postComment?.size.toString()
-        holder.communityFavoriteCounter.text = post.postLike.toString()
+
 
         Log.d("어떤 카테고리",post.postCategory.toString())
         when(post.postCategory.toString()){
@@ -179,27 +184,69 @@ class CommunityAdapter(
             }
         }
 
-
-
-        var isClicked = false
-
         holder.communityFavoriteLottie.scaleX = 2.0f
         holder.communityFavoriteLottie.scaleY = 2.0f
 
-        holder.communityFavoriteLottie.setOnClickListener {
+        val auth = FirebaseAuth.getInstance()
+        val user = auth.currentUser?.uid
+        val db = FirebaseFirestore.getInstance()
+        val collectionName = "Post"
+        val documentId = post.postID.toString()
+        val docRef = db.collection(collectionName).document(documentId)
 
-            isClicked = !isClicked // 클릭할 때마다 변수를 반전시킴
-            if (isClicked) {
-                holder.communityFavoriteLottie.playAnimation()
-
-            } else {
-                holder.communityFavoriteLottie.cancelAnimation()
-                holder.communityFavoriteLottie.progress = 0f
+        docRef.addSnapshotListener { documentSnapshot, e ->
+            if (e != null) {
+                // 오류 처리
+                return@addSnapshotListener
             }
 
+            if (documentSnapshot != null && documentSnapshot.exists()) {
+                // 문서가 존재하고 데이터가 변경됨
+                val likedUserIds = documentSnapshot.get("likedUserIds") as? List<String>
+
+                // 사용자 ID가 likedUserIds에 포함되어 있는지 확인
+                val isLiked = likedUserIds?.contains(user) == true
+                val numberOfLikes = likedUserIds?.size ?: 0
+
+                Log.d("numberOfLikes", numberOfLikes.toString())
+                holder.communityFavoriteCounter.text = numberOfLikes.toString()
+
+                // 좋아요 상태에 따라 버튼 색상 설정
+                if (isLiked) {
+                    holder.communityFavoriteLottie.playAnimation()
+                } else {
+                    holder.communityFavoriteLottie.cancelAnimation()
+                    holder.communityFavoriteLottie.progress = 0f
+                }
+
+                holder.communityFavoriteLottie.setOnClickListener {
+                    // 좋아요 토글 로직 추가
+                    val updatedLikedUserIds = likedUserIds?.toMutableList() ?: mutableListOf()
+
+                    if (isLiked) {
+                        // 사용자가 이미 좋아요를 누른 경우: 좋아요 취소
+                        updatedLikedUserIds.remove(user)
+                        holder.communityFavoriteLottie.cancelAnimation()
+                        holder.communityFavoriteLottie.progress = 0f
+                    } else {
+                        // 사용자가 좋아요를 누르지 않은 경우: 좋아요 추가
+                        updatedLikedUserIds.add(user.toString())
+                        holder.communityFavoriteLottie.playAnimation()
+                    }
+
+                    // Firestore 업데이트
+                    docRef.update("likedUserIds", updatedLikedUserIds)
+                        .addOnSuccessListener {
+                            // 업데이트 성공
+                        }
+                        .addOnFailureListener { e ->
+                            Log.d("CommunityAdapter", e.toString())
+                        }
+                }
+            } else {
+                // 문서가 존재하지 않음 또는 삭제됨
+            }
         }
-
-
     }
 
     fun add(post: Post) {

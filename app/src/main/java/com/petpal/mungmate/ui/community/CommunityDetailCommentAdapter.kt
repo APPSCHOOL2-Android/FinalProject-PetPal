@@ -3,6 +3,7 @@ package com.petpal.mungmate.ui.community
 import android.content.Context
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.ImageView
@@ -16,6 +17,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
 import com.petpal.mungmate.R
 import com.petpal.mungmate.databinding.RowCommunityCommentBinding
 import com.petpal.mungmate.model.Comment
@@ -27,7 +29,8 @@ class CommunityDetailCommentAdapter(
     private val context: Context,
     private val postCommentList: MutableList<Comment>,
     private val postGetId: String,
-    private val commentViewModel: CommentViewModel
+    private val commentViewModel: CommentViewModel,
+    private val callback: AdapterCallback
 ) :
     RecyclerView.Adapter<CommunityDetailCommentAdapter.ViewHolder>() {
 
@@ -43,7 +46,7 @@ class CommunityDetailCommentAdapter(
         val communityCommentFavoriteLottie: LottieAnimationView =
             item.communityCommentFavoriteLottie
         val communityCommentCommentCounter: TextView = item.communityCommentCommentCounter
-
+        val communityCommentReplyTextView: TextView = item.communityCommentReplyTextView
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -61,16 +64,20 @@ class CommunityDetailCommentAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
 
         val commentList = postCommentList[position]
-        Glide
-            .with(context)
-            .load(commentList.commentUserImage)
-            .diskCacheStrategy(DiskCacheStrategy.ALL)
-            .fitCenter()
-            .error(R.drawable.main_image)
-            .fallback(R.drawable.main_image)
-            .into(holder.communityProfileImage)
 
+        val storage = FirebaseStorage.getInstance()
+        val storageRef = storage.reference.child(commentList.commentUserImage.toString())
+        storageRef.downloadUrl.addOnSuccessListener { uri ->
+            Glide
+                .with(context)
+                .load(uri)
+                .diskCacheStrategy(DiskCacheStrategy.ALL)
+                .fitCenter()
+                .error(R.drawable.main_image)
+                .fallback(R.drawable.main_image)
+                .into(holder.communityProfileImage)
 
+        }
         holder.communityUserNickName.text = commentList.commentNickName.toString()
 
 
@@ -94,6 +101,12 @@ class CommunityDetailCommentAdapter(
         holder.communityCommentFavoriteCounter.text = "0"
         holder.communityCommentCommentCounter.text = "0"
 
+        holder.communityCommentReplyTextView.setOnClickListener {
+            callback.onReplyButtonClicked(commentList)
+
+        }
+
+
         holder.communityCommentMenuImageButton.setOnClickListener { view ->
             val popupMenu = PopupMenu(context, view)
 
@@ -111,8 +124,6 @@ class CommunityDetailCommentAdapter(
                         R.id.item_comment_delete -> {
                             val commentToDelete = postCommentList[holder.adapterPosition]
 
-                            Log.d("이건 뭐죠?", commentToDelete.commentUid.toString())
-                            Log.d("이건 뭐죠?", currentUserId.toString())
                             if (commentToDelete.commentUid.toString() == currentUserId.toString()) {
                                 val db = FirebaseFirestore.getInstance()
                                 db.collection("Post").document(postGetId).update(
@@ -150,6 +161,7 @@ class CommunityDetailCommentAdapter(
         holder.communityCommentFavoriteLottie.scaleX = 2.0f
         holder.communityCommentFavoriteLottie.scaleY = 2.0f
 
+
         holder.communityCommentFavoriteLottie.setOnClickListener {
             isClicked = !isClicked // 클릭할 때마다 변수를 반전시킴
             if (isClicked) {
@@ -165,7 +177,6 @@ class CommunityDetailCommentAdapter(
     }
 
     fun updateData(newData: MutableList<Comment>) {
-        Log.d("값 추적", newData.toString())
         postCommentList.clear()
         postCommentList.addAll(newData)
         notifyDataSetChanged()
