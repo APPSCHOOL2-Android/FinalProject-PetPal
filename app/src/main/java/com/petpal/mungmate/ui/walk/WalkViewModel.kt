@@ -235,18 +235,19 @@ class WalkViewModel(private val repository: WalkRepository,application: Applicat
     fun updateUserLocation(userId: String, latitude: Double, longitude: Double) {
         viewModelScope.launch {
             try {
-                repository.updateUserLocation(userId, latitude, longitude)
+                repository.updateLocation(userId, latitude, longitude)
+                // 필요한 경우 성공 메시지나 상태 업데이트
             } catch (e: Exception) {
                 errorMessage.postValue(e.localizedMessage ?: "Failed to update location")
             }
         }
     }
 
-    // 사용자의 onWalk 상태를 true로 설정
-    fun setUserOnWalk(userId: String) {
+    fun setOnWalkStatusTrue(userId: String) {
         viewModelScope.launch {
             try {
                 repository.updateOnWalkStatusTrue(userId)
+                // 필요한 경우 성공 메시지나 상태 업데이트
             } catch (e: Exception) {
                 errorMessage.postValue(e.localizedMessage ?: "Failed to set onWalk status")
             }
@@ -309,7 +310,7 @@ class WalkViewModel(private val repository: WalkRepository,application: Applicat
             }
         }
     }
-//    fun fetchMatchesByUserId(userId: String) {
+    //    fun fetchMatchesByUserId(userId: String) {
 //        viewModelScope.launch {
 //            try {
 //                val matches = repository.fetchMatchesByUserId(userId)
@@ -320,14 +321,14 @@ class WalkViewModel(private val repository: WalkRepository,application: Applicat
 //        }
 //    }
     fun fetchMatchesByUserId(userId: String) {
-    repository.fetchMatchesByUserId(userId,
-        onSuccess = { matches ->
-            matchesLiveData.postValue(matches)
-        },
-        onFailure = { exception ->
-            // Handle the error here, if necessary.
-            // For example, you might post a different value to a LiveData or log the exception.
-        })
+        repository.fetchMatchesByUserId(userId,
+            onSuccess = { matches ->
+                matchesLiveData.postValue(matches)
+            },
+            onFailure = { exception ->
+                // Handle the error here, if necessary.
+                // For example, you might post a different value to a LiveData or log the exception.
+            })
     }
     fun fetchAverageRatingForUser(userId: String) {
         viewModelScope.launch {

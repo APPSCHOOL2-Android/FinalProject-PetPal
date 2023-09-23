@@ -167,23 +167,6 @@ class WalkRepository {
         return document.getString("nickname")
     }
 
-//    suspend fun updateLocationAndOnWalkStatusTrue(
-//        userId: String,
-//        latitude: Double,
-//        longitude: Double
-//    ) {
-//        val userRef = db.collection("users").document(userId)
-//        userRef.update(
-//            mapOf(
-//                "onWalk" to true,
-//                "location" to mapOf(
-//                    "latitude" to latitude,
-//                    "longitude" to longitude
-//                )
-//            )
-//        ).await()
-//    }
-
     suspend fun updateOnWalkStatusTrue(userId: String) {
         val userRef = db.collection("users").document(userId)
         userRef.update(
@@ -193,7 +176,7 @@ class WalkRepository {
         ).await()
     }
 
-    suspend fun updateUserLocation(userId: String, latitude: Double, longitude: Double) {
+    suspend fun updateLocation(userId: String, latitude: Double, longitude: Double) {
         val userRef = db.collection("users").document(userId)
         userRef.update(
             mapOf(
@@ -343,5 +326,3 @@ class WalkRepository {
     }
 
 }
-
-
