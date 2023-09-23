@@ -65,8 +65,8 @@ class CommunityWritingFragment : Fragment() {
     private val auth = FirebaseAuth.getInstance()
     val user = auth.currentUser
 
-    var nickname=""
-    var userImage=""
+    var nickname = ""
+    var userImage = ""
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -133,7 +133,7 @@ class CommunityWritingFragment : Fragment() {
                             "",
                             emptyList(),
                             "",
-                            0,
+                            emptyList(),
                             emptyList()
                         )
                         if (
@@ -244,7 +244,7 @@ class CommunityWritingFragment : Fragment() {
                                         formattedDateTime,
                                         postImagesList,
                                         communityWritingBinding.communityPostWritingContentTextInputEditText.text.toString(),
-                                        0,
+                                        emptyList(),
                                         emptyList()
                                     )
 
@@ -281,7 +281,7 @@ class CommunityWritingFragment : Fragment() {
                             }
                         }
                     }
-                }  else {
+                } else {
                     // 사진이 없을 때
                     val updatedData = Post(
                         generatedDocId,
@@ -294,7 +294,7 @@ class CommunityWritingFragment : Fragment() {
                         formattedDateTime,
                         postImagesList,
                         communityWritingBinding.communityPostWritingContentTextInputEditText.text.toString(),
-                        0,
+                        emptyList(),
                         emptyList()
                     )
 
@@ -362,7 +362,7 @@ class CommunityWritingFragment : Fragment() {
         }
     }
 
-    private fun getFireStoreUserInfo(){
+    private fun getFireStoreUserInfo() {
 
         if (user != null) {
             val db = FirebaseFirestore.getInstance()
@@ -376,21 +376,21 @@ class CommunityWritingFragment : Fragment() {
                         val getNickname = document.getString("nickname")
                         val getUserImage = document.getString("userImage")
 
-                        Log.d("닉네임",getNickname.toString())
+                        Log.d("닉네임", getNickname.toString())
                         if (getNickname != null) {
-                            nickname=getNickname
+                            nickname = getNickname
                         }
 
                         if (getUserImage != null) {
-                            userImage=getUserImage
+                            userImage = getUserImage
                         }
 
                     } else {
-                       // 사용자 정보 x
+                        // 사용자 정보 x
                     }
                 }
                 .addOnFailureListener { e ->
-                  // 사용자 정보 x
+                    // 사용자 정보 x
                 }
         }
     }
