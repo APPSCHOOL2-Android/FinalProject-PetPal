@@ -22,6 +22,7 @@ class ChatRoomViewModel: ViewModel() {
 
     var chatRepository = ChatRepository()
 
+    // 두 사용자 간의 차단 상태 저장
     private val _isBlocked = MutableLiveData<Boolean>()
     val isBlocked get() = _isBlocked
 
@@ -55,13 +56,9 @@ class ChatRoomViewModel: ViewModel() {
     // 참여자 중 한명이라도 상대를 차단했는지 여부 체크
     fun checkBlockedStatus(myUserId: String, receiverId: String) {
         viewModelScope.launch {
-            val isBlocked = chatRepository.checkBlockedStatus(myUserId, receiverId)
-            setIsBlocked(isBlocked)
+            val result = chatRepository.checkBlockedStatus(myUserId, receiverId)
+            _isBlocked.value = result
         }
-    }
-
-    fun setIsBlocked(value: Boolean) {
-        _isBlocked.value = value
     }
 
     // 채팅방 Document에 메시지 저장
@@ -146,6 +143,22 @@ class ChatRoomViewModel: ViewModel() {
     fun updateFieldInMatchDocument(matchKey: String, fieldName: String, updatedValue: Any) {
         viewModelScope.launch(Dispatchers.IO) {
             chatRepository.updateFieldInMatchDocument(matchKey, fieldName, updatedValue)
+        }
+    }
+
+    // 사용자를 차단 목록에 추가
+    fun blockUser(userId: String, blockedUserId: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            chatRepository.addUserToBlockList(userId, blockedUserId)
+            _isBlocked.postValue(true)
+        }
+    }
+    
+    // 사용자를 차단 목록에서 제거
+    fun unblockUser(userId: String, unblockedUserId: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            chatRepository.removeUserFromBlockList(userId, unblockedUserId)
+            _isBlocked.postValue(false)
         }
     }
 }

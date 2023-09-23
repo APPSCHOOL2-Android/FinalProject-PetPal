@@ -35,6 +35,8 @@ class ChatRepository {
         const val USERS_NAME = "users"
         const val PETS_NAME = "pets"
 
+        const val BLOCK_USER_LIST = "blockUserList"
+
         const val TIMESTAMP = "timestamp"
         const val CHAT_PAGE_SIZE = 100L
     }
@@ -235,7 +237,7 @@ class ChatRepository {
         val receiverDocumentSnapshot = db.collection(USERS_NAME).document(receiverId).get().await()
         if (receiverDocumentSnapshot != null && receiverDocumentSnapshot.exists()) {
             // 상대방이 날 차단했는지 확인
-            val receiverBlockUsers = receiverDocumentSnapshot.get("blockUserList") as? List<String>
+            val receiverBlockUsers = receiverDocumentSnapshot.get(BLOCK_USER_LIST) as? List<String>
             // blockUserList 필드가 아예 없는 경우 : 아직 차단한 사용자가 없음
             if (receiverBlockUsers != null && myUserId != null) {
                 isBlockedByReceiver = receiverBlockUsers.contains(myUserId)
@@ -247,7 +249,7 @@ class ChatRepository {
         val myDocumentSnapshot = db.collection(USERS_NAME).document(myUserId).get().await()
         if (myDocumentSnapshot != null && myDocumentSnapshot.exists()) {
             // 내가 상대를 차단했는지 확인
-            val myBlockList = myDocumentSnapshot.get("blockUserList") as? List<String>
+            val myBlockList = myDocumentSnapshot.get(BLOCK_USER_LIST) as? List<String>
             if (myBlockList != null) {
                 isBlockedByMe = myBlockList.contains(receiverId)
             }
@@ -255,6 +257,50 @@ class ChatRepository {
 
         // 두 경우 중 하나라도 차단 상태인지 확인
         return isBlockedByMe || isBlockedByReceiver
+    }
+
+    // 사용자를 차단 목록에 추가
+    suspend fun addUserToBlockList(userId: String, blockedUserId: String) {
+        val userRef = db.collection(USERS_NAME).document(userId)
+        val blockedUserList = mutableListOf<String>()
+
+        // 현재 차단 목록 가져오기
+        val snapshot = userRef.get().await()
+        if (snapshot.exists()) {
+            val existBlockList = snapshot.get(BLOCK_USER_LIST) as? List<String>
+            if (existBlockList != null) {
+                blockedUserList.addAll(existBlockList)
+            }
+        }
+
+        // 이미 차단되어 있는 사용자인지 확인
+        if (!blockedUserList.contains(blockedUserId)) {
+            // 차단 목록에 추가
+            blockedUserList.add(blockedUserId)
+            // 업데이트된 차단 목록을 DB에 저장
+            userRef.update(BLOCK_USER_LIST, blockedUserList).await()
+        }
+    }
+
+    // 사용자를 차단 목록에서 제거
+    suspend fun removeUserFromBlockList(userId: String, unblockedUserId: String) {
+        val userRef = db.collection(USERS_NAME).document(userId)
+        val blockedUserList = mutableListOf<String>()
+
+        // 현재 차단 목록 가져오기
+        val snapshot = userRef.get().await()
+        if (snapshot.exists()) {
+            val existBlockList = snapshot.get(BLOCK_USER_LIST) as? List<String>
+            if (existBlockList != null) {
+                blockedUserList.addAll(existBlockList)
+            }
+        }
+
+        // 차단 목록에서 제거
+        blockedUserList.remove(unblockedUserId)
+
+        // 업데이트된 차단 목록을 DB에 저장
+        userRef.update(BLOCK_USER_LIST, blockedUserList).await()
     }
 
     // 채팅방의 모든 메시지 로드

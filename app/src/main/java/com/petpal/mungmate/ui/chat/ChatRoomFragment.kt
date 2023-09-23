@@ -15,7 +15,6 @@ import com.bumptech.glide.Glide
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.storage
 import com.petpal.mungmate.R
@@ -37,9 +36,6 @@ class ChatRoomFragment : Fragment() {
 
     private lateinit var chatRoomViewModel: ChatRoomViewModel
     private lateinit var messageAdapter: MessageAdapter
-
-    // 채팅 창 이동시 messages에 등록된 실시간 리스너 해제, 감시 종료 목적
-    private var messageListenerRegistration: ListenerRegistration? = null
 
     private val currentUserId = FirebaseAuth.getInstance().currentUser?.uid.toString()  // 현재 사용자 id
     lateinit var receiverId: String     // 채팅 상대 id
@@ -138,22 +134,22 @@ class ChatRoomFragment : Fragment() {
                 setOnMenuItemClickListener { menuItem ->
                     when(menuItem.itemId) {
                         // 차단 상태가 아닐때만 보이는 메뉴
-                        R.id.menu_item_block -> {
+                        R.id.item_chat_block -> {
                             blockUser()
                             true
                         }
                         // 차단 상태에서만 보이는 메뉴
-                        R.id.menu_item_unblock -> {
+                        R.id.item_chat_unblock -> {
                             unblockUser()
                             true
                         }
-                        R.id.menu_item_report -> {
+                        R.id.item_chat_report -> {
                             // 신고하기 화면 이동 (채팅 상대 UID 전달)
                             val action = ChatRoomFragmentDirections.actionChatRoomFragmentToReportUserFragment(receiverId, chatRoomViewModel.receiverUserInfo.value?.nickname!!)
                             findNavController().navigate(action)
                             true
                         }
-                        R.id.menu_item_exit -> {
+                        R.id.item_chat_exit -> {
                             exitChatRoom()
                             true
                         }
@@ -264,8 +260,7 @@ class ChatRoomFragment : Fragment() {
             .setTitle("차단하기")
             .setMessage("차단한 사용자와는 채팅을 할 수 없으며 산책 메이트를 요청할 수 없습니다.")
             .setPositiveButton("차단하기"){ dialogInterface: DialogInterface, i: Int ->
-                // TODO 사용자 차단 -> 채팅 상대 차단 상태 정보 가져와서 적용하도록 수정 예정
-                chatRoomViewModel.setIsBlocked(true)
+                chatRoomViewModel.blockUser(currentUserId, receiverId)
             }
             .setNegativeButton("취소", null)
             .create()
@@ -278,8 +273,7 @@ class ChatRoomFragment : Fragment() {
             .setTitle("차단해제")
             .setMessage("차단을 해제하면 다시 채팅을 주고받을 수 있으며 산책 메이트 요청이 가능해집니다.")
             .setPositiveButton("해제하기"){ dialogInterface: DialogInterface, i: Int ->
-                // TODO 사용자 차단 해제
-                chatRoomViewModel.setIsBlocked(false)
+                chatRoomViewModel.unblockUser(currentUserId, receiverId)
             }
             .setNegativeButton("취소", null)
             .create()
@@ -289,20 +283,28 @@ class ChatRoomFragment : Fragment() {
     // 차단 여부에 따라 UI 변경
     private fun updateUIBasedOnBlockStatus(isBlocked: Boolean) {
         if (isBlocked) {
-            // 차단 -> 산책 메이트 요청, 채팅 불가
+            // 차단 -> 산책 메이트 요청, 채팅 불가, 차단하기 가능
             fragmentChatRoomBinding.run {
                 buttonRequestWalkMate.isEnabled = false
                 buttonSendMessage.isEnabled = false
                 editTextMessage.hint = "차단 사용자와는 채팅할 수 없습니다."
                 editTextMessage.isEnabled = false
+                toolbarChatRoom.menu.run {
+                    findItem(R.id.item_chat_block).isVisible = false
+                    findItem(R.id.item_chat_unblock).isVisible = true
+                }
             }
         } else {
-            // 차단 해제 -> 산책 메이트 요청, 채팅 가능
+            // 차단 해제 -> 산책 메이트 요청, 채팅 가능, 차단해제 불가
             fragmentChatRoomBinding.run {
                 buttonRequestWalkMate.isEnabled = true
                 buttonSendMessage.isEnabled = true
                 editTextMessage.hint = "메시지를 입력하세요."
                 editTextMessage.isEnabled = true
+                toolbarChatRoom.menu.run {
+                    findItem(R.id.item_chat_block).isVisible = true
+                    findItem(R.id.item_chat_unblock).isVisible = false
+                }
             }
         }
     }
@@ -320,5 +322,4 @@ class ChatRoomFragment : Fragment() {
             .create()
         builder.show()
     }
-
 }
