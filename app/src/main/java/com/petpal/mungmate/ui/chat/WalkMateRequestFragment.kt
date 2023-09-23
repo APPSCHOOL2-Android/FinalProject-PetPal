@@ -1,7 +1,6 @@
 package com.petpal.mungmate.ui.chat
 
 import android.os.Bundle
-import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -209,7 +208,7 @@ class WalkMateRequestFragment : Fragment() {
 
         chatRoomViewModel.saveMatch(match).addOnSuccessListener { matchDocumentKey ->
             // 매칭 데이터 저장된 후에 산책 매칭 메시지 저장(전송)
-            sendMatchMessage(matchDocumentKey)
+            sendMatchMessage(match, matchDocumentKey)
         }
     }
 
@@ -230,27 +229,61 @@ class WalkMateRequestFragment : Fragment() {
     }
 
     // 2. 산책 매칭 메시지 저장
-    private fun sendMatchMessage(matchDocumentKey: String) {
+    private fun sendMatchMessage(match: Match, matchDocumentKey: String) {
+        // 산책 일시, 장소 표시
+        val formattedWalkTimestamp = formatFirebaseTimestamp(match.walkTimestamp!!, "M월 d일 (E) a h:mm")
+        val matchContentDateTime = "일시 : $formattedWalkTimestamp"
+        val matchContentPlace = "장소 : ${match.walkPlace}"
+        val content = listOf<String>(matchContentDateTime, matchContentPlace).joinToString("|")
+
         // 메시지 표시 대상 제한 = currentUser가 senderId, receiverId인지에 따라 visibility 설정
-        val messageVisibility = if (currentUserId == currentChatRoom.senderId) {
-            MessageVisibility.ONLY_RECEIVER
+        var senderMessageVisible = MessageVisibility.ALL
+        var receiverMessageVisible = MessageVisibility.ALL
+        if (currentUserId == currentChatRoom.senderId) {
+            senderMessageVisible = MessageVisibility.ONLY_SENDER
+            receiverMessageVisible = MessageVisibility.ONLY_RECEIVER
         } else {
-            MessageVisibility.ONLY_SENDER
+            senderMessageVisible = MessageVisibility.ONLY_RECEIVER
+            receiverMessageVisible = MessageVisibility.ONLY_SENDER
         }
 
-        // content에 walkmatching id 저장 -> RecyclerView ViewHolder에서 데이터 가져와서 사용
-        val message = Message(
+        // 산책 메이트 요청 송신측 메시지
+        var senderMessage = Message(
             "",
             currentUserId,
-            matchDocumentKey,
+            content,
             Timestamp.now(),
             false,
-            MessageType.WALK_MATE_REQUEST.code,
-            messageVisibility.code
+            MessageType.WALK_MATE_REQUEST_SEND.code,
+            senderMessageVisible.code,
+            matchDocumentKey
+        )
+        chatRoomViewModel.sendMessage(currentChatRoom.id, senderMessage)
+
+        // content에 walkmatching id 저장 -> RecyclerView ViewHolder에서 데이터 가져와서 사용 TODO 일시, 장소 content에 저장하고 match id는 다른 필드에 저장하는 식으로 변경?
+        // 산책 메이트 요청 수신측 메시지
+        val receiverMessage = Message(
+            "",
+            currentUserId,
+            content,
+            Timestamp.now(),
+            false,
+            MessageType.WALK_MATE_REQUEST_RECEIVE.code,
+            receiverMessageVisible.code,
+            matchDocumentKey
         )
 
-        chatRoomViewModel.sendMessage(currentChatRoom.id, message)
+        chatRoomViewModel.sendMessage(currentChatRoom.id, receiverMessage)
+
         Snackbar.make(requireView(), "산책 메이트 요청 메시지를 전송했습니다.", Snackbar.LENGTH_SHORT).show()
+
         findNavController().popBackStack()
+    }
+
+    // Firebase Timestamp 타입을 포맷 패턴의 문자열로 변환
+    private fun formatFirebaseTimestamp(timestamp: Timestamp, format: String): String {
+        val date = timestamp.toDate()
+        val dateFormat = SimpleDateFormat(format, Locale.getDefault())
+        return dateFormat.format(date)
     }
 }

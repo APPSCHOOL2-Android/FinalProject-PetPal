@@ -175,7 +175,7 @@ class ChatRoomViewModel: ViewModel() {
         viewModelScope.launch(Dispatchers.IO) {
             chatRepository.updateFieldInMessageDocument(messageId, "visible", MessageVisibility.NONE.code)
         }
-
+        
     }
 }
 
