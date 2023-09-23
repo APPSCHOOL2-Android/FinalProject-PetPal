@@ -1,5 +1,6 @@
 package com.petpal.mungmate.ui.community
 
+import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -8,10 +9,12 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.petpal.mungmate.MainActivity
 import com.petpal.mungmate.R
 import com.petpal.mungmate.model.PostImage
 
-class CommunityDetailViewPager2Adapter: ListAdapter<PostImage, CommunityDetailViewPager2Adapter.ItemViewHolder>(differ) {
+class CommunityDetailViewPager2Adapter(private val mainActivity: MainActivity): ListAdapter<PostImage, CommunityDetailViewPager2Adapter.ItemViewHolder>(differ) {
 
     inner class ItemViewHolder(val view: View) : RecyclerView.ViewHolder(view) {
 
@@ -22,8 +25,22 @@ class CommunityDetailViewPager2Adapter: ListAdapter<PostImage, CommunityDetailVi
             Glide
                 .with(bannerImageView.context)
                 .load(bannerItem.image)
+                .diskCacheStrategy(DiskCacheStrategy.ALL)
+                .fitCenter()
+                .error(R.drawable.baseline_error_24)
+                .fallback(R.drawable.main_image)
                 .into(bannerImageView)
 
+            bannerImageView.setOnClickListener {
+                    val bundle = Bundle().apply {
+                        putString("img", currentList[position].image)
+                    }
+
+                    mainActivity.navigate(
+                        R.id.action_communityPostDetailFragment_to_fullScreenFragment,
+                        bundle
+                    )
+                }
             /*
                     if (postImagesList != null) {
                     if (postImagesGetList.isNotEmpty()) {
@@ -58,6 +75,7 @@ class CommunityDetailViewPager2Adapter: ListAdapter<PostImage, CommunityDetailVi
 
     override fun onBindViewHolder(holder: ItemViewHolder, position: Int) {
         holder.bind(currentList[position])
+
     }
 
     companion object {

@@ -3,9 +3,9 @@ package com.petpal.mungmate.model
 import com.google.firebase.Timestamp
 
 data class WalkReview(
-    val rating: Double,
-    val comment: String?,
-    val timestamp: Timestamp
+    var rating: Float,
+    var comment: String?,
+    var timestamp: Timestamp?
 ) {
-    constructor() : this(0.0, "", Timestamp.now())
+    constructor() : this(0.0f, "", null)
 }
