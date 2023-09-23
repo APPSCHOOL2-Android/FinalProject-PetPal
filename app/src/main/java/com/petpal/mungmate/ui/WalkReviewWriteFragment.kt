@@ -64,16 +64,24 @@ class WalkReviewWriteFragment : Fragment() {
         val walkDuration=arguments?.getLong("walkDuration") //초단위로 올라감 1분40초 ->walkDuration:100
         val walkDistance=arguments?.getString("walkDistance")
         val walkMatchingId=arguments?.getString("walkMatchingId")
-        Log.d("매칭아이디",walkMatchingId!!)
         val walkRecordId=arguments?.getString("walkMatchingRecorId")
+        val capturedImageUri = arguments?.getParcelable<Uri>("capturedImageUri")
+        Log.d("이미지",capturedImageUri.toString())
         if (walkRecordId != null) {
             Log.d("매칭아이디",walkRecordId)
         }
+        if (capturedImageUri != null) {
+            uploadOriginalImageToStorage(capturedImageUri) { imageUrl ->
+            }
+        }
+
         if(walkMatchingId==null){
             fragmentWalkReviewWriteBinding.imageViewWalk.visibility=View.VISIBLE
             fragmentWalkReviewWriteBinding.userRatingBar.visibility=View.GONE
 
         }else{
+            fragmentWalkReviewWriteBinding.buttonWalkReviewSubmit.text="후기 보내기"
+            fragmentWalkReviewWriteBinding.textViewWalkReviewUser1.text="남긴 평점은 상대방의 발바닥 점수에 반영됩니다."
             fragmentWalkReviewWriteBinding.textViewWalkReviewUser.text="${walkMatchingId}님과의 산책은 어떠셨나요?"
         }
         fragmentWalkReviewWriteBinding.imageViewWalk.setOnClickListener {
@@ -93,7 +101,7 @@ class WalkReviewWriteFragment : Fragment() {
                             walkRecordEndTime!!,
                             walkDuration!!,
                             walkDistance!!.toDouble(),
-                            walkMatchingId,
+                            null,
                             walkMemo,
                             walkPhoto
                         )
@@ -109,7 +117,7 @@ class WalkReviewWriteFragment : Fragment() {
                         walkRecordEndTime!!,
                         walkDuration!!,
                         walkDistance!!.toDouble(),
-                        walkMatchingId,
+                        null,
                         walkMemo
                     )
                     addWalkReview(userId, walkReview)
@@ -118,13 +126,27 @@ class WalkReviewWriteFragment : Fragment() {
             }else{//sender
                 if(userId!=walkMatchingId) {
                     val walkWithReview = WalkReview(fragmentWalkReviewWriteBinding.userRatingBar.rating, walkMemo, Timestamp.now())
+                    val myReview=WalkRecord( walkRecorduid!!, walkRecordDate!!, walkRecordStartTime!!, walkRecordEndTime!!,
+                        walkDuration!!, walkDistance!!.toDouble(),
+                        walkMatchingId,
+                        walkMemo)
+                    //내 산책기록에 올린다
+                    addWalkReview(userId,myReview)
+                    //matches의 문서에 sender의 리뷰로 올린다
                     addWalkwithReviewSender(userId,walkRecordId!!,walkWithReview)
-                    addWalkReview1(walkMatchingId,walkWithReview)
+                    //매칭상대방의 walkmatereview에 올려준다
+                    addWalkReviewToMate(walkMatchingId,walkWithReview)
                     mainActivity.navigate(R.id.action_WriteWalkReviewFragment_to_mainFragment)
                 }else {
                     //receiver
+                    val myReview=WalkRecord( walkRecorduid!!, walkRecordDate!!, walkRecordStartTime!!, walkRecordEndTime!!, walkDuration!!, walkDistance!!.toDouble(), walkMatchingId, walkMemo)
+                    //내 산책기록에 올린다
+                    addWalkReview(walkRecordId!!,myReview)
                     val walkWithReview = WalkReview(fragmentWalkReviewWriteBinding.userRatingBar.rating, walkMemo, Timestamp.now())
+                    //matches에 receiver의 리뷰로 올린다
                     addWalkwithReviewReceiver(userId,walkRecordId!!,walkWithReview)
+                    //매칭상대방의 walkmatereview에 올려준다
+                    addWalkReviewToMate(walkMatchingId,walkWithReview)
                     mainActivity.navigate(R.id.action_WriteWalkReviewFragment_to_mainFragment)
                 }
             }
@@ -134,6 +156,22 @@ class WalkReviewWriteFragment : Fragment() {
         return fragmentWalkReviewWriteBinding.root
     }
 
+    private fun uploadOriginalImageToStorage(uri: Uri, onSuccess: (String) -> Unit) {
+        showProgress()
+
+        val ref = storage.reference.child("captured_images/${UUID.randomUUID()}.jpg")
+        ref.putFile(uri)
+            .addOnSuccessListener {
+                ref.downloadUrl.addOnSuccessListener {
+                    hideProgress()
+                    onSuccess(it.toString())
+                }
+            }
+            .addOnFailureListener {
+                fragmentWalkReviewWriteBinding.progressBarWalk.visibility = View.GONE
+                Toast.makeText(context, "이미지 업로드 실패", Toast.LENGTH_SHORT).show()
+            }
+    }
     fun addWalkReview(userId: String, walkReview: WalkRecord) {
         val userRef = db.collection("users").document(userId)
 
@@ -146,7 +184,7 @@ class WalkReviewWriteFragment : Fragment() {
                 Toast.makeText(context, "리뷰 등록 실패 .", Toast.LENGTH_SHORT).show()
             }
     }
-    fun addWalkReview1(walkMatchingId: String, walkWithReview: WalkReview) {
+    fun addWalkReviewToMate(walkMatchingId: String, walkWithReview: WalkReview) {
         val userRef = db.collection("users").document(walkMatchingId)
 
         userRef.update("walkMateReview", FieldValue.arrayUnion(walkWithReview))
@@ -157,6 +195,34 @@ class WalkReviewWriteFragment : Fragment() {
 
                 Toast.makeText(context, "리뷰 등록 실패 .", Toast.LENGTH_SHORT).show()
             }
+    }
+    private fun uploadCapturedImageToStorage(uri: Uri, onSuccess: (String) -> Unit) {
+        showProgress()
+
+        Glide.with(this)
+            .asBitmap()
+            .load(uri)
+            .override(400, 400)
+            .into(object : SimpleTarget<Bitmap>() {
+                override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
+                    val byteArrayOutputStream = ByteArrayOutputStream()
+                    resource.compress(Bitmap.CompressFormat.JPEG, 80, byteArrayOutputStream)
+                    val byteArray = byteArrayOutputStream.toByteArray()
+
+                    val ref = storage.reference.child("captured_images/${UUID.randomUUID()}.jpg")
+                    ref.putBytes(byteArray)
+                        .addOnSuccessListener {
+                            ref.downloadUrl.addOnSuccessListener {
+                                hideProgress()
+                                onSuccess(it.toString())
+                            }
+                        }
+                        .addOnFailureListener {
+                            fragmentWalkReviewWriteBinding.progressBarWalk.visibility = View.GONE
+                            Toast.makeText(context, "이미지 업로드 실패", Toast.LENGTH_SHORT).show()
+                        }
+                }
+            })
     }
     fun addWalkwithReviewSender(userId: String,walkRecordId:String, walkWithReview: WalkReview) {
         val userRef = db.collection("matches").document(walkRecordId)
