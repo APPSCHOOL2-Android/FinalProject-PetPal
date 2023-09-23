@@ -13,9 +13,6 @@ import com.petpal.mungmate.model.UserReport
 import com.petpal.mungmate.model.Match
 import com.petpal.mungmate.model.PetData
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -33,16 +30,12 @@ class ChatRoomViewModel: ViewModel() {
     private val _messages = MutableLiveData<List<Message>>()
     val messages : LiveData<List<Message>> get() = _messages
 
-    // 차단 상태
-    private val _blockStatus = MutableStateFlow<BlockStatus>(BlockStatus.NONE)
-    val blockStatus: StateFlow<BlockStatus> = _blockStatus.asStateFlow()
-
-    // 채팅 상대 정보
-    private val _receiverUserId = MutableLiveData<String>()
-    val receiverUserId: LiveData<String> get() = _receiverUserId
+    // 사용자 정보
+    private val _currentUserInfo = MutableLiveData<FirestoreUserBasicInfoData>()
+    val currentUserInfoData: LiveData<FirestoreUserBasicInfoData> get() = _currentUserInfo
 
     private val _receiverUserInfo = MutableLiveData<FirestoreUserBasicInfoData>()
-    val receiverUserInfo: LiveData<FirestoreUserBasicInfoData> get() = _receiverUserInfo
+    val receiverUserInfoData: LiveData<FirestoreUserBasicInfoData> get() = _receiverUserInfo
 
     private val _receiverPetInfo = MutableLiveData<PetData>()
     val receiverPetInfo: LiveData<PetData> get() = _receiverPetInfo
@@ -64,7 +57,7 @@ class ChatRoomViewModel: ViewModel() {
     }
 
     // 채팅방 메시지 가져오기
-    fun getMessages(chatRoomId: String) {
+    fun startObservingMessages(chatRoomId: String) {
         viewModelScope.launch {
             chatRepository.getMessages(chatRoomId)
                 .collect { messageList ->
@@ -96,24 +89,6 @@ class ChatRoomViewModel: ViewModel() {
         }
     }
 
-    fun setReceiverUser(userId: String){
-        _receiverUserId.value = userId
-    }
-
-    // 채팅 상대 기본 정보 가져오기
-    fun getReceiverInfoById(userId: String) {
-        viewModelScope.launch {
-            val userBasicInfoData = chatRepository.getUserBasicInfoById(userId)
-            if (userBasicInfoData != null) {
-                _receiverUserInfo.value = userBasicInfoData!!
-                Log.d(TAG, "ReceiverUserInfo updated: ${userBasicInfoData.nickname}")
-            } else {
-                // 오류 처리
-                Log.d(TAG, "ReceiverUserInfo failed")
-            }
-        }
-    }
-    
     // 채팅 상대 대표 반려견 정보 가져오기
     fun getReceiverPetInfoByUserId(userId: String) {
          viewModelScope.launch {
@@ -144,20 +119,41 @@ class ChatRoomViewModel: ViewModel() {
         }
     }
 
-    // Firestore에서 실시간으로 데이터를 가져와서 차단 상태 업데이트
-    fun startObservingBlockStatus(currentUserId: String, receiverId: String) {
+    // 상대 차단 상태 전환 (차단 -> 해제 / 해제 -> 차단)
+//    fun toggleBlockStatus(currentUserId: String, receiverId: String) {
+//        viewModelScope.launch {
+//            chatRepository.toggleBlockStatus(currentUserId, receiverId)
+//        }
+//    }
+
+    fun blockUser(currentUserId: String, receiverId: String) {
         viewModelScope.launch {
-            chatRepository.observeBlockStatus(currentUserId, receiverId)
-                .collect { blockStatus ->
-                    _blockStatus.value = blockStatus
-                }
+            chatRepository.addUserToBlockList(currentUserId, receiverId)
         }
     }
 
-    // 상대 차단 상태 전환 (차단 -> 해제 / 해제 -> 차단)
-    fun toggleBlockStatus(currentUserId: String, receiverId: String) {
+    fun unblockUser(currentUserId: String, receiverId: String) {
         viewModelScope.launch {
-            chatRepository.toggleBlockStatus(currentUserId, receiverId)
+            chatRepository.removeUserFromBlockList(currentUserId, receiverId)
+        }
+    }
+
+    // 실시간 차단 및 프로필 변경 감시용
+    fun startObservingReceiverUserInfo(userId: String) {
+        viewModelScope.launch {
+            chatRepository.getUserBasicInfo(userId)
+                .collect { userInfo ->
+                   _receiverUserInfo.value = userInfo
+                }
+        }
+    }
+    // 실시간 차단 감시용
+    fun startObservingCurrentUserInfo(userId: String) {
+        viewModelScope.launch { 
+            chatRepository.getUserBasicInfo(userId)
+                .collect { userInfo ->
+                    _currentUserInfo.value = userInfo
+                }
         }
     }
 }

@@ -2,7 +2,6 @@ package com.petpal.mungmate.ui.chat
 
 import android.util.Log
 import com.google.android.gms.tasks.Task
-import com.google.android.gms.tasks.Tasks
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
@@ -19,7 +18,6 @@ import com.petpal.mungmate.model.PetData
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.tasks.await
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -131,6 +129,7 @@ class ChatRepository {
         }
     }
 
+    // 사용자 id로 정보 객체 가져오기
     suspend fun getUserInfoById(userId: String): DocumentSnapshot? {
         return try {
             db.collection(USERS_NAME)
@@ -142,14 +141,24 @@ class ChatRepository {
         }
     }
 
-    // 사용자 id로 사용자 Document 가져오기
-    suspend fun getUserBasicInfoById(userId: String): FirestoreUserBasicInfoData? {
-        return try {
-            db.collection(USERS_NAME).document(userId).get().await().toObject(FirestoreUserBasicInfoData::class.java)
-        } catch (e: Exception) {
-            Log.d(TAG, "getUserBasicInfo failed : ${e.printStackTrace()}")
-            null
+    // 사용자 정보 실시간 감시 리스너 등록
+    fun getUserBasicInfo(userId: String): Flow<FirestoreUserBasicInfoData> = callbackFlow {
+        val userDocRef = db.collection(USERS_NAME).document(userId)
+
+        val listenerRegistration = userDocRef.addSnapshotListener { snapshot, error ->
+            if (error != null) {
+                return@addSnapshotListener
+            }
+
+            if (snapshot != null && snapshot.exists()) {
+                val userBasicInfo = snapshot.toObject(FirestoreUserBasicInfoData::class.java)
+                if (userBasicInfo != null) {
+                    trySend(userBasicInfo)
+                }
+            }
         }
+
+        awaitClose { listenerRegistration.remove() }
     }
 
     suspend fun getMainPetInfoByUserId(userId: String): PetData? {
@@ -214,7 +223,7 @@ class ChatRepository {
             // TODO 채팅 보낼 때 lastMessageTime이 오늘이 아닐 경우 보내는 걸로 나중에 수정하기
             val dateContent = SimpleDateFormat("yyyy년 MM월 dd일", Locale.getDefault())
                 .format(Date())
-            
+
             val message = Message(
                 "",
                 myUserId,
@@ -258,85 +267,45 @@ class ChatRepository {
         userRef.update(BLOCK_USER_LIST, blockedUserList).await()
     }
 
-    // Firestore 차단 상태 관련 작업을 처리
-    suspend fun observeBlockStatus(currentUserId: String, receiverId: String): Flow<BlockStatus> = flow {
-        // Firestore에서 사용자의 blockUserList 필드를 실시간으로 감시
-        val currentUserDocRef = db.collection(USERS_NAME).document(currentUserId)
-        val receiverUserDocRef = db.collection(USERS_NAME).document(receiverId)
-        
-        // 내 차단 목록 실시간 반영
-        val currentUserSnapshot = currentUserDocRef.addSnapshotListener { currentUserSnapshot, error ->
-            // 내가 차단 목록에 상대가 있는지 체크, "blockUserList" 필드가 없어서 null인 경우 빈 리스트로 대체
-            val currentUserBlockList = currentUserSnapshot?.get(BLOCK_USER_LIST) as? List<String>
-            val isBlockedByMe = receiverId in currentUserBlockList.orEmpty()
-            
-            // 상대의 차단 목록에 내가 있는지 체크
-            val receiverUserSnapshotTask = receiverUserDocRef.get()
-            val receiverUserSnapshot = Tasks.await(receiverUserSnapshotTask)
-            val receiverUserBlockList = receiverUserSnapshot?.get(BLOCK_USER_LIST) as? List<String>
+    suspend fun addUserToBlockList(currentUserId: String, blockUserId: String) {
+        val userRef = db.collection(USERS_NAME).document(currentUserId)
+        val blockedUserList = mutableListOf<String>()
 
-            val isBlockedByReceiver = currentUserId in receiverUserBlockList.orEmpty()
-
-            // BlockStatus 업데이트
-            val blockStatus = when {
-                isBlockedByMe && isBlockedByReceiver -> BlockStatus.ALL
-                isBlockedByMe && !isBlockedByReceiver -> BlockStatus.BLOCKED_BY_ME
-                !isBlockedByMe && isBlockedByReceiver -> BlockStatus.BLOCKED_BY_RECEIVER
-                else -> BlockStatus.NONE
+        // 현재 차단 목록 가져오기
+        val snapshot = userRef.get().await()
+        if (snapshot.exists()) {
+            val existBlockList = snapshot.get(BLOCK_USER_LIST) as? List<String>
+            if (existBlockList != null) {
+                blockedUserList.addAll(existBlockList)
             }
-
-            emit(blockStatus)
         }
 
-        // 상대 차단 목록 실시간 반영
-        val receiverUserSnapshot = receiverUserDocRef.addSnapshotListener { snapshot, error ->
-            // 상대의 차단 목록에 내가 있는지 체크
-            val receiverUserBlockList = snapshot?.get(BLOCK_USER_LIST) as? List<String>
-            val isBlockedByReceiver = currentUserId in receiverUserBlockList.orEmpty()
-
-            // 내 차단 목록에 상대가 있는지 체크
-            val currentUserSnapshotTask = currentUserDocRef.get()
-            val currentUserSnapshot = Tasks.await(currentUserSnapshotTask)
-            val currentUserBlockList = currentUserSnapshot?.get(BLOCK_USER_LIST) as? List<String>
-
-            val isBlockedByMe = receiverId in currentUserBlockList.orEmpty()
-
-            // BlockStatus 업데이트
-            val blockStatus = when {
-                isBlockedByMe && isBlockedByReceiver -> BlockStatus.ALL
-                isBlockedByMe && !isBlockedByReceiver -> BlockStatus.BLOCKED_BY_ME
-                !isBlockedByMe && isBlockedByReceiver -> BlockStatus.BLOCKED_BY_RECEIVER
-                else -> BlockStatus.NONE
-            }
-
-            emit(blockStatus)
-        }
-
-        // 더 이상 감시하지 않을 때 listener 제거
-        awaitClose {
-            currentUserSnapshot.remove()
-            receiverUserSnapshot.remove()
+        // 이미 차단되어 있는 사용자인지 확인
+        if (!blockedUserList.contains(blockUserId)) {
+            // 차단 목록에 추가
+            blockedUserList.add(blockUserId)
+            // 업데이트된 차단 목록을 DB에 저장
+            userRef.update(BLOCK_USER_LIST, blockedUserList).await()
         }
     }
 
+    suspend fun removeUserFromBlockList(currentUserId: String, blockUserId: String) {
+        val userRef = db.collection(USERS_NAME).document(currentUserId)
+        val blockedUserList = mutableListOf<String>()
 
-    // 현재 시간보다 이전 메시지를 N개 가져오는데 사용, Paging으로 자르기
-//    suspend fun receiveMessages(chatRoomId: String, lastTime: Timestamp): List<Message> {
-//        return db.collection(CHAT_ROOMS_NAME)
-//            .document(chatRoomId)
-//            .collection(MESSAGES_NAME)
-//            .whereLessThan(TIMESTAMP, lastTime)
-//            .orderBy(TIMESTAMP, Query.Direction.DESCENDING)
-//            .limit(CHAT_PAGE_SIZE)
-//            .get()
-//            .await()
-//            .documents
-//            .map { document ->
-//                document.let {
-//                    document.toObject(Message::class.java)
-//                }?: kotlin.run {
-//                    Message()
-//                }
-//            }
-//    }
+        // 현재 차단 목록 가져오기
+        val snapshot = userRef.get().await()
+        if (snapshot.exists()) {
+            val existBlockList = snapshot.get(BLOCK_USER_LIST) as? List<String>
+            if (existBlockList != null) {
+                blockedUserList.addAll(existBlockList)
+            }
+        }
+
+        // 차단 목록에서 제거
+        blockedUserList.remove(blockUserId)
+
+        // 업데이트된 차단 목록을 DB에 저장
+        userRef.update(BLOCK_USER_LIST, blockedUserList).await()
+    }
 }

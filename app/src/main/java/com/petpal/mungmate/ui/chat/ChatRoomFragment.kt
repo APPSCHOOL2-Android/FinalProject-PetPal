@@ -19,6 +19,7 @@ import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.storage
 import com.petpal.mungmate.R
 import com.petpal.mungmate.databinding.FragmentChatRoomBinding
+import com.petpal.mungmate.model.FirestoreUserBasicInfoData
 import com.petpal.mungmate.model.Message
 import com.petpal.mungmate.model.MessageType
 import com.petpal.mungmate.model.MessageVisibility
@@ -41,6 +42,9 @@ class ChatRoomFragment : Fragment() {
     lateinit var receiverId: String     // 채팅 상대 id
     lateinit var chatRoomId: String     // 채팅방 id
 
+    private var currentUserInfo: FirestoreUserBasicInfoData? = null
+    private var receiverUserInfo: FirestoreUserBasicInfoData? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -55,7 +59,6 @@ class ChatRoomFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         _fragmentChatRoomBinding = FragmentChatRoomBinding.inflate(inflater)
-
         return fragmentChatRoomBinding.root
     }
 
@@ -66,33 +69,39 @@ class ChatRoomFragment : Fragment() {
         chatRoomViewModel.run {
             // 채팅방 세팅
             currentChatRoomId.observe(viewLifecycleOwner) { currentChatRoomId ->
+                // 현재 채팅방 id 저장
                 chatRoomId = currentChatRoomId
 
                 // 메세지 목록 로드
-                chatRoomViewModel.getMessages(chatRoomId)
-
-                // 사용자 프로필 표시
-                chatRoomViewModel.getReceiverInfoById(receiverId)
-
-                // 반려견 정보 표시
-                chatRoomViewModel.getReceiverPetInfoByUserId(receiverId)
+                chatRoomViewModel.startObservingMessages(chatRoomId)
             }
 
-            blockStatus.observe(viewLifecycleOwner) { blockStatus ->
-                updateUIBasedOnBlockStatus(blockStatus)
+            currentUserInfoData.observe(viewLifecycleOwner) { userInfoData ->
+                currentUserInfo = userInfoData
+                // 상호 차단 여부에 따라 ui 변경
+                updateUIBasedOnBlockStatus()
             }
 
-            receiverUserInfo.observe(viewLifecycleOwner) { userBasicInfoData ->
-                fragmentChatRoomBinding.textViewUserNickName.text = userBasicInfoData.nickname
-                // 채팅 상대 프로필 이미지 TODO 나중에 MVVM 맞춰서 분리하기
-                val userImageRef = Firebase.storage.reference.child(userBasicInfoData.userImage)
+            receiverUserInfoData.observe(viewLifecycleOwner) { userInfoData ->
+                receiverUserInfo = userInfoData
+
+                // 닉네임
+                fragmentChatRoomBinding.textViewUserNickName.text = userInfoData.nickname
+                // 채팅 상대 프로필 이미지
+                val userImageRef = Firebase.storage.reference.child(userInfoData.userImage)
                 userImageRef.downloadUrl.addOnSuccessListener { uri ->
                     Glide.with(requireContext())
                         .load(uri)
                         .into(fragmentChatRoomBinding.imageViewUserProfile)
-                }.addOnFailureListener { exception ->
+                }.addOnFailureListener {
                     Log.d(TAG, "load user image failed")
                 }
+
+                // 반려견 정보 표시
+                chatRoomViewModel.getReceiverPetInfoByUserId(receiverId)
+
+                // 상호 차단 여부에 따라 ui 변경
+                updateUIBasedOnBlockStatus()
             }
 
             receiverPetInfo.observe(viewLifecycleOwner) { petData ->
@@ -112,8 +121,9 @@ class ChatRoomFragment : Fragment() {
             }
         }
 
-        // 차단 여부 체크
-        chatRoomViewModel.startObservingBlockStatus(currentUserId, receiverId)
+        // 사용자 정보 데이터 실시간 감시
+        chatRoomViewModel.startObservingCurrentUserInfo(currentUserId)
+        chatRoomViewModel.startObservingReceiverUserInfo(receiverId)
 
         // 두 사용자 정보로 채팅방 찾아서 정보 로드
         chatRoomViewModel.getChatRoom(currentUserId, receiverId)
@@ -136,7 +146,7 @@ class ChatRoomFragment : Fragment() {
                         }
                         R.id.item_chat_report -> {
                             // 신고하기 화면 이동 (채팅 상대 UID 전달)
-                            val action = ChatRoomFragmentDirections.actionChatRoomFragmentToReportUserFragment(receiverId, chatRoomViewModel.receiverUserInfo.value?.nickname!!)
+                            val action = ChatRoomFragmentDirections.actionChatRoomFragmentToReportUserFragment(receiverId, chatRoomViewModel.receiverUserInfoData.value?.nickname!!)
                             findNavController().navigate(action)
                             true
                         }
@@ -247,23 +257,25 @@ class ChatRoomFragment : Fragment() {
     
     // 차단 상태 반전
     private fun toggleBlockStatus() {
-        val isBlocked = chatRoomViewModel.blockStatus.value
-        if (isBlocked == BlockStatus.ALL || isBlocked == BlockStatus.BLOCKED_BY_ME) {
+        // 차단 여부 체크
+        val userBlockList = currentUserInfo?.blockUserList.orEmpty()
+        val isBlocked = userBlockList.contains(receiverId)
+        if (isBlocked) {
             // 내가 이미 차단한 경우
-            unblockUser()
+            showUnblockDialog()
         } else {
             // 내가 아직 차단하지 않은 경우
-            blockUser()
+            showBlockDialog()
         }
     }
     
     // 차단
-    private fun blockUser() {
+    private fun showBlockDialog() {
         val builder = MaterialAlertDialogBuilder(requireContext())
             .setTitle("차단하기")
             .setMessage("차단한 사용자와는 채팅을 할 수 없으며 산책 메이트를 요청할 수 없습니다.")
             .setPositiveButton("차단하기"){ dialogInterface: DialogInterface, i: Int ->
-                chatRoomViewModel.toggleBlockStatus(currentUserId, receiverId)
+                chatRoomViewModel.blockUser(currentUserId, receiverId)
             }
             .setNegativeButton("취소", null)
             .create()
@@ -271,12 +283,12 @@ class ChatRoomFragment : Fragment() {
     }
 
     // 차단 해제
-    private fun unblockUser() {
+    private fun showUnblockDialog() {
         val builder = MaterialAlertDialogBuilder(requireContext())
             .setTitle("차단해제")
             .setMessage("차단을 해제하면 다시 채팅을 주고받을 수 있으며 산책 메이트 요청이 가능해집니다.")
             .setPositiveButton("해제하기"){ dialogInterface: DialogInterface, i: Int ->
-                chatRoomViewModel.toggleBlockStatus(currentUserId, receiverId)
+                chatRoomViewModel.unblockUser(currentUserId, receiverId)
             }
             .setNegativeButton("취소", null)
             .create()
@@ -284,20 +296,23 @@ class ChatRoomFragment : Fragment() {
     }
 
     // 차단 여부에 따라 UI 변경
-    private fun updateUIBasedOnBlockStatus(blockStatus: BlockStatus) {
-        // 차단 상태에 따라 분기
-        if (blockStatus == BlockStatus.NONE) {
-            // 차단해제 상태 : 산책 메이트 요청 및 채팅 가능, 차단하기 메뉴 표시
-            fragmentChatRoomBinding.run {
-                buttonRequestWalkMate.isEnabled = true
-                buttonSendMessage.isEnabled = true
-                editTextMessage.hint = "메시지를 입력하세요."
-                editTextMessage.isEnabled = true
-                toolbarChatRoom.menu.run {
-                    findItem(R.id.item_chat_toggle_block).title = "차단하기"
-                }
-            }
-        } else {
+    private fun updateUIBasedOnBlockStatus() {
+        var isBlockedByMe = false
+        var isBlockedByReceiver = false
+
+        // 내가 상대를 차단했는지 여부
+        if (currentUserInfo != null) {
+            val myBlockList = currentUserInfo!!.blockUserList.orEmpty()
+            isBlockedByMe = myBlockList.contains(receiverId)
+        }
+
+        // 상대가 나를 차단했는지 여부
+        if (receiverUserInfo != null) {
+            val receiverBlockList = receiverUserInfo!!.blockUserList.orEmpty()
+            isBlockedByReceiver = receiverBlockList.contains(currentUserId)
+        }
+
+        if (isBlockedByMe) {
             // 차단 상태 : 산책 메이트 요청 및 채팅 불가, 차단해제 메뉴 표시
             fragmentChatRoomBinding.run {
                 buttonRequestWalkMate.isEnabled = false
@@ -306,11 +321,27 @@ class ChatRoomFragment : Fragment() {
                 toolbarChatRoom.menu.run {
                     findItem(R.id.item_chat_toggle_block).title = "차단해제"
                 }
-                when (blockStatus) {
-                    BlockStatus.ALL -> { editTextMessage.hint = "서로 차단한 사용자끼리는 채팅할 수 없습니다." }
-                    BlockStatus.BLOCKED_BY_ME -> { editTextMessage.hint = "차단한 사용자와는 채팅할 수 없습니다." }
-                    BlockStatus.BLOCKED_BY_RECEIVER -> { editTextMessage.hint = "상대방으로 부터 차단되어 채팅할 수 없습니다." }
-                    else -> { }
+                editTextMessage.hint = "차단한 사용자와는 채팅할 수 없습니다."
+            }
+        } else if (isBlockedByReceiver) {
+            fragmentChatRoomBinding.run {
+                buttonRequestWalkMate.isEnabled = false
+                buttonSendMessage.isEnabled = false
+                editTextMessage.isEnabled = false
+                toolbarChatRoom.menu.run {
+                    findItem(R.id.item_chat_toggle_block).title = "차단하기"
+                }
+                editTextMessage.hint = "상대방으로 부터 차단되어 채팅할 수 없습니다."
+            }
+        } else {
+            // 차단해제 상태 : 산책 메이트 요청 및 채팅 가능, 차단하기 메뉴 표시
+            fragmentChatRoomBinding.run {
+                buttonRequestWalkMate.isEnabled = true
+                buttonSendMessage.isEnabled = true
+                editTextMessage.hint = "메시지를 입력하세요."
+                editTextMessage.isEnabled = true
+                toolbarChatRoom.menu.run {
+                    findItem(R.id.item_chat_toggle_block).title = "차단하기"
                 }
             }
         }
