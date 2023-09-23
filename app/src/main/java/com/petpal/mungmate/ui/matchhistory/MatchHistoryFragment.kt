@@ -114,9 +114,6 @@ class MatchHistoryFragment : Fragment() {
                                 mateName
                             )
                         )
-                        if(tempList.isEmpty()){
-                            NotDataLConstraintLayout.visibility=View.VISIBLE
-                        }
                     }
                     launch(Dispatchers.Main) {
                         matchHistorList.clear()
@@ -126,6 +123,10 @@ class MatchHistoryFragment : Fragment() {
                         getPetFilterList.clear()
                         getPetFilterList.addAll(tempList2)
                         petFilterAdapter.submitList(getPetFilterList)
+
+                        if(matchHistorList.isEmpty()){
+                            NotDataLConstraintLayout.visibility=View.VISIBLE
+                        }
                     }
                 } catch (e: Exception) {
 
