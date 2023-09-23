@@ -232,13 +232,23 @@ class WalkViewModel(private val repository: WalkRepository,application: Applicat
         }
     }
 
-    fun updateLocationAndOnWalkStatus(userId: String, latitude: Double, longitude: Double) {
+    fun updateUserLocation(userId: String, latitude: Double, longitude: Double) {
         viewModelScope.launch {
             try {
-                repository.updateLocationAndOnWalkStatusTrue(userId, latitude, longitude)
-                // 필요한 경우 성공 메시지나 상태 업데이트
+                repository.updateUserLocation(userId, latitude, longitude)
             } catch (e: Exception) {
                 errorMessage.postValue(e.localizedMessage ?: "Failed to update location")
+            }
+        }
+    }
+
+    // 사용자의 onWalk 상태를 true로 설정
+    fun setUserOnWalk(userId: String) {
+        viewModelScope.launch {
+            try {
+                repository.updateOnWalkStatusTrue(userId)
+            } catch (e: Exception) {
+                errorMessage.postValue(e.localizedMessage ?: "Failed to set onWalk status")
             }
         }
     }
