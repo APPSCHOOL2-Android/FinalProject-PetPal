@@ -1,5 +1,6 @@
 package com.petpal.mungmate.ui.community
 
+import android.graphics.PorterDuff
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -32,9 +33,23 @@ class FullScreenFragment : Fragment() {
             .fitCenter()
             .into(fullScreenBinding.fullScreenImageView)
 
-        fullScreenBinding.fullScreenImageView.setOnClickListener {
-            it.findNavController()
-                .popBackStack()
+//        fullScreenBinding.fullScreenImageView.setOnClickListener {
+//            it.findNavController()
+//                .popBackStack()
+//        }
+        fullScreenBinding.run {
+            fullScreenToolbar.run {
+                bringToFront()
+                setNavigationIcon(androidx.appcompat.R.drawable.abc_ic_ab_back_material)
+                navigationIcon?.setColorFilter(
+                    resources.getColor(R.color.white),
+                    PorterDuff.Mode.SRC_ATOP
+                )
+                setNavigationOnClickListener {
+                    it.findNavController()
+                        .popBackStack()
+                }
+            }
         }
 
         return fullScreenBinding.root

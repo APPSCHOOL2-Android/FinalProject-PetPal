@@ -17,7 +17,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.viewpager.widget.PagerAdapter
 import androidx.viewpager2.widget.ViewPager2
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
@@ -26,6 +25,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
+import com.petpal.mungmate.MainActivity
 import com.petpal.mungmate.R
 import com.petpal.mungmate.databinding.FragmentCommunityPostDetailBinding
 import com.petpal.mungmate.model.Comment
@@ -50,7 +50,7 @@ class CommunityPostDetailFragment : Fragment() {
     private val coroutineScope = CoroutineScope(Dispatchers.Main)
 
     private lateinit var viewPagerAdapter: CommunityDetailViewPager2Adapter
-
+    private lateinit var mainActivity: MainActivity
     private val postCommentList: MutableList<Comment> = mutableListOf()
 
     private lateinit var communityDetailCommentAdapter: CommunityDetailCommentAdapter
@@ -62,7 +62,6 @@ class CommunityPostDetailFragment : Fragment() {
     var nickname = ""
     var userImage = ""
     var getAuthorUid = ""
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -70,11 +69,11 @@ class CommunityPostDetailFragment : Fragment() {
 
         communityPostDetailBinding = FragmentCommunityPostDetailBinding.inflate(inflater)
         commentViewModel = ViewModelProvider(requireActivity())[CommentViewModel::class.java]
-
+//        commentViewModel.setCommunityImage(BannerItemList)
         val args: CommunityPostDetailFragmentArgs by navArgs()
         val postid = args.position
         postGetId = postid
-
+        mainActivity = activity as MainActivity
         communityPostDetailBinding.run {
             toolbar()
             lottie()
@@ -300,8 +299,18 @@ class CommunityPostDetailFragment : Fragment() {
                     postImagesGetList.add(postImageObject)
                 }
 
-                val imageUrls = postImagesGetList.map { it.image }.joinToString(", ")
-                Log.d("어떤 리스트가..", imageUrls)
+                val imageUrl = postImagesGetList.map { it.image }
+                    .joinToString(", ")
+                    .split(", ")
+                    .map { it.trim() }
+                var imageUrls= mutableListOf<PostImage>()
+
+                for (url in imageUrl) {
+                    val postImage = PostImage(url) // 여기서 PostImage 생성자에 URL을 전달하여 객체를 만듭니다.
+                    imageUrls.add(postImage)
+                }
+                commentViewModel.setCommunityImage(imageUrls)
+                Log.d("어떤 리스트가..", imageUrls.toString())
             }
 
             val postLike = documentSnapshot.getLong("postLike")
@@ -368,6 +377,8 @@ class CommunityPostDetailFragment : Fragment() {
                 communityPostDetailUserNickName.text = userNickName
             }
         }
+        initViewPager2()
+        subscribeObservers()
     }
 
     private fun FragmentCommunityPostDetailBinding.communityDetailRecyclerView() {
@@ -464,15 +475,17 @@ class CommunityPostDetailFragment : Fragment() {
     }
     private fun initViewPager2() {
         communityPostDetailBinding.communityPostDetailViewPager2.run {
-            viewPagerAdapter = CommunityDetailViewPager2Adapter()
+            viewPagerAdapter = CommunityDetailViewPager2Adapter(mainActivity)
             adapter = viewPagerAdapter
             registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             })
+            communityPostDetailBinding.dotsIndicator.attachTo(this)
         }
+
     }
 
     private fun subscribeObservers() {
-        commentViewModel.bannerItemList.observe(viewLifecycleOwner) { imageList->
+        commentViewModel.communityImageList.observe(viewLifecycleOwner) { imageList->
             viewPagerAdapter.submitList(imageList)
         }
 
