@@ -29,7 +29,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/common_margin"
             android:gravity="center"
-            android:text="ㅇㅇㅇ님과의 산책은 어떠셨나요?"
+            android:text="오늘 산책은 어떠셨나요?"
             android:textAppearance="@style/TextAppearance.AppCompat.Large" />
 
         <RatingBar
@@ -48,7 +48,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/common_margin"
             android:gravity="center"
-            android:text="남긴 평점은 상대방의 발바닥 점수에 반영됩니다"
+            android:text=""
             android:textAppearance="@style/TextAppearance.AppCompat.Small" />
 
 

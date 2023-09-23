@@ -1246,14 +1246,12 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
             val differences = matches.map { match ->
                 kotlin.math.abs(currentTimestamp.seconds - match.walkTimestamp!!.seconds)
             }
+            if(matches.isNotEmpty()) {
             val closestIndex = differences.indexOf(differences.minOrNull())
-            walkWithUser=matches[closestIndex]
+            walkWithUser = matches[closestIndex]
             println("매치스1: ${walkWithUser!!.senderId}, Receiver ID: ${walkWithUser!!.receiverId}, Timestamp: ${walkWithUser!!.walkTimestamp}")
-
-            if (matches.isNotEmpty()) {
-                fragmentWalkBinding.buttonWalk.text = "같이 산책하기"
-            }
-
+            fragmentWalkBinding.buttonWalk.text = "같이 산책하기"
+        }
         }
 
         viewModel.stopLocationUpdates()

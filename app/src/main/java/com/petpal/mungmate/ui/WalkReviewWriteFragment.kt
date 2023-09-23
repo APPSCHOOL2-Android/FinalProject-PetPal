@@ -77,9 +77,11 @@ class WalkReviewWriteFragment : Fragment() {
 
         if(walkMatchingId==null){
             fragmentWalkReviewWriteBinding.imageViewWalk.visibility=View.VISIBLE
+
             fragmentWalkReviewWriteBinding.userRatingBar.visibility=View.GONE
 
         }else{
+            fragmentWalkReviewWriteBinding.textViewWalkReviewUser1.text="남긴 평점은 상대방의 발바닥 점수에 반영됩니다."
             fragmentWalkReviewWriteBinding.textViewWalkReviewUser.text="${walkMatchingId}님과의 산책은 어떠셨나요?"
         }
         fragmentWalkReviewWriteBinding.imageViewWalk.setOnClickListener {
