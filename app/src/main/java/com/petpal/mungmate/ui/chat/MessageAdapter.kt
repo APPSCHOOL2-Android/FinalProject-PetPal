@@ -21,7 +21,7 @@ import java.text.SimpleDateFormat
 import java.util.Locale
 
 // Recyceler.ViewHolder를 상속받는 자식 클래스 ViewHolder들로 이루어진 리스트를 하나의 RecyclerView로 표시
-class MessageAdapter(private val chatViewModel: ChatViewModel): RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+class MessageAdapter(private val chatRoomViewModel: ChatRoomViewModel): RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     private val currentUserId = FirebaseAuth.getInstance().currentUser?.uid!!
     private val messages = mutableListOf<Message>()
@@ -169,15 +169,15 @@ class MessageAdapter(private val chatViewModel: ChatViewModel): RecyclerView.Ada
                 // 산책 요청 Message에 저장된 document key 값으로 match 객체 가져오기
                 val matchKey = message.content!!
                 
-                chatViewModel.getMatchByKey(matchKey) { document ->
+                chatRoomViewModel.getMatchByKey(matchKey) { document ->
                     if (document != null && document.exists()) {
                         val match = document.toObject(Match::class.java)
                         if (match != null) {
                             // 하나의 match에 대해 수락, 거절은 한 번만 선택 가능
-//                            if (match.status != MatchStatus.REQUESTED.code) {
-//                                buttonAccept.isEnabled = false
-//                                buttonReject.isEnabled = false
-//                            }
+                            if (match.status === MatchStatus.REQUESTED.code) {
+                                buttonAccept.isEnabled = true
+                                buttonReject.isEnabled = true
+                            }
 
                             // 산책 일시, 장소 표시
                             val formattedWalkTimestamp = formatFirebaseTimestamp(match.walkTimestamp!!, "M월 d일 (E) a h:mm")
@@ -196,7 +196,7 @@ class MessageAdapter(private val chatViewModel: ChatViewModel): RecyclerView.Ada
                     buttonReject.isEnabled = false
                     
                     // 매칭 상태 변경 -> 수락
-                    chatViewModel.updateFieldInMatchDocument(matchKey, "status", MatchStatus.ACCEPTED.code)
+                    chatRoomViewModel.updateFieldInMatchDocument(matchKey, "status", MatchStatus.ACCEPTED.code)
 
                     // 산책 메이트 수락 메시지 전송
                     val message = Message(
@@ -208,7 +208,7 @@ class MessageAdapter(private val chatViewModel: ChatViewModel): RecyclerView.Ada
                         MessageVisibility.ALL.code
                     )
                     // chatRoomId를 viewmodel에서 가져오기 vs 매개변수로 받기??
-                    chatViewModel.saveMessage(chatViewModel.chatRoomId.value.toString(), message)
+                    chatRoomViewModel.saveMessage(chatRoomViewModel.currentChatRoomId.value.toString(), message)
                 }
 
                 buttonReject.setOnClickListener {
@@ -217,7 +217,7 @@ class MessageAdapter(private val chatViewModel: ChatViewModel): RecyclerView.Ada
                     buttonReject.isEnabled = false
 
                     // 매칭 상태 변경 -> 거절
-                    chatViewModel.updateFieldInMatchDocument(matchKey, "status", MatchStatus.REJECTED.code)
+                    chatRoomViewModel.updateFieldInMatchDocument(matchKey, "status", MatchStatus.REJECTED.code)
                     
                     // 산책 메이트 거절 메시지 전송
                     val message = Message(
@@ -229,7 +229,7 @@ class MessageAdapter(private val chatViewModel: ChatViewModel): RecyclerView.Ada
                         MessageVisibility.ALL.code
                     )
                     // chatRoomId를 viewmodel에서 가져오기 vs 매개변수로 받기??
-                    chatViewModel.saveMessage(chatViewModel.chatRoomId.value.toString(), message)
+                    chatRoomViewModel.saveMessage(chatRoomViewModel.currentChatRoomId.value.toString(), message)
                 }
             }
         }
@@ -249,7 +249,7 @@ class MessageAdapter(private val chatViewModel: ChatViewModel): RecyclerView.Ada
                 // 산책 요청 Message에 저장된 document key 값으로 match 객체 가져오기
                 val matchKey = message.content!!
 
-                chatViewModel.getMatchByKey(matchKey) { document ->
+                chatRoomViewModel.getMatchByKey(matchKey) { document ->
                     if (document != null && document.exists()) {
                         val match = document.toObject(Match::class.java)
                         if (match != null) {

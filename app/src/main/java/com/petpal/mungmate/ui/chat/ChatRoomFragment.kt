@@ -2,6 +2,7 @@ package com.petpal.mungmate.ui.chat
 
 import android.content.DialogInterface
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -10,35 +11,43 @@ import androidx.core.widget.addTextChangedListener
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.bumptech.glide.Glide
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.ktx.storage
 import com.petpal.mungmate.R
 import com.petpal.mungmate.databinding.FragmentChatRoomBinding
 import com.petpal.mungmate.model.Message
 import com.petpal.mungmate.model.MessageType
 import com.petpal.mungmate.model.MessageVisibility
+import com.petpal.mungmate.ui.pet.PetSex
 import java.text.SimpleDateFormat
-import java.util.Date
+import java.util.Calendar
 import java.util.Locale
 
 class ChatRoomFragment : Fragment() {
+    private val TAG = "CHAT_ROOM"
     private var _fragmentChatRoomBinding : FragmentChatRoomBinding? = null
     private val fragmentChatRoomBinding get() = _fragmentChatRoomBinding!!
 
-    private lateinit var chatViewModel: ChatViewModel
+    private lateinit var chatRoomViewModel: ChatRoomViewModel
     private lateinit var messageAdapter: MessageAdapter
 
-    private val currentUserId = FirebaseAuth.getInstance().currentUser?.uid.toString()
-    lateinit var chatRoomId: String
+    private val currentUserId = FirebaseAuth.getInstance().currentUser?.uid.toString()  // 현재 사용자 id
+    lateinit var receiverId: String     // 채팅 상대 id
+    lateinit var chatRoomId: String     // 채팅방 id
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // 채팅 목록 화면에서 Bundle로 전달받은 현재 채팅방 id
-        chatRoomId = arguments?.getString("chatRoomId")!!
+        // 채팅 -> 채팅방 : 채팅 목록 화면에서 Bundle로 전달받은 현재 채팅방 id
+        // chatRoomId = arguments?.getString("chatRoomId")!!
 
-        chatViewModel = ViewModelProvider(this)[ChatViewModel::class.java]
-        chatViewModel.setCurrentChatRoomId(chatRoomId)
+        // 사용자 프로필 -> 채팅방 : 사용자 프로필 시트에서 Bundle로 전달받은 상대 user id
+        receiverId = arguments?.getString("receiverId")!!
+
+        chatRoomViewModel = ViewModelProvider(this)[ChatRoomViewModel::class.java]
     }
 
     override fun onCreateView(
@@ -46,12 +55,61 @@ class ChatRoomFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         _fragmentChatRoomBinding = FragmentChatRoomBinding.inflate(inflater)
+
         return fragmentChatRoomBinding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        
+
+        // Observer
+        chatRoomViewModel.run {
+            // 채팅방 세팅
+            currentChatRoomId.observe(viewLifecycleOwner) { currentChatRoomId ->
+                chatRoomId = currentChatRoomId
+
+                // 메세지 목록 로드
+                chatRoomViewModel.loadMessages(chatRoomId)
+                // 사용자 프로필 표시
+                chatRoomViewModel.getReceiverInfoById(receiverId)
+
+                // 반려견 정보 표시
+                chatRoomViewModel.getReceiverPetInfoByUserId(receiverId)
+            }
+
+            receiverUserInfo.observe(viewLifecycleOwner) { userBasicInfoData ->
+                fragmentChatRoomBinding.textViewUserNickName.text = userBasicInfoData.nickname
+                // 채팅 상대 프로필 이미지 TODO 나중에 MVVM 맞춰서 분리하기
+                val userImageRef = Firebase.storage.reference.child(userBasicInfoData.userImage)
+                userImageRef.downloadUrl.addOnSuccessListener { uri ->
+                    Glide.with(requireContext())
+                        .load(uri)
+                        .into(fragmentChatRoomBinding.imageViewUserProfile)
+                }.addOnFailureListener { exception ->
+                    Log.d(TAG, "load user image failed")
+                }
+
+            }
+
+            receiverPetInfo.observe(viewLifecycleOwner) { petData ->
+                val petGender = when(petData.petSex) {
+                    PetSex.MALE.ordinal -> "남"
+                    else -> "여"
+                }
+                // 생일 -> 현재 나이 계산
+                val petAge = calculateAgeFromBirthDay(petData.birth)
+                fragmentChatRoomBinding.textViewUserDogInfo.text = "${petData.name}(${petData.breed}, ${petGender}), $petAge"
+            }
+
+            messages.observe(viewLifecycleOwner) { messages ->
+                messageAdapter.setMessages(messages)
+                fragmentChatRoomBinding.recyclerViewMessage.scrollToPosition(messages.size - 1)
+            }
+        }
+
+        // 두 사용자 정보로 채팅방 찾아서 정보 로드
+        chatRoomViewModel.getChatRoom(currentUserId, receiverId)
+
         // TODO 날짜가 바뀌면 자동으로 DATE 타입 메시지 저장
 
         fragmentChatRoomBinding.run {
@@ -76,7 +134,7 @@ class ChatRoomFragment : Fragment() {
                         }
                         R.id.menu_item_report -> {
                             // 신고하기 화면 이동 (채팅 상대 UID 전달)
-                            val action = ChatRoomFragmentDirections.actionChatRoomFragmentToReportUserFragment("user1")
+                            val action = ChatRoomFragmentDirections.actionChatRoomFragmentToReportUserFragment(receiverId, chatRoomViewModel.receiverUserInfo.value?.nickname!!)
                             findNavController().navigate(action)
                             true
                         }
@@ -91,55 +149,82 @@ class ChatRoomFragment : Fragment() {
 
             // 산책 메이트 요청
             buttonRequestWalkMate.setOnClickListener {
-                val action = ChatRoomFragmentDirections.actionChatRoomFragmentToWalkMateRequestFragment(currentUserId, "user1", chatRoomId)
+                val action = ChatRoomFragmentDirections.actionChatRoomFragmentToWalkMateRequestFragment(currentUserId, receiverId, chatRoomId)
                 findNavController().navigate(action)
             }
 
-            messageAdapter = MessageAdapter(chatViewModel)
+            messageAdapter = MessageAdapter(chatRoomViewModel)
 
             // 채팅방 메시지 목록
-            recyclerViewMessage.apply {
+            recyclerViewMessage.run {
                 layoutManager = LinearLayoutManager(requireContext())
                 addItemDecoration(TopMarginItemDecoration(8))
                 adapter = messageAdapter
+
+                addOnLayoutChangeListener { v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom ->
+                    // 소프트 키보드가 올라올 때 RecyclerView 마지막으로 스크롤
+                    if(bottom < oldBottom) {
+                        postDelayed({
+                            scrollToPosition(messageAdapter.itemCount - 1)
+                        }, 100)
+                    }
+                }
             }
 
             // 메시지 입력, 전송
-            editTextMessage.addTextChangedListener {
-                buttonSendMessage.isEnabled = it.toString().trim().isNotEmpty()
+            editTextMessage.run {
+                // 공백 또는 엔터만 입력시에는 전송 버튼 비활성화
+                addTextChangedListener {
+                    buttonSendMessage.isEnabled = it.toString().trim().isNotEmpty()
+                }
+                // EditText에 포커스가 주어지면 RecyclerView를 스크롤하여 키보드 위로 밀기
+                setOnFocusChangeListener { v, hasFocus ->
+                    recyclerViewMessage.post {
+                        recyclerViewMessage.scrollToPosition(messageAdapter.itemCount - 1)
+                    }
+                }
             }
+
             buttonSendMessage.setOnClickListener {
                 sendTextMessage()
             }
-
-            // Observer
-            chatViewModel.run {
-                messages.observe(viewLifecycleOwner) { messages ->
-                    messageAdapter.setMessages(messages)
-                    recyclerViewMessage.scrollToPosition(messages.size - 1)
-                }
-            }
         }
-
-        chatViewModel.loadMessages(chatRoomId)
     }
 
-    // 시스템 날짜 메시지 저장 
-    // todo 텍스트 메시지를 보내는 시점 : 가장 마지막 메시지의 날짜와 다를 경우 날짜 메시지 전송 후 텍스트 메시지 전송하기
-    private fun saveDateMessage() {
-//        val currentDate = Date()
-//        val dateFormat = SimpleDateFormat("yyyy년 M월 d일", Locale.getDefault())
-//        val formattedDate = dateFormat.format(currentDate)
+    // 생일(yyyy-MM-dd)로 나이 계산 : n세, n개월
+    private fun calculateAgeFromBirthDay(birthday: String): String {
+        // String -> Date
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+        val birthDate = dateFormat.parse(birthday) ?: return "Invalid Date"
 
-        val message = Message(
-            currentUserId,
-            null,
-            Timestamp.now(),
-            null,
-            MessageType.TEXT.code,
-            MessageVisibility.ALL.code
-        )
-        chatViewModel.saveMessage(chatRoomId, message)
+        // Date -> Calendar
+        val currentCalender = Calendar.getInstance()
+        val birthCalendar = Calendar.getInstance()
+        birthCalendar.time = birthDate
+
+        // 현재 날짜, 생년월일 날짜 비교
+        var ageYear = currentCalender.get(Calendar.YEAR) - birthCalendar.get(Calendar.YEAR)
+        var ageMonth = currentCalender.get(Calendar.MONTH) - birthCalendar.get(Calendar.MONTH)
+
+        // 만 나이 계산시 현재 날짜의 일(day)와 생년월일의 일(day)을 비교해 생일이 지났는지 체크
+        // 오늘 시점 생일이 지나지 않았을 시 개월 수 감소 
+        if (currentCalender.get(Calendar.DAY_OF_MONTH) < birthCalendar.get(Calendar.DAY_OF_MONTH)) {
+            ageMonth--
+        }
+        
+        // 월이 음수인 경우 연도를 내려서 보정
+        if(ageMonth < 0) {
+            ageYear--
+            ageMonth += 12
+        }
+        
+        // 1년 미만일 경우 개월 수
+        if (ageYear == 0){
+            return "${ageMonth}개월"
+        }
+        
+        // 1년 이상일 경우 나이
+        return "${ageYear}세"
     }
     
     // 메시지 전송
@@ -150,11 +235,11 @@ class ChatRoomFragment : Fragment() {
             currentUserId,
             content,
             Timestamp.now(),
-            null,
+            false,
             MessageType.TEXT.code,
             MessageVisibility.ALL.code
         )
-        chatViewModel.saveMessage(chatRoomId, message)
+        chatRoomViewModel.saveMessage(chatRoomId, message)
     }
 
     private fun exitChatRoom() {

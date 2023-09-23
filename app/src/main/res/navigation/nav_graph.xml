@@ -165,6 +165,11 @@
         <argument
             android:name="position"
             app:argType="string" />
+        <action
+            android:id="@+id/action_communityPostDetailFragment_to_fullScreenFragment"
+            app:destination="@id/fullScreenFragment"
+            app:enterAnim="@anim/from_bottom"
+            app:popEnterAnim="@anim/from_top" />
     </fragment>
     <fragment
         android:id="@+id/communitySearchFragment"

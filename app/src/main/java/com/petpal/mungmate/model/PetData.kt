@@ -1,6 +1,7 @@
 package com.petpal.mungmate.model
 
 import android.graphics.Bitmap
+import com.petpal.mungmate.ui.pet.PetSex
 
 data class PetData(
     val petImageUrl: String,
@@ -12,4 +13,6 @@ data class PetData(
     val isNeutered: Boolean,
     val weight: Double,
     val character: String,
-)
+){
+    constructor():this("", "", "", "", PetSex.MALE.ordinal, false, 0.0, "")
+}

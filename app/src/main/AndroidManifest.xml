@@ -25,7 +25,8 @@
             android:name=".MainActivity"
             android:exported="true"
             android:theme="@style/AppTheme.Splash"
-            android:configChanges="screenSize|screenLayout">
+            android:configChanges="screenSize|screenLayout"
+            android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

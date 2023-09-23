@@ -20,9 +20,9 @@ import com.petpal.mungmate.model.Message
 import com.petpal.mungmate.model.MessageType
 import com.petpal.mungmate.model.Match
 import com.petpal.mungmate.model.MatchStatus
+import com.petpal.mungmate.model.MessageVisibility
 import java.lang.Exception
 import java.text.SimpleDateFormat
-import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
@@ -30,8 +30,7 @@ class WalkMateRequestFragment : Fragment() {
     private var _fragmentWalkMateRequestBinding : FragmentWalkMateRequestBinding? = null
     private val fragmentWalkMateRequestBinding get() = _fragmentWalkMateRequestBinding!!
 
-    // private lateinit var walkMateRequestViewModel: WalkMateRequestViewModel
-    private lateinit var chatViewModel: ChatViewModel
+    private lateinit var chatRoomViewModel: ChatRoomViewModel
 
     lateinit var chatRoomId: String
     lateinit var senderId: String
@@ -42,7 +41,7 @@ class WalkMateRequestFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         // walkMateRequestViewModel = ViewModelProvider(this)[WalkMateRequestViewModel::class.java]
-        chatViewModel = ViewModelProvider(this)[ChatViewModel::class.java]
+        chatRoomViewModel = ViewModelProvider(this)[ChatRoomViewModel::class.java]
     }
 
     override fun onCreateView(
@@ -204,14 +203,14 @@ class WalkMateRequestFragment : Fragment() {
             null
         )
 
-        chatViewModel.saveMatch(match).addOnSuccessListener { matchDocumentKey ->
+        chatRoomViewModel.saveMatch(match).addOnSuccessListener { matchDocumentKey ->
             // 매칭 데이터 저장된 후에 산책 매칭 메시지 저장(전송)
             sendMatchMessage(matchDocumentKey)
         }
     }
 
     // 날짜 시간 문자열을 timestamp 타입으로 형변환
-    private fun parseStringToTimeStamp(dateTimeString: String): Timestamp? {
+    private fun parseStringToTimeStamp(dateTimeString: String): Timestamp {
         try {
             val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
             val date = dateFormat.parse(dateTimeString)
@@ -222,22 +221,26 @@ class WalkMateRequestFragment : Fragment() {
         } catch (e: Exception) {
             e.printStackTrace()
         }
-        // 파싱 실패 시 null 반환
-        return null
+        // 파싱 실패 시 현재 시간 timestamp 반환
+        return Timestamp.now()
     }
 
     // 2. 산책 매칭 메시지 저장
     private fun sendMatchMessage(matchDocumentKey: String) {
+//        val messageVisibility = if (senderId ==  )
+
         // content에 walkmatching id 저장 -> RecyclerView ViewHolder에서 데이터 가져와서 사용
         val message = Message(
             senderId,
             matchDocumentKey,
             Timestamp.now(),
-            null,
+            false,
             MessageType.WALK_MATE_REQUEST.code,
-            null
+            MessageVisibility.ALL.code
         )
-        chatViewModel.saveMessage(chatRoomId, message)
+        // todo currentUser가 senderId, receiverId인지에 따라 visibility 설정
+        // todo 채팅방의 sender, receiver 문구가 헷갈리는데 user1, user2로 하는 게 나을지
+        chatRoomViewModel.saveMessage(chatRoomId, message)
         Snackbar.make(requireView(), "산책 메이트 요청 메시지를 전송했습니다.", Snackbar.LENGTH_SHORT).show()
         findNavController().popBackStack()
     }
