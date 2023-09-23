@@ -43,8 +43,6 @@ class ChatRoomFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // 채팅 -> 채팅방 : 채팅 목록 화면에서 Bundle로 전달받은 현재 채팅방 id
-        // chatRoomId = arguments?.getString("chatRoomId")!!
 
         // 사용자 프로필 -> 채팅방 : 사용자 프로필 시트에서 Bundle로 전달받은 상대 user id
         receiverId = arguments?.getString("receiverId")!!
@@ -80,9 +78,8 @@ class ChatRoomFragment : Fragment() {
                 chatRoomViewModel.getReceiverPetInfoByUserId(receiverId)
             }
 
-            isBlocked.observe(viewLifecycleOwner) {
-                // 차단 여부에 따라 UI 변경
-                updateUIBasedOnBlockStatus(it)
+            blockStatus.observe(viewLifecycleOwner) { blockStatus ->
+                updateUIBasedOnBlockStatus(blockStatus)
             }
 
             receiverUserInfo.observe(viewLifecycleOwner) { userBasicInfoData ->
@@ -116,7 +113,7 @@ class ChatRoomFragment : Fragment() {
         }
 
         // 차단 여부 체크
-        chatRoomViewModel.checkBlockedStatus(currentUserId, receiverId)
+        chatRoomViewModel.startObservingBlockStatus(currentUserId, receiverId)
 
         // 두 사용자 정보로 채팅방 찾아서 정보 로드
         chatRoomViewModel.getChatRoom(currentUserId, receiverId)
@@ -133,14 +130,8 @@ class ChatRoomFragment : Fragment() {
                 // toolbar 메뉴 이벤트 리스너
                 setOnMenuItemClickListener { menuItem ->
                     when(menuItem.itemId) {
-                        // 차단 상태가 아닐때만 보이는 메뉴
-                        R.id.item_chat_block -> {
-                            blockUser()
-                            true
-                        }
-                        // 차단 상태에서만 보이는 메뉴
-                        R.id.item_chat_unblock -> {
-                            unblockUser()
+                        R.id.item_chat_toggle_block -> {
+                            toggleBlockStatus()
                             true
                         }
                         R.id.item_chat_report -> {
@@ -253,14 +244,26 @@ class ChatRoomFragment : Fragment() {
         )
         chatRoomViewModel.sendMessage(chatRoomId, message)
     }
-
+    
+    // 차단 상태 반전
+    private fun toggleBlockStatus() {
+        val isBlocked = chatRoomViewModel.blockStatus.value
+        if (isBlocked == BlockStatus.ALL || isBlocked == BlockStatus.BLOCKED_BY_ME) {
+            // 내가 이미 차단한 경우
+            unblockUser()
+        } else {
+            // 내가 아직 차단하지 않은 경우
+            blockUser()
+        }
+    }
+    
     // 차단
     private fun blockUser() {
         val builder = MaterialAlertDialogBuilder(requireContext())
             .setTitle("차단하기")
             .setMessage("차단한 사용자와는 채팅을 할 수 없으며 산책 메이트를 요청할 수 없습니다.")
             .setPositiveButton("차단하기"){ dialogInterface: DialogInterface, i: Int ->
-                chatRoomViewModel.blockUser(currentUserId, receiverId)
+                chatRoomViewModel.toggleBlockStatus(currentUserId, receiverId)
             }
             .setNegativeButton("취소", null)
             .create()
@@ -273,37 +276,41 @@ class ChatRoomFragment : Fragment() {
             .setTitle("차단해제")
             .setMessage("차단을 해제하면 다시 채팅을 주고받을 수 있으며 산책 메이트 요청이 가능해집니다.")
             .setPositiveButton("해제하기"){ dialogInterface: DialogInterface, i: Int ->
-                chatRoomViewModel.unblockUser(currentUserId, receiverId)
+                chatRoomViewModel.toggleBlockStatus(currentUserId, receiverId)
             }
             .setNegativeButton("취소", null)
             .create()
         builder.show()
     }
 
-    // 차단 여부에 따라 UI 변경 TODO 내가 차단한건지, 상대가 차단한건지 문구 분기해서 표시해주기
-    private fun updateUIBasedOnBlockStatus(isBlocked: Boolean) {
-        if (isBlocked) {
-            // 차단 -> 산책 메이트 요청, 채팅 불가, 차단하기 가능
-            fragmentChatRoomBinding.run {
-                buttonRequestWalkMate.isEnabled = false
-                buttonSendMessage.isEnabled = false
-                editTextMessage.hint = "차단 사용자와는 채팅할 수 없습니다."
-                editTextMessage.isEnabled = false
-                toolbarChatRoom.menu.run {
-                    findItem(R.id.item_chat_block).isVisible = false
-                    findItem(R.id.item_chat_unblock).isVisible = true
-                }
-            }
-        } else {
-            // 차단 해제 -> 산책 메이트 요청, 채팅 가능, 차단해제 불가
+    // 차단 여부에 따라 UI 변경
+    private fun updateUIBasedOnBlockStatus(blockStatus: BlockStatus) {
+        // 차단 상태에 따라 분기
+        if (blockStatus == BlockStatus.NONE) {
+            // 차단해제 상태 : 산책 메이트 요청 및 채팅 가능, 차단하기 메뉴 표시
             fragmentChatRoomBinding.run {
                 buttonRequestWalkMate.isEnabled = true
                 buttonSendMessage.isEnabled = true
                 editTextMessage.hint = "메시지를 입력하세요."
                 editTextMessage.isEnabled = true
                 toolbarChatRoom.menu.run {
-                    findItem(R.id.item_chat_block).isVisible = true
-                    findItem(R.id.item_chat_unblock).isVisible = false
+                    findItem(R.id.item_chat_toggle_block).title = "차단하기"
+                }
+            }
+        } else {
+            // 차단 상태 : 산책 메이트 요청 및 채팅 불가, 차단해제 메뉴 표시
+            fragmentChatRoomBinding.run {
+                buttonRequestWalkMate.isEnabled = false
+                buttonSendMessage.isEnabled = false
+                editTextMessage.isEnabled = false
+                toolbarChatRoom.menu.run {
+                    findItem(R.id.item_chat_toggle_block).title = "차단해제"
+                }
+                when (blockStatus) {
+                    BlockStatus.ALL -> { editTextMessage.hint = "서로 차단한 사용자끼리는 채팅할 수 없습니다." }
+                    BlockStatus.BLOCKED_BY_ME -> { editTextMessage.hint = "차단한 사용자와는 채팅할 수 없습니다." }
+                    BlockStatus.BLOCKED_BY_RECEIVER -> { editTextMessage.hint = "상대방으로 부터 차단되어 채팅할 수 없습니다." }
+                    else -> { }
                 }
             }
         }

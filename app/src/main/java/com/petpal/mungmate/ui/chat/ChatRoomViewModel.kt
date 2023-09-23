@@ -13,6 +13,9 @@ import com.petpal.mungmate.model.UserReport
 import com.petpal.mungmate.model.Match
 import com.petpal.mungmate.model.PetData
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -30,15 +33,9 @@ class ChatRoomViewModel: ViewModel() {
     private val _messages = MutableLiveData<List<Message>>()
     val messages : LiveData<List<Message>> get() = _messages
 
-    // 두 사용자 간의 차단 상태 저장
-    private val _isBlocked = MutableLiveData<Boolean>()
-    val isBlocked: LiveData<Boolean> get() = _isBlocked
-
-    // TODO 차단 각자 관리
-    private val _isBlockedByMe = MutableLiveData<Boolean>()
-    val isBlockedByMe: LiveData<Boolean> get() = _isBlockedByMe
-    private val _isBlockedByReceiver = MutableLiveData<Boolean>()
-    val isBlockedByReceiver: LiveData<Boolean> get() = _isBlockedByReceiver
+    // 차단 상태
+    private val _blockStatus = MutableStateFlow<BlockStatus>(BlockStatus.NONE)
+    val blockStatus: StateFlow<BlockStatus> = _blockStatus.asStateFlow()
 
     // 채팅 상대 정보
     private val _receiverUserId = MutableLiveData<String>()
@@ -61,27 +58,12 @@ class ChatRoomViewModel: ViewModel() {
         }
     }
 
-    // 참여자 중 한명이라도 상대를 차단했는지 여부 체크
-    fun checkBlockedStatus(myUserId: String, receiverId: String) {
-        viewModelScope.launch {
-            val result = chatRepository.checkBlockedStatus(myUserId, receiverId)
-            _isBlocked.postValue(result)
-        }
-    }
-
-    // 상대가 나를 차단했는지 여부 체크 - 채팅방에서 내가 차단을 풀었어도 상대가 안풀었으면 차단 유지
-    fun checkBlockStatus(myBlocked: Boolean, myUserId: String, receiverId: String) {
-        viewModelScope.launch {
-            val isBlockedByReceiver = chatRepository.checkBlockedByReceiver(myUserId, receiverId)
-            _isBlocked.postValue(myBlocked || isBlockedByReceiver)
-        }
-    }
-
     // 채팅방 Document에 메시지 저장
     fun sendMessage(chatRoomId: String, message: Message){
         chatRepository.saveMessage(chatRoomId, message)
     }
 
+    // 채팅방 메시지 가져오기
     fun getMessages(chatRoomId: String) {
         viewModelScope.launch {
             chatRepository.getMessages(chatRoomId)
@@ -162,19 +144,28 @@ class ChatRoomViewModel: ViewModel() {
         }
     }
 
-    // 사용자를 차단 목록에 추가
-    fun blockUser(myUserId: String, blockedUserId: String) {
-        viewModelScope.launch(Dispatchers.IO) {
-            chatRepository.addUserToBlockList(myUserId, blockedUserId)
-            checkBlockStatus(true, myUserId, blockedUserId)
+    // Firestore에서 실시간으로 데이터를 가져와서 차단 상태 업데이트
+    fun startObservingBlockStatus(currentUserId: String, receiverId: String) {
+        viewModelScope.launch {
+            chatRepository.observeBlockStatus(currentUserId, receiverId)
+                .collect { blockStatus ->
+                    _blockStatus.value = blockStatus
+                }
         }
     }
-    
-    // 사용자를 차단 목록에서 제거
-    fun unblockUser(myUserId: String, unblockedUserId: String) {
-        viewModelScope.launch(Dispatchers.IO) {
-            chatRepository.removeUserFromBlockList(myUserId, unblockedUserId)
-            checkBlockStatus(false, myUserId, unblockedUserId)
+
+    // 상대 차단 상태 전환 (차단 -> 해제 / 해제 -> 차단)
+    fun toggleBlockStatus(currentUserId: String, receiverId: String) {
+        viewModelScope.launch {
+            chatRepository.toggleBlockStatus(currentUserId, receiverId)
         }
     }
+}
+
+// 차단 상태
+enum class BlockStatus {
+    ALL,                    // 상호 차단
+    BLOCKED_BY_ME,          // 나만 상대를 차단
+    BLOCKED_BY_RECEIVER,    // 상대만 나를 차단
+    NONE                    // 상호 차단 안함
 }

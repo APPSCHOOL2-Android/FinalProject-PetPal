@@ -2,11 +2,8 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:id="@+id/item_chat_block"
+        android:id="@+id/item_chat_toggle_block"
         android:title="차단하기" />
-    <item
-        android:id="@+id/item_chat_unblock"
-        android:title="차단해제" />
     <item
         android:id="@+id/item_chat_report"
         android:title="신고하기" />
