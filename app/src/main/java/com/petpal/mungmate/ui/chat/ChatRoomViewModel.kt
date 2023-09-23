@@ -21,16 +21,24 @@ private const val TAG = "CHAT_ROOM_VIEW_MODEL"
 class ChatRoomViewModel: ViewModel() {
 
     var chatRepository = ChatRepository()
-
-    // 두 사용자 간의 차단 상태 저장
-    private val _isBlocked = MutableLiveData<Boolean>()
-    val isBlocked get() = _isBlocked
-
+    
+    // 현재 채팅방 ID
     private val _currentChatRoomId = MutableLiveData<String>()
     val currentChatRoomId get() = _currentChatRoomId
 
+    // 현재 채팅방의 메시지 목록
     private val _messages = MutableLiveData<List<Message>>()
     val messages : LiveData<List<Message>> get() = _messages
+
+    // 두 사용자 간의 차단 상태 저장
+    private val _isBlocked = MutableLiveData<Boolean>()
+    val isBlocked: LiveData<Boolean> get() = _isBlocked
+
+    // TODO 차단 각자 관리
+    private val _isBlockedByMe = MutableLiveData<Boolean>()
+    val isBlockedByMe: LiveData<Boolean> get() = _isBlockedByMe
+    private val _isBlockedByReceiver = MutableLiveData<Boolean>()
+    val isBlockedByReceiver: LiveData<Boolean> get() = _isBlockedByReceiver
 
     // 채팅 상대 정보
     private val _receiverUserId = MutableLiveData<String>()
@@ -57,7 +65,15 @@ class ChatRoomViewModel: ViewModel() {
     fun checkBlockedStatus(myUserId: String, receiverId: String) {
         viewModelScope.launch {
             val result = chatRepository.checkBlockedStatus(myUserId, receiverId)
-            _isBlocked.value = result
+            _isBlocked.postValue(result)
+        }
+    }
+
+    // 상대가 나를 차단했는지 여부 체크 - 채팅방에서 내가 차단을 풀었어도 상대가 안풀었으면 차단 유지
+    fun checkBlockStatus(myBlocked: Boolean, myUserId: String, receiverId: String) {
+        viewModelScope.launch {
+            val isBlockedByReceiver = chatRepository.checkBlockedByReceiver(myUserId, receiverId)
+            _isBlocked.postValue(myBlocked || isBlockedByReceiver)
         }
     }
 
@@ -147,18 +163,18 @@ class ChatRoomViewModel: ViewModel() {
     }
 
     // 사용자를 차단 목록에 추가
-    fun blockUser(userId: String, blockedUserId: String) {
+    fun blockUser(myUserId: String, blockedUserId: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            chatRepository.addUserToBlockList(userId, blockedUserId)
-            _isBlocked.postValue(true)
+            chatRepository.addUserToBlockList(myUserId, blockedUserId)
+            checkBlockStatus(true, myUserId, blockedUserId)
         }
     }
     
     // 사용자를 차단 목록에서 제거
-    fun unblockUser(userId: String, unblockedUserId: String) {
+    fun unblockUser(myUserId: String, unblockedUserId: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            chatRepository.removeUserFromBlockList(userId, unblockedUserId)
-            _isBlocked.postValue(false)
+            chatRepository.removeUserFromBlockList(myUserId, unblockedUserId)
+            checkBlockStatus(false, myUserId, unblockedUserId)
         }
     }
 }

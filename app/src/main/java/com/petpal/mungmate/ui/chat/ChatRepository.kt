@@ -259,6 +259,23 @@ class ChatRepository {
         return isBlockedByMe || isBlockedByReceiver
     }
 
+    // 내 차단 상태는 알고, 상대의 차단 여부만 체크
+    suspend fun checkBlockedByReceiver(myUserId: String, receiverId: String): Boolean {
+        // 상대 정보 가져오기
+        var isBlockedByReceiver = false
+        val receiverDocumentSnapshot = db.collection(USERS_NAME).document(receiverId).get().await()
+        if (receiverDocumentSnapshot != null && receiverDocumentSnapshot.exists()) {
+            // 상대방이 날 차단했는지 확인
+            val receiverBlockUsers = receiverDocumentSnapshot.get(BLOCK_USER_LIST) as? List<String>
+            // blockUserList 필드가 아예 없는 경우 : 아직 차단한 사용자가 없음
+            if (receiverBlockUsers != null && myUserId != null) {
+                isBlockedByReceiver = receiverBlockUsers.contains(myUserId)
+            }
+        }
+
+        return isBlockedByReceiver
+    }
+
     // 사용자를 차단 목록에 추가
     suspend fun addUserToBlockList(userId: String, blockedUserId: String) {
         val userRef = db.collection(USERS_NAME).document(userId)

@@ -280,7 +280,7 @@ class ChatRoomFragment : Fragment() {
         builder.show()
     }
 
-    // 차단 여부에 따라 UI 변경
+    // 차단 여부에 따라 UI 변경 TODO 내가 차단한건지, 상대가 차단한건지 문구 분기해서 표시해주기
     private fun updateUIBasedOnBlockStatus(isBlocked: Boolean) {
         if (isBlocked) {
             // 차단 -> 산책 메이트 요청, 채팅 불가, 차단하기 가능
