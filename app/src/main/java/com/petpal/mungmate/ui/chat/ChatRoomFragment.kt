@@ -331,7 +331,7 @@ class ChatRoomFragment : Fragment() {
                 toolbarChatRoom.menu.run {
                     findItem(R.id.item_chat_toggle_block).title = "차단하기"
                 }
-                editTextMessage.hint = "상대방으로 부터 차단되어 채팅할 수 없습니다."
+                editTextMessage.hint = "상대방이 차단하여 채팅할 수 없습니다."
             }
         } else {
             // 차단해제 상태 : 산책 메이트 요청 및 채팅 가능, 차단하기 메뉴 표시
