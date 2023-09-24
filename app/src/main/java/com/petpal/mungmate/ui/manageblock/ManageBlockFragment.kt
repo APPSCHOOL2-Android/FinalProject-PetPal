@@ -77,6 +77,7 @@ class ManageBlockFragment : Fragment() {
                         // RecyclerView 어댑터에 차단 사용자 리스트 설정
                         blockedUserRecyclerAdapter.submitList(blockUserList)
 
+                        // UI 업데이트
                         updateBlockListUI()
                     } else {
                         // 사용자 문서가 없을 경우

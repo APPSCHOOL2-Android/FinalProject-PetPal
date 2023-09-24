@@ -65,9 +65,6 @@ class BlockUserRecyclerAdapter() : ListAdapter<String,BlockUserRecyclerAdapter.B
                                     submitList(updateBlockUserList)
                                     notifyDataSetChanged()
                                 }
-                                .addOnFailureListener { 
-                                    // 업데이트 실패
-                                }
                         }
                     }
                 }
@@ -83,7 +80,6 @@ class BlockUserRecyclerAdapter() : ListAdapter<String,BlockUserRecyclerAdapter.B
         )
         return BlockUserViewHolder(rowBinding)
     }
-
 
     override fun onBindViewHolder(holder: BlockUserViewHolder, position: Int) {
         holder.bind(getItem(position))
