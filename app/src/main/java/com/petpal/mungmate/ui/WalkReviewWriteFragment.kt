@@ -65,6 +65,7 @@ class WalkReviewWriteFragment : Fragment() {
         val walkDistance=arguments?.getString("walkDistance")
         val walkMatchingId=arguments?.getString("walkMatchingId")
         val walkRecordId=arguments?.getString("walkMatchingRecorId")
+        val walkMateNickname=arguments?.getString("mateNickname")
         val capturedImageUri = arguments?.getParcelable<Uri>("capturedImageUri")
         Log.d("이미지",capturedImageUri.toString())
         if (walkRecordId != null) {
@@ -75,14 +76,14 @@ class WalkReviewWriteFragment : Fragment() {
             }
         }
 
-        if(walkMatchingId==null){
+        if(walkMateNickname==null){
             fragmentWalkReviewWriteBinding.imageViewWalk.visibility=View.VISIBLE
             fragmentWalkReviewWriteBinding.userRatingBar.visibility=View.GONE
 
         }else{
             fragmentWalkReviewWriteBinding.buttonWalkReviewSubmit.text="후기 보내기"
             fragmentWalkReviewWriteBinding.textViewWalkReviewUser1.text="남긴 평점은 상대방의 발바닥 점수에 반영됩니다."
-            fragmentWalkReviewWriteBinding.textViewWalkReviewUser.text="${walkMatchingId}님과의 산책은 어떠셨나요?"
+            fragmentWalkReviewWriteBinding.textViewWalkReviewUser.text="$walkMateNickname 님과의 산책은 어떠셨나요?"
         }
         fragmentWalkReviewWriteBinding.imageViewWalk.setOnClickListener {
             selectImageFromGallery()

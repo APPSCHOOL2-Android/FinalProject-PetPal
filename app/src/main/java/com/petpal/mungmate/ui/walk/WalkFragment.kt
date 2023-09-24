@@ -24,6 +24,7 @@ import android.os.Looper
 import android.text.format.DateUtils.formatElapsedTime
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
@@ -71,6 +72,7 @@ import com.petpal.mungmate.model.PlaceData
 import com.petpal.mungmate.model.ReceiveUser
 import com.petpal.mungmate.model.Review
 import com.petpal.mungmate.utils.LastKnownLocation
+import com.petpal.mungmate.utils.observeOnce
 import com.petpal.mungmate.utils.onWalk.onWalk
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -99,6 +101,9 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
     private val viewModel: WalkViewModel by activityViewModels {
         WalkViewModelFactory(WalkRepository(), requireActivity().application)
     }
+    // 거리 필터링을 위한 코드
+    private var distanceFilterValue:Double?=null
+
     private var location123:Location?=null
     private var repeatJob: Job? = null
     val CURRENT_LOCATION_MARKER_TAG = 100
@@ -116,6 +121,7 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
     private lateinit var userId:String
     private val locationList = mutableListOf<Location>()
     private lateinit var userNickname:String
+    private var walkMateNickname: String? = null
     private var lastLocation: Location? = null
     private var totalDistance = 0.0f
     private var elapsedTime = 0L
@@ -192,12 +198,30 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
     }
     private fun setupMapView() {
         //필터 드로어 제어
-        fragmentWalkBinding.drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
+        //fragmentWalkBinding.drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
         fragmentWalkBinding.mapView.setPOIItemEventListener(this)
         fragmentWalkBinding.mapView.setCurrentLocationEventListener(this)
         fragmentWalkBinding.mapView.setMapViewEventListener(this)
         requestLocationPermissionIfNeeded()
 
+    }
+    fun setupAndShowDialog(builder: AlertDialog.Builder) {
+        builder.setPositiveButton("확인") { dialogInterface: DialogInterface, i: Int ->
+            showProgress()
+            startCountdown()
+            onWalk = true
+            startLocationUpdates()
+            observeViewModelonWalk()
+            viewModel.observeUsersOnWalk()
+
+            fragmentWalkBinding.mapView.removeAllPOIItems()
+            updateCurrentLocationOnce()
+        }
+        builder.setNegativeButton("취소") { dialogInterface: DialogInterface, i: Int ->
+            dialogInterface.dismiss()
+        }
+        val dialog = builder.create()
+        dialog.show()
     }
     private fun observeViewModelOnWalkLocationChanges() {
         viewModel.usersOnWalkLocationChanges.observe(viewLifecycleOwner, Observer { users ->
@@ -267,55 +291,49 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
     }
     private fun setupButtonListeners() {
         fragmentWalkBinding.buttonWalk.setOnClickListener {
-
+            walkWithUser?.walkRecordId?.let { it1 -> viewModel.updateMatchStatusToFour(it1) }
             val builder = AlertDialog.Builder(requireContext())
             builder.setTitle("멍메이트")
-            if(walkWithUser!=null)
-            {
-                if(userId==walkWithUser!!.senderId)
-                    builder.setMessage("${walkWithUser!!.receiverId}와 산책을 시작하시겠습니까?")
-                else if(userId!=walkWithUser!!.senderId){
-                    builder.setMessage("${walkWithUser!!.senderId}와 산책을 시작하시겠습니까?")
+
+            if (walkWithUser != null) {
+                val targetUserId = if (userId == walkWithUser!!.senderId) {
+                    walkWithUser!!.receiverId
+                } else {
+                    walkWithUser!!.senderId
                 }
-            }else {
+
+                targetUserId?.let { it1 ->
+                    viewModel.fetchUserByUserId(it1)
+                    viewModel.userLiveData.observeOnce(viewLifecycleOwner, Observer { user ->
+                        walkMateNickname=user?.nickname
+                        builder.setMessage("${user!!.nickname} 님과의 산책을 시작하시겠습니까?")
+
+                        // 여기서 다이얼로그를 설정하고 표시합니다.
+                        setupAndShowDialog(builder)
+                    })
+                }
+            } else {
                 builder.setMessage("산책을 시작하시겠습니까?")
+                setupAndShowDialog(builder)
             }
-
-            builder.setPositiveButton("확인") { dialogInterface: DialogInterface, i: Int ->
-                showProgress()
-                startCountdown()
-                onWalk=true
-                startLocationUpdates()
-                observeViewModelonWalk()
-                //observeViewModelOnWalkLocationChanges()
-                //viewModel.observeUsersOnWalkLocation()
-                viewModel.observeUsersOnWalk()
-
-                fragmentWalkBinding.mapView.removeAllPOIItems()
-                updateCurrentLocationOnce()
-                //startLocationUpdates()
-            }
-            builder.setNegativeButton("취소") { dialogInterface: DialogInterface, i: Int ->
-
-                dialogInterface.dismiss()
-            }
-            val dialog = builder.create()
-            dialog.show()
-
         }
 
         fragmentWalkBinding.chipMapFilter.setOnClickListener {
             fragmentWalkBinding.drawerLayout.setScrimColor(Color.parseColor("#FFFFFF"))
             fragmentWalkBinding.drawerLayout.openDrawer(GravityCompat.END)
+            fragmentWalkBinding.drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_OPEN)
 
         }
 
         fragmentWalkBinding.buttonFilterSubmit.setOnClickListener {
-            val isAnyFilterSelected = fragmentWalkBinding.filterDistanceGroup.checkedChipId != -1 || fragmentWalkBinding.filterUserGenderGroup.checkedChipId != -1 || fragmentWalkBinding.filterAgeRangeGroup.checkedChipId != -1 || fragmentWalkBinding.filterPetGenderGroup.checkedChipId != -1 || fragmentWalkBinding.filterPetPropensityGroup.checkedChipId != -1 || fragmentWalkBinding.filterNeuterStatusGroup.checkedChipId != -1
-            fragmentWalkBinding.chipMapFilter.isChecked = isAnyFilterSelected
+            showSnackbar("필터가 적용되었습니다.")
+            when(fragmentWalkBinding.filterDistanceGroup.checkedChipId) {
+                R.id.distance1 -> distanceFilterValue=1000.0
+                R.id.distance2 -> distanceFilterValue=2000.0
+                R.id.distance3 -> distanceFilterValue=3000.0
+                else -> distanceFilterValue=2000.0
+            }
             fragmentWalkBinding.drawerLayout.closeDrawer(GravityCompat.END)
-            if(isAnyFilterSelected){
-            showSnackbar("필터가 적용되었습니다.")}
 
         }
         fragmentWalkBinding.buttonStopWalk.setOnClickListener {
@@ -334,6 +352,8 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
             bundle.putString("walkRecordEndTime",endTimestamp)
             bundle.putLong("walkDuration",elapsedTime)
             bundle.putString("walkDistance",totalDistance.toString())
+            bundle.putString("mateNickname",walkMateNickname)
+            walkMateNickname?.let { it1 -> Log.d("닉닉닉", it1) }
             if(walkWithUser!=null) {
                 if (userId != walkWithUser!!.receiverId) {
                     bundle.putString("walkMatchingId", walkWithUser!!.receiverId)
@@ -362,6 +382,7 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
             viewModel.updateOnWalkStatusFalse(userId)
             mainActivity.navigate(R.id.action_mainFragment_to_WriteWalkReviewFragment, bundle)
             getCurrentLocation()
+            //여기에 메서드로 walkWithUser.matchid로 해당match문서의 status=4로 바꾸는 메서드 넣어야함
             matches1.remove(walkWithUser)
             val currentTimestamp = com.google.firebase.Timestamp.now()
             val differences = matches1.map { match ->
@@ -432,22 +453,19 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
                             longitude = it.longitude ?: 0.0
                         }
 
-                        // 거리 필터링을 위한 코드
-                        val distanceFilterValue = when(fragmentWalkBinding.filterDistanceGroup.checkedChipId) {
-                            R.id.distance1 -> 1000.0
-                            R.id.distance2 -> 2000.0
-                            R.id.distance3 -> 3000.0
-                            else -> 2000.0
-                        }
-                            Log.d("로그로그",distanceFilterValue.toString())
+
 
                         nearbyUsers = users.filter { user ->
                             val userLocation = Location("userLocation").apply {
                                 latitude = user.location?.get("latitude") ?: 0.0
                                 longitude = user.location?.get("longitude") ?: 0.0
                             }
-
-                            user.uid != userId && currentLocation.distanceTo(userLocation) <= distanceFilterValue
+                            val filterddistance=if(distanceFilterValue==null){
+                                2000.0
+                            }else{
+                                distanceFilterValue
+                            }
+                            user.uid != userId && currentLocation.distanceTo(userLocation) <= filterddistance!!
                         }
 
                         val newNearbyUserIds = nearbyUsers!!.map { it.uid }.toSet()
@@ -1216,13 +1234,14 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
                 val buttonBottomWalk=onWalkBottomSheetView.findViewById<Button>(R.id.buttonBottomWalk)
                 val buttonBottomBlock=onWalkBottomSheetView.findViewById<Button>(R.id.buttonBottomBlock)
                 val userRating= onWalkBottomSheetView.findViewById<RatingBar>(R.id.ratingBarUser2)
-                user.uid?.let { viewModel.blockUser(userId, it) }
+
                 buttonBottomWalk.setOnClickListener {
                     val bundle=Bundle()
-                    bundle.putString("receiverId",user.uid)
+                    bundle.putString("receiverId",user.uid.toString())
                     mainActivity.navigate(R.id.action_mainFragment_to_chat,bundle)
                 }
                 buttonBottomBlock.setOnClickListener {
+                    user.uid?.let { viewModel.blockUser(userId, it) }
                     viewModel.isUserBlocked.observe(viewLifecycleOwner, Observer { isBlocked ->
                         if (isBlocked) {
                             Snackbar.make(buttonBottomBlock, "사용자가 차단되었습니다.",Snackbar.LENGTH_SHORT).show()
@@ -1249,23 +1268,36 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
                         textViewBottomPetPropensity.text="성향 : ${pet.character}"
                         textViewBottomPetGender.text="성별 : ${petSex}"
                         textViewBottomIsPetNeutered.text="중성화 여부 : ${isPetNeutered}"
-                        if(pet.imgaeURI !=null){
-                            Glide.with(imageViewBottomPetProfileImage.context)
-                                .load(pet.imgaeURI)
-                                .placeholder(R.drawable.pets_24px)
-                                .listener(object : RequestListener<Drawable> {
-                                    override fun onLoadFailed(e: GlideException?, model: Any?, target: Target<Drawable>?, isFirstResource: Boolean): Boolean {
-                                        return false
-                                    }
-
-                                    override fun onResourceReady(resource: Drawable?, model: Any?, target: Target<Drawable>?, dataSource: DataSource?, isFirstResource: Boolean): Boolean {
-                                        return false
-                                    }
-                                })
-                                .into(imageViewBottomPetProfileImage)
-                        } else {
-                            imageViewBottomPetProfileImage.setImageResource(R.drawable.pets_24px)
+                        if (pet.petImageUrl != null) {
+                            val userImageRef = Firebase.storage.reference.child(pet.petImageUrl)
+                            Log.d("펫이미지", pet.petImageUrl)
+                            userImageRef.getBytes(Long.MAX_VALUE).addOnSuccessListener { bytes ->
+                                // 이미지 다운로드에 성공한 경우
+                                val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+                                imageViewBottomPetProfileImage.setImageBitmap(bitmap) // ImageView에 이미지 설정
+                            }.addOnFailureListener {
+                                // 이미지 다운로드에 실패한 경우
+                                Log.e("FirebaseStorage", "이미지 다운로드 실패: $it")
+                                imageViewBottomPetProfileImage.setImageResource(R.drawable.pets_24px)
+                            }
                         }
+//                        if(pet.imgaeURI !=null){
+//                            Glide.with(imageViewBottomPetProfileImage.context)
+//                                .load(pet.imgaeURI)
+//                                .placeholder(R.drawable.pets_24px)
+//                                .listener(object : RequestListener<Drawable> {
+//                                    override fun onLoadFailed(e: GlideException?, model: Any?, target: Target<Drawable>?, isFirstResource: Boolean): Boolean {
+//                                        return false
+//                                    }
+//
+//                                    override fun onResourceReady(resource: Drawable?, model: Any?, target: Target<Drawable>?, dataSource: DataSource?, isFirstResource: Boolean): Boolean {
+//                                        return false
+//                                    }
+//                                })
+//                                .into(imageViewBottomPetProfileImage)
+//                        } else {
+//                            imageViewBottomPetProfileImage.setImageResource(R.drawable.pets_24px)
+//                        }
                     }
                 }
                 viewModel.averageRatingForUser.observe(this, Observer { ratings ->
