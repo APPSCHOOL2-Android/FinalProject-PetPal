@@ -183,7 +183,7 @@ class ChatRepository {
         val chatRoomDocRef = db.collection(CHAT_ROOMS_NAME).document(chatRoomKey)
         val chatRoomDocSnapshot = chatRoomDocRef.get().await()
 
-        if (chatRoomDocSnapshot.exists()) {
+        if (chatRoomDocSnapshot != null && chatRoomDocSnapshot.exists()) {
             // 채팅방이 이미 존재하는 경우, 기존 채팅방의 ID를 반환
             Log.d(TAG, "load chatroom completed")
             return chatRoomDocSnapshot.toObject(ChatRoom::class.java) ?: ChatRoom()
