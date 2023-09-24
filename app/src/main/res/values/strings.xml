@@ -60,7 +60,7 @@
     <string name="check">확인</string>
     <string name="delete_dialog_title">정말 게시글을 삭제하시겠습니까?</string>
     <string name="community_comment_EditText">댓글을 입력하세요.</string>
-
+    <string name="community_reply_EditText">답글을 입력하세요.</string>
 
     <!-- 견종 문자열 배열 -->
     <string-array name="dog_breeds">

@@ -9,6 +9,7 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.PopupMenu
 import android.widget.TextView
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.airbnb.lottie.LottieAnimationView
 import com.bumptech.glide.Glide
@@ -47,6 +48,9 @@ class CommunityDetailCommentAdapter(
             item.communityCommentFavoriteLottie
         val communityCommentCommentCounter: TextView = item.communityCommentCommentCounter
         val communityCommentReplyTextView: TextView = item.communityCommentReplyTextView
+        val replyRecyclerView:RecyclerView=item.replyRecyclerView
+
+
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -99,11 +103,20 @@ class CommunityDetailCommentAdapter(
         holder.communityPostDateCreated.text = timeAgo
         holder.communityContent.text = commentList.commentContent
         holder.communityCommentFavoriteCounter.text = "0"
-        holder.communityCommentCommentCounter.text = "0"
 
         holder.communityCommentReplyTextView.setOnClickListener {
-            callback.onReplyButtonClicked(commentList)
+            callback.onReplyButtonClicked(commentList,position)
 
+        }
+
+        holder.communityCommentCommentCounter.text = commentList.replyList.size.toString()
+        if (commentList.replyList.isNotEmpty()) {
+            val replyAdapter = ReplyAdapter(commentList.replyList)
+            holder.replyRecyclerView.layoutManager = LinearLayoutManager(context)
+            holder.replyRecyclerView.adapter = replyAdapter
+            holder.replyRecyclerView.visibility = View.VISIBLE
+        } else {
+            holder.replyRecyclerView.visibility = View.GONE
         }
 
 
@@ -180,5 +193,11 @@ class CommunityDetailCommentAdapter(
         postCommentList.clear()
         postCommentList.addAll(newData)
         notifyDataSetChanged()
+    }
+
+    fun addReply(newReply: Comment, position: Int) {
+        postCommentList[position].replyList.add(newReply)
+
+        notifyItemChanged(position)
     }
 }
