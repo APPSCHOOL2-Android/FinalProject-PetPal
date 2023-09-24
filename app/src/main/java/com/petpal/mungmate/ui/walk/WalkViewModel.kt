@@ -56,7 +56,7 @@ class WalkViewModel(private val repository: WalkRepository,application: Applicat
     val averageRatingForUser: LiveData<Double> get() = _averageRatingForUser
     private val _averageRatingForUser = MutableLiveData<Double>()
     val usersOnWalkLocationChanges: MutableLiveData<List<ReceiveUser>> = MutableLiveData()
-
+    val userLiveData: MutableLiveData<ReceiveUser?> = MutableLiveData()
     val isUserBlocked: LiveData<Boolean> get() = _isUserBlocked
     val timerRunnable = object : Runnable {
         override fun run() {
@@ -77,7 +77,25 @@ class WalkViewModel(private val repository: WalkRepository,application: Applicat
         handler.removeCallbacks(timerRunnable)
     }
 
-
+    fun fetchUserByUserId(userId: String) {
+        viewModelScope.launch {
+            try {
+                val user = repository.fetchUserByUserId(userId)
+                userLiveData.postValue(user)
+            } catch (e: Exception) {
+                errorMessage.postValue(e.localizedMessage ?: "Failed to fetch user data")
+            }
+        }
+    }
+    fun updateMatchStatusToFour(documentId: String) {
+        viewModelScope.launch {
+            try {
+                repository.updateMatchStatus(documentId)
+            } catch (e: Exception) {
+                errorMessage.postValue(e.localizedMessage ?: "Failed to update match status")
+            }
+        }
+    }
     override fun onCleared() {
         super.onCleared()
         // ViewModel이 파괴될 때 Handler 콜백을 취소하여 메모리 누수를 방지합니다.

@@ -212,12 +212,12 @@
     <LinearLayout
         android:id="@+id/DrawerLinear"
         android:layout_width="400dp"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:layout_gravity="end"
+        android:orientation="vertical"
         android:paddingLeft="32dp"
         android:paddingTop="8dp"
-        android:paddingBottom="16dp"
-        android:orientation="vertical">
+        android:paddingBottom="16dp">
 
 
         <LinearLayout

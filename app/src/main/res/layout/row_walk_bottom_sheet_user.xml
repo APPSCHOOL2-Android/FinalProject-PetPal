@@ -32,8 +32,7 @@
             android:background="@android:color/transparent"
             android:src="@drawable/account_circle_24px"
             app:civ_border_color="#000000"
-            app:civ_border_overlay="true"
-            app:civ_border_width="5dp" />
+            app:civ_border_overlay="true" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -117,8 +116,7 @@
             android:background="@android:color/transparent"
             android:src="@drawable/pets_24px"
             app:civ_border_color="#000000"
-            app:civ_border_overlay="true"
-            app:civ_border_width="5dp" />
+            app:civ_border_overlay="true" />
 
         <LinearLayout
             android:layout_width="match_parent"

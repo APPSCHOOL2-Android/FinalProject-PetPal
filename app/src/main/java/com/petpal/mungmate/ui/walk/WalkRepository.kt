@@ -244,6 +244,27 @@ class WalkRepository {
 //        }
 //        awaitClose { listenerRegistration.remove() }
 //    }
+    suspend fun updateMatchStatus(documentId: String) {
+        try {
+            val matchDocumentRef = db.collection("matches").document(documentId)
+            matchDocumentRef.update("status", 4).await()
+        } catch (e: Exception) {
+            // 여기에서 예외 처리를 할 수 있습니다.
+            throw e  // 예외를 다시 던질 수 있습니다.
+        }
+    }
+    suspend fun fetchUserByUserId(userId: String): ReceiveUser? {
+        // userId를 사용하여 해당 사용자의 문서를 가져옵니다.
+        val userDocRef = db.collection("users").document(userId)
+        val userDoc = userDocRef.get().await()
+
+        // 문서가 존재하면 해당 문서를 UserBasicInfoData 클래스로 변환하여 반환하고, 그렇지 않으면 null을 반환합니다.
+        return if (userDoc.exists()) {
+            userDoc.toObject(ReceiveUser::class.java)
+        } else {
+            null
+        }
+    }
     suspend fun fetchMatchingWalkCount(userId: String): Int {
         // userId를 사용하여 해당 사용자의 문서를 가져옵니다.
         val userDocRef = db.collection("users").document(userId)
@@ -295,7 +316,9 @@ class WalkRepository {
         Log.d("MATCH_LOG", userId)
 
         val allMatches = mutableListOf<Match>()
-        matchRef.whereEqualTo("receiverId", userId).get().addOnSuccessListener { matchesByReceiverId ->
+
+        // status=2이며 receiverId가 userId인 문서 검색
+        matchRef.whereEqualTo("status", 2).whereEqualTo("receiverId", userId).get().addOnSuccessListener { matchesByReceiverId ->
             for (document in matchesByReceiverId) {
                 val match = document.toObject(Match::class.java)
                 Log.d("MATCH_LOG", "Match from ReceiverId: ${match.senderId}")
@@ -306,8 +329,8 @@ class WalkRepository {
                 }
             }
 
-
-            matchRef.whereEqualTo("senderId", userId).get().addOnSuccessListener { matchesBySenderId ->
+            // status=2이며 senderId가 userId인 문서 검색
+            matchRef.whereEqualTo("status", 2).whereEqualTo("senderId", userId).get().addOnSuccessListener { matchesBySenderId ->
                 for (document in matchesBySenderId) {
                     val match = document.toObject(Match::class.java)
                     match.walkRecordId = document.id
@@ -316,17 +339,11 @@ class WalkRepository {
                         Log.d("MATCH_LOG", "Match from SenderId: ${document.id} -> ${document.data}")
                     }
                 }
-
-
                 onSuccess(allMatches)
-
             }.addOnFailureListener { exception ->
-
                 onFailure(exception)
             }
-
         }.addOnFailureListener { exception ->
-
             onFailure(exception)
         }
     }
