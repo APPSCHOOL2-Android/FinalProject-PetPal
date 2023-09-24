@@ -208,7 +208,7 @@ class WalkReviewWriteFragment : Fragment() {
 
         userRef.update("walkMateReview", FieldValue.arrayUnion(walkWithReview))
             .addOnSuccessListener {
-                Toast.makeText(context, "리뷰가 성공적으로 등록되었습니다.", Toast.LENGTH_SHORT).show()
+                //Toast.makeText(context, "리뷰가 성공적으로 등록되었습니다.", Toast.LENGTH_SHORT).show()
             }
             .addOnFailureListener { e ->
 
@@ -243,23 +243,23 @@ class WalkReviewWriteFragment : Fragment() {
                 }
             })
     }
-    fun addWalkwithReviewSender(userId: String,walkRecordId:String, walkWithReview: WalkReview) {
+    private fun addWalkwithReviewSender(userId: String, walkRecordId:String, walkWithReview: WalkReview) {
         val userRef = db.collection("matches").document(walkRecordId)
         userRef.update("senderWalkReview", FieldValue.arrayUnion(walkWithReview))
             .addOnSuccessListener {
-                Toast.makeText(context, "리뷰가 성공적으로 등록되었습니다.", Toast.LENGTH_SHORT).show()
+                //Toast.makeText(context, "리뷰가 성공적으로 등록되었습니다.", Toast.LENGTH_SHORT).show()
             }
             .addOnFailureListener { e ->
 
                 Toast.makeText(context, "리뷰 등록 실패 .", Toast.LENGTH_SHORT).show()
             }
     }
-    fun addWalkwithReviewReceiver(userId: String,walkRecordId:String, walkWithReview: WalkReview) {
+    private fun addWalkwithReviewReceiver(userId: String, walkRecordId:String, walkWithReview: WalkReview) {
         val userRef = db.collection("matches").document(walkRecordId)
 
         userRef.update("receiverWalkReview", FieldValue.arrayUnion(walkWithReview))
             .addOnSuccessListener {
-                Toast.makeText(context, "리뷰가 성공적으로 등록되었습니다.", Toast.LENGTH_SHORT).show()
+                //Toast.makeText(context, "리뷰가 성공적으로 등록되었습니다.", Toast.LENGTH_SHORT).show()
             }
             .addOnFailureListener { e ->
 

@@ -4,13 +4,10 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.app.Application
-import android.content.Context
 import android.content.DialogInterface
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.location.Location
@@ -18,30 +15,22 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.CountDownTimer
-import android.os.Environment
 import android.os.Handler
 import android.os.Looper
-import android.text.format.DateUtils.formatElapsedTime
 import android.util.Log
 import android.view.LayoutInflater
-import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.RatingBar
-import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.annotation.RequiresApi
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.app.ActivityCompat
-import androidx.core.content.FileProvider
-import androidx.core.os.bundleOf
 import androidx.core.view.GravityCompat
-import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -58,7 +47,6 @@ import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
-import com.google.android.material.chip.Chip
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
@@ -74,25 +62,18 @@ import com.petpal.mungmate.model.PlaceData
 import com.petpal.mungmate.model.ReceiveUser
 import com.petpal.mungmate.model.Review
 import com.petpal.mungmate.utils.LastKnownLocation
+import com.petpal.mungmate.utils.fragment123.fragmentmove
 import com.petpal.mungmate.utils.observeOnce
 import com.petpal.mungmate.utils.onWalk.onWalk
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import net.daum.mf.map.api.MapPOIItem
 import net.daum.mf.map.api.MapPoint
-import net.daum.mf.map.api.MapPolyline
 import net.daum.mf.map.api.MapView
-import org.w3c.dom.Text
 import java.io.File
 import java.io.FileOutputStream
-import java.io.IOException
 import java.text.SimpleDateFormat
 import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.ZoneId
-import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Date
 
@@ -116,7 +97,7 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
     private var petGenderUser:String?=null
     private var petGenderFilter:String?=null
     private var location123:Location?=null
-    private var repeatJob: Job? = null
+
     val CURRENT_LOCATION_MARKER_TAG = 100
     private lateinit var kakaoSearchResponse: KakaoSearchResponse
     private var isLocationPermissionGranted = false
@@ -146,16 +127,13 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
     var matches1: MutableList<Match> = mutableListOf()
     val storage = Firebase.storage
     private val userMarkers = HashMap<String, MapPOIItem>()
-    private var observeJob: Job? = null
-    //val storageReference = storage.reference
     private val handler = Handler()
+    private var isPetimageRoaded:Boolean?=null
     private val delayMillis: Long = 2* 1000 // 1분 (1분 = 60,000 밀리초)
 
     private val periodicRunnable: Runnable = object : Runnable {
         override fun run() {
-            // 여기에 주기적으로 실행하고자 하는 함수를 호출
-            getCurrentLocationOnWalk2()
-            // 다음에도 호출되도록 다시 예약
+                getCurrentLocationOnWalkWithoutFocus()
             handler.postDelayed(this, delayMillis)
         }
     }
@@ -173,7 +151,7 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
         savedInstanceState: Bundle?
     ): View? {
 
-
+        Log.d("LIFECYCLE", "onCreateView called")
         mainActivity = activity as MainActivity
         fragmentWalkBinding = FragmentWalkBinding.inflate(inflater)
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(mainActivity)
@@ -193,10 +171,7 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
         if(onWalk==false){
             viewModel.updateOnWalkStatusFalse(userId)
         }
-
         viewModel.fetchUserNickname(userId)
-
-
         viewModel.userNickname.observe(viewLifecycleOwner){
             userNickname=it!!
         }
@@ -214,12 +189,10 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
             fragmentWalkBinding.imageViewMylocation.visibility=View.GONE
         }
         //필터 드로어 제어
-        //fragmentWalkBinding.drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
         fragmentWalkBinding.mapView.setPOIItemEventListener(this)
         fragmentWalkBinding.mapView.setCurrentLocationEventListener(this)
         fragmentWalkBinding.mapView.setMapViewEventListener(this)
         requestLocationPermissionIfNeeded()
-
     }
     @RequiresApi(Build.VERSION_CODES.O)
     fun setupAndShowDialog(builder: AlertDialog.Builder) {
@@ -242,7 +215,6 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
     @RequiresApi(Build.VERSION_CODES.O)
     private fun setupButtonListeners() {
         fragmentWalkBinding.buttonWalk.setOnClickListener {
-
             val builder = AlertDialog.Builder(requireContext())
             builder.setTitle("멍메이트")
 
@@ -252,14 +224,11 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
                 } else {
                     walkWithUser!!.senderId
                 }
-
                 targetUserId?.let { it1 ->
                     viewModel.fetchUserByUserId(it1)
                     viewModel.userLiveData.observeOnce(viewLifecycleOwner, Observer { user ->
                         walkMateNickname=user?.nickname
                         builder.setMessage("${user!!.nickname} 님과의 산책을 시작하시겠습니까?")
-
-                        // 여기서 다이얼로그를 설정하고 표시합니다.
                         setupAndShowDialog(builder)
                     })
                 }
@@ -272,7 +241,6 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
         fragmentWalkBinding.chipMapFilter.setOnClickListener {
             fragmentWalkBinding.drawerLayout.setScrimColor(Color.parseColor("#FFFFFF"))
             fragmentWalkBinding.drawerLayout.openDrawer(GravityCompat.END)
-            //fragmentWalkBinding.drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_OPEN)
         }
 
         fragmentWalkBinding.buttonFilterSubmit.setOnClickListener {
@@ -322,8 +290,6 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
                     R.id.NeuterStatus2->petNeuteredFilter=false
                 }
 
-
-
                 fragmentWalkBinding.drawerLayout.closeDrawer(GravityCompat.END)
             } else {
                 fragmentWalkBinding.chipMapFilter.isChecked = false
@@ -332,9 +298,6 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
                 fragmentWalkBinding.drawerLayout.closeDrawer(GravityCompat.END)
             }
         }
-
-
-
 
         fragmentWalkBinding.buttonStopWalk.setOnClickListener {
             onWalk=false
@@ -404,8 +367,6 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
             walkWithUser = if (closestIndex != -1) matches1[closestIndex] else null
 
         }
-
-
         fragmentWalkBinding.imageViewMylocation.setOnClickListener {
             updateCurrentLocationOnce()
             LastKnownLocation.latitude = null
@@ -417,7 +378,6 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
             LastKnownLocation.longitude= null
         }
     }
-
     @SuppressLint("SimpleDateFormat")
     fun timestampToString(timestamp: Long): String {
         val date = Date(timestamp)
@@ -447,6 +407,7 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
     }
     @RequiresApi(Build.VERSION_CODES.O)
     private fun observeViewModelonWalk() {
+        Log.d("옵옵옵", "옵호출")
         viewModel.usersOnWalk.observe(viewLifecycleOwner, Observer { users ->
             users.forEach { user ->
                 user.nickname?.let { Log.d("전체유저", it) }
@@ -466,7 +427,6 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
                             val filterddistance = distanceFilterValue ?: 2000.0
                             //거리필터
                             val isUserWithinDistance = user.uid != userId && currentLocation.distanceTo(userLocation) <= filterddistance
-
                             //나이대필터
                             val isUserWithinAgeGroup = if(userAgeGroup != null) {
                                 user.birthday?.let { calculateAgeGroup(it) } == userAgeGroup
@@ -481,86 +441,72 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
                             }
                             //성별필터
                             val isUserWithinGenderGroup=if(userGenderGroupFilter!=null && userGenderGroupUser!=null){
-
                                 userGenderGroupFilter==userGenderGroupUser
                             }else{
                                 true
                             }
                             val firstPet = user.pets.firstOrNull()
-                            Log.d("firstpet",firstPet?.petSex.toString())
-                            firstPet?.character?.let { it1 -> Log.d("firstpet", it1) }
-                            Log.d("firstpet",firstPet?.neutered.toString())
                            when(firstPet?.petSex){
                                 0.toLong()  ->petGenderUser="남아"
                                 1.toLong() -> petGenderUser="여아"
                             }
                             petPropensityUser=firstPet?.character
                             petNeuteredUser=firstPet?.neutered
-                            if(firstPet?.neutered!=null) {
-                                Log.d("중성화여부", firstPet.neutered.toString())
-                            }
 
                             val isUserWithinPetGenderGroup=if(petGenderUser!=null && petGenderFilter!=null){
-                                Log.d("펫성별유저", petGenderUser!!)
-                                Log.d("펫성별필터", petGenderFilter!!)
                                 petGenderUser==petGenderFilter
                             }else{
                                 true
                             }
                             val isUserWitninPetPropensityGroup=if(petPropensityUser!=null && petPropensityFilter !=null){
-                                Log.d("펫성향유저", petPropensityUser!!)
-                                Log.d("펫성향필터", petPropensityFilter!!)
                                 petPropensityUser==petPropensityFilter
                             }else{
                                 true
                             }
                             val isUserWithinPetNeuteredGroup=if(petNeuteredFilter !=null && petNeuteredUser!=null){
-                                Log.d("펫중성화유저", petNeuteredFilter!!.toString())
-                                Log.d("펫중성화필터", petNeuteredUser!!.toString())
                                 petNeuteredFilter==petNeuteredUser
                             }else{
                                 true
                             }
-
-
                             isUserWithinDistance && isUserWithinAgeGroup &&isUserWithinGenderGroup&&isUserWithinPetGenderGroup&&isUserWitninPetPropensityGroup&&isUserWithinPetNeuteredGroup
                         }
-
-
-//                        nearbyUsers = users.filter { user ->
-//                            val userLocation = Location("userLocation").apply {
-//                                latitude = user.location?.get("latitude") ?: 0.0
-//                                longitude = user.location?.get("longitude") ?: 0.0
-//                            }
-//                            val filterddistance=if(distanceFilterValue==null){
-//                                2000.0
-//                            }else{
-//                                distanceFilterValue
-//                            }
-//                            if(userAgeGroup!=null){
-//                                user.uid != userId && user.birthday?.let { it1 -> calculateAgeGroup(it1) } ==userAgeGroup
-//                            }
-//                            user.uid != userId && currentLocation.distanceTo(userLocation) <= filterddistance!!
-//                        }
-
                         val newNearbyUserIds = nearbyUsers!!.map { it.uid }.toSet()
-                        val usersToRemove = userMarkers.keys.filter { it !in newNearbyUserIds }
 
-                        usersToRemove.forEach { userIdToRemove ->
-                            val markerToRemove = userMarkers[userIdToRemove]
-                            if (markerToRemove != null) {
-                                fragmentWalkBinding.mapView.removePOIItem(markerToRemove)
-                                userMarkers.remove(userIdToRemove)
+                        userMarkers.keys.filterNot { it in newNearbyUserIds }.forEach { userIdToRemove ->
+                            val markerToRemove = userMarkers.remove(userIdToRemove)
+                            markerToRemove?.let { fragmentWalkBinding.mapView.removePOIItem(it) }
+                        }
+                        if(fragmentmove==true) {
+                            fragmentmove=false
+                            for (user in nearbyUsers!!) {
+                                val mapPoint = MapPoint.mapPointWithGeoCoord(
+                                    user.location?.get("latitude") ?: 0.0,
+                                    user.location?.get("longitude") ?: 0.0
+                                )
+
+                                val poiItem = MapPOIItem().apply {
+                                    itemName = user.nickname
+                                    tag = user.nickname.hashCode()
+                                    this.mapPoint = mapPoint
+                                    markerType = MapPOIItem.MarkerType.CustomImage
+                                    customImageResourceId = R.drawable.location
+                                    isCustomImageAutoscale = true
+                                    setCustomImageAnchor(0.5f, 1.0f)
+                                }
+                                fragmentWalkBinding.mapView.addPOIItem(poiItem)
+                                userMarkers[user.uid!!] = poiItem
                             }
                         }
 
                         for (user in nearbyUsers!!) {
                             val mapPoint = MapPoint.mapPointWithGeoCoord(
-                                user.location?.get("latitude") ?: 0.0, user.location?.get("longitude") ?: 0.0)
+                                user.location?.get("latitude") ?: 0.0,
+                                user.location?.get("longitude") ?: 0.0
+                            )
 
-                            if (userMarkers.containsKey(user.uid)) {
-                                val existingMarker = userMarkers[user.uid]
-                                existingMarker?.mapPoint = mapPoint
+                            val existingMarker = userMarkers[user.uid]
+                            if (existingMarker != null) {
+                                existingMarker.mapPoint = mapPoint
                             } else {
                                 val poiItem = MapPOIItem().apply {
                                     itemName = user.nickname
@@ -580,7 +526,7 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
             }
         })
     }
-    fun resetFilters() {
+    private fun resetFilters() {
         distanceFilterValue = null
         userAgeGroup = null
         userGenderGroupFilter = null
@@ -589,7 +535,6 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
         petNeuteredFilter = null
     }
     private fun observeViewModel() {
-
         viewModel.searchResults.observe(viewLifecycleOwner) { response ->
             //검색 결과로 씀
             kakaoSearchResponse = response
@@ -608,7 +553,6 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
                     setCustomImageAnchor(0.5f, 1.0f)
                 }
             }
-
             //기존 마커 중 새로운 검색 결과에 없는 것은 지도에서 제거하고 currentMarkers에서도 제거
             val markersToRemove = currentMarkers.filter { marker ->
                 newMarkers.none { it.tag == marker.tag }
@@ -617,7 +561,6 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
                 fragmentWalkBinding.mapView.removePOIItem(marker)
                 currentMarkers.remove(marker)
             }
-
             //새로운 검색 결과 중 현재 지도에 없는 마커들을 추가
             val markersToAdd = newMarkers.filter { marker ->
                 currentMarkers.none { it.tag == marker.tag }
@@ -628,7 +571,6 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
             }
         }
     }
-
     //메인화면 진입시 권한 요청/LastKnownLocation의 값에 따라 검색/마킹
     private fun requestLocationPermissionIfNeeded() {
         if (ActivityCompat.checkSelfPermission(
@@ -643,12 +585,11 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
         } else {
             // 권한이 승인되어있으면 위치 가져오기
             isLocationPermissionGranted = true
-            Log.d("LastKnownLocation",LastKnownLocation.latitude.toString())
-            if (LastKnownLocation.latitude != null || LastKnownLocation.longitude != null){
-                getLastLocation()
-            } else {
+//            if (LastKnownLocation.latitude != null || LastKnownLocation.longitude != null){
+//                getLastLocation()
+//            } else {
                 getCurrentLocation()
-            }
+        //    }
         }
     }
     private fun requestLocationPermissionIfNeededOnWalk() {
@@ -677,13 +618,12 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
                     LastKnownLocation.longitude=it.longitude
                     viewModel.observeUsersOnWalk()
                     val mapPoint = MapPoint.mapPointWithGeoCoord(it.latitude, it.longitude)
-                    //showUserLocationOnMap(it)
                     fragmentWalkBinding.mapView.setMapCenterPoint(mapPoint, true)
                 }
             }
         }
     }
-    private fun getCurrentLocationOnWalk2(){
+    private fun getCurrentLocationOnWalkWithoutFocus(){
         if (checkPermission(Manifest.permission.ACCESS_FINE_LOCATION)
         ) {
             fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
@@ -693,13 +633,11 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
                     location123?.latitude=it.latitude
                     location123?.longitude=it.longitude
                     viewModel.observeUsersOnWalk()
-                    //val mapPoint = MapPoint.mapPointWithGeoCoord(it.latitude, it.longitude)
                     showUserLocationOnMap(it)
                 }
             }
         }
     }
-
     //내 현재 위치에서 검색/마킹
     private fun getCurrentLocation() {
         if (checkPermission(Manifest.permission.ACCESS_FINE_LOCATION)
@@ -709,48 +647,17 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
                     LastKnownLocation.latitude=it.latitude
                     LastKnownLocation.longitude=it.longitude
                     viewModel.searchPlacesByKeyword(it.latitude, it.longitude, "동물")
-                    //showUserLocationOnMap1(location)
                     val mapPoint = MapPoint.mapPointWithGeoCoord(it.latitude, it.longitude)
                     fragmentWalkBinding.mapView.setMapCenterPoint(mapPoint, true)
                 }
             }
         }
     }
-    private fun getLastLocationOnWalk() {
-        if (checkPermission(Manifest.permission.ACCESS_FINE_LOCATION)
-        ) {
-            LastKnownLocation.let {
-                LastKnownLocation.latitude?.let { it1 ->
-                    LastKnownLocation.longitude?.let { it2 ->
-                        viewModel.observeUsersOnWalk()
-                    }
-                }
-                val mapPoint = LastKnownLocation.latitude?.let { it1 ->
-                    LastKnownLocation.longitude?.let { it2 ->
-                        MapPoint.mapPointWithGeoCoord(it1, it2)
-                    }
-                }
-                val location = Location("providerName")
-                location.latitude = LastKnownLocation.latitude!!
-                location.longitude = LastKnownLocation.longitude!!
-                //showUserLocationOnMap(location)
-                fragmentWalkBinding.mapView.setMapCenterPoint(mapPoint, true)
-
-                for (marker in currentMarkers) {
-                    fragmentWalkBinding.mapView.removePOIItem(marker)
-                }
-                currentMarkers.clear()
-            }
-        }
-    }
-
-
     private fun checkPermission(permission: String): Boolean {
         return ActivityCompat.checkSelfPermission(requireContext(), permission) == PackageManager.PERMISSION_GRANTED
     }
 
     private fun showUserLocationOnMap(location: Location) {
-        //fragmentWalkBinding.mapView.removePOIItem(userLocationMarker)
         userLocationMarker?.let {
             fragmentWalkBinding.mapView.removePOIItem(it)
         }
@@ -765,25 +672,8 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
 
         }
         fragmentWalkBinding.mapView.addPOIItem(userLocationMarker)
-//        fragmentWalkBinding.mapView.setMapCenterPoint(MapPoint.mapPointWithGeoCoord(location.latitude, location.longitude),true)
     }
-    private fun showUserLocationOnMap1(location: Location) {
-        //fragmentWalkBinding.mapView.removePOIItem(userLocationMarker)
-        userLocationMarker?.let {
-            fragmentWalkBinding.mapView.removePOIItem(it)
-        }
-        userLocationMarker = MapPOIItem().apply {
-            itemName = "나"
-            mapPoint = MapPoint.mapPointWithGeoCoord(location.latitude, location.longitude)
-            markerType = MapPOIItem.MarkerType.CustomImage
-            customImageResourceId = R.drawable.paw_pin
-            isCustomImageAutoscale = true
-            setCustomImageAnchor(0.5f, 1.0f)
 
-        }
-        fragmentWalkBinding.mapView.addPOIItem(userLocationMarker)
-//        fragmentWalkBinding.mapView.setMapCenterPoint(MapPoint.mapPointWithGeoCoord(location.latitude, location.longitude),true)
-    }
     private fun updateCurrentLocationOnce() {
         if (checkPermission(Manifest.permission.ACCESS_FINE_LOCATION)) {
             fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
@@ -794,7 +684,6 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
             }
         }
     }
-
     private val locationCallback = object : LocationCallback() {
         override fun onLocationResult(p0: LocationResult) {
             p0  ?: return
@@ -825,13 +714,6 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
         }
     }
 
-    private fun stopLocationUpdates() {
-        fusedLocationClient.removeLocationUpdates(locationCallback)
-        totalDistance=0.0f
-        fragmentWalkBinding.textViewWalkDistance.text=totalDistance.toString()
-    }
-
-
     //LastKnownLocation의 위치에서 검색 마킹(원래 있던 마커들 지우고)
     private fun getLastLocation() {
         if (checkPermission(Manifest.permission.ACCESS_FINE_LOCATION)
@@ -851,38 +733,8 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
                     LastKnownLocation.longitude?.let { it2 ->
                         MapPoint.mapPointWithGeoCoord(it1, it2)
                     }
-
-
                 }
-
-
                 fragmentWalkBinding.mapView.setMapCenterPoint(mapPoint,true)
-
-
-                for (marker in currentMarkers) {
-                    fragmentWalkBinding.mapView.removePOIItem(marker)
-                }
-                currentMarkers.clear()
-            }
-        }
-    }
-
-    //거리 필터의 값에 따라 ㄱ
-    private fun getLastLocationFilter(radius:Int) {
-        if (checkPermission(Manifest.permission.ACCESS_FINE_LOCATION)
-        ) {
-            LastKnownLocation.let {
-                LastKnownLocation.latitude?.let { it1 ->
-                    LastKnownLocation.longitude?.let { it2 ->
-                        viewModel.searchPlacesByKeywordFilter(it1, it2, "동물",radius)
-                    }
-                }
-                val mapPoint = LastKnownLocation.latitude?.let { it1 ->
-                    LastKnownLocation.longitude?.let { it2 -> MapPoint.mapPointWithGeoCoord(it1, it2)
-                    }
-                }
-                fragmentWalkBinding.mapView.setMapCenterPoint(mapPoint, true)
-
                 for (marker in currentMarkers) {
                     fragmentWalkBinding.mapView.removePOIItem(marker)
                 }
@@ -934,7 +786,7 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
                 walkWithUser?.walkRecordId?.let { it1 -> viewModel.updateMatchStatusToFour(it1) }
                 fragmentWalkBinding.imageViewMylocation.visibility=View.VISIBLE
                 fragmentWalkBinding.chipMapFilter.visibility=View.VISIBLE
-                // 카운트다운이 끝나면 시작 작업을 수행하고 다이얼로그를 숨깁니다.
+                //카운트다운이 끝나면 시작 수행 다이얼로그를 숨김
                 toggleVisibility(fragmentWalkBinding.LinearLayoutOnWalk, fragmentWalkBinding.LinearLayoutOffWalk)
                 fragmentWalkBinding.imageViewWalkToggle.setImageResource(R.drawable.dog_walk)
                 viewModel.distanceMoved.value=0.0f
@@ -951,41 +803,14 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
         }.start()
     }
 
-//    private fun startCountdown() {
-//        countDownTimer = object : CountDownTimer((countdownValue * 1000).toLong(), countDownInterval.toLong()) {
-//            override fun onTick(millisUntilFinished: Long) {
-////                // 카운트다운 값을 텍스트뷰에 표시합니다.
-//                fragmentWalkBinding.textViewWalkCountdown.text = countdownValue.toString()
-//                countdownValue--
-//            }
-//            override fun onFinish() {
-//                // 카운트다운이 끝나면 시작 작업을 수행하고 다이얼로그를 숨깁니다.
-//                toggleVisibility(fragmentWalkBinding.LinearLayoutOnWalk, fragmentWalkBinding.LinearLayoutOffWalk)
-//                fragmentWalkBinding.imageViewWalkToggle.setImageResource(R.drawable.dog_walk)
-//                viewModel.distanceMoved.value=0.0f
-//                viewModel.startTimer()
-//                viewModel.setOnWalkStatusTrue(userId)
-//                location123?.latitude?.let {
-//                    location123?.longitude?.let { it1 ->
-//                        viewModel.updateUserLocation(userId,
-//                            it, it1
-//                        )
-//                    }
-//                }
-//                //requestLocationPermissionIfNeededOnWalk()
-//                //startLocationUpdates()
-//                hideProgress()
-//            }
-//        }.start()
-//    }
     fun showProgress() {
         fragmentWalkBinding.textViewWalkCountdown.visibility = View.VISIBLE
-        //fragmentWalkBinding.progressBackgroundWalk1.visibility = View.VISIBLE
+
     }
 
     fun hideProgress() {
         fragmentWalkBinding.textViewWalkCountdown.visibility = View.GONE
-        //fragmentWalkBinding.progressBackgroundWalk1.visibility = View.GONE
+
     }
     @SuppressLint("SimpleDateFormat")
     fun getCurrentDate(): String
@@ -1016,9 +841,7 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
     fun calculateAge(birthday: String): Int {
         val birthDate = LocalDate.parse(birthday, DateTimeFormatter.ofPattern("yyyy-MM-dd"))
         val currentDate = LocalDate.now()
-
         var age = currentDate.year - birthDate.year
-
         if (birthDate.month > currentDate.month ||
             (birthDate.month == currentDate.month && birthDate.dayOfMonth > currentDate.dayOfMonth)) {
             age--
@@ -1184,14 +1007,8 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
                             avgRatingBundle.putString("place_name", selectedPlace?.place_name)
                             avgRatingBundle.putString("place_id", selectedPlace?.id)
                             avgRatingBundle.putString("phone", selectedPlace?.phone)
-                            avgRatingBundle.putString(
-                                "place_road_adress_name",
-                                selectedPlace?.road_address_name
-                            )
-                            avgRatingBundle.putString(
-                                "place_category",
-                                selectedPlace?.category_group_name
-                            )
+                            avgRatingBundle.putString("place_road_adress_name", selectedPlace?.road_address_name)
+                            avgRatingBundle.putString("place_category", selectedPlace?.category_group_name)
                             mainActivity.navigate(R.id.action_mainFragment_to_placeReviewFragment, avgRatingBundle,)
                             bottomSheetDialog.dismiss()
                         }
@@ -1226,7 +1043,6 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
                     viewModel.fetchFavoriteCount(placeId!!)
                     viewLifecycleOwner.lifecycleScope.launchWhenStarted {
                         viewModel.favoriteCount.collect { favoriteCount ->
-                            Log.d("firstsubmit", favoriteCount.toString())
                             val favoriteCountTextView =
                                 initialBottomSheetView.findViewById<TextView>(R.id.textViewPlaceFavoriteCount)
                             favoriteCountTextView.text = "$favoriteCount"
@@ -1365,6 +1181,7 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
                     val bundle=Bundle()
                     bundle.putString("receiverId",user.uid.toString())
                     mainActivity.navigate(R.id.action_mainFragment_to_chat,bundle)
+                    fragmentmove=true
                     onWalkbottomSheetDialog.dismiss()
                 }
                 buttonBottomBlock.setOnClickListener {
@@ -1399,32 +1216,16 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
                             val userImageRef = Firebase.storage.reference.child(pet.petImageUrl)
                             Log.d("펫이미지", pet.petImageUrl)
                             userImageRef.getBytes(Long.MAX_VALUE).addOnSuccessListener { bytes ->
-                                // 이미지 다운로드에 성공한 경우
+
                                 val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
-                                imageViewBottomPetProfileImage.setImageBitmap(bitmap) // ImageView에 이미지 설정
+                                imageViewBottomPetProfileImage.setImageBitmap(bitmap)
+                                isPetimageRoaded=true
                             }.addOnFailureListener {
-                                // 이미지 다운로드에 실패한 경우
+
                                 Log.e("FirebaseStorage", "이미지 다운로드 실패: $it")
                                 imageViewBottomPetProfileImage.setImageResource(R.drawable.pets_24px)
                             }
                         }
-//                        if(pet.imgaeURI !=null){
-//                            Glide.with(imageViewBottomPetProfileImage.context)
-//                                .load(pet.imgaeURI)
-//                                .placeholder(R.drawable.pets_24px)
-//                                .listener(object : RequestListener<Drawable> {
-//                                    override fun onLoadFailed(e: GlideException?, model: Any?, target: Target<Drawable>?, isFirstResource: Boolean): Boolean {
-//                                        return false
-//                                    }
-//
-//                                    override fun onResourceReady(resource: Drawable?, model: Any?, target: Target<Drawable>?, dataSource: DataSource?, isFirstResource: Boolean): Boolean {
-//                                        return false
-//                                    }
-//                                })
-//                                .into(imageViewBottomPetProfileImage)
-//                        } else {
-//                            imageViewBottomPetProfileImage.setImageResource(R.drawable.pets_24px)
-//                        }
                     }
                 }
                 viewModel.averageRatingForUser.observe(this, Observer { ratings ->
@@ -1450,24 +1251,13 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
                 val userImageRef = Firebase.storage.reference.child(user.userImage!!)
                 Log.d("이미지",user.userImage)
                 Log.d("이미지",userImageRef.toString())
-//                userImageRef.downloadUrl.addOnCompleteListener {
-//                    Log.d("asdfasdf", imageViewUser.context.toString())
-//                    Glide.with(imageViewUser.context)
-//                        .load(it)
-//                        .placeholder(R.drawable.default_profile_image)
-//                        .into(imageViewUser)
-//                    Handler(Looper.getMainLooper()).postDelayed({
-//                        onWalkbottomSheetDialog.show()
-//                    }, 200)
-//
-//                            }.addOnFailureListener {
-//                                Log.d("이미지실패",it.toString())
-//                            }
                 userImageRef.getBytes(Long.MAX_VALUE).addOnSuccessListener { bytes ->
                     // 이미지 다운로드에 성공한 경우
                     val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
-                    imageViewUser.setImageBitmap(bitmap) // ImageView에 이미지 설정
-                    onWalkbottomSheetDialog.show()
+                    imageViewUser.setImageBitmap(bitmap)
+                  // ImageView에 이미지 설정
+                        onWalkbottomSheetDialog.show()
+
                 }.addOnFailureListener {
                     // 이미지 다운로드에 실패한 경우
                     Log.e("FirebaseStorage", "이미지 다운로드 실패: $it")
@@ -1483,7 +1273,6 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
 
     }
 
-
     //맵 드래그 -> 맵 중심의 좌표 이동하면 실행되는 메서드
     @Deprecated("Deprecated in Java")
     override fun onMapViewCenterPointMoved(p0: MapView?, p1: MapPoint?) {
@@ -1494,7 +1283,6 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
                 LastKnownLocation.longitude = it.longitude
                 viewModel.searchPlacesByKeyword(it.latitude, it.longitude, "동물")
 
-                Log.d("lastlocation", (LastKnownLocation.latitude).toString())
             }
         }else{
             p1?.mapPointGeoCoord?.let {
@@ -1552,6 +1340,7 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onResume() {
         super.onResume()
+        Log.d("LIFECYCLE", "onResume called")
         handler.postDelayed(periodicRunnable, delayMillis)
         //fragmentWalkBinding.mapView.currentLocationTrackingMode = MapView.CurrentLocationTrackingMode.TrackingModeOnWithoutHeading
         viewModel.matchesLiveData.observe(viewLifecycleOwner) { matches ->
@@ -1566,7 +1355,6 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
             if(matches.isNotEmpty()) {
                 val closestIndex = differences.indexOf(differences.minOrNull())
                 walkWithUser = matches[closestIndex]
-                println("매치스1: ${walkWithUser!!.senderId}, Receiver ID: ${walkWithUser!!.receiverId}, Timestamp: ${walkWithUser!!.walkTimestamp}")
                 fragmentWalkBinding.buttonWalk.text = "같이 산책하기"
             }
         }
@@ -1607,6 +1395,24 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
         } else {
             toggleVisibility(fragmentWalkBinding.LinearLayoutOffWalk, fragmentWalkBinding.LinearLayoutOnWalk)
         }
+    }
+    override fun onStart() {
+        super.onStart()
+        Log.d("LIFECYCLE", "onStart called")
+    }
+    override fun onPause() {
+        super.onPause()
+        Log.d("LIFECYCLE", "onPause called")
+    }
+
+    override fun onStop() {
+        super.onStop()
+        Log.d("LIFECYCLE", "onStop called")
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        Log.d("LIFECYCLE", "onDestroy called")
     }
 }
 
