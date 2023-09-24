@@ -415,14 +415,18 @@ class CommunityPostDetailFragment : Fragment(),AdapterCallback {
                 else -> "${timeDifferenceMillis / 86_400_000}일 전" // 1일 이상 전
             }
 
-            communityPostDetailBinding.run {
+            val storage = FirebaseStorage.getInstance()
+            val storageRef = storage.reference.child(userImage.toString())
+            storageRef.downloadUrl.addOnSuccessListener { uri ->
                 Glide
                     .with(requireContext())
-                    .load(userImage)
+                    .load(uri)
                     .diskCacheStrategy(DiskCacheStrategy.ALL)
                     .fitCenter()
-                    .into(communityPostDetailProfileImage)
-
+                    .into(communityPostDetailBinding.communityPostDetailProfileImage)
+            }
+            
+            communityPostDetailBinding.run {
 
                 communityPostDetailPostTitle.text = postTitle
                 communityPostDateCreated.text = timeAgo
