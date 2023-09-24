@@ -19,6 +19,18 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
 
+        <TextView
+            android:id="@+id/textViewWalkCountdown"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:layout_gravity="center"
+            android:text="3"
+            android:textAppearance="@style/TextAppearance.AppCompat.Large"
+            android:textSize="60sp"
+            android:visibility="gone" />
+
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -202,7 +214,9 @@
         android:layout_width="400dp"
         android:layout_height="match_parent"
         android:layout_gravity="end"
-        android:padding="@dimen/common_padding"
+        android:paddingLeft="32dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="16dp"
         android:orientation="vertical">
 
 
@@ -547,6 +561,15 @@
 
 </LinearLayout>
     </ScrollView>
+
+
+    <View
+        android:id="@+id/progressBackgroundWalk1"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#66000000"
+        android:visibility="gone" />
+
 
 
 </androidx.drawerlayout.widget.DrawerLayout>

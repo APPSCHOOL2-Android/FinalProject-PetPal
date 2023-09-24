@@ -115,8 +115,8 @@ class CommunitySearchAdapter(
         holder.communityPostDateCreated.text = post.postDateCreated.toString()
         holder.communityContent.text = post.postContent
         holder.communityCommentCounter.text= post.postComment?.size.toString()
-        holder.communityFavoriteCounter.text = post.postLike.toString()
         holder.communityPostCategoryTextView.text= post.postCategory.toString()
+//        holder.communityFavoriteCounter.text = post.postLike.toString()
 
         Log.d("어떤 카테고리",post.postCategory.toString())
         /*when(post.postCategory.toString()){

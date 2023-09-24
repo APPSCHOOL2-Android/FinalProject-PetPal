@@ -2,7 +2,7 @@ package com.petpal.mungmate.model
 
 import com.google.firebase.Timestamp
 
-// 산책 메이트 매칭
+// 산책 매칭
 data class Match(
     var senderId: String?,
     var receiverId: String?,
@@ -11,12 +11,14 @@ data class Match(
     var timestamp: Timestamp?,
     var status: Int?,
     var walkRecordId: String?,
-    var senderWalkReview: WalkReview?,
-    var receiverWalkReview: WalkReview?
+    var senderWalkReview: List<WalkReview>?,
+    var receiverWalkReview: List<WalkReview>?
 ) {
-    constructor(): this("", "", null, "", null, MatchStatus.REQUESTED.code, null, null, null)
+    // firstroe에서 데이터 가져올 때 document.toObject(Match::class.java)로 파싱하려면 매개변수 없는 생성자 필수
+    constructor(): this("", "", Timestamp.now(), "", Timestamp.now(), MatchStatus.REQUESTED.code, null, null, null)
 }
 
+// 산책 매칭 상태
 enum class MatchStatus(val code: Int) {
     REQUESTED(0),  // 산책 요청 상태
     REJECTED(1),   // 산책 거절 상태

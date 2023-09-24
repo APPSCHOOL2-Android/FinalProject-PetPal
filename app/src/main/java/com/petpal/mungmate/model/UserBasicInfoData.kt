@@ -33,7 +33,3 @@ data class UserBasicInfoData(
         )
     }
 }
-
-
-
-

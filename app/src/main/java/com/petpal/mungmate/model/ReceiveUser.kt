@@ -1,8 +1,11 @@
 package com.petpal.mungmate.model
 
+import android.graphics.Bitmap
+import java.net.URI
+
 data class ReceiveUser(
     var uid:String?=null,
-    val userImage: String? = null,
+    val userImage: String?=null,
     val nickname: String?=null,
     val birthday: String?=null,
     val ageVisible: Boolean?=false,

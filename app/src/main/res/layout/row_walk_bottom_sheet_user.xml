@@ -63,6 +63,16 @@
 
                     android:layout_marginTop="6dp"
                     android:text="매칭 기록 :00회" />
+
+                <RatingBar
+                    android:id="@+id/ratingBarUser2"
+                    style="@style/Widget.AppCompat.RatingBar.Small"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginTop="6dp" />
+
             </LinearLayout>
 
             <LinearLayout

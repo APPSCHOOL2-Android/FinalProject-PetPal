@@ -11,14 +11,11 @@
         android:label="산책 메이트 요청"
         tools:layout="@layout/fragment_walk_mate_request" >
         <argument
-            android:name="senderId"
-            app:argType="string" />
-        <argument
             android:name="receiverId"
             app:argType="string" />
         <argument
-            android:name="chatRoomId"
-            app:argType="string" />
+            android:name="chatRoom"
+            app:argType="com.petpal.mungmate.model.ChatRoom" />
     </fragment>
     <fragment
         android:id="@+id/chatRoomFragment"
@@ -32,7 +29,7 @@
             android:id="@+id/action_chatRoomFragment_to_reportUserFragment"
             app:destination="@id/reportUserFragment" />
         <argument
-            android:name="chatRoomId"
+            android:name="receiverId"
             app:argType="string" />
     </fragment>
     <fragment
@@ -42,6 +39,9 @@
         tools:layout="@layout/fragment_report_user" >
         <argument
             android:name="reportedUserId"
+            app:argType="string" />
+        <argument
+            android:name="reportedUserNickname"
             app:argType="string" />
     </fragment>
 </navigation>

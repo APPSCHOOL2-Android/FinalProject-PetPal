@@ -21,14 +21,37 @@
             android:theme="?attr/actionBarTheme"
             app:title="산책 리뷰 작성" />
 
+
+
         <TextView
-            android:id="@+id/textViewWalkReviewDate"
+            android:id="@+id/textViewWalkReviewUser"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/common_margin"
             android:gravity="center"
-            android:text="날짜"
+            android:text="오늘 산책은 어떠셨나요?"
             android:textAppearance="@style/TextAppearance.AppCompat.Large" />
+
+        <RatingBar
+            android:id="@+id/userRatingBar"
+            style="@android:style/Widget.DeviceDefault.Light.RatingBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="@dimen/common_margin"
+            android:numStars="5"
+            android:rating="4" />
+
+        <TextView
+            android:id="@+id/textViewWalkReviewUser1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/common_margin"
+            android:gravity="center"
+            android:text=""
+            android:textAppearance="@style/TextAppearance.AppCompat.Small" />
+
+
 
         <ImageView
             android:id="@+id/imageViewWalk"
@@ -37,7 +60,8 @@
             android:layout_gravity="center"
             android:layout_marginTop="@dimen/common_margin"
             android:src="@drawable/photo"
-            tools:src="@drawable/photo" />
+            tools:src="@drawable/photo"
+            android:visibility="gone"/>
 
         <TextView
             android:id="@+id/textViewWalkReviewAnnouncement2"

@@ -11,6 +11,7 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
         android:background="@drawable/background_receive_message"
+        android:maxWidth="300dp"
         android:padding="10dp"
         android:text="안녕하세요"
         android:textAlignment="textStart"
@@ -21,6 +22,7 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:gravity="bottom"
+        android:minWidth="80dp"
         android:text="오후 10:00"
         android:textAppearance="@style/TextAppearance.Material3.BodySmall" />
 </LinearLayout>

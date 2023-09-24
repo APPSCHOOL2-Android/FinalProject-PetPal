@@ -3,6 +3,7 @@ package com.petpal.mungmate.ui.community
 import android.content.Context
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.ImageView
@@ -19,6 +20,7 @@ import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.storage
+import com.google.firebase.storage.FirebaseStorage
 import com.petpal.mungmate.R
 import com.petpal.mungmate.databinding.RowCommunityCommentBinding
 import com.petpal.mungmate.model.Comment
@@ -31,6 +33,7 @@ class CommunityDetailCommentAdapter(
     private val postCommentList: MutableList<Comment>,
     private val postGetId: String,
     private val commentViewModel: CommentViewModel,
+    private val callback: AdapterCallback
 ) :
     RecyclerView.Adapter<CommunityDetailCommentAdapter.ViewHolder>() {
 
@@ -46,7 +49,7 @@ class CommunityDetailCommentAdapter(
         val communityCommentFavoriteLottie: LottieAnimationView =
             item.communityCommentFavoriteLottie
         val communityCommentCommentCounter: TextView = item.communityCommentCommentCounter
-
+        val communityCommentReplyTextView: TextView = item.communityCommentReplyTextView
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -79,14 +82,6 @@ class CommunityDetailCommentAdapter(
                     .fitCenter()
                     .into(holder.communityProfileImage)
             }
-//            Glide.with(context)
-//                .load(userImageReference)
-//                .diskCacheStrategy(DiskCacheStrategy.ALL)
-//                .fitCenter()
-//                .into(holder.communityProfileImage)
-
-
-            holder.communityProfileImage.drawable
         } else {
             Log.w("commentUserImage", "url")
             Glide
@@ -97,8 +92,8 @@ class CommunityDetailCommentAdapter(
                 .into(holder.communityProfileImage)
         }
 
-
         holder.communityUserNickName.text = comment.commentNickName.toString()
+
 
 
         val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
@@ -121,6 +116,12 @@ class CommunityDetailCommentAdapter(
         holder.communityCommentFavoriteCounter.text = "0"
         holder.communityCommentCommentCounter.text = "0"
 
+        holder.communityCommentReplyTextView.setOnClickListener {
+            callback.onReplyButtonClicked(commentList)
+
+        }
+
+
         holder.communityCommentMenuImageButton.setOnClickListener { view ->
             val popupMenu = PopupMenu(context, view)
 
@@ -140,6 +141,7 @@ class CommunityDetailCommentAdapter(
 
                             Log.d("이건 뭐죠?", commentToDelete.commentUid.toString())
                             Log.d("이건 뭐죠?", currentUserId.toString())
+
                             if (commentToDelete.commentUid.toString() == currentUserId.toString()) {
                                 val db = FirebaseFirestore.getInstance()
                                 db.collection("Post").document(postGetId).update(
@@ -177,6 +179,7 @@ class CommunityDetailCommentAdapter(
         holder.communityCommentFavoriteLottie.scaleX = 2.0f
         holder.communityCommentFavoriteLottie.scaleY = 2.0f
 
+
         holder.communityCommentFavoriteLottie.setOnClickListener {
             isClicked = !isClicked // 클릭할 때마다 변수를 반전시킴
             if (isClicked) {
@@ -193,7 +196,6 @@ class CommunityDetailCommentAdapter(
 
 
     fun updateData(newData: MutableList<Comment>) {
-        Log.d("값 추적", newData.toString())
         postCommentList.clear()
         postCommentList.addAll(newData)
         notifyDataSetChanged()

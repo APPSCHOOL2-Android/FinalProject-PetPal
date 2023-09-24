@@ -25,6 +25,8 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
+import com.petpal.mungmate.MainActivity
 import com.petpal.mungmate.R
 import com.petpal.mungmate.databinding.FragmentCommunityPostDetailBinding
 import com.petpal.mungmate.model.Comment
@@ -40,7 +42,7 @@ import java.util.Locale
 import java.util.TimeZone
 import java.util.UUID
 
-class CommunityPostDetailFragment : Fragment() {
+class CommunityPostDetailFragment : Fragment(),AdapterCallback {
 
     private lateinit var communityPostDetailBinding: FragmentCommunityPostDetailBinding
     var isClicked = false
@@ -49,7 +51,7 @@ class CommunityPostDetailFragment : Fragment() {
     private val coroutineScope = CoroutineScope(Dispatchers.Main)
 
     private lateinit var viewPagerAdapter: CommunityDetailViewPager2Adapter
-
+    private lateinit var mainActivity: MainActivity
     private val postCommentList: MutableList<Comment> = mutableListOf()
 
     private lateinit var communityDetailCommentAdapter: CommunityDetailCommentAdapter
@@ -61,7 +63,6 @@ class CommunityPostDetailFragment : Fragment() {
     var nickname = ""
     var userImage = ""
     var getAuthorUid = ""
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?,
@@ -69,11 +70,11 @@ class CommunityPostDetailFragment : Fragment() {
 
         communityPostDetailBinding = FragmentCommunityPostDetailBinding.inflate(inflater)
         commentViewModel = ViewModelProvider(requireActivity())[CommentViewModel::class.java]
-
+//        commentViewModel.setCommunityImage(BannerItemList)
         val args: CommunityPostDetailFragmentArgs by navArgs()
         val postid = args.position
         postGetId = postid
-
+        mainActivity = activity as MainActivity
         communityPostDetailBinding.run {
             toolbar()
             lottie()
@@ -81,6 +82,9 @@ class CommunityPostDetailFragment : Fragment() {
             communityDetailCommentRecyclerView()
             getFireStoreUserInfo()
             comment()
+
+
+
         }
 
         return communityPostDetailBinding.root
@@ -197,17 +201,64 @@ class CommunityPostDetailFragment : Fragment() {
 
     private fun FragmentCommunityPostDetailBinding.lottie() {
 
-        communityPostDetailFavoriteLottie.scaleX = 2.0f
-        communityPostDetailFavoriteLottie.scaleY = 2.0f
 
-        communityPostDetailFavoriteLottie.setOnClickListener {
-            isClicked = !isClicked // 클릭할 때마다 변수를 반전시킴
-            if (isClicked) {
-                communityPostDetailFavoriteLottie.playAnimation()
+        val db = FirebaseFirestore.getInstance()
+        val collectionName = "Post"
+        val documentId = postGetId
+        val docRef = db.collection(collectionName).document(documentId)
 
+        docRef.addSnapshotListener { documentSnapshot, e ->
+            if (e != null) {
+                // 오류 처리
+                return@addSnapshotListener
+            }
+            communityPostDetailFavoriteLottie.scaleX = 2.0f
+            communityPostDetailFavoriteLottie.scaleY = 2.0f
+            if (documentSnapshot != null && documentSnapshot.exists()) {
+                // 문서가 존재하고 데이터가 변경됨
+                val likedUserIds = documentSnapshot.get("likedUserIds") as? List<String>
+
+                // 사용자 ID가 likedUserIds에 포함되어 있는지 확인
+                val isLiked = likedUserIds?.contains(user!!.uid) == true
+                val numberOfLikes = likedUserIds?.size ?: 0
+
+                Log.d("numberOfLikes", numberOfLikes.toString())
+                communityPostDetailFavoriteCounter.text = numberOfLikes.toString()
+
+                // 좋아요 상태에 따라 버튼 색상 설정
+                if (isLiked) {
+                    communityPostDetailFavoriteLottie.playAnimation()
+                } else {
+                    communityPostDetailFavoriteLottie.cancelAnimation()
+                    communityPostDetailFavoriteLottie.progress = 0f
+                }
+
+                communityPostDetailFavoriteLottie.setOnClickListener {
+                    // 좋아요 토글 로직 추가
+                    val updatedLikedUserIds = likedUserIds?.toMutableList() ?: mutableListOf()
+
+                    if (isLiked) {
+                        // 사용자가 이미 좋아요를 누른 경우: 좋아요 취소
+                        updatedLikedUserIds.remove(user?.uid)
+                        communityPostDetailFavoriteLottie.cancelAnimation()
+                        communityPostDetailFavoriteLottie.progress = 0f
+                    } else {
+                        // 사용자가 좋아요를 누르지 않은 경우: 좋아요 추가
+                        updatedLikedUserIds.add(user!!.uid)
+                        communityPostDetailFavoriteLottie.playAnimation()
+                    }
+
+                    // Firestore 업데이트
+                    docRef.update("likedUserIds", updatedLikedUserIds)
+                        .addOnSuccessListener {
+                            // 업데이트 성공
+                        }
+                        .addOnFailureListener { e ->
+                            Log.d("CommunityAdapter", e.toString())
+                        }
+                }
             } else {
-                communityPostDetailFavoriteLottie.cancelAnimation()
-                communityPostDetailFavoriteLottie.progress = 0f
+                // 문서가 존재하지 않음 또는 삭제됨
             }
 
         }
@@ -292,16 +343,29 @@ class CommunityPostDetailFragment : Fragment() {
             val postDateCreated = documentSnapshot.getString("postDateCreated")
             val postCategory = documentSnapshot.getString("postCategory")
             val postImagesList = documentSnapshot.get("postImages") as? List<*>
+
             var postImagesGetList = mutableListOf<PostImage>()
-            if (postImagesList!!.isNotEmpty()) {
 
-                val cleanedString = postImagesList?.toString()?.replace("{image=", "")
-                val imageUrl = cleanedString?.trim()
-                val imageUrlWithoutBrace = imageUrl?.removeSuffix("}")
+            if (postImagesList != null && postImagesList.isNotEmpty()) {
+                for (postImage in postImagesList) {
+                    val imageUrl = postImage.toString()
+                    val cleanedImageUrl = imageUrl.replace("{image=", "").removeSuffix("}")
+                    val postImageObject = PostImage(cleanedImageUrl)
+                    postImagesGetList.add(postImageObject)
+                }
 
-                val postImage = PostImage(imageUrlWithoutBrace)
-                postImagesGetList.add(postImage)
-                Log.d("어떤 리스트가..",postImagesGetList.toString())
+                val imageUrl = postImagesGetList.map { it.image }
+                    .joinToString(", ")
+                    .split(", ")
+                    .map { it.trim() }
+                var imageUrls= mutableListOf<PostImage>()
+
+                for (url in imageUrl) {
+                    val postImage = PostImage(url) // 여기서 PostImage 생성자에 URL을 전달하여 객체를 만듭니다.
+                    imageUrls.add(postImage)
+                }
+                commentViewModel.setCommunityImage(imageUrls)
+                Log.d("어떤 리스트가..", imageUrls.toString())
             }
 
             val postLike = documentSnapshot.getLong("postLike")
@@ -372,8 +436,27 @@ class CommunityPostDetailFragment : Fragment() {
                     getCategoryDrawable(postCategory), 0, 0, 0
                 )
 
+//             val storage = FirebaseStorage.getInstance()
+//             val storageRef = storage.reference.child(userImage.toString())
+//             storageRef.downloadUrl.addOnSuccessListener { uri ->
+//                 communityPostDetailBinding.run {
+//                     Glide
+//                         .with(requireContext())
+//                         .load(uri)
+//                         .diskCacheStrategy(DiskCacheStrategy.ALL)
+//                         .fitCenter()
+//                         .into(communityPostDetailProfileImage)
+
+
+//                     communityPostDetailPostTitle.text = postTitle
+//                     communityPostDateCreated.text = timeAgo
+//                     communityPostDetailContent.text = postContent
+//                     communityPostDetailUserNickName.text = userNickName
+//                 }
             }
         }
+        initViewPager2()
+        subscribeObservers()
     }
 
     private fun getCategoryDrawable(postCategory: String?) = when (postCategory) {
@@ -409,7 +492,8 @@ class CommunityPostDetailFragment : Fragment() {
                     requireContext(),
                     mutableListOf(),
                     postGetId,
-                    commentViewModel
+                    commentViewModel,
+                    this@CommunityPostDetailFragment
                 )
             adapter = communityDetailCommentAdapter
             setHasFixedSize(true)
@@ -497,15 +581,17 @@ class CommunityPostDetailFragment : Fragment() {
 
     private fun initViewPager2() {
         communityPostDetailBinding.communityPostDetailViewPager2.run {
-            viewPagerAdapter = CommunityDetailViewPager2Adapter()
+            viewPagerAdapter = CommunityDetailViewPager2Adapter(mainActivity)
             adapter = viewPagerAdapter
             registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             })
+            communityPostDetailBinding.dotsIndicator.attachTo(this)
         }
+
     }
 
     private fun subscribeObservers() {
-        commentViewModel.bannerItemList.observe(viewLifecycleOwner) { imageList ->
+        commentViewModel.communityImageList.observe(viewLifecycleOwner) { imageList->
             viewPagerAdapter.submitList(imageList)
         }
 
@@ -515,5 +601,13 @@ class CommunityPostDetailFragment : Fragment() {
         super.onDestroy()
         postCommentList.clear()
     }
+
+    override fun onReplyButtonClicked(commentList: Comment) {
+//        Snackbar.make(requireView(), "답글", Snackbar.LENGTH_SHORT).show()
+        communityPostDetailBinding.communityPostDetailCommentTextInputEditText.requestFocus()
+        val imm = requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.showSoftInput(communityPostDetailBinding.communityPostDetailCommentTextInputEditText, InputMethodManager.SHOW_IMPLICIT)
+    }
+
 
 }
