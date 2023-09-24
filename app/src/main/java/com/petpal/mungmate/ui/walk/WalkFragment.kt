@@ -63,7 +63,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.storage
-import com.petpal.mungmate.BlockingDialogFragment
+import com.petpal.mungmate.BlockingDailogFragment
 import com.petpal.mungmate.MainActivity
 import com.petpal.mungmate.R
 import com.petpal.mungmate.databinding.FragmentWalkBinding
@@ -106,7 +106,7 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
     }
     // 거리 필터링을 위한 코드
     private var distanceFilterValue:Double?=null
-
+    private var userAgeGroup:String?=null
     private var location123:Location?=null
     private var repeatJob: Job? = null
     val CURRENT_LOCATION_MARKER_TAG = 100
@@ -200,6 +200,10 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
         viewToHide.visibility = View.GONE
     }
     private fun setupMapView() {
+        if(onWalk==false){
+            fragmentWalkBinding.chipMapFilter.visibility=View.GONE
+            fragmentWalkBinding.imageViewMylocation.visibility=View.GONE
+        }
         //필터 드로어 제어
         //fragmentWalkBinding.drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
         fragmentWalkBinding.mapView.setPOIItemEventListener(this)
@@ -216,7 +220,6 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
             startLocationUpdates()
             observeViewModelonWalk()
             viewModel.observeUsersOnWalk()
-
             fragmentWalkBinding.mapView.removeAllPOIItems()
             updateCurrentLocationOnce()
         }
@@ -228,7 +231,7 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
     }
     private fun setupButtonListeners() {
         fragmentWalkBinding.buttonWalk.setOnClickListener {
-            walkWithUser?.walkRecordId?.let { it1 -> viewModel.updateMatchStatusToFour(it1) }
+
             val builder = AlertDialog.Builder(requireContext())
             builder.setTitle("멍메이트")
 
@@ -279,6 +282,15 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
                     R.id.distance3 -> distanceFilterValue = 3000.0
                     else -> distanceFilterValue = 2000.0
                 }
+                when(fragmentWalkBinding.filterAgeRangeGroup.checkedChipId){
+                    R.id.AgeRange1 -> userAgeGroup="10대"
+                    R.id.AgeRange2 -> userAgeGroup="20대"
+                    R.id.AgeRange3 -> userAgeGroup="30대"
+                    R.id.AgeRange4 -> userAgeGroup="40대"
+                    R.id.AgeRange4 -> userAgeGroup="50대"
+                }
+
+
                 fragmentWalkBinding.drawerLayout.closeDrawer(GravityCompat.END)
             } else {
                 fragmentWalkBinding.chipMapFilter.isChecked = false
@@ -296,7 +308,7 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
             fragmentWalkBinding.mapView.removeAllPOIItems()
             toggleVisibility(fragmentWalkBinding.LinearLayoutOffWalk, fragmentWalkBinding.LinearLayoutOnWalk)
             fragmentWalkBinding.imageViewWalkToggle.setImageResource(R.drawable.dog_home)
-
+            fragmentWalkBinding.chipMapFilter.visibility=View.VISIBLE
             val endTimestamp=timestampToString(System.currentTimeMillis())
             val startTimestamp=timestampToString(viewModel.walkStartTime)
             val bundle=Bundle()
@@ -307,16 +319,19 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
             bundle.putLong("walkDuration",elapsedTime)
             bundle.putString("walkDistance",totalDistance.toString())
             bundle.putString("mateNickname",walkMateNickname)
-            bundle.putString("walkMatchingSender",walkWithUser!!.senderId)
-            bundle.putString("walkMatchingReceiver",walkWithUser!!.receiverId)
+
             walkMateNickname?.let { it1 -> Log.d("닉닉닉", it1) }
             if(walkWithUser!=null) {
                 if (userId != walkWithUser!!.receiverId) {
                     bundle.putString("walkMatchingId", walkWithUser!!.receiverId)
                     bundle.putString("walkMatchingRecorId",walkWithUser!!.walkRecordId)
+                    bundle.putString("walkMatchingSender",walkWithUser!!.senderId)
+                    bundle.putString("walkMatchingReceiver",walkWithUser!!.receiverId)
                 } else {
                     bundle.putString("walkMatchingId", walkWithUser!!.senderId)
                     bundle.putString("walkMatchingRecorId",walkWithUser!!.walkRecordId)
+                    bundle.putString("walkMatchingSender",walkWithUser!!.senderId)
+                    bundle.putString("walkMatchingReceiver",walkWithUser!!.receiverId)
                 }
             }
 
@@ -359,16 +374,16 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
 
         fragmentWalkBinding.imageViewMylocation.setOnClickListener {
             updateCurrentLocationOnce()
-
-//            if(onWalk==true) {
-//                getCurrentLocationOnWalk()
-//            }else {
-//                getCurrentLocation()
-//            }
+            LastKnownLocation.latitude = null
+            LastKnownLocation.longitude= null
+        }
+        fragmentWalkBinding.chipMylocation.setOnClickListener {
+            updateCurrentLocationOnce()
             LastKnownLocation.latitude = null
             LastKnownLocation.longitude= null
         }
     }
+
     @SuppressLint("SimpleDateFormat")
     fun timestampToString(timestamp: Long): String {
         val date = Date(timestamp)
@@ -396,6 +411,7 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
         }
         return uri
     }
+    @RequiresApi(Build.VERSION_CODES.O)
     private fun observeViewModelonWalk() {
         viewModel.usersOnWalk.observe(viewLifecycleOwner, Observer { users ->
             users.forEach { user ->
@@ -408,21 +424,40 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
                             latitude = it.latitude ?: 0.0
                             longitude = it.longitude ?: 0.0
                         }
-
-
-
                         nearbyUsers = users.filter { user ->
                             val userLocation = Location("userLocation").apply {
                                 latitude = user.location?.get("latitude") ?: 0.0
                                 longitude = user.location?.get("longitude") ?: 0.0
                             }
-                            val filterddistance=if(distanceFilterValue==null){
-                                2000.0
-                            }else{
-                                distanceFilterValue
+                            val filterddistance = distanceFilterValue ?: 2000.0
+                            val isUserWithinDistance = user.uid != userId && currentLocation.distanceTo(userLocation) <= filterddistance
+                            userAgeGroup?.let { it1 -> Log.d("필터", it1) }
+                            user.birthday?.let { it1 -> calculateAgeGroup(it1) }
+                                ?.let { it2 -> Log.d("필터1", it2) }
+                            val isUserWithinAgeGroup = if(userAgeGroup != null) {
+                                user.birthday?.let { calculateAgeGroup(it) } == userAgeGroup
+                            } else {
+                                true
                             }
-                            user.uid != userId && currentLocation.distanceTo(userLocation) <= filterddistance!!
+                            isUserWithinDistance && isUserWithinAgeGroup
                         }
+
+
+//                        nearbyUsers = users.filter { user ->
+//                            val userLocation = Location("userLocation").apply {
+//                                latitude = user.location?.get("latitude") ?: 0.0
+//                                longitude = user.location?.get("longitude") ?: 0.0
+//                            }
+//                            val filterddistance=if(distanceFilterValue==null){
+//                                2000.0
+//                            }else{
+//                                distanceFilterValue
+//                            }
+//                            if(userAgeGroup!=null){
+//                                user.uid != userId && user.birthday?.let { it1 -> calculateAgeGroup(it1) } ==userAgeGroup
+//                            }
+//                            user.uid != userId && currentLocation.distanceTo(userLocation) <= filterddistance!!
+//                        }
 
                         val newNearbyUserIds = nearbyUsers!!.map { it.uid }.toSet()
                         val usersToRemove = userMarkers.keys.filter { it !in newNearbyUserIds }
@@ -792,17 +827,21 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
     }
     private fun startCountdown() {
 
-        val blockingDialog = BlockingDialogFragment()
+        val blockingDialog = BlockingDailogFragment()
         blockingDialog.show(childFragmentManager, "BLOCKING_DIALOG")
 
         countDownTimer = object : CountDownTimer((countdownValue * 1000).toLong(), countDownInterval.toLong()) {
             override fun onTick(millisUntilFinished: Long) {
+
                 fragmentWalkBinding.textViewWalkCountdown.text = countdownValue.toString()
                 countdownValue--
             }
 
             override fun onFinish() {
-                    blockingDialog.dismiss()
+                blockingDialog.dismiss()
+                walkWithUser?.walkRecordId?.let { it1 -> viewModel.updateMatchStatusToFour(it1) }
+                fragmentWalkBinding.imageViewMylocation.visibility=View.VISIBLE
+                fragmentWalkBinding.chipMapFilter.visibility=View.VISIBLE
                 // 카운트다운이 끝나면 시작 작업을 수행하고 다이얼로그를 숨깁니다.
                 toggleVisibility(fragmentWalkBinding.LinearLayoutOnWalk, fragmentWalkBinding.LinearLayoutOffWalk)
                 fragmentWalkBinding.imageViewWalkToggle.setImageResource(R.drawable.dog_walk)
@@ -871,13 +910,13 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
 
         return when {
             age in 0..9 -> "나이대 : 영유아 및 초등학생"
-            age in 10..19 -> "나이대 : 10대"
-            age in 20..29 -> "나이대 : 20대"
-            age in 30..39 -> "나이대 : 30대"
-            age in 40..49 -> "나이대 : 40대"
-            age in 50..59 -> "나이대 : 50대"
-            age in 60..69 -> "나이대 : 60대"
-            age in 70..79 -> "나이대 : 70대"
+            age in 10..19 -> "10대"
+            age in 20..29 -> "20대"
+            age in 30..39 -> "30대"
+            age in 40..49 -> "40대"
+            age in 50..59 -> "50대"
+            age in 60..69 -> "60대"
+            age in 70..79 -> "70대"
             else -> "밝히지 않음"
         }
     }
@@ -888,8 +927,13 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
 
         var age = currentDate.year - birthDate.year
 
-        if (birthDate.month > currentDate.month || (birthDate.month == currentDate.month && birthDate.dayOfMonth > currentDate.dayOfMonth)) {
+        if (birthDate.month > currentDate.month ||
+            (birthDate.month == currentDate.month && birthDate.dayOfMonth > currentDate.dayOfMonth)) {
             age--
+        }
+
+        if (age < 1) {
+            age = 1
         }
 
         return age
@@ -1202,7 +1246,9 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
                 val userNicknameTextView = onWalkBottomSheetView.findViewById<TextView>(R.id.textViewBottomUserNickname)
                 userNicknameTextView.text = user.nickname
                 val textViewBottomUserAgeRange=onWalkBottomSheetView.findViewById<TextView>(R.id.textViewBottomUserAgeRange)
-                textViewBottomUserAgeRange.text=user.birthday?.let { calculateAgeGroup(it) }
+                userAgeGroup= user.birthday?.let { calculateAgeGroup(it) }
+                textViewBottomUserAgeRange.text = user.birthday?.let { "나이대 : ${calculateAgeGroup(it)}" }
+
                 val imageViewUser=onWalkBottomSheetView.findViewById<ImageView>(R.id.ImageViewBottomUserProfileImage)
                 val textViewBottomUserAvailability=onWalkBottomSheetView.findViewById<TextView>(R.id.textViewBottomUserAvailability)
                 if(user.walkHoursStart?.isNotEmpty() == true) {

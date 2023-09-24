@@ -28,6 +28,7 @@ import com.petpal.mungmate.R
 import com.petpal.mungmate.databinding.FragmentWalkReviewWriteBinding
 import com.petpal.mungmate.model.WalkRecord
 import com.petpal.mungmate.model.WalkReview
+import com.petpal.mungmate.model.WalkReviewForMate
 import java.io.ByteArrayOutputStream
 import java.util.UUID
 
@@ -128,12 +129,15 @@ class WalkReviewWriteFragment : Fragment() {
                 }
             }else{//sender
                 if(userId!=walkMatchingId) {
+                    val walkReviewForMate= WalkReviewForMate(fragmentWalkReviewWriteBinding.userRatingBar.rating,walkMemo,Timestamp.now(),walkDistance!!.toDouble(),
+                        walkDuration!!,walkRecordEndTime!!,walkRecordStartTime!!)
                     if (userId == walkMatchingSender) {
                     val walkWithReview = WalkReview(
                         fragmentWalkReviewWriteBinding.userRatingBar.rating,
                         walkMemo,
                         Timestamp.now()
                     )
+
                     val myReview = WalkRecord(
                         walkRecorduid!!,
                         walkRecordDate!!,
@@ -149,7 +153,7 @@ class WalkReviewWriteFragment : Fragment() {
                     //matches의 문서에 sender의 리뷰로 올린다
                     addWalkwithReviewSender(userId, walkRecordId!!, walkWithReview)
                     //매칭상대방의 walkmatereview에 올려준다
-                    addWalkReviewToMate(walkMatchingId, walkWithReview)
+                    addWalkReviewToMate(walkMatchingId, walkReviewForMate)
                     mainActivity.navigate(R.id.action_WriteWalkReviewFragment_to_mainFragment)
                 }else {
                         //receiver
@@ -160,7 +164,7 @@ class WalkReviewWriteFragment : Fragment() {
                         //matches에 receiver의 리뷰로 올린다
                         addWalkwithReviewReceiver(userId,walkRecordId!!,walkWithReview)
                         //매칭상대방의 walkmatereview에 올려준다
-                        addWalkReviewToMate(walkMatchingId,walkWithReview)
+                        addWalkReviewToMate(walkMatchingId,walkReviewForMate)
                         mainActivity.navigate(R.id.action_WriteWalkReviewFragment_to_mainFragment)
                     }
                 }
@@ -199,7 +203,7 @@ class WalkReviewWriteFragment : Fragment() {
                 Toast.makeText(context, "리뷰 등록 실패 .", Toast.LENGTH_SHORT).show()
             }
     }
-    fun addWalkReviewToMate(walkMatchingId: String, walkWithReview: WalkReview) {
+    fun addWalkReviewToMate(walkMatchingId: String, walkWithReview: WalkReviewForMate) {
         val userRef = db.collection("users").document(walkMatchingId)
 
         userRef.update("walkMateReview", FieldValue.arrayUnion(walkWithReview))
