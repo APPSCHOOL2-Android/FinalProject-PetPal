@@ -16,6 +16,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -61,6 +62,10 @@ class PlaceReviewFragment : Fragment() {
 
         mainActivity = activity as MainActivity
         fragmentPlaceReviewBinding = FragmentPlaceReviewBinding.inflate(layoutInflater)
+
+        fragmentPlaceReviewBinding.toolbarPlaceReview.setNavigationOnClickListener {
+            findNavController().popBackStack()
+        }
 
        // reviewAdapter = placeId?.let { ReviewAdapter(emptyList(), it) }!!
         fragmentPlaceReviewBinding.reviewsRecyclerView.adapter = reviewAdapter

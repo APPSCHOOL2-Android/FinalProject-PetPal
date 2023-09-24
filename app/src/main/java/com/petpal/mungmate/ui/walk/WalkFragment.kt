@@ -81,6 +81,7 @@ import net.daum.mf.map.api.MapPOIItem
 import net.daum.mf.map.api.MapPoint
 import net.daum.mf.map.api.MapPolyline
 import net.daum.mf.map.api.MapView
+import org.w3c.dom.Text
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -958,7 +959,9 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
             viewModel.placeInfo.observe(viewLifecycleOwner) { placeInfo ->
                 val textViewPlaceName = initialBottomSheetView.findViewById<TextView>(R.id.textView)
                 val imageViewPlace = initialBottomSheetView.findViewById<ImageView>(R.id.ImageViewBottomRecommendPlace)
+                val textViewAddress = initialBottomSheetView.findViewById<TextView>(R.id.textViewAddress)
                 textViewPlaceName.text = placeInfo?.get("name") as? String ?: "${selectedPlace?.place_name}"
+                textViewAddress.text = placeInfo?.get("address") as? String ?: selectedPlace?.address_name
                 val imageUrl = placeInfo?.get("imageRes") as? String
 
                 if (imageUrl != null) {

@@ -4,7 +4,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_margin="@dimen/common_margin"
     tools:context=".ui.placereview.WritePlaceReviewFragment">
 
     <LinearLayout
@@ -13,89 +12,98 @@
         android:orientation="vertical">
 
 
-    <com.google.android.material.appbar.MaterialToolbar
-        android:id="@+id/materialPlaceReviewToolbar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:minHeight="?attr/actionBarSize"
-        android:theme="?attr/actionBarTheme"
-        app:title="장소 리뷰 작성" />
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/materialPlaceReviewToolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="?attr/actionBarSize"
+            android:theme="?attr/actionBarTheme"
+            app:navigationIcon="@drawable/arrow_back_24px"
+            app:title="장소 리뷰 작성" />
 
-    <TextView
-        android:id="@+id/textViewplaceReviewName"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/common_margin"
-        android:gravity="center"
-        android:text="부천 동물병원"
-        android:textAppearance="@style/TextAppearance.AppCompat.Large" />
-
-    <ImageView
-        android:id="@+id/imageViewPlaceReview"
-        android:layout_width="300dp"
-        android:layout_height="150dp"
-        android:layout_gravity="center"
-        android:layout_marginTop="@dimen/common_margin"
-        android:src="@drawable/photo"
-        tools:src="@drawable/photo" />
-
-
-    <TextView
-        android:id="@+id/textViewPlaceReviewAnnouncement"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/common_margin"
-        android:gravity="center"
-        android:text="장소가 마음에 든 만큼 별점을 주세요"
-        android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
-
-    <RatingBar
-        android:id="@+id/placeRatingBar"
-        style="@android:style/Widget.DeviceDefault.Light.RatingBar"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_marginTop="@dimen/common_margin"
-        android:numStars="5"
-        android:rating="3" />
-
-    <TextView
-        android:id="@+id/textViewPlaceReviewAnnouncement2"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/common_margin"
-        android:gravity="center"
-        android:text="솔직한 리뷰를 작성해 주세요." />
-
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/textField"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="다른 견주분들에게 도움이 될 수 있는 솔직한 리뷰 부탁드려요"
-        app:hintTextAppearance="@style/HintTextAppearance"
-        >
-
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/editTextReviewContent"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:gravity="top"
-            android:inputType="textMultiLine"
-            android:textSize="12sp"
-            android:lines="5"
-            android:maxLines="5" />
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:orientation="vertical">
 
-    </com.google.android.material.textfield.TextInputLayout>
+            <TextView
+                android:id="@+id/textViewplaceReviewName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/common_margin"
+                android:gravity="center"
+                android:text="부천 동물병원"
+                android:textAppearance="@style/TextAppearance.AppCompat.Large"
+                android:textStyle="bold" />
 
-    <Button
-        android:id="@+id/buttonPlaceReviewSubmit"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/common_margin"
-        android:text="리뷰 작성 완료" />
+            <ImageView
+                android:id="@+id/imageViewPlaceReview"
+                android:layout_width="300dp"
+                android:layout_height="150dp"
+                android:layout_gravity="center"
+                android:layout_marginTop="@dimen/common_margin"
+                android:src="@drawable/photo"
+                tools:src="@drawable/photo" />
+
+            <TextView
+                android:id="@+id/textViewPlaceReviewAnnouncement"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/common_margin"
+                android:gravity="center"
+                android:text="장소가 마음에 든 만큼 별점을 주세요"
+                android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
+
+            <RatingBar
+                android:id="@+id/placeRatingBar"
+                style="@android:style/Widget.DeviceDefault.Light.RatingBar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="@dimen/common_margin"
+                android:numStars="5"
+                android:rating="3" />
+
+            <TextView
+                android:id="@+id/textViewPlaceReviewAnnouncement2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/common_margin"
+                android:gravity="center"
+                android:text="솔직한 리뷰를 작성해 주세요." />
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/textField"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="다른 견주분들에게 도움이 될 수 있는 솔직한 리뷰 부탁드려요"
+                app:hintTextAppearance="@style/HintTextAppearance">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/editTextReviewContent"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="top"
+                    android:inputType="textMultiLine"
+                    android:lines="5"
+                    android:maxLines="5"
+                    android:textSize="12sp" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <Button
+                android:id="@+id/buttonPlaceReviewSubmit"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/common_margin"
+                android:text="리뷰 작성 완료" />
+        </LinearLayout>
 
 
-</LinearLayout>
+    </LinearLayout>
+
     <View
         android:id="@+id/progressBackground"
         android:layout_width="match_parent"
@@ -108,6 +116,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
-        android:visibility="gone"/>
+        android:visibility="gone" />
 
 </RelativeLayout>
