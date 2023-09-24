@@ -87,14 +87,6 @@ class ChatFragment : Fragment() {
                 val receiverId = editTextReceiverId.text.toString()
                 mainActivity.navigate(R.id.action_mainFragment_to_chat, bundleOf("receiverId" to receiverId))
             }
-
-            toolbarChat.setOnClickListener {
-                if (chatTestLayout.visibility == View.VISIBLE) {
-                    chatTestLayout.visibility = View.GONE
-                } else {
-                    chatTestLayout.visibility == View.VISIBLE
-                }
-            }
         }
     }
 

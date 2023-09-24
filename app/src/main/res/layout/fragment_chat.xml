@@ -16,6 +16,30 @@
         app:title="채팅" />
 
     <LinearLayout
+        android:id="@+id/chatTestLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:visibility="gone">
+
+        <EditText
+            android:id="@+id/editTextReceiverId"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:ems="10"
+            android:inputType="text" />
+
+        <Button
+            android:id="@+id/buttonTestSendMessage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:text="id 에게 메시지 보내기" />
+
+    </LinearLayout>
+
+    <LinearLayout
         android:id="@+id/layoutNoChatRoomList"
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -56,30 +80,6 @@
             android:scrollbars="vertical">
 
         </androidx.recyclerview.widget.RecyclerView>
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/chatTestLayout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:visibility="gone">
-
-        <EditText
-            android:id="@+id/editTextReceiverId"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:ems="10"
-            android:inputType="text" />
-
-        <Button
-            android:id="@+id/buttonTestSendMessage"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:text="id 에게 메시지 보내기" />
 
     </LinearLayout>
 
