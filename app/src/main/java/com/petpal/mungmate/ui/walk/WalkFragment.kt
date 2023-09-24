@@ -62,6 +62,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.storage
+import com.petpal.mungmate.BlockingDialogFragment
 import com.petpal.mungmate.MainActivity
 import com.petpal.mungmate.R
 import com.petpal.mungmate.databinding.FragmentWalkBinding
@@ -223,72 +224,6 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
         val dialog = builder.create()
         dialog.show()
     }
-    private fun observeViewModelOnWalkLocationChanges() {
-        viewModel.usersOnWalkLocationChanges.observe(viewLifecycleOwner, Observer { users ->
-            if (checkPermission(Manifest.permission.ACCESS_FINE_LOCATION)) {
-                fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
-                    location?.let {
-                        val currentLocation = Location("currentLocation").apply {
-                            latitude = it.latitude ?: 0.0
-                            longitude = it.longitude ?: 0.0
-                        }
-
-                        // 거리 필터링을 위한 코드
-                        val distanceFilterValue = when(fragmentWalkBinding.filterDistanceGroup.checkedChipId) {
-                            R.id.distance1 -> 1000.0
-                            R.id.distance2 -> 2000.0
-                            R.id.distance3 -> 3000.0
-                            else -> 2000.0
-                        }
-
-                        val nearbyUsers = users.filter { user ->
-                            val userLocation = Location("userLocation").apply {
-                                latitude = user.location?.get("latitude") ?: 0.0
-                                longitude = user.location?.get("longitude") ?: 0.0
-                            }
-
-                            user.uid != userId && currentLocation.distanceTo(userLocation) <= distanceFilterValue
-                        }
-
-                        val newNearbyUserIds = nearbyUsers.map { it.uid }.toSet()
-                        val usersToRemove = userMarkers.keys.filter { it !in newNearbyUserIds }
-
-                        // 기존에 없어진 사용자의 마커를 제거합니다.
-                        usersToRemove.forEach { userIdToRemove ->
-                            val markerToRemove = userMarkers[userIdToRemove]
-                            if (markerToRemove != null) {
-                                fragmentWalkBinding.mapView.removePOIItem(markerToRemove)
-                                userMarkers.remove(userIdToRemove)
-                            }
-                        }
-
-                        // 사용자의 위치에 따라 마커를 추가 또는 업데이트합니다.
-                        for (user in nearbyUsers) {
-                            val mapPoint = MapPoint.mapPointWithGeoCoord(
-                                user.location?.get("latitude") ?: 0.0, user.location?.get("longitude") ?: 0.0)
-
-                            if (userMarkers.containsKey(user.uid)) {
-                                val existingMarker = userMarkers[user.uid]
-                                existingMarker?.mapPoint = mapPoint
-                            } else {
-                                val poiItem = MapPOIItem().apply {
-                                    itemName = user.nickname
-                                    tag = user.nickname.hashCode()
-                                    this.mapPoint = mapPoint
-                                    markerType = MapPOIItem.MarkerType.CustomImage
-                                    customImageResourceId = R.drawable.location
-                                    isCustomImageAutoscale = true
-                                    setCustomImageAnchor(0.5f, 1.0f)
-                                }
-                                fragmentWalkBinding.mapView.addPOIItem(poiItem)
-                                userMarkers[user.uid!!] = poiItem
-                            }
-                        }
-                    }
-                }
-            }
-        })
-    }
     private fun setupButtonListeners() {
         fragmentWalkBinding.buttonWalk.setOnClickListener {
             walkWithUser?.walkRecordId?.let { it1 -> viewModel.updateMatchStatusToFour(it1) }
@@ -321,21 +256,38 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
         fragmentWalkBinding.chipMapFilter.setOnClickListener {
             fragmentWalkBinding.drawerLayout.setScrimColor(Color.parseColor("#FFFFFF"))
             fragmentWalkBinding.drawerLayout.openDrawer(GravityCompat.END)
-            fragmentWalkBinding.drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_OPEN)
-
+            //fragmentWalkBinding.drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_OPEN)
         }
 
         fragmentWalkBinding.buttonFilterSubmit.setOnClickListener {
-            showSnackbar("필터가 적용되었습니다.")
-            when(fragmentWalkBinding.filterDistanceGroup.checkedChipId) {
-                R.id.distance1 -> distanceFilterValue=1000.0
-                R.id.distance2 -> distanceFilterValue=2000.0
-                R.id.distance3 -> distanceFilterValue=3000.0
-                else -> distanceFilterValue=2000.0
-            }
-            fragmentWalkBinding.drawerLayout.closeDrawer(GravityCompat.END)
+            val isAnyChipSelected = listOf(
+                fragmentWalkBinding.filterDistanceGroup,
+                fragmentWalkBinding.filterUserGenderGroup,
+                fragmentWalkBinding.filterAgeRangeGroup,
+                fragmentWalkBinding.filterPetGenderGroup,
+                fragmentWalkBinding.filterPetPropensityGroup,
+                fragmentWalkBinding.filterNeuterStatusGroup
+            ).any { it.checkedChipId != View.NO_ID }
 
+            if (isAnyChipSelected) {
+                showSnackbar("필터가 적용되었습니다.")
+                when(fragmentWalkBinding.filterDistanceGroup.checkedChipId) {
+                    R.id.distance1 -> distanceFilterValue = 1000.0
+                    R.id.distance2 -> distanceFilterValue = 2000.0
+                    R.id.distance3 -> distanceFilterValue = 3000.0
+                    else -> distanceFilterValue = 2000.0
+                }
+                fragmentWalkBinding.drawerLayout.closeDrawer(GravityCompat.END)
+            } else {
+                fragmentWalkBinding.chipMapFilter.isChecked = false
+                showSnackbar("필터가 선택되지 않았습니다 기본값으로 적용됩니다.")
+                fragmentWalkBinding.drawerLayout.closeDrawer(GravityCompat.END)
+            }
         }
+
+
+
+
         fragmentWalkBinding.buttonStopWalk.setOnClickListener {
             onWalk=false
             handler.removeCallbacks(periodicRunnable)
@@ -834,15 +786,19 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
     private fun showSnackbar(message: String) {
         Snackbar.make(fragmentWalkBinding.root, message, Snackbar.LENGTH_LONG).show()
     }
-
     private fun startCountdown() {
+
+        val blockingDialog = BlockingDialogFragment()
+        blockingDialog.show(childFragmentManager, "BLOCKING_DIALOG")
+
         countDownTimer = object : CountDownTimer((countdownValue * 1000).toLong(), countDownInterval.toLong()) {
             override fun onTick(millisUntilFinished: Long) {
-//                // 카운트다운 값을 텍스트뷰에 표시합니다.
                 fragmentWalkBinding.textViewWalkCountdown.text = countdownValue.toString()
                 countdownValue--
             }
+
             override fun onFinish() {
+                    blockingDialog.dismiss()
                 // 카운트다운이 끝나면 시작 작업을 수행하고 다이얼로그를 숨깁니다.
                 toggleVisibility(fragmentWalkBinding.LinearLayoutOnWalk, fragmentWalkBinding.LinearLayoutOffWalk)
                 fragmentWalkBinding.imageViewWalkToggle.setImageResource(R.drawable.dog_walk)
@@ -851,25 +807,50 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
                 viewModel.setOnWalkStatusTrue(userId)
                 location123?.latitude?.let {
                     location123?.longitude?.let { it1 ->
-                        viewModel.updateUserLocation(userId,
-                            it, it1
-                        )
+                        viewModel.updateUserLocation(userId, it, it1)
                     }
                 }
-                //requestLocationPermissionIfNeededOnWalk()
-                //startLocationUpdates()
+
                 hideProgress()
             }
         }.start()
     }
+
+//    private fun startCountdown() {
+//        countDownTimer = object : CountDownTimer((countdownValue * 1000).toLong(), countDownInterval.toLong()) {
+//            override fun onTick(millisUntilFinished: Long) {
+////                // 카운트다운 값을 텍스트뷰에 표시합니다.
+//                fragmentWalkBinding.textViewWalkCountdown.text = countdownValue.toString()
+//                countdownValue--
+//            }
+//            override fun onFinish() {
+//                // 카운트다운이 끝나면 시작 작업을 수행하고 다이얼로그를 숨깁니다.
+//                toggleVisibility(fragmentWalkBinding.LinearLayoutOnWalk, fragmentWalkBinding.LinearLayoutOffWalk)
+//                fragmentWalkBinding.imageViewWalkToggle.setImageResource(R.drawable.dog_walk)
+//                viewModel.distanceMoved.value=0.0f
+//                viewModel.startTimer()
+//                viewModel.setOnWalkStatusTrue(userId)
+//                location123?.latitude?.let {
+//                    location123?.longitude?.let { it1 ->
+//                        viewModel.updateUserLocation(userId,
+//                            it, it1
+//                        )
+//                    }
+//                }
+//                //requestLocationPermissionIfNeededOnWalk()
+//                //startLocationUpdates()
+//                hideProgress()
+//            }
+//        }.start()
+//    }
     fun showProgress() {
         fragmentWalkBinding.textViewWalkCountdown.visibility = View.VISIBLE
-        fragmentWalkBinding.progressBackgroundWalk1.visibility = View.VISIBLE
+        //fragmentWalkBinding.progressBackgroundWalk1.visibility = View.VISIBLE
     }
 
     fun hideProgress() {
         fragmentWalkBinding.textViewWalkCountdown.visibility = View.GONE
-        fragmentWalkBinding.progressBackgroundWalk1.visibility = View.GONE
+        //fragmentWalkBinding.progressBackgroundWalk1.visibility = View.GONE
     }
     @SuppressLint("SimpleDateFormat")
     fun getCurrentDate(): String
@@ -1196,11 +1177,11 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
                 )
                 avgRatingBundle.putString("place_category", selectedPlace?.category_group_name)
                 avgRatingBundle.putString("userNickname", userNickname)
+                bottomSheetDialog.dismiss()
                 mainActivity.navigate(
                     R.id.action_mainFragment_to_placeReviewFragment,
                     avgRatingBundle
                 )
-                bottomSheetDialog.dismiss()
             }
             //산책 on 유저마커 바텀시트
         } else {
@@ -1239,6 +1220,7 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
                     val bundle=Bundle()
                     bundle.putString("receiverId",user.uid.toString())
                     mainActivity.navigate(R.id.action_mainFragment_to_chat,bundle)
+                    onWalkbottomSheetDialog.dismiss()
                 }
                 buttonBottomBlock.setOnClickListener {
                     user.uid?.let { viewModel.blockUser(userId, it) }
@@ -1250,7 +1232,7 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
                             Snackbar.make(buttonBottomBlock, "사용자 차단에 실패하였습니다.",Snackbar.LENGTH_SHORT).show()
                         }
                     })
-
+                    onWalkbottomSheetDialog.dismiss()
                 }
                 user.pets.let { pets ->
                     val firstPet = pets.firstOrNull()
