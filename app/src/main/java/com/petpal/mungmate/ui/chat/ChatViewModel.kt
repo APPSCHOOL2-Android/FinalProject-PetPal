@@ -7,14 +7,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.firestore.DocumentSnapshot
 import com.petpal.mungmate.model.ChatRoom
-import com.petpal.mungmate.model.FirestoreUserBasicInfoData
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class ChatViewModel: ViewModel() {
     private val TAG = "CHAT_VIEW_MODEL"
-    private val chatRepository = ChatRepository()
+    val chatRepository = ChatRepository()
 
     // 참여중인 채팅방 목록
     private val _chatRooms = MutableLiveData<List<ChatRoom>>()
@@ -23,7 +22,7 @@ class ChatViewModel: ViewModel() {
     // 참여중인 채팅방 목록 실시간 로드
     fun getChatRooms(userId: String) {
         viewModelScope.launch {
-            chatRepository.getChatRooms(userId)
+            chatRepository.startChatRoomListener(userId)
                 .collect { chatRoomList ->
                     _chatRooms.value = chatRoomList
                     Log.d(TAG, "loadChatRooms completed")
