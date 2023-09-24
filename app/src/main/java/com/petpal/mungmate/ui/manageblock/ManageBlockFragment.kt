@@ -13,19 +13,19 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.petpal.mungmate.MainActivity
 import com.petpal.mungmate.databinding.FragmentManageBlockBinding
-import com.petpal.mungmate.model.BlockUser
 import com.petpal.mungmate.model.FirestoreUserBasicInfoData
 
 class ManageBlockFragment : Fragment() {
+    private val TAG = "MANAGE_BLOCK"
 
     private lateinit var _fragmentManageBlockBinding: FragmentManageBlockBinding
     private val fragmentManageBlockBinding get() = _fragmentManageBlockBinding
-    private lateinit var blockUserRecyclerAdapter: BlockUserRecyclerAdapter
-    private val auth = FirebaseAuth.getInstance()
-    val user = auth.currentUser
-    private val addBlackList = mutableListOf<BlockUser>()
-    val db = FirebaseFirestore.getInstance()
     private lateinit var mainActivity: MainActivity
+
+    private lateinit var blockedUserRecyclerAdapter: BlockUserRecyclerAdapter
+
+    val user = FirebaseAuth.getInstance().currentUser
+    private val usersCollectionRef = FirebaseFirestore.getInstance().collection("users")
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -34,11 +34,11 @@ class ManageBlockFragment : Fragment() {
 
         _fragmentManageBlockBinding = FragmentManageBlockBinding.inflate(layoutInflater)
         mainActivity = activity as MainActivity
-        blockUserRecyclerAdapter = BlockUserRecyclerAdapter(requireContext())
+        blockedUserRecyclerAdapter = BlockUserRecyclerAdapter()
 
         fragmentManageBlockBinding.run {
             recyclerViewBlockedUser.run {
-                adapter = blockUserRecyclerAdapter
+                adapter = blockedUserRecyclerAdapter
                 layoutManager = LinearLayoutManager(requireContext())
 
                 addItemDecoration(
@@ -55,51 +55,47 @@ class ManageBlockFragment : Fragment() {
                 }
             }
 
-            getFireStoreUserInfo()
+            // 사용자의 차단 목록 가져와서 RecyclerView에 설정
+            getBlockUserList()
         }
 
         return fragmentManageBlockBinding.root
     }
 
-    private fun getFireStoreUserInfo() {
-
+    private fun getBlockUserList() {
         if (user != null) {
-
-            db.collection("users").document(user.uid)
+            usersCollectionRef
+                .document(user.uid)
                 .get()
                 .addOnSuccessListener { documentSnapshot ->
                     if (documentSnapshot.exists()) {
 
                         // 현재 사용자가 블락한 사용자 리스트
-                        val blockUserList = documentSnapshot.get("blockUserList") as? List<String>
-                        addBlackList.clear()
-                        if (blockUserList != null) {
-                            for (item in blockUserList) {
-                                Log.d("MANAGE_BLOCK", "블락 사용자 : $item")
+                        val userInfo = documentSnapshot.toObject(FirestoreUserBasicInfoData::class.java)
+                        val blockUserList = userInfo?.blockUserList ?: emptyList()
 
-                                // 블락 사용자 정보 가져오기
-                                db.collection("users").document(item)
-                                    .get()
-                                    .addOnSuccessListener { document ->
-                                        if (document != null) {
-                                            val userImage = document.getString("userImage")
-                                            val nickname = document.getString("nickname")
-                                            val blockUser = BlockUser(userImage, nickname)
-                                            Log.d("MANAGE_BLOCK", "블락 사용자 닉네임 : $nickname")
-                                            addBlackList.add(blockUser)
-                                            blockUserRecyclerAdapter.submitList(addBlackList)
-                                        }
-                                    }
-                            }
-                        } else {
-                            // 차단한 사용자가 없을 경우
-                            Log.d("MANAGE_BLOCK", "차단 사용자가 존재하지 않음")
-                        }
+                        // RecyclerView 어댑터에 차단 사용자 리스트 설정
+                        blockedUserRecyclerAdapter.submitList(blockUserList)
+
+                        updateBlockListUI()
                     } else {
-                        // 사용자 없을 경우
-                        Log.d("MANAGE_BLOCK", "사용자가 존재하지 않음")
+                        // 사용자 문서가 없을 경우
+                        Log.d(TAG, "사용자가 존재하지 않음")
                     }
                 }
+                .addOnFailureListener {
+                    Log.d(TAG, "문서 가져오기 실패")
+                }
+        }
+    }
+
+    fun updateBlockListUI() {
+        if (blockedUserRecyclerAdapter.currentList.isEmpty()) {
+            fragmentManageBlockBinding.layoutNoBlockUser.visibility = View.VISIBLE
+            fragmentManageBlockBinding.recyclerViewBlockedUser.visibility = View.GONE
+        } else {
+            fragmentManageBlockBinding.layoutNoBlockUser.visibility = View.GONE
+            fragmentManageBlockBinding.recyclerViewBlockedUser.visibility = View.VISIBLE
         }
     }
 }
