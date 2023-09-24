@@ -23,6 +23,7 @@ import com.petpal.mungmate.model.Match
 import com.petpal.mungmate.model.PlaceData
 import com.petpal.mungmate.model.ReceiveUser
 import com.petpal.mungmate.model.Review
+import com.petpal.mungmate.utils.onWalk.onWalk
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -54,6 +55,8 @@ class WalkViewModel(private val repository: WalkRepository,application: Applicat
     val matchesLiveData: MutableLiveData<List<Match>> = MutableLiveData()
     val averageRatingForUser: LiveData<Double> get() = _averageRatingForUser
     private val _averageRatingForUser = MutableLiveData<Double>()
+    val usersOnWalkLocationChanges: MutableLiveData<List<ReceiveUser>> = MutableLiveData()
+
     val isUserBlocked: LiveData<Boolean> get() = _isUserBlocked
     val timerRunnable = object : Runnable {
         override fun run() {
@@ -232,13 +235,24 @@ class WalkViewModel(private val repository: WalkRepository,application: Applicat
         }
     }
 
-    fun updateLocationAndOnWalkStatus(userId: String, latitude: Double, longitude: Double) {
+    fun updateUserLocation(userId: String, latitude: Double, longitude: Double) {
         viewModelScope.launch {
             try {
-                repository.updateLocationAndOnWalkStatusTrue(userId, latitude, longitude)
+                repository.updateLocation(userId, latitude, longitude)
                 // 필요한 경우 성공 메시지나 상태 업데이트
             } catch (e: Exception) {
                 errorMessage.postValue(e.localizedMessage ?: "Failed to update location")
+            }
+        }
+    }
+
+    fun setOnWalkStatusTrue(userId: String) {
+        viewModelScope.launch {
+            try {
+                repository.updateOnWalkStatusTrue(userId)
+                // 필요한 경우 성공 메시지나 상태 업데이트
+            } catch (e: Exception) {
+                errorMessage.postValue(e.localizedMessage ?: "Failed to set onWalk status")
             }
         }
     }
@@ -278,6 +292,13 @@ class WalkViewModel(private val repository: WalkRepository,application: Applicat
             }
         }
     }
+    fun observeUsersOnWalkLocation() {
+        viewModelScope.launch {
+            repository.observeUsersOnWalkLocationChanges().collect { users ->
+                usersOnWalkLocationChanges.postValue(users)
+            }
+        }
+    }
     fun fetchMatchingWalkCount(userId: String) {
         viewModelScope.launch {
             try {
@@ -285,6 +306,19 @@ class WalkViewModel(private val repository: WalkRepository,application: Applicat
                 walkMatchingCount.postValue(count)
             } catch (e: Exception) {
                 errorMessage.postValue(e.localizedMessage ?: "Failed to fetch matching walk count")
+            }
+        }
+    }
+    fun updateLocationIfOnWalk(userId: String, latitude: Double, longitude: Double) {
+        if (onWalk == true) {
+            viewModelScope.launch {
+                try {
+                    repository.updateLocationIfOnWalk(userId, latitude, longitude)
+                    // 업데이트 성공
+                } catch (e: Exception) {
+                    // 업데이트 실패: 예외 처리
+                    errorMessage.postValue(e.localizedMessage ?: "Failed to update location")
+                }
             }
         }
     }
@@ -299,7 +333,7 @@ class WalkViewModel(private val repository: WalkRepository,application: Applicat
             }
         }
     }
-//    fun fetchMatchesByUserId(userId: String) {
+    //    fun fetchMatchesByUserId(userId: String) {
 //        viewModelScope.launch {
 //            try {
 //                val matches = repository.fetchMatchesByUserId(userId)
@@ -310,14 +344,14 @@ class WalkViewModel(private val repository: WalkRepository,application: Applicat
 //        }
 //    }
     fun fetchMatchesByUserId(userId: String) {
-    repository.fetchMatchesByUserId(userId,
-        onSuccess = { matches ->
-            matchesLiveData.postValue(matches)
-        },
-        onFailure = { exception ->
-            // Handle the error here, if necessary.
-            // For example, you might post a different value to a LiveData or log the exception.
-        })
+        repository.fetchMatchesByUserId(userId,
+            onSuccess = { matches ->
+                matchesLiveData.postValue(matches)
+            },
+            onFailure = { exception ->
+                // Handle the error here, if necessary.
+                // For example, you might post a different value to a LiveData or log the exception.
+            })
     }
     fun fetchAverageRatingForUser(userId: String) {
         viewModelScope.launch {
