@@ -117,7 +117,7 @@ class CommunityDetailCommentAdapter(
         holder.communityCommentCommentCounter.text = "0"
 
         holder.communityCommentReplyTextView.setOnClickListener {
-            callback.onReplyButtonClicked(commentList)
+            callback.onReplyButtonClicked(comment)
 
         }
 
