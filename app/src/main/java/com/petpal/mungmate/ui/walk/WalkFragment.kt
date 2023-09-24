@@ -307,6 +307,8 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
             bundle.putLong("walkDuration",elapsedTime)
             bundle.putString("walkDistance",totalDistance.toString())
             bundle.putString("mateNickname",walkMateNickname)
+            bundle.putString("walkMatchingSender",walkWithUser!!.senderId)
+            bundle.putString("walkMatchingReceiver",walkWithUser!!.receiverId)
             walkMateNickname?.let { it1 -> Log.d("닉닉닉", it1) }
             if(walkWithUser!=null) {
                 if (userId != walkWithUser!!.receiverId) {

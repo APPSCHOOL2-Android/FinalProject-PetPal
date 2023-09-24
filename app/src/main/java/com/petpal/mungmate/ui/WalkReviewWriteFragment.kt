@@ -66,6 +66,8 @@ class WalkReviewWriteFragment : Fragment() {
         val walkMatchingId=arguments?.getString("walkMatchingId")
         val walkRecordId=arguments?.getString("walkMatchingRecorId")
         val walkMateNickname=arguments?.getString("mateNickname")
+        val walkMatchingSender=arguments?.getString("walkMatchingSender")
+        val walkMatchingReceiver=arguments?.getString("walkMatchingReceiver")
         val capturedImageUri = arguments?.getParcelable<Uri>("capturedImageUri")
         Log.d("이미지",capturedImageUri.toString())
         if (walkRecordId != null) {
@@ -126,29 +128,41 @@ class WalkReviewWriteFragment : Fragment() {
                 }
             }else{//sender
                 if(userId!=walkMatchingId) {
-                    val walkWithReview = WalkReview(fragmentWalkReviewWriteBinding.userRatingBar.rating, walkMemo, Timestamp.now())
-                    val myReview=WalkRecord( walkRecorduid!!, walkRecordDate!!, walkRecordStartTime!!, walkRecordEndTime!!,
-                        walkDuration!!, walkDistance!!.toDouble(),
+                    if (userId == walkMatchingSender) {
+                    val walkWithReview = WalkReview(
+                        fragmentWalkReviewWriteBinding.userRatingBar.rating,
+                        walkMemo,
+                        Timestamp.now()
+                    )
+                    val myReview = WalkRecord(
+                        walkRecorduid!!,
+                        walkRecordDate!!,
+                        walkRecordStartTime!!,
+                        walkRecordEndTime!!,
+                        walkDuration!!,
+                        walkDistance!!.toDouble(),
                         walkMatchingId,
-                        walkMemo)
+                        walkMemo
+                    )
                     //내 산책기록에 올린다
-                    addWalkReview(userId,myReview)
+                    addWalkReview(userId, myReview)
                     //matches의 문서에 sender의 리뷰로 올린다
-                    addWalkwithReviewSender(userId,walkRecordId!!,walkWithReview)
+                    addWalkwithReviewSender(userId, walkRecordId!!, walkWithReview)
                     //매칭상대방의 walkmatereview에 올려준다
-                    addWalkReviewToMate(walkMatchingId,walkWithReview)
+                    addWalkReviewToMate(walkMatchingId, walkWithReview)
                     mainActivity.navigate(R.id.action_WriteWalkReviewFragment_to_mainFragment)
                 }else {
-                    //receiver
-                    val myReview=WalkRecord( walkRecorduid!!, walkRecordDate!!, walkRecordStartTime!!, walkRecordEndTime!!, walkDuration!!, walkDistance!!.toDouble(), walkMatchingId, walkMemo)
-                    //내 산책기록에 올린다
-                    addWalkReview(walkRecordId!!,myReview)
-                    val walkWithReview = WalkReview(fragmentWalkReviewWriteBinding.userRatingBar.rating, walkMemo, Timestamp.now())
-                    //matches에 receiver의 리뷰로 올린다
-                    addWalkwithReviewReceiver(userId,walkRecordId!!,walkWithReview)
-                    //매칭상대방의 walkmatereview에 올려준다
-                    addWalkReviewToMate(walkMatchingId,walkWithReview)
-                    mainActivity.navigate(R.id.action_WriteWalkReviewFragment_to_mainFragment)
+                        //receiver
+                        val myReview=WalkRecord( walkRecorduid!!, walkRecordDate!!, walkRecordStartTime!!, walkRecordEndTime!!, walkDuration!!, walkDistance!!.toDouble(), walkMatchingId, walkMemo)
+                        //내 산책기록에 올린다
+                        addWalkReview(walkRecordId!!,myReview)
+                        val walkWithReview = WalkReview(fragmentWalkReviewWriteBinding.userRatingBar.rating, walkMemo, Timestamp.now())
+                        //matches에 receiver의 리뷰로 올린다
+                        addWalkwithReviewReceiver(userId,walkRecordId!!,walkWithReview)
+                        //매칭상대방의 walkmatereview에 올려준다
+                        addWalkReviewToMate(walkMatchingId,walkWithReview)
+                        mainActivity.navigate(R.id.action_WriteWalkReviewFragment_to_mainFragment)
+                    }
                 }
             }
         }
