@@ -3,16 +3,22 @@
     android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
+
+
+
 <LinearLayout
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
+
 
     <FrameLayout
         android:id="@+id/mapViewContainer"
         android:layout_width="match_parent"
         android:layout_height="500dp"
         android:layout_weight="0.6">
+
+
 
         <net.daum.mf.map.api.MapView
             android:id="@+id/mapView"
@@ -558,17 +564,10 @@
 
 
 
-
 </LinearLayout>
+
     </ScrollView>
 
-
-    <View
-        android:id="@+id/progressBackgroundWalk1"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="#66000000"
-        android:visibility="gone" />
 
 
 
