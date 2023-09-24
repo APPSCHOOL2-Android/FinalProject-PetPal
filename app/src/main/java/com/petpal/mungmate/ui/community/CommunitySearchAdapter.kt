@@ -16,6 +16,9 @@ import androidx.recyclerview.widget.RecyclerView
 import com.airbnb.lottie.LottieAnimationView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
 import com.petpal.mungmate.MainActivity
 import com.petpal.mungmate.R
 import com.petpal.mungmate.databinding.RowCommunityBinding
@@ -77,13 +80,50 @@ class CommunitySearchAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val post = postList[position]
+        val db = FirebaseFirestore.getInstance()
+        val auth = FirebaseAuth.getInstance()
+        val user = auth.currentUser?.uid
+        if (user != null) {
+            val userId = user
+            val db = FirebaseFirestore.getInstance()
 
-        Glide
-            .with(context)
-            .load(post.userImage)
-            .diskCacheStrategy(DiskCacheStrategy.ALL)
-            .fitCenter()
-            .into(holder.communityProfileImage)
+            db.collection("users")
+                .document(userId)
+                .get()
+                .addOnSuccessListener { documentSnapshot ->
+                    if (documentSnapshot.exists()) {
+
+                        val userImage = documentSnapshot.getString("userImage")
+                        val nickname = documentSnapshot.getString("nickname")
+                        if (userImage != null) {
+
+                            val storage = FirebaseStorage.getInstance()
+                            val storageRef = storage.reference.child(userImage)
+                            holder.communityUserNickName.text = nickname
+                            storageRef.downloadUrl.addOnSuccessListener { uri ->
+                                // Glide를 사용하여 이미지를 로드하고 ImageView에 표시
+                                Glide.with(context)
+                                    .load(uri)
+                                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                                    .fitCenter()
+                                    .fallback(R.drawable.main_image)
+                                    .error(R.drawable.main_image)
+                                    .into(holder.communityProfileImage)
+                            }.addOnFailureListener { exception ->
+
+                            }
+                        } else {
+
+                        }
+                    } else {
+
+                    }
+                }
+                .addOnFailureListener { e ->
+
+                }
+
+        }
 
         if (post.postImages?.isNotEmpty()!!) {
             Glide
@@ -111,7 +151,6 @@ class CommunitySearchAdapter(
         }
 
         holder.communityPostTitle.text = post.postTitle
-        holder.communityUserNickName.text = post.userNickName
         holder.communityPostDateCreated.text = post.postDateCreated.toString()
         holder.communityContent.text = post.postContent
         holder.communityCommentCounter.text= post.postComment?.size.toString()

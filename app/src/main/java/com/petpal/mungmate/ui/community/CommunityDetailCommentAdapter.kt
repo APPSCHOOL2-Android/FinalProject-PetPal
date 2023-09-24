@@ -68,22 +68,50 @@ class CommunityDetailCommentAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
 
         val commentList = postCommentList[position]
+        val db = FirebaseFirestore.getInstance()
+        val auth = FirebaseAuth.getInstance()
+        val user = auth.currentUser?.uid
 
-        val storage = FirebaseStorage.getInstance()
-        val storageRef = storage.reference.child(commentList.commentUserImage.toString())
-        storageRef.downloadUrl.addOnSuccessListener { uri ->
-            Glide
-                .with(context)
-                .load(uri)
-                .diskCacheStrategy(DiskCacheStrategy.ALL)
-                .fitCenter()
-                .error(R.drawable.main_image)
-                .fallback(R.drawable.main_image)
-                .into(holder.communityProfileImage)
+        if (user != null) {
+            val userId = user
+
+            db.collection("users")
+                .document(userId)
+                .get()
+                .addOnSuccessListener { documentSnapshot ->
+                    if (documentSnapshot.exists()) {
+
+                        val userImage = documentSnapshot.getString("userImage")
+                        val nickname = documentSnapshot.getString("nickname")
+                        if (userImage != null) {
+
+                            val storage = FirebaseStorage.getInstance()
+                            val storageRef = storage.reference.child(userImage)
+                            holder.communityUserNickName.text = nickname
+                            storageRef.downloadUrl.addOnSuccessListener { uri ->
+                                // Glide를 사용하여 이미지를 로드하고 ImageView에 표시
+                                Glide.with(context)
+                                    .load(uri)
+                                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                                    .fitCenter()
+                                    .fallback(R.drawable.main_image)
+                                    .error(R.drawable.main_image)
+                                    .into(holder.communityProfileImage)
+                            }.addOnFailureListener { exception ->
+
+                            }
+                        } else {
+
+                        }
+                    } else {
+
+                    }
+                }
+                .addOnFailureListener { e ->
+
+                }
 
         }
-        holder.communityUserNickName.text = commentList.commentNickName.toString()
-
 
         val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
         dateFormat.timeZone = TimeZone.getTimeZone("Asia/Seoul")
