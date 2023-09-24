@@ -258,7 +258,7 @@ class CommunityWritingFragment : Fragment() {
                                                     "게시글 등록 성공",
                                                     Snackbar.LENGTH_SHORT
                                                 ).show()
-                                                delay(5000)
+                                                delay(3000)
                                                 withContext(Dispatchers.Main) {
                                                     findNavController().popBackStack()
                                                 }
