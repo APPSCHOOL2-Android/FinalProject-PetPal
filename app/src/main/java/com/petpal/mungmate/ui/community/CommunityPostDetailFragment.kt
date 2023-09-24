@@ -66,7 +66,7 @@ class CommunityPostDetailFragment : Fragment(), AdapterCallback {
     var getAuthorUid = ""
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View? {
 
         communityPostDetailBinding = FragmentCommunityPostDetailBinding.inflate(inflater)
@@ -78,8 +78,8 @@ class CommunityPostDetailFragment : Fragment(), AdapterCallback {
         communityPostDetailBinding.run {
             toolbar()
             lottie()
-            getDataFirebasFirestore()
-            communityDetailRecyclerView()
+            getPostData(postGetId)
+            communityDetailCommentRecyclerView()
             getFireStoreUserInfo()
             comment()
 
@@ -118,7 +118,7 @@ class CommunityPostDetailFragment : Fragment(), AdapterCallback {
                 s: CharSequence?,
                 start: Int,
                 count: Int,
-                after: Int
+                after: Int,
             ) {
             }
 
@@ -138,7 +138,7 @@ class CommunityPostDetailFragment : Fragment(), AdapterCallback {
                     )
                     communityPostDetailCommentTextInputLayout.setEndIconOnClickListener {
                         coroutineScope.launch(Dispatchers.IO) {
-                            val documentSnapshot = getFirestoreData(postGetId)
+                            val documentSnapshot = getPostSnapshotFromFirestore(postGetId)
                             withContext(Dispatchers.Main) {
 
                                 updateComment(documentSnapshot)
@@ -157,10 +157,10 @@ class CommunityPostDetailFragment : Fragment(), AdapterCallback {
         })
     }
 
-    private fun getDataFirebasFirestore() {
+    private fun getPostData(postGetId: String) {
         coroutineScope.launch(Dispatchers.IO) {
             skeleton = communityPostDetailBinding.skeletonLayout.apply { showSkeleton() }
-            val documentSnapshot = getFirestoreData(postGetId)
+            val documentSnapshot = getPostSnapshotFromFirestore(postGetId)
             withContext(Dispatchers.Main) {
                 updateUI(documentSnapshot)
                 skeleton.showOriginal()
@@ -332,7 +332,7 @@ class CommunityPostDetailFragment : Fragment(), AdapterCallback {
     }
 
     // Firestore에서 데이터 가져오기
-    private suspend fun getFirestoreData(id: String): DocumentSnapshot? {
+    private suspend fun getPostSnapshotFromFirestore(id: String): DocumentSnapshot? {
         val db = FirebaseFirestore.getInstance()
         val postRef = db.collection("Post").document(id).get().await()
         return if (postRef.exists()) postRef else null
@@ -345,7 +345,7 @@ class CommunityPostDetailFragment : Fragment(), AdapterCallback {
             val postTitle = documentSnapshot.getString("postTitle")
             val userNickName = documentSnapshot.getString("userNickName")
             val postDateCreated = documentSnapshot.getString("postDateCreated")
-
+            val postCategory = documentSnapshot.getString("postCategory")
             val postImagesList = documentSnapshot.get("postImages") as? List<*>
             val postComment = documentSnapshot.get("postComment") as? ArrayList<*>
             val commentCount = postComment?.size ?: 0
@@ -431,9 +431,11 @@ class CommunityPostDetailFragment : Fragment(), AdapterCallback {
                 timeDifferenceMillis < 86_400_000 -> "${timeDifferenceMillis / 3_600_000}시간 전" // 1일 미만
                 else -> "${timeDifferenceMillis / 86_400_000}일 전" // 1일 이상 전
             }
+
             val storage = FirebaseStorage.getInstance()
             val storageRef = storage.reference.child(userImage.toString())
             storageRef.downloadUrl.addOnSuccessListener { uri ->
+
                 communityPostDetailBinding.run {
                     Glide
                         .with(requireContext())
@@ -448,11 +450,38 @@ class CommunityPostDetailFragment : Fragment(), AdapterCallback {
                     communityPostDetailUserNickName.text = userNickName
                     communityPostDetailCommentCounter.text = commentCount.toString()
                 }
+
             }
         }
     }
 
-    private fun FragmentCommunityPostDetailBinding.communityDetailRecyclerView() {
+    private fun getCategoryDrawable(postCategory: String?) = when (postCategory) {
+        "일상" -> {
+            R.drawable.tag_20px
+        }
+
+        "산책일지" -> {
+            R.drawable.floor_lamp_20px
+        }
+
+        "산책 메이트 구해요" -> {
+            R.drawable.forum_20px
+        }
+
+        "장소 후기" -> {
+            R.drawable.map_20px
+        }
+
+        "애견용품 후기" -> {
+            R.drawable.pet_supplies_20px
+        }
+
+        else -> {
+            R.drawable.dog
+        }
+    }
+
+    private fun FragmentCommunityPostDetailBinding.communityDetailCommentRecyclerView() {
         communityPostDetailCommentRecyclerView.run {
             communityDetailCommentAdapter =
                 CommunityDetailCommentAdapter(

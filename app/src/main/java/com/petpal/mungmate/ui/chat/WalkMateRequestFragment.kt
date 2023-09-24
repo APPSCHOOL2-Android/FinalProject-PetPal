@@ -15,26 +15,29 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.timepicker.MaterialTimePicker
 import com.google.android.material.timepicker.TimeFormat
 import com.google.firebase.Timestamp
+import com.google.firebase.auth.FirebaseAuth
 import com.petpal.mungmate.databinding.FragmentWalkMateRequestBinding
+import com.petpal.mungmate.model.ChatRoom
 import com.petpal.mungmate.model.Message
 import com.petpal.mungmate.model.MessageType
 import com.petpal.mungmate.model.Match
 import com.petpal.mungmate.model.MatchStatus
+import com.petpal.mungmate.model.MessageVisibility
 import java.lang.Exception
 import java.text.SimpleDateFormat
-import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
 class WalkMateRequestFragment : Fragment() {
+    private val TAG = "CHAT_WALK_MATE_REQUEST"
+
     private var _fragmentWalkMateRequestBinding : FragmentWalkMateRequestBinding? = null
     private val fragmentWalkMateRequestBinding get() = _fragmentWalkMateRequestBinding!!
 
-    // private lateinit var walkMateRequestViewModel: WalkMateRequestViewModel
-    private lateinit var chatViewModel: ChatViewModel
+    private lateinit var chatRoomViewModel: ChatRoomViewModel
 
-    lateinit var chatRoomId: String
-    lateinit var senderId: String
+    val currentUserId = FirebaseAuth.getInstance().currentUser?.uid!!
+    lateinit var currentChatRoom: ChatRoom
     lateinit var receiverId: String
 
     lateinit var selectedDate: Date
@@ -42,7 +45,7 @@ class WalkMateRequestFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         // walkMateRequestViewModel = ViewModelProvider(this)[WalkMateRequestViewModel::class.java]
-        chatViewModel = ViewModelProvider(this)[ChatViewModel::class.java]
+        chatRoomViewModel = ViewModelProvider(this)[ChatRoomViewModel::class.java]
     }
 
     override fun onCreateView(
@@ -53,8 +56,7 @@ class WalkMateRequestFragment : Fragment() {
 
         // 채팅창에서 전달받은 산책 메이트 요청 송신자 -> 수신자 id
         val args = WalkMateRequestFragmentArgs.fromBundle(requireArguments())
-        chatRoomId = args.chatRoomId
-        senderId = args.senderId
+        currentChatRoom = args.chatRoom
         receiverId = args.receiverId
 
         return fragmentWalkMateRequestBinding.root
@@ -193,7 +195,7 @@ class WalkMateRequestFragment : Fragment() {
         val walkTimestamp = parseStringToTimeStamp("$walkDate $walkTime")
 
         val match = Match(
-            senderId,
+            currentUserId,
             receiverId,
             walkTimestamp,
             walkPlace,
@@ -204,14 +206,14 @@ class WalkMateRequestFragment : Fragment() {
             null
         )
 
-        chatViewModel.saveMatch(match).addOnSuccessListener { matchDocumentKey ->
+        chatRoomViewModel.saveMatch(match).addOnSuccessListener { matchDocumentKey ->
             // 매칭 데이터 저장된 후에 산책 매칭 메시지 저장(전송)
-            sendMatchMessage(matchDocumentKey)
+            sendMatchMessage(match, matchDocumentKey)
         }
     }
 
     // 날짜 시간 문자열을 timestamp 타입으로 형변환
-    private fun parseStringToTimeStamp(dateTimeString: String): Timestamp? {
+    private fun parseStringToTimeStamp(dateTimeString: String): Timestamp {
         try {
             val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
             val date = dateFormat.parse(dateTimeString)
@@ -222,23 +224,65 @@ class WalkMateRequestFragment : Fragment() {
         } catch (e: Exception) {
             e.printStackTrace()
         }
-        // 파싱 실패 시 null 반환
-        return null
+        // 파싱 실패 시 현재 시간 timestamp 반환
+        return Timestamp.now()
     }
 
     // 2. 산책 매칭 메시지 저장
-    private fun sendMatchMessage(matchDocumentKey: String) {
-        // content에 walkmatching id 저장 -> RecyclerView ViewHolder에서 데이터 가져와서 사용
-        val message = Message(
-            senderId,
-            matchDocumentKey,
+    private fun sendMatchMessage(match: Match, matchDocumentKey: String) {
+        // 산책 일시, 장소 표시
+        val formattedWalkTimestamp = formatFirebaseTimestamp(match.walkTimestamp!!, "M월 d일 (E) a h:mm")
+        val matchContentDateTime = "일시 : $formattedWalkTimestamp"
+        val matchContentPlace = "장소 : ${match.walkPlace}"
+        val content = listOf<String>(matchContentDateTime, matchContentPlace).joinToString("|")
+
+        // 메시지 표시 대상 제한 = currentUser가 senderId, receiverId인지에 따라 visibility 설정
+        var senderMessageVisible = MessageVisibility.ALL
+        var receiverMessageVisible = MessageVisibility.ALL
+        if (currentUserId == currentChatRoom.senderId) {
+            senderMessageVisible = MessageVisibility.ONLY_SENDER
+            receiverMessageVisible = MessageVisibility.ONLY_RECEIVER
+        } else {
+            senderMessageVisible = MessageVisibility.ONLY_RECEIVER
+            receiverMessageVisible = MessageVisibility.ONLY_SENDER
+        }
+
+        // 산책 메이트 요청 송신측 메시지
+        var senderMessage = Message(
+            "",
+            currentUserId,
+            content,
             Timestamp.now(),
-            null,
-            MessageType.WALK_MATE_REQUEST.code,
-            null
+            false,
+            MessageType.WALK_MATE_REQUEST_SEND.code,
+            senderMessageVisible.code,
+            matchDocumentKey
         )
-        chatViewModel.saveMessage(chatRoomId, message)
-        Snackbar.make(requireView(), "산책 메이트 요청 메시지를 전송했습니다.", Snackbar.LENGTH_SHORT).show()
+        chatRoomViewModel.sendMessage(currentChatRoom.id, senderMessage)
+
+        // content에 walkmatching id 저장 -> RecyclerView ViewHolder에서 데이터 가져와서 사용 TODO 일시, 장소 content에 저장하고 match id는 다른 필드에 저장하는 식으로 변경?
+        // 산책 메이트 요청 수신측 메시지
+        val receiverMessage = Message(
+            "",
+            currentUserId,
+            content,
+            Timestamp.now(),
+            false,
+            MessageType.WALK_MATE_REQUEST_RECEIVE.code,
+            receiverMessageVisible.code,
+            matchDocumentKey
+        )
+
+        chatRoomViewModel.sendMessage(currentChatRoom.id, receiverMessage)
+        // Snackbar.make(requireView(), "산책 메이트 요청 메시지를 전송했습니다.", Snackbar.LENGTH_SHORT).show()
+
         findNavController().popBackStack()
+    }
+
+    // Firebase Timestamp 타입을 포맷 패턴의 문자열로 변환
+    private fun formatFirebaseTimestamp(timestamp: Timestamp, format: String): String {
+        val date = timestamp.toDate()
+        val dateFormat = SimpleDateFormat(format, Locale.getDefault())
+        return dateFormat.format(date)
     }
 }
