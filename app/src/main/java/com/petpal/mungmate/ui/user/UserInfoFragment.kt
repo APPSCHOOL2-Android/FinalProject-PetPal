@@ -52,8 +52,13 @@ class UserInfoFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         userViewModel = ViewModelProvider(requireActivity())[UserViewModel::class.java]
+        //가입(true)인지 수정(false)인지 식별
+        val isRegister = requireArguments().getBoolean("isRegister")
 
-        Snackbar.make(requireView(), "사용자 정보를 입력해주세요", Snackbar.LENGTH_SHORT).show()
+        if(isRegister) {
+            Snackbar.make(requireView(), "사용자 정보를 입력해주세요", Snackbar.LENGTH_SHORT).show()
+        }
+
 
         // StateFlow를 사용하여 사용자 데이터 관찰
         viewLifecycleOwner.lifecycleScope.launch {
@@ -78,8 +83,7 @@ class UserInfoFragment : Fragment() {
             }
         }
 
-        //가입(true)인지 수정(false)인지 식별
-        val isRegister = requireArguments().getBoolean("isRegister")
+
 
         fragmentUserInfoBinding.run {
             //수정화면이면
