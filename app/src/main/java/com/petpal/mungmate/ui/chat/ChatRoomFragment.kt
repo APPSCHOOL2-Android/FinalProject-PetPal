@@ -360,4 +360,10 @@ class ChatRoomFragment : Fragment() {
             .create()
         builder.show()
     }
+
+    override fun onResume() {
+        super.onResume()
+        // 산책 메이트 요청 메시지 전송 후 스크롤
+        fragmentChatRoomBinding.recyclerViewMessage.scrollToPosition(messageAdapter.itemCount - 1)
+    }
 }

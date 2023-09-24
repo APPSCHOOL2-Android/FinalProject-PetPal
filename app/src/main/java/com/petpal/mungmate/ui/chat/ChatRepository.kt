@@ -296,7 +296,14 @@ class ChatRepository {
     // 산책 매칭 저장
     fun saveMatch(match: Match): Task<DocumentReference> {
         val matchesCollection = db.collection(MATCHES_NAME)
-        return matchesCollection.add(match)
+        
+        // Match 문서 저장
+        val newMatchDocument = matchesCollection.document()
+        // Match 문서에 데이터 설정
+        match.id = newMatchDocument.id  // 자동 생성된 키를 id 필드에 저장
+        val task = newMatchDocument.set(match)
+
+        return task.continueWith { newMatchDocument }
     }
 
     // Document Key 값으로 산책 매칭 데이터 가져오기

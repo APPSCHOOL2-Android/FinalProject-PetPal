@@ -269,8 +269,6 @@ class MessageAdapter(private val chatRoomViewModel: ChatRoomViewModel): Recycler
         }
     }
 
-
-
     // 산책 수락
     inner class WalkMateAcceptViewHolder(private val rowBinding: RowChatWalkMateAcceptBinding): RecyclerView.ViewHolder(rowBinding.root) {
         fun bind(message: Message) {
