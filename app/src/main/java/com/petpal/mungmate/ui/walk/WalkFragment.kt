@@ -138,7 +138,6 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
         override fun run() {
             // 여기에 주기적으로 실행하고자 하는 함수를 호출
             getCurrentLocationOnWalk2()
-
             // 다음에도 호출되도록 다시 예약
             handler.postDelayed(this, delayMillis)
         }
