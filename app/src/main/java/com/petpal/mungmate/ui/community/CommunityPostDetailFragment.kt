@@ -471,7 +471,7 @@ class CommunityPostDetailFragment : Fragment(), AdapterCallback {
         }
     }
 
-    private fun updateComment(documentSnapshot: DocumentSnapshot?) {
+    fun updateComment(documentSnapshot: DocumentSnapshot?) {
         if (documentSnapshot != null) {
             val db = FirebaseFirestore.getInstance()
             val postID = documentSnapshot.getString("postID")
@@ -490,14 +490,37 @@ class CommunityPostDetailFragment : Fragment(), AdapterCallback {
                 "0"
             )
 
-            val newPostCommentList: MutableList<Comment> = ArrayList(postCommentList)
-            newPostCommentList.add(newComment)
-
             val documentRef = db.collection("Post").document(postID!!)
             documentRef.get().addOnSuccessListener { documentSnapshot ->
                 if (documentSnapshot.exists()) {
+                    val currentComments = documentSnapshot.get("postComment") as? List<HashMap<String, Any>>
+                    val newPostCommentList: MutableList<Comment> = ArrayList()
+
+                    if (currentComments != null) {
+                        for (commentData in currentComments) {
+                            // 삭제되지 않은 댓글만 추가
+                            val isDeleted = commentData["isDeleted"] as? Boolean
+                            if (isDeleted == null || !isDeleted) {
+                                val comment = Comment(
+                                    commentUid = commentData["commentUid"] as? String,
+                                    commentNickName = commentData["commentNickName"] as? String,
+                                    commentUserImage = commentData["commentUserImage"] as? String,
+                                    commentDateCreated = commentData["commentDateCreated"] as? String,
+                                    commentContent = commentData["commentContent"] as? String,
+                                    commentLike = commentData["commentLike"] as? Long ?: 0,
+                                    parentID = commentData["parentID"] as? String
+                                )
+                                newPostCommentList.add(comment)
+                            }
+                        }
+                    }
+
+                    // 새 댓글을 목록에 추가
+                    newPostCommentList.add(newComment)
+
                     documentRef.update("postComment", newPostCommentList)
                         .addOnSuccessListener {
+                            postCommentList.addAll(newPostCommentList)
                             commentViewModel.setCommentList(newPostCommentList)
                         }
                         .addOnFailureListener { e ->
