@@ -130,7 +130,18 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
     private val userMarkers = HashMap<String, MapPOIItem>()
     private var observeJob: Job? = null
     //val storageReference = storage.reference
+    private val handler = Handler()
+    private val delayMillis: Long = 2* 1000 // 1분 (1분 = 60,000 밀리초)
 
+    private val periodicRunnable: Runnable = object : Runnable {
+        override fun run() {
+            // 여기에 주기적으로 실행하고자 하는 함수를 호출
+            getCurrentLocationOnWalk2()
+
+            // 다음에도 호출되도록 다시 예약
+            handler.postDelayed(this, delayMillis)
+        }
+    }
 
 
 
@@ -163,7 +174,6 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
         val user=auth.currentUser
         userId= user?.uid.toString()
         viewModel.fetchMatchesByUserId(userId)
-
         if(onWalk==false){
             viewModel.updateOnWalkStatusFalse(userId)
         }
@@ -190,9 +200,73 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
         fragmentWalkBinding.mapView.setMapViewEventListener(this)
         requestLocationPermissionIfNeeded()
 
-
     }
+    private fun observeViewModelOnWalkLocationChanges() {
+        viewModel.usersOnWalkLocationChanges.observe(viewLifecycleOwner, Observer { users ->
+            if (checkPermission(Manifest.permission.ACCESS_FINE_LOCATION)) {
+                fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
+                    location?.let {
+                        val currentLocation = Location("currentLocation").apply {
+                            latitude = it.latitude ?: 0.0
+                            longitude = it.longitude ?: 0.0
+                        }
 
+                        // 거리 필터링을 위한 코드
+                        val distanceFilterValue = when(fragmentWalkBinding.filterDistanceGroup.checkedChipId) {
+                            R.id.distance1 -> 1000.0
+                            R.id.distance2 -> 2000.0
+                            R.id.distance3 -> 3000.0
+                            else -> 2000.0
+                        }
+
+                        val nearbyUsers = users.filter { user ->
+                            val userLocation = Location("userLocation").apply {
+                                latitude = user.location?.get("latitude") ?: 0.0
+                                longitude = user.location?.get("longitude") ?: 0.0
+                            }
+
+                            user.uid != userId && currentLocation.distanceTo(userLocation) <= distanceFilterValue
+                        }
+
+                        val newNearbyUserIds = nearbyUsers.map { it.uid }.toSet()
+                        val usersToRemove = userMarkers.keys.filter { it !in newNearbyUserIds }
+
+                        // 기존에 없어진 사용자의 마커를 제거합니다.
+                        usersToRemove.forEach { userIdToRemove ->
+                            val markerToRemove = userMarkers[userIdToRemove]
+                            if (markerToRemove != null) {
+                                fragmentWalkBinding.mapView.removePOIItem(markerToRemove)
+                                userMarkers.remove(userIdToRemove)
+                            }
+                        }
+
+                        // 사용자의 위치에 따라 마커를 추가 또는 업데이트합니다.
+                        for (user in nearbyUsers) {
+                            val mapPoint = MapPoint.mapPointWithGeoCoord(
+                                user.location?.get("latitude") ?: 0.0, user.location?.get("longitude") ?: 0.0)
+
+                            if (userMarkers.containsKey(user.uid)) {
+                                val existingMarker = userMarkers[user.uid]
+                                existingMarker?.mapPoint = mapPoint
+                            } else {
+                                val poiItem = MapPOIItem().apply {
+                                    itemName = user.nickname
+                                    tag = user.nickname.hashCode()
+                                    this.mapPoint = mapPoint
+                                    markerType = MapPOIItem.MarkerType.CustomImage
+                                    customImageResourceId = R.drawable.location
+                                    isCustomImageAutoscale = true
+                                    setCustomImageAnchor(0.5f, 1.0f)
+                                }
+                                fragmentWalkBinding.mapView.addPOIItem(poiItem)
+                                userMarkers[user.uid!!] = poiItem
+                            }
+                        }
+                    }
+                }
+            }
+        })
+    }
     private fun setupButtonListeners() {
         fragmentWalkBinding.buttonWalk.setOnClickListener {
 
@@ -214,13 +288,10 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
                 startCountdown()
                 onWalk=true
                 observeViewModelonWalk()
-                observeJob?.cancel()  // 기존의 Job이 실행 중이면 취소
-                observeJob = lifecycleScope.launch {
-                    while (isActive) {
-                        viewModel.observeUsersOnWalk()
-                        delay(60000)  // 1분 대기
-                    }
-                }
+                observeViewModelOnWalkLocationChanges()
+                viewModel.observeUsersOnWalkLocation()
+                viewModel.observeUsersOnWalk()
+
                 fragmentWalkBinding.mapView.removeAllPOIItems()
                 updateCurrentLocationOnce()
                 //startLocationUpdates()
@@ -244,12 +315,13 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
             val isAnyFilterSelected = fragmentWalkBinding.filterDistanceGroup.checkedChipId != -1 || fragmentWalkBinding.filterUserGenderGroup.checkedChipId != -1 || fragmentWalkBinding.filterAgeRangeGroup.checkedChipId != -1 || fragmentWalkBinding.filterPetGenderGroup.checkedChipId != -1 || fragmentWalkBinding.filterPetPropensityGroup.checkedChipId != -1 || fragmentWalkBinding.filterNeuterStatusGroup.checkedChipId != -1
             fragmentWalkBinding.chipMapFilter.isChecked = isAnyFilterSelected
             fragmentWalkBinding.drawerLayout.closeDrawer(GravityCompat.END)
-            showSnackbar("필터가 적용되었습니다.")
+            if(isAnyFilterSelected){
+            showSnackbar("필터가 적용되었습니다.")}
 
         }
-
         fragmentWalkBinding.buttonStopWalk.setOnClickListener {
             onWalk=false
+            handler.removeCallbacks(periodicRunnable)
             fragmentWalkBinding.mapView.removeAllPOIItems()
             toggleVisibility(fragmentWalkBinding.LinearLayoutOffWalk, fragmentWalkBinding.LinearLayoutOnWalk)
             fragmentWalkBinding.imageViewWalkToggle.setImageResource(R.drawable.dog_home)
@@ -358,13 +430,23 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
                             latitude = it.latitude ?: 0.0
                             longitude = it.longitude ?: 0.0
                         }
+
+                        // 거리 필터링을 위한 코드
+                        val distanceFilterValue = when(fragmentWalkBinding.filterDistanceGroup.checkedChipId) {
+                            R.id.distance1 -> 1000.0
+                            R.id.distance2 -> 2000.0
+                            R.id.distance3 -> 3000.0
+                            else -> 2000.0
+                        }
+                            Log.d("로그로그",distanceFilterValue.toString())
+
                         nearbyUsers = users.filter { user ->
                             val userLocation = Location("userLocation").apply {
                                 latitude = user.location?.get("latitude") ?: 0.0
                                 longitude = user.location?.get("longitude") ?: 0.0
                             }
 
-                            user.uid != userId && currentLocation.distanceTo(userLocation) <= 2000
+                            user.uid != userId && currentLocation.distanceTo(userLocation) <= distanceFilterValue
                         }
 
                         val newNearbyUserIds = nearbyUsers!!.map { it.uid }.toSet()
@@ -417,7 +499,7 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
                     tag = place.id.hashCode() //id로 태그
                     this.mapPoint = mapPoint
                     markerType = MapPOIItem.MarkerType.CustomImage
-                    customImageResourceId = R.drawable.paw
+                    customImageResourceId = R.drawable.pet_shop
                     //마커 크기 자동조정
                     isCustomImageAutoscale = true
                     //마커 위치 조정
@@ -499,6 +581,20 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
             }
         }
     }
+    private fun getCurrentLocationOnWalk2() {
+        if (checkPermission(Manifest.permission.ACCESS_FINE_LOCATION)
+        ) {
+            fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
+                location?.let {
+                    LastKnownLocation.latitude=it.latitude
+                    LastKnownLocation.longitude=it.longitude
+                    viewModel.observeUsersOnWalk()
+                    val mapPoint = MapPoint.mapPointWithGeoCoord(it.latitude, it.longitude)
+                    showUserLocationOnMap(it)
+                }
+            }
+        }
+    }
 
     //내 현재 위치에서 검색/마킹
     private fun getCurrentLocation() {
@@ -557,9 +653,9 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
         userLocationMarker = MapPOIItem().apply {
             itemName = "나"
             mapPoint = MapPoint.mapPointWithGeoCoord(location.latitude, location.longitude)
-            //custome으로하면 로드가 안되서 깨지는 현상
-            markerType = MapPOIItem.MarkerType.CustomImage
-            customImageResourceId = R.drawable.paw_pin
+            //custom으로하면 로드가 안되서 깨지는 현상
+            markerType = MapPOIItem.MarkerType.RedPin
+            //customImageResourceId = R.drawable.paw_pin
             isCustomImageAutoscale = true
             setCustomImageAnchor(0.5f, 1.0f)
 
@@ -600,22 +696,24 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
             p0  ?: return
             for (location in p0.locations) {
                 // 정확도 체크
-                if (location.accuracy <= 3) {
+                if (location.accuracy <= 5) {
                     showUserLocationOnMap(location)
                     locationList.add(location)
                     lastLocation = location
                     lastLocation?.let { location ->
                         viewModel.updateUserLocation(userId, location.latitude, location.longitude)
+                        viewModel.updateLocationIfOnWalk(userId,location.latitude,location.longitude, onWalk!!)
                     }
                     Log.d("infooooo1",lastLocation.toString())
                 }
             }
         }
     }
+
     private fun startLocationUpdates() {
         if (checkPermission(Manifest.permission.ACCESS_FINE_LOCATION)) {
             val locationRequest = LocationRequest.create().apply {
-                interval = 1000 // 2초마다 갱신
+                interval = 2000 // 2초마다 갱신
                 fastestInterval = 5000 // 타앱
                 priority = LocationRequest.PRIORITY_HIGH_ACCURACY
             }
@@ -730,7 +828,8 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
                 viewModel.distanceMoved.value=0.0f
                 viewModel.startTimer()
                 viewModel.setOnWalkStatusTrue(userId)
-                startLocationUpdates()
+                //requestLocationPermissionIfNeededOnWalk()
+                //startLocationUpdates()
                 hideProgress()
             }
         }.start()
@@ -1278,7 +1377,7 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onResume() {
         super.onResume()
-
+        handler.postDelayed(periodicRunnable, delayMillis)
         //fragmentWalkBinding.mapView.currentLocationTrackingMode = MapView.CurrentLocationTrackingMode.TrackingModeOnWithoutHeading
         viewModel.matchesLiveData.observe(viewLifecycleOwner) { matches ->
             matches1= matches as MutableList<Match>

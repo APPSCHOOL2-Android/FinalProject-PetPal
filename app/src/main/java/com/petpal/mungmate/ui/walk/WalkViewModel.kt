@@ -54,6 +54,8 @@ class WalkViewModel(private val repository: WalkRepository,application: Applicat
     val matchesLiveData: MutableLiveData<List<Match>> = MutableLiveData()
     val averageRatingForUser: LiveData<Double> get() = _averageRatingForUser
     private val _averageRatingForUser = MutableLiveData<Double>()
+    val usersOnWalkLocationChanges: MutableLiveData<List<ReceiveUser>> = MutableLiveData()
+
     val isUserBlocked: LiveData<Boolean> get() = _isUserBlocked
     val timerRunnable = object : Runnable {
         override fun run() {
@@ -289,6 +291,13 @@ class WalkViewModel(private val repository: WalkRepository,application: Applicat
             }
         }
     }
+    fun observeUsersOnWalkLocation() {
+        viewModelScope.launch {
+            repository.observeUsersOnWalkLocationChanges().collect { users ->
+                usersOnWalkLocationChanges.postValue(users)
+            }
+        }
+    }
     fun fetchMatchingWalkCount(userId: String) {
         viewModelScope.launch {
             try {
@@ -296,6 +305,19 @@ class WalkViewModel(private val repository: WalkRepository,application: Applicat
                 walkMatchingCount.postValue(count)
             } catch (e: Exception) {
                 errorMessage.postValue(e.localizedMessage ?: "Failed to fetch matching walk count")
+            }
+        }
+    }
+    fun updateLocationIfOnWalk(userId: String, latitude: Double, longitude: Double, onWalk: Boolean) {
+        if (onWalk) {
+            viewModelScope.launch {
+                try {
+                    repository.updateLocationIfOnWalk(userId, latitude, longitude,onWalk)
+                    // 업데이트 성공
+                } catch (e: Exception) {
+                    // 업데이트 실패: 예외 처리
+                    errorMessage.postValue(e.localizedMessage ?: "Failed to update location")
+                }
             }
         }
     }

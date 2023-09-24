@@ -3,6 +3,7 @@ package com.petpal.mungmate.ui.walk
 import android.util.Log
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.DocumentChange
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
@@ -188,6 +189,23 @@ class WalkRepository {
         ).await()
     }
 
+    suspend fun updateLocationIfOnWalk(userId: String, latitude: Double, longitude: Double, onWalk: Boolean) {
+        if (onWalk) {
+            try {
+                val userRef = db.collection("users").document(userId)
+                val locationData = mapOf(
+                    "latitude" to latitude,
+                    "longitude" to longitude
+                )
+                userRef.update("location", locationData).await()
+                // 업데이트 성공
+            } catch (e: Exception) {
+                // 업데이트 실패: 예외 처리
+                // e.printStackTrace() 또는 로그를 활용하여 에러 로깅
+            }
+        }
+    }
+
     suspend fun updateOnWalkStatusFalse(userId: String) {
         val userRef = db.collection("users").document(userId)
         userRef.update(
@@ -323,6 +341,41 @@ class WalkRepository {
         Log.d("에바야",count.toString())
         return if (count > 0) totalRating / count else 0.0
 
+    }
+
+    fun observeUsersOnWalkLocationChanges(): Flow<List<ReceiveUser>> = callbackFlow {
+        val query = db.collection("users").whereEqualTo("onWalk", true)
+
+        val registration = query.addSnapshotListener { snapshot, error ->
+            if (error != null) {
+                close(error)
+                return@addSnapshotListener
+            }
+
+            // 변화가 있는 문서만 선택합니다.
+            val changedDocuments = snapshot?.documentChanges?.filter {
+                it.type == DocumentChange.Type.MODIFIED
+            }?.map { it.document }
+
+            val tasks = changedDocuments?.map { userDocument ->
+                val user = userDocument.toObject(ReceiveUser::class.java) ?: ReceiveUser()
+                user.uid = userDocument.id
+
+                userDocument.reference.collection("pets").get().continueWith { petSnapshot ->
+                    val pets = petSnapshot.result?.mapNotNull { it.toObject(Pet::class.java) }
+                    if (pets != null) {
+                        user.pets = pets
+                    }
+                    user
+                }
+            } ?: emptyList()
+
+            Tasks.whenAllSuccess<ReceiveUser>(tasks).addOnSuccessListener { users ->
+                trySend(users).isSuccess
+            }
+        }
+
+        awaitClose { registration.remove() }
     }
 
 }
