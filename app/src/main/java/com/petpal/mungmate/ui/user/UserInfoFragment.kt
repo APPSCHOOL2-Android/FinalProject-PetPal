@@ -149,7 +149,7 @@ class UserInfoFragment : Fragment() {
 
                 mainActivity.navigate(
                     R.id.action_userInfoFragment_to_addPetFragment,
-                    bundleOf("isAdd" to true)
+                    bundleOf("isAdd" to true, "isUserJoin" to true)
                 )
 
             }

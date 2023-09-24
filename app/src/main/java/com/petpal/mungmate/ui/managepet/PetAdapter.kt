@@ -49,7 +49,7 @@ class PetAdapter( private val context: Context) :
                 root.setOnClickListener {
                     val navController = Navigation.findNavController(itemView)
                     navController.navigate(R.id.action_managePetFragment_to_addPetFragment,
-                        bundleOf("isAdd" to false)
+                        bundleOf("isAdd" to false, "isUserJoin" to false)
                     )
                 }
             }

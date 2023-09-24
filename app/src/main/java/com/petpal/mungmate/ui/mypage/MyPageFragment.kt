@@ -9,7 +9,7 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.navOptions
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.google.android.material.snackbar.Snackbar
@@ -20,18 +20,10 @@ import com.google.firebase.storage.StorageReference
 import com.petpal.mungmate.MainActivity
 import com.petpal.mungmate.R
 import com.petpal.mungmate.databinding.FragmentMyPageBinding
-import com.petpal.mungmate.ui.matchhistory.MatchHistoryUiState
-import com.petpal.mungmate.ui.matchhistory.PetFilterUiState
 import com.petpal.mungmate.ui.user.UserViewModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
 import java.text.SimpleDateFormat
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 import java.util.Calendar
-import java.util.Collections
 import java.util.Date
 import java.util.Locale
 
@@ -42,18 +34,45 @@ class MyPageFragment : Fragment() {
 
     private val auth = FirebaseAuth.getInstance()
     val user = auth.currentUser
+
     private lateinit var userViewModel: UserViewModel
+    private lateinit var myPageViewModel: MyPageViewModel
+
     val db = FirebaseFirestore.getInstance()
 
-    val dateList: MutableList<Date> = ArrayList()
+    private val matchList: MutableList<Date> = ArrayList()
+
+    private lateinit var simplePetAdapter: SimplePetAdapter
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        Log.d("mypage", "onCreate")
+    }
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View? {
+        Log.d("mypage", "onCreateView")
         _fragmentMyPageBinding = FragmentMyPageBinding.inflate(layoutInflater)
         mainActivity = activity as MainActivity
+
         userViewModel = ViewModelProvider(requireActivity())[UserViewModel::class.java]
+        myPageViewModel = ViewModelProvider(requireActivity())[MyPageViewModel::class.java]
+
+        //반려견 정보 불러오기 (repository 통해 viewmodel에 정보 넣을거)
+        myPageViewModel.loadPetInfo(user!!.uid)
+
+        simplePetAdapter = SimplePetAdapter()
         fragmentMyPageBinding.run {
+
+            recyclerViewMyPet.run {
+                adapter = simplePetAdapter
+            }
+
+            myPageViewModel.simplePetList.observe(viewLifecycleOwner) {
+                simplePetAdapter.submitList(it)
+            }
+
             buttonManagePet.setOnClickListener {
                 mainActivity.navigate(R.id.action_mainFragment_to_managePetFragment)
             }
@@ -89,7 +108,7 @@ class MyPageFragment : Fragment() {
             imageRowSimplePet.setOnClickListener {
                 mainActivity.navigate(
                     R.id.action_mainFragment_to_addPetFragment,
-                    bundleOf("isAdd" to true)
+                    bundleOf("isAdd" to true, "isUserJoin" to false)
                 )
             }
 
@@ -144,8 +163,8 @@ class MyPageFragment : Fragment() {
                 .addOnSuccessListener { documents ->
                     for (document in documents) {
                         val timestamp = document.getTimestamp("timestamp")
-                        val walkPlace= document.getString("walkPlace")
-                        val receiverId= document.getString("receiverId")
+                        val walkPlace = document.getString("walkPlace")
+                        val receiverId = document.getString("receiverId")
                         val date = timestamp?.toDate()
                         val walkTimestamp =
                             SimpleDateFormat("yyyy년 MM월 dd일 a hh시 mm분", Locale.getDefault()).format(
@@ -158,38 +177,39 @@ class MyPageFragment : Fragment() {
                                 if (document != null) {
                                     // userImage,nickname, birthday, walkHoursStart, walkHoursEnd
                                     val nickname = document.getString("nickname")
-                                    textViewMatchPlace.text="${nickname}님과 ${walkPlace}에서"
+                                    textViewMatchPlace.text = "${nickname}님과 ${walkPlace}에서"
                                 }
                             }
 
                         Log.d("walkTimestamp", walkTimestamp.toString())
-                        textViewMatchPlace.text=walkPlace
+                        textViewMatchPlace.text = walkPlace
 
                         if (date != null) {
-                            dateList.add(date)
+                            matchList.add(date)
                         }
                     }
 
-                    dateList.sort()
+                    matchList.sort()
 
-                    if (dateList.isNotEmpty()) {
-                        val closestDate = dateList[0]
+                    if (matchList.isNotEmpty()) {
+                        val closestDate = matchList[0]
                         val formattedDate =
                             SimpleDateFormat("M.dd", Locale.getDefault()).format(closestDate)
                         val dayOfWeek =
                             SimpleDateFormat("EEEE", Locale.getDefault()).format(closestDate)
-                        val time = SimpleDateFormat("a hh:mm", Locale.getDefault()).format(closestDate)
+                        val time =
+                            SimpleDateFormat("a hh:mm", Locale.getDefault()).format(closestDate)
                         textViewDate.text = formattedDate
                         textViewDay.text = dayOfWeek
-                        textViewMatchTime.text=time
+                        textViewMatchTime.text = time
                     } else {
                         // 리스트가 비어있는 경우 처리
                         textViewDate.text = "예정된 약속이 없음"
-                        textViewDay.visibility=View.GONE
-                        imageViewMatchProfile.visibility=View.GONE
-                        textViewMatchPlace.visibility=View.GONE
-                        textViewMatchTime.visibility=View.GONE
-                        imageView5.visibility=View.GONE
+                        textViewDay.visibility = View.GONE
+                        imageViewMatchProfile.visibility = View.GONE
+                        textViewMatchPlace.visibility = View.GONE
+                        textViewMatchTime.visibility = View.GONE
+                        imageView5.visibility = View.GONE
                     }
                 }
                 .addOnFailureListener { exception ->
@@ -240,11 +260,8 @@ class MyPageFragment : Fragment() {
                         if (gender!!.toInt() == 1) {
                             whatGender = "여"
                         }
-                        var genderAge = "${whatGender}/${calculateAge(birthday.toString())}"
+                        val genderAge = "${whatGender}/${calculateAge(birthday.toString())}"
                         fragmentMyPageBinding.textViewGenderAge.text = genderAge
-
-                        walkHoursStart
-                        walkHoursEnd
 
                         if (walkHoursStart!!.isEmpty() || walkHoursEnd!!.isEmpty()) {
                             fragmentMyPageBinding.textViewAvailable.text = "언제든 가능해요"

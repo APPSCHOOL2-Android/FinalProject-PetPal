@@ -40,7 +40,7 @@ class ManagePetFragment : Fragment() {
             fabGoToAddPet.setOnClickListener {
                 mainActivity.navigate(
                     R.id.action_managePetFragment_to_addPetFragment,
-                    bundleOf("isAdd" to true),
+                    bundleOf("isAdd" to true, "isUserJoin" to false),
 
                     )
             }
