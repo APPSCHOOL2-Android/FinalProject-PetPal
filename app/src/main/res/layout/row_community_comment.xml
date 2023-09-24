@@ -3,9 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_marginStart="@dimen/common_margin"
-    android:layout_marginEnd="@dimen/common_margin">
+    android:layout_height="wrap_content">
 
     <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/communityCommentProfileImage"
@@ -15,6 +13,7 @@
         android:layout_marginTop="20dp"
         android:background="@android:color/transparent"
         android:scaleType="centerCrop"
+        android:layout_marginStart="@dimen/common_margin"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -23,6 +22,7 @@
         android:id="@+id/communityCommentMenuImageButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/common_margin"
         android:backgroundTint="@android:color/transparent"
         android:clickable="true"
         android:focusable="true"
@@ -40,7 +40,6 @@
         android:textAppearance="@style/TextAppearance.AppCompat.Small"
         android:textColor="@color/black"
         android:textStyle="bold"
-
         app:layout_constraintStart_toEndOf="@id/communityCommentProfileImage"
         app:layout_constraintTop_toTopOf="@id/communityCommentProfileImage" />
 
@@ -50,7 +49,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
-
         android:text="30분전"
         android:textAppearance="@style/TextAppearance.AppCompat.Small"
         app:layout_constraintStart_toStartOf="@id/communityCommentUserNickName"
@@ -62,6 +60,7 @@
         android:layout_height="match_parent"
         android:layout_marginTop="12dp"
         android:maxLength="300"
+        android:layout_marginStart="@dimen/common_margin"
         android:text="rrrrrrrrrrrrrrrrrddddddddddddddddddddddddddddddddddddddddddddddddddddrrrrrrrrrrrrrrrrrrrrrrrr"
         android:textAppearance="@style/TextAppearance.AppCompat.Body2"
         app:layout_constraintEnd_toEndOf="@id/communityCommentMenuImageButton"
@@ -75,6 +74,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
         android:orientation="horizontal"
+        android:layout_marginStart="@dimen/common_margin"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/communityCommentContent">
 
@@ -155,4 +155,12 @@
         app:layout_constraintTop_toBottomOf="@id/communityCommentBottomLinerLayout" />
 
 
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/replyRecyclerView"
+        android:layout_width="match_parent"
+        android:layout_marginStart="@dimen/common_small_margin"
+        android:layout_height="wrap_content"
+        android:background="#FBFBFB"
+        app:layout_constraintTop_toBottomOf="@id/communityCommentDivider" />
 </androidx.constraintlayout.widget.ConstraintLayout>
+

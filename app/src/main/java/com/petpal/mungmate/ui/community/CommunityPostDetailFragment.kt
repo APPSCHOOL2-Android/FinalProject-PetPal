@@ -17,6 +17,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
@@ -42,7 +43,7 @@ import java.util.Locale
 import java.util.TimeZone
 import java.util.UUID
 
-class CommunityPostDetailFragment : Fragment(),AdapterCallback {
+class CommunityPostDetailFragment : Fragment(), AdapterCallback {
 
     private lateinit var communityPostDetailBinding: FragmentCommunityPostDetailBinding
     var isClicked = false
@@ -65,12 +66,11 @@ class CommunityPostDetailFragment : Fragment(),AdapterCallback {
     var getAuthorUid = ""
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?,
+        savedInstanceState: Bundle?
     ): View? {
 
         communityPostDetailBinding = FragmentCommunityPostDetailBinding.inflate(inflater)
         commentViewModel = ViewModelProvider(requireActivity())[CommentViewModel::class.java]
-//        commentViewModel.setCommunityImage(BannerItemList)
         val args: CommunityPostDetailFragmentArgs by navArgs()
         val postid = args.position
         postGetId = postid
@@ -78,11 +78,10 @@ class CommunityPostDetailFragment : Fragment(),AdapterCallback {
         communityPostDetailBinding.run {
             toolbar()
             lottie()
-            getPostData(postGetId)
-            communityDetailCommentRecyclerView()
+            getDataFirebasFirestore()
+            communityDetailRecyclerView()
             getFireStoreUserInfo()
             comment()
-
 
 
         }
@@ -93,7 +92,7 @@ class CommunityPostDetailFragment : Fragment(),AdapterCallback {
     private fun FragmentCommunityPostDetailBinding.comment() {
         commentViewModel.postCommentList.observe(viewLifecycleOwner) { commentList ->
             communityDetailCommentAdapter.updateData(commentList)
-
+            communityPostDetailCommentCounter.text = commentList.size.toString()
             communityPostDetailCommentCount.text = "댓글 ${commentList.size.toString()}"
         }
         val iconColorNotInput =
@@ -119,7 +118,7 @@ class CommunityPostDetailFragment : Fragment(),AdapterCallback {
                 s: CharSequence?,
                 start: Int,
                 count: Int,
-                after: Int,
+                after: Int
             ) {
             }
 
@@ -139,7 +138,7 @@ class CommunityPostDetailFragment : Fragment(),AdapterCallback {
                     )
                     communityPostDetailCommentTextInputLayout.setEndIconOnClickListener {
                         coroutineScope.launch(Dispatchers.IO) {
-                            val documentSnapshot = getPostSnapshotFromFirestore(postGetId)
+                            val documentSnapshot = getFirestoreData(postGetId)
                             withContext(Dispatchers.Main) {
 
                                 updateComment(documentSnapshot)
@@ -158,10 +157,10 @@ class CommunityPostDetailFragment : Fragment(),AdapterCallback {
         })
     }
 
-    private fun getPostData(postGetId: String) {
+    private fun getDataFirebasFirestore() {
         coroutineScope.launch(Dispatchers.IO) {
             skeleton = communityPostDetailBinding.skeletonLayout.apply { showSkeleton() }
-            val documentSnapshot = getPostSnapshotFromFirestore(postGetId)
+            val documentSnapshot = getFirestoreData(postGetId)
             withContext(Dispatchers.Main) {
                 updateUI(documentSnapshot)
                 skeleton.showOriginal()
@@ -222,8 +221,13 @@ class CommunityPostDetailFragment : Fragment(),AdapterCallback {
                 val isLiked = likedUserIds?.contains(user!!.uid) == true
                 val numberOfLikes = likedUserIds?.size ?: 0
 
+
                 Log.d("numberOfLikes", numberOfLikes.toString())
-                communityPostDetailFavoriteCounter.text = numberOfLikes.toString()
+                if (likedUserIds == null) {
+                    communityPostDetailFavoriteCounter.text = "0"
+                } else {
+                    communityPostDetailFavoriteCounter.text = numberOfLikes.toString()
+                }
 
                 // 좋아요 상태에 따라 버튼 색상 설정
                 if (isLiked) {
@@ -328,7 +332,7 @@ class CommunityPostDetailFragment : Fragment(),AdapterCallback {
     }
 
     // Firestore에서 데이터 가져오기
-    private suspend fun getPostSnapshotFromFirestore(id: String): DocumentSnapshot? {
+    private suspend fun getFirestoreData(id: String): DocumentSnapshot? {
         val db = FirebaseFirestore.getInstance()
         val postRef = db.collection("Post").document(id).get().await()
         return if (postRef.exists()) postRef else null
@@ -342,8 +346,10 @@ class CommunityPostDetailFragment : Fragment(),AdapterCallback {
             val userNickName = documentSnapshot.getString("userNickName")
             val postDateCreated = documentSnapshot.getString("postDateCreated")
             val postCategory = documentSnapshot.getString("postCategory")
-            val postImagesList = documentSnapshot.get("postImages") as? List<*>
 
+            val postImagesList = documentSnapshot.get("postImages") as? List<*>
+            val postComment = documentSnapshot.get("postComment") as? ArrayList<*>
+            val commentCount = postComment?.size ?: 0
             var postImagesGetList = mutableListOf<PostImage>()
 
             if (postImagesList != null && postImagesList.isNotEmpty()) {
@@ -358,13 +364,25 @@ class CommunityPostDetailFragment : Fragment(),AdapterCallback {
                     .joinToString(", ")
                     .split(", ")
                     .map { it.trim() }
-                var imageUrls= mutableListOf<PostImage>()
+                var imageUrls = mutableListOf<PostImage>()
 
                 for (url in imageUrl) {
                     val postImage = PostImage(url) // 여기서 PostImage 생성자에 URL을 전달하여 객체를 만듭니다.
                     imageUrls.add(postImage)
                 }
+
                 commentViewModel.setCommunityImage(imageUrls)
+                if(postImagesList != null && postImagesList.isNotEmpty()){
+                    communityPostDetailBinding.communityPostDetailPostCardView.visibility=View.VISIBLE
+                    communityPostDetailBinding.communityPostDetailPostCardView.visibility=View.VISIBLE
+                    initViewPager2()
+                    subscribeObservers()
+                }else{
+                    communityPostDetailBinding.communityPostDetailPostCardView.visibility=View.GONE
+                    communityPostDetailBinding.communityPostDetailViewPager2.visibility=View.GONE
+                }
+
+
                 Log.d("어떤 리스트가..", imageUrls.toString())
             }
 
@@ -414,82 +432,30 @@ class CommunityPostDetailFragment : Fragment(),AdapterCallback {
                 timeDifferenceMillis < 86_400_000 -> "${timeDifferenceMillis / 3_600_000}시간 전" // 1일 미만
                 else -> "${timeDifferenceMillis / 86_400_000}일 전" // 1일 이상 전
             }
-
             val storage = FirebaseStorage.getInstance()
             val storageRef = storage.reference.child(userImage.toString())
             storageRef.downloadUrl.addOnSuccessListener { uri ->
-                Glide
-                    .with(requireContext())
-                    .load(uri)
-                    .diskCacheStrategy(DiskCacheStrategy.ALL)
-                    .fitCenter()
-                    .into(communityPostDetailBinding.communityPostDetailProfileImage)
+                communityPostDetailBinding.run {
+                    Glide
+                        .with(requireContext())
+                        .load(uri)
+                        .diskCacheStrategy(DiskCacheStrategy.ALL)
+                        .fitCenter()
+                        .into(communityPostDetailProfileImage)
+
+                    communityPostDetailPostTitle.text = postTitle
+                    communityPostDateCreated.text = timeAgo
+                    communityPostDetailContent.text = postContent
+                    communityPostDetailUserNickName.text = userNickName
+                    communityPostDetailCommentCounter.text = commentCount.toString()
+                    communityPostDetailCategoryTextView.text =postCategory.toString()
+
+                }
             }
-            
-            communityPostDetailBinding.run {
-
-                communityPostDetailPostTitle.text = postTitle
-                communityPostDateCreated.text = timeAgo
-                communityPostDetailFavoriteCounter.text = postLike.toString()
-                communityPostDetailCommentCounter.text = postCommentList.size.toString()
-                communityPostDetailContent.text = postContent
-                communityPostDetailUserNickName.text = userNickName
-                communityPostDetailCategoryTextView.text = postCategory
-
-                communityPostDetailCategoryTextView.setCompoundDrawablesWithIntrinsicBounds(
-                    getCategoryDrawable(postCategory), 0, 0, 0
-                )
-
-//             val storage = FirebaseStorage.getInstance()
-//             val storageRef = storage.reference.child(userImage.toString())
-//             storageRef.downloadUrl.addOnSuccessListener { uri ->
-//                 communityPostDetailBinding.run {
-//                     Glide
-//                         .with(requireContext())
-//                         .load(uri)
-//                         .diskCacheStrategy(DiskCacheStrategy.ALL)
-//                         .fitCenter()
-//                         .into(communityPostDetailProfileImage)
-
-
-//                     communityPostDetailPostTitle.text = postTitle
-//                     communityPostDateCreated.text = timeAgo
-//                     communityPostDetailContent.text = postContent
-//                     communityPostDetailUserNickName.text = userNickName
-//                 }
-            }
-        }
-        initViewPager2()
-        subscribeObservers()
-    }
-
-    private fun getCategoryDrawable(postCategory: String?) = when (postCategory) {
-        "일상" -> {
-            R.drawable.tag_20px
-        }
-
-        "산책일지" -> {
-            R.drawable.floor_lamp_20px
-        }
-
-        "산책 메이트 구해요" -> {
-            R.drawable.forum_20px
-        }
-
-        "장소 후기" -> {
-            R.drawable.map_20px
-        }
-
-        "애견용품 후기" -> {
-            R.drawable.pet_supplies_20px
-        }
-
-        else -> {
-            R.drawable.dog
         }
     }
 
-    private fun FragmentCommunityPostDetailBinding.communityDetailCommentRecyclerView() {
+    private fun FragmentCommunityPostDetailBinding.communityDetailRecyclerView() {
         communityPostDetailCommentRecyclerView.run {
             communityDetailCommentAdapter =
                 CommunityDetailCommentAdapter(
@@ -505,14 +471,14 @@ class CommunityPostDetailFragment : Fragment(),AdapterCallback {
         }
     }
 
-    private fun updateComment(documentSnapshot: DocumentSnapshot?) {
+    fun updateComment(documentSnapshot: DocumentSnapshot?) {
         if (documentSnapshot != null) {
             val db = FirebaseFirestore.getInstance()
             val postID = documentSnapshot.getString("postID")
 
             val currentDateTime = Date()
             val formattedDateTime = formatDateTimeToNewFormat(currentDateTime)
-            Log.d("닉네임이요", nickname)
+
             val newComment = Comment(
                 UUID.randomUUID().toString(),
                 user?.uid,
@@ -524,16 +490,36 @@ class CommunityPostDetailFragment : Fragment(),AdapterCallback {
                 "0"
             )
 
-            val newPostCommentList: MutableList<Comment> = mutableListOf()
-            newPostCommentList.addAll(postCommentList)
-            newPostCommentList.add(newComment)
-
             val documentRef = db.collection("Post").document(postID!!)
             documentRef.get().addOnSuccessListener { documentSnapshot ->
                 if (documentSnapshot.exists()) {
+                    val currentComments = documentSnapshot.get("postComment") as? List<HashMap<String, Any>>
+                    val newPostCommentList: MutableList<Comment> = ArrayList()
+
+                    if (currentComments != null) {
+                        for (commentData in currentComments) {
+                            // 삭제되지 않은 댓글만 추가
+                            val isDeleted = commentData["isDeleted"] as? Boolean
+                            if (isDeleted == null || !isDeleted) {
+                                val comment = Comment(
+                                    commentUid = commentData["commentUid"] as? String,
+                                    commentNickName = commentData["commentNickName"] as? String,
+                                    commentUserImage = commentData["commentUserImage"] as? String,
+                                    commentDateCreated = commentData["commentDateCreated"] as? String,
+                                    commentContent = commentData["commentContent"] as? String,
+                                    commentLike = commentData["commentLike"] as? Long ?: 0,
+                                    parentID = commentData["parentID"] as? String
+                                )
+                                newPostCommentList.add(comment)
+                            }
+                        }
+                    }
+
+                    // 새 댓글을 목록에 추가
+                    newPostCommentList.add(newComment)
+
                     documentRef.update("postComment", newPostCommentList)
                         .addOnSuccessListener {
-                            postCommentList.clear()
                             postCommentList.addAll(newPostCommentList)
                             commentViewModel.setCommentList(newPostCommentList)
                         }
@@ -595,10 +581,9 @@ class CommunityPostDetailFragment : Fragment(),AdapterCallback {
     }
 
     private fun subscribeObservers() {
-        commentViewModel.communityImageList.observe(viewLifecycleOwner) { imageList->
+        commentViewModel.communityImageList.observe(viewLifecycleOwner) { imageList ->
             viewPagerAdapter.submitList(imageList)
         }
-
     }
 
     override fun onDestroy() {
@@ -606,12 +591,148 @@ class CommunityPostDetailFragment : Fragment(),AdapterCallback {
         postCommentList.clear()
     }
 
-    override fun onReplyButtonClicked(commentList: Comment) {
+    override fun onReplyButtonClicked(
+        commentList: Comment,
+        position: Int
+    ) {
 //        Snackbar.make(requireView(), "답글", Snackbar.LENGTH_SHORT).show()
-        communityPostDetailBinding.communityPostDetailCommentTextInputEditText.requestFocus()
-        val imm = requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-        imm.showSoftInput(communityPostDetailBinding.communityPostDetailCommentTextInputEditText, InputMethodManager.SHOW_IMPLICIT)
+        communityPostDetailBinding.replyLinearLayout.visibility = View.VISIBLE
+        communityPostDetailBinding.commentLinearLayout.visibility = View.GONE
+
+        communityPostDetailBinding.replyCloseButton.setOnClickListener {
+            communityPostDetailBinding.replyLinearLayout.visibility = View.GONE
+            communityPostDetailBinding.commentLinearLayout.visibility =
+                View.VISIBLE
+        }
+
+        communityPostDetailBinding.replyTextInputEditText.requestFocus()
+        val imm =
+            requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.showSoftInput(
+            communityPostDetailBinding.replyTextInputEditText,
+            InputMethodManager.SHOW_IMPLICIT
+        )
+
+        val iconColorNotInput =
+            ContextCompat.getColor(requireContext(), R.color.md_theme_light_tertiaryContainer)
+        val iconColorInput = ContextCompat.getColor(requireContext(), R.color.black)
+        communityPostDetailBinding.replyTextInputLayout.setEndIconOnClickListener {
+            if (communityPostDetailBinding.replyTextInputEditText.text.toString().isEmpty()) {
+                val snackbar = Snackbar.make(
+                    communityPostDetailBinding.replyTextInputLayout,
+                    "댓글을 입력해주세요",
+                    Snackbar.LENGTH_SHORT
+                )
+
+                // Snackbar 위치 변경 바로 위로..
+                snackbar.anchorView = communityPostDetailBinding.replyTextInputLayout
+                snackbar.show()
+            }
+        }
+
+        communityPostDetailBinding.replyTextInputEditText.addTextChangedListener(object :
+            TextWatcher {
+            override fun beforeTextChanged(
+                s: CharSequence?,
+                start: Int,
+                count: Int,
+                after: Int
+            ) {
+            }
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                if (s.isNullOrEmpty()) {
+                    communityPostDetailBinding.replyTextInputLayout.setEndIconTintList(
+                        ColorStateList.valueOf(
+                            iconColorNotInput
+                        )
+                    )
+                } else {
+
+                    communityPostDetailBinding.replyTextInputLayout.setEndIconTintList(
+                        ColorStateList.valueOf(
+                            iconColorInput
+                        )
+                    )
+                    communityPostDetailBinding.replyTextInputLayout.setEndIconOnClickListener {
+                        if (communityPostDetailBinding.replyTextInputEditText.text.toString()
+                                .isEmpty()
+                        ) {
+                            val snackbar = Snackbar.make(
+                                communityPostDetailBinding.replyTextInputLayout,
+                                "댓글을 입력해주세요",
+                                Snackbar.LENGTH_SHORT
+                            )
+
+                            snackbar.anchorView = communityPostDetailBinding.replyTextInputLayout
+                            snackbar.show()
+                        } else {
+                            coroutineScope.launch(Dispatchers.IO) {
+                                val documentSnapshot = getFirestoreData(postGetId)
+                                val reply = Comment(
+                                    commentUid = "user_id_1",
+                                    commentNickName = "대댓글 작성자",
+                                    commentDateCreated = "2023-09-23 14:30:00",
+                                    commentContent = communityPostDetailBinding.replyTextInputEditText.text.toString()
+                                )
+
+                                communityDetailCommentAdapter.addReply(reply, position)
+                                communityPostDetailBinding.replyTextInputEditText.text?.clear()
+
+
+                                updateReply(documentSnapshot)
+                                val imm =
+                                    requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                                imm.hideSoftInputFromWindow(view?.windowToken, 0)
+                            }
+                        }
+
+                    }
+                }
+            }
+
+            override fun afterTextChanged(s: Editable?) {}
+        })
     }
 
+    private fun updateReply(documentSnapshot: DocumentSnapshot?) {
+        if (documentSnapshot != null) {
+            val db = FirebaseFirestore.getInstance()
+            val postID = documentSnapshot.getString("postID")
+
+            val currentDateTime = Date()
+            val formattedDateTime = formatDateTimeToNewFormat(currentDateTime)
+
+            val newComment = Comment(
+                UUID.randomUUID().toString(),
+                user?.uid,
+                nickname,
+                userImage,
+                formattedDateTime,
+                communityPostDetailBinding.communityPostDetailCommentTextInputEditText.text.toString(),
+                0,
+                "0"
+            )
+
+            val newPostCommentList: MutableList<Comment> = mutableListOf()
+            newPostCommentList.addAll(postCommentList)
+            newPostCommentList.add(newComment)
+            postCommentList.clear()
+            val documentRef = db.collection("Post").document(postID!!)
+            documentRef.get().addOnSuccessListener { documentSnapshot ->
+                if (documentSnapshot.exists()) {
+                    documentRef.update("postComment", newPostCommentList)
+                        .addOnSuccessListener {
+                            postCommentList.clear()
+                            postCommentList.addAll(newPostCommentList)
+                            commentViewModel.setCommentList(newPostCommentList)
+                        }
+                        .addOnFailureListener { e ->
+                            Snackbar.make(requireView(), "실패", Snackbar.LENGTH_SHORT).show()
+                        }
+                }
+            }
+        }
+    }
 
 }

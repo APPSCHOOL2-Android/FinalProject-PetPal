@@ -149,6 +149,7 @@
                         android:layout_marginEnd="@dimen/common_margin"
                         android:paddingStart="@dimen/common_padding"
                         android:paddingEnd="@dimen/common_padding"
+                        android:visibility="gone"
                         app:cardCornerRadius="15dp"
                         app:cardElevation="0dp">
 
@@ -299,6 +300,7 @@
     </LinearLayout>
 
     <LinearLayout
+        android:id="@+id/commentLinearLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
@@ -329,4 +331,60 @@
         </com.google.android.material.textfield.TextInputLayout>
     </LinearLayout>
 
+    <LinearLayout
+        android:id="@+id/replyLinearLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:background="@color/white"
+        android:visibility="gone"
+        android:layout_marginBottom="@dimen/common_small_padding"
+        android:orientation="vertical"
+        android:padding="8dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/common_margin"
+            android:layout_marginBottom="@dimen/common_small_margin"
+            android:layout_marginEnd="@dimen/common_small_margin"
+            android:orientation="horizontal">
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/replyTextView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="님에게 답글을 남기는 중입니다." />
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/replyCloseButton"
+                android:layout_width="0dp"
+                android:layout_weight="0.1"
+                android:layout_height="20dp"
+                android:background="@drawable/close"/>
+        </LinearLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/replyTextInputLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:boxCornerRadiusBottomEnd="30dp"
+            app:boxCornerRadiusBottomStart="30dp"
+            app:boxCornerRadiusTopEnd="30dp"
+            app:boxCornerRadiusTopStart="30dp"
+            app:endIconDrawable="@drawable/send_24px"
+            app:endIconMode="custom"
+            app:hintEnabled="false">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/replyTextInputEditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/community_reply_EditText"
+                android:paddingTop="5dp"
+                android:paddingBottom="5dp" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+    </LinearLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
