@@ -29,6 +29,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.RatingBar
+import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.annotation.RequiresApi
 import androidx.coordinatorlayout.widget.CoordinatorLayout
@@ -949,7 +950,7 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
             viewLifecycleOwner.lifecycleScope.launch {
                 viewModel.favoriteCount.collect { count ->
                     val favoriteCountTextView = initialBottomSheetView.findViewById<TextView>(R.id.textViewPlaceFavoriteCount)
-                    favoriteCountTextView.text = "${count}명의 유저가 추천합니다."
+                    favoriteCountTextView.text = "$count"
                 }
             }
 
@@ -985,7 +986,7 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
             //리뷰 개수 받아와서 출력
             viewModel.reviewCount.observe(viewLifecycleOwner) { reviewCount ->
                 val reviewCountTextView = initialBottomSheetView.findViewById<TextView>(R.id.textViewPlaceReviewCount)
-                reviewCountTextView.text = "${reviewCount}개의 리뷰가 있어요"
+                reviewCountTextView.text = "(${reviewCount})"
             }
 
             //최신순 리뷰 두개 받아와서 바텀시트에 1,2 출력
@@ -1022,14 +1023,14 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
                         placeuserReview2.visibility = View.GONE
                     }
 
-                    initialBottomSheetView.findViewById<Chip>(R.id.chipViewAllReviews).visibility = View.VISIBLE
+                    initialBottomSheetView.findViewById<TextView>(R.id.chipViewAllReviews).visibility = View.VISIBLE
                     initialBottomSheetView.findViewById<TextView>(R.id.textViewNoReview).visibility = View.GONE
                 } else {
                     placeuserRating1.visibility = View.GONE
                     placeuserRating2.visibility = View.GONE
                     placeuserReview1.visibility = View.GONE
                     placeuserReview2.visibility = View.GONE
-                    initialBottomSheetView.findViewById<Chip>(R.id.chipViewAllReviews).visibility = View.GONE
+                    initialBottomSheetView.findViewById<TextView>(R.id.chipViewAllReviews).visibility = View.GONE
                     initialBottomSheetView.findViewById<TextView>(R.id.textViewNoReview).visibility = View.VISIBLE
                 }
             }
@@ -1090,7 +1091,7 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
                             Log.d("firstsubmit", favoriteCount.toString())
                             val favoriteCountTextView =
                                 initialBottomSheetView.findViewById<TextView>(R.id.textViewPlaceFavoriteCount)
-                            favoriteCountTextView.text = "${favoriteCount}명의 유저가 추천합니다."
+                            favoriteCountTextView.text = "$favoriteCount"
                         }
                     }
 
@@ -1168,7 +1169,7 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
                     }
                 }
             //상세리뷰 페이지
-            initialBottomSheetView.findViewById<Chip>(R.id.chipViewAllReviews).setOnClickListener {
+            initialBottomSheetView.findViewById<TextView>(R.id.chipViewAllReviews).setOnClickListener {
                 avgRatingBundle.putString("place_name", selectedPlace?.place_name)
                 avgRatingBundle.putString("place_id", selectedPlace?.id)
                 avgRatingBundle.putString("phone", selectedPlace?.phone)
