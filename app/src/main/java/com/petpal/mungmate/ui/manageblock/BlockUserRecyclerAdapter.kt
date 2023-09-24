@@ -17,8 +17,6 @@ class BlockUserRecyclerAdapter(private val context: Context) : ListAdapter<Block
 
     inner class BlockUserViewHolder(private val  rowBlockUserBinding: RowBlockUserBinding):
         RecyclerView.ViewHolder(rowBlockUserBinding.root) {
-//        val textViewBlockedUserNickName = rowBlockUserBinding.textViewUserKNickName
-
             fun bind(blockUser:BlockUser){
                 rowBlockUserBinding.run{
                     val storage = FirebaseStorage.getInstance()
@@ -37,11 +35,9 @@ class BlockUserRecyclerAdapter(private val context: Context) : ListAdapter<Block
                                 .into(textViewUserImage)
                         }
 
-
                     textViewUserKNickName.text = blockUser.blackUserNickname
                 }
             }
-
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BlockUserViewHolder {
@@ -56,7 +52,6 @@ class BlockUserRecyclerAdapter(private val context: Context) : ListAdapter<Block
 
 
     override fun onBindViewHolder(holder: BlockUserViewHolder, position: Int) {
-//        holder.textViewBlockedUserNickName.text = position.toString()
         holder.bind(getItem(position) as BlockUser)
     }
 }
