@@ -77,19 +77,53 @@ class CommunityAdapter(
     override fun getItemCount() = postList.size
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val post = postList[position]
-        val storage = FirebaseStorage.getInstance()
-        val storageRef = storage.reference.child(post.userImage.toString())
-        storageRef.downloadUrl.addOnSuccessListener { uri ->
-            Glide
-                .with(context)
-                .load(uri)
-                .diskCacheStrategy(DiskCacheStrategy.ALL)
-                .fitCenter()
-                .fallback(R.drawable.main_image)
-                .error(R.drawable.main_image)
-                .into(holder.communityProfileImage)
+        val db = FirebaseFirestore.getInstance()
+        val auth = FirebaseAuth.getInstance()
+        val user = auth.currentUser?.uid
+        if (user != null) {
+            val userId = user
+            val db = FirebaseFirestore.getInstance()
+
+            db.collection("users")
+                .document(userId)
+                .get()
+                .addOnSuccessListener { documentSnapshot ->
+                    if (documentSnapshot.exists()) {
+
+                        val userImage = documentSnapshot.getString("userImage")
+                        val nickname = documentSnapshot.getString("nickname")
+                        if (userImage != null) {
+
+                            val storage = FirebaseStorage.getInstance()
+                            val storageRef = storage.reference.child(userImage)
+                            holder.communityUserNickName.text = nickname
+                            storageRef.downloadUrl.addOnSuccessListener { uri ->
+                                // Glide를 사용하여 이미지를 로드하고 ImageView에 표시
+                                Glide.with(context)
+                                    .load(uri)
+                                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                                    .fitCenter()
+                                    .fallback(R.drawable.main_image)
+                                    .error(R.drawable.main_image)
+                                    .into(holder.communityProfileImage)
+                            }.addOnFailureListener { exception ->
+
+                            }
+                        } else {
+
+                        }
+                    } else {
+
+                    }
+                }
+                .addOnFailureListener { e ->
+
+                }
+
         }
+
+        val post = postList[position]
+
         if (post.postImages?.isNotEmpty()!!) {
             Glide
                 .with(context)
@@ -116,7 +150,7 @@ class CommunityAdapter(
         }
 
         holder.communityPostTitle.text = post.postTitle
-        holder.communityUserNickName.text = post.userNickName
+
         holder.communityPostDateCreated.text = post.postDateCreated.toString()
         holder.communityContent.text = post.postContent
         holder.communityCommentCounter.text= post.postComment?.size.toString()
@@ -186,9 +220,8 @@ class CommunityAdapter(
         holder.communityFavoriteLottie.scaleX = 2.0f
         holder.communityFavoriteLottie.scaleY = 2.0f
 
-        val auth = FirebaseAuth.getInstance()
-        val user = auth.currentUser?.uid
-        val db = FirebaseFirestore.getInstance()
+
+
         val collectionName = "Post"
         val documentId = post.postID.toString()
         val docRef = db.collection(collectionName).document(documentId)
