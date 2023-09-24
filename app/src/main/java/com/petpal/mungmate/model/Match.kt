@@ -4,6 +4,7 @@ import com.google.firebase.Timestamp
 
 // 산책 매칭
 data class Match(
+    var id: String?,
     var senderId: String?,
     var receiverId: String?,
     var walkTimestamp: Timestamp?,
@@ -15,7 +16,7 @@ data class Match(
     var receiverWalkReview: List<WalkReview>?
 ) {
     // firstroe에서 데이터 가져올 때 document.toObject(Match::class.java)로 파싱하려면 매개변수 없는 생성자 필수
-    constructor(): this("", "", Timestamp.now(), "", Timestamp.now(), MatchStatus.REQUESTED.code, null, null, null)
+    constructor(): this("", "", "", Timestamp.now(), "", Timestamp.now(), MatchStatus.REQUESTED.code, null, null, null)
 }
 
 // 산책 매칭 상태

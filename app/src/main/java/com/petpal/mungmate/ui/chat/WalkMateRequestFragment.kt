@@ -195,6 +195,7 @@ class WalkMateRequestFragment : Fragment() {
         val walkTimestamp = parseStringToTimeStamp("$walkDate $walkTime")
 
         val match = Match(
+            "",
             currentUserId,
             receiverId,
             walkTimestamp,
