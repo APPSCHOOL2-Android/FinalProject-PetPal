@@ -23,14 +23,14 @@ private const val TAG = "CHAT_ADAPTER"
 
 class ChatAdapter(private val chatViewModel: ChatViewModel, private val activity: MainActivity) : RecyclerView.Adapter<ChatAdapter.ViewHolder>() {
 
-    val currentUserUid = FirebaseAuth.getInstance().currentUser?.uid.toString()
+    val currentUserId = FirebaseAuth.getInstance().currentUser?.uid.toString()
     private val chatRooms = mutableListOf<ChatRoom>()
 
     inner class ViewHolder(private val rowBinding: RowChatRoomBinding) : RecyclerView.ViewHolder(rowBinding.root) {
         fun bind(chatRoom: ChatRoom) {
             rowBinding.run {
                 // 채팅 참여자중 내가 아닌 상대의 정보 가져오기
-                val otherUserId = if (currentUserUid == chatRoom.senderId) chatRoom.receiverId else chatRoom.senderId
+                val otherUserId = if (currentUserId == chatRoom.senderId) chatRoom.receiverId else chatRoom.senderId
                 chatViewModel.getUserInfoById(otherUserId) { document ->
                     if (document != null && document.exists()) {
                         val otherUserInfo = document.toObject(FirestoreUserBasicInfoData::class.java)
@@ -86,7 +86,7 @@ class ChatAdapter(private val chatViewModel: ChatViewModel, private val activity
                 textViewLastMessageTime.text = formattedTime
 
                 // 아직 안읽은 메시지 수
-                if (currentUserUid == chatRoom.senderId) {
+                if (currentUserId == chatRoom.senderId) {
                     // 현재 로그인한 사용자가 해당 채팅방에 대해 senderId일 경우
                     if (chatRoom.senderUnReadCount?.takeIf { it > 1 } != null) {
                         textViewUnreadCount.text = chatRoom.senderUnReadCount.toString()
@@ -109,7 +109,7 @@ class ChatAdapter(private val chatViewModel: ChatViewModel, private val activity
             rowBinding.root.setOnClickListener {
                 // 채팅방 이동
                 // 채팅방 정보의 참여자 중에 내가 아닌 다른 상대방의 id 전달
-                if (currentUserUid == chatRoom.senderId) {
+                if (currentUserId == chatRoom.senderId) {
                     activity.navigate(R.id.action_mainFragment_to_chat, bundleOf("receiverId" to chatRoom.receiverId))
                 } else {
                     activity.navigate(R.id.action_mainFragment_to_chat, bundleOf("receiverId" to chatRoom.senderId))
@@ -138,12 +138,8 @@ class ChatAdapter(private val chatViewModel: ChatViewModel, private val activity
 
     // ViewModel의 observer에서 호출하는 메서드 -> 데이터 세팅
     fun setChatRooms(newChatRooms: List<ChatRoom>) {
-        // 내가 참여중인 채팅방만 필터링
-        val myChatRooms = newChatRooms
-            .filter { it.senderId == currentUserUid || it.receiverId == currentUserUid }
-            .sortedByDescending { it.lastMessageTime }
         chatRooms.clear()
-        chatRooms.addAll(myChatRooms)
+        chatRooms.addAll(newChatRooms)
         notifyDataSetChanged()
     }
 }
