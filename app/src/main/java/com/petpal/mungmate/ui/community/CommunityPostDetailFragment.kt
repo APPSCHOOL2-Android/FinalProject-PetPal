@@ -14,7 +14,6 @@ import android.view.inputmethod.InputMethodManager
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -33,7 +32,6 @@ import com.petpal.mungmate.R
 import com.petpal.mungmate.databinding.FragmentCommunityPostDetailBinding
 import com.petpal.mungmate.model.Comment
 import com.petpal.mungmate.model.PostImage
-import com.petpal.mungmate.ui.user.UserViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -62,7 +60,7 @@ class CommunityPostDetailFragment : Fragment(), AdapterCallback {
 
     private val auth = FirebaseAuth.getInstance()
     val user = auth.currentUser
-    private lateinit var userViewModel: UserViewModel
+
     var nickname = ""
     var userImage = ""
     var getAuthorUid = ""
@@ -70,7 +68,7 @@ class CommunityPostDetailFragment : Fragment(), AdapterCallback {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        userViewModel = ViewModelProvider(requireActivity())[UserViewModel::class.java]
+
         communityPostDetailBinding = FragmentCommunityPostDetailBinding.inflate(inflater)
         commentViewModel = ViewModelProvider(requireActivity())[CommentViewModel::class.java]
         val args: CommunityPostDetailFragmentArgs by navArgs()
@@ -346,6 +344,7 @@ class CommunityPostDetailFragment : Fragment(), AdapterCallback {
             val postTitle = documentSnapshot.getString("postTitle")
             val postDateCreated = documentSnapshot.getString("postDateCreated")
             val postCategory = documentSnapshot.getString("postCategory")
+
             val postImagesList = documentSnapshot.get("postImages") as? List<*>
             val postComment = documentSnapshot.get("postComment") as? ArrayList<*>
             val commentCount = postComment?.size ?: 0
@@ -432,38 +431,51 @@ class CommunityPostDetailFragment : Fragment(), AdapterCallback {
                 timeDifferenceMillis < 86_400_000 -> "${timeDifferenceMillis / 3_600_000}시간 전" // 1일 미만
                 else -> "${timeDifferenceMillis / 86_400_000}일 전" // 1일 이상 전
             }
-            val storage = FirebaseStorage.getInstance()
 
-            viewLifecycleOwner.lifecycleScope.launch {
-                userViewModel.user.collect { userData ->
-                    // userData를 사용하여 사용자 정보 표시
-                    if (userData != null) {
-                        Log.d("ggg", userData.photoUrl.toString())
-                    }
-                    if (userData != null) {
+            val db = FirebaseFirestore.getInstance()
+            db.collection("users")
+                .document(getAuthorUid)
+                .get()
+                .addOnSuccessListener { documentSnapshot ->
+                    if (documentSnapshot.exists()) {
 
-                        communityPostDetailBinding.run {
-                            Glide
-                                .with(requireContext())
-                                .load(userData.photoUrl.toString())
-                                .diskCacheStrategy(DiskCacheStrategy.ALL)
-                                .fitCenter()
-                                .into(communityPostDetailProfileImage)
+                        val userImage = documentSnapshot.getString("userImage")
+                        val nickname = documentSnapshot.getString("nickname")
+                        if (userImage != null) {
 
-                            communityPostDetailUserNickName.text = userData.displayName
+                            val storage = FirebaseStorage.getInstance()
+                            val storageRef = storage.reference.child(userImage)
+                            storageRef.downloadUrl.addOnSuccessListener { uri ->
+                                communityPostDetailBinding.run {
+                                    Glide
+                                        .with(requireContext())
+                                        .load(uri)
+                                        .diskCacheStrategy(DiskCacheStrategy.ALL)
+                                        .fitCenter()
+                                        .into(communityPostDetailProfileImage)
+
+                                    communityPostDetailPostTitle.text = postTitle
+                                    communityPostDateCreated.text = timeAgo
+                                    communityPostDetailContent.text = postContent
+                                    communityPostDetailUserNickName.text = nickname
+                                    communityPostDetailCommentCounter.text = commentCount.toString()
+                                    communityPostDetailCategoryTextView.text =
+                                        postCategory.toString()
+
+                                }
+                            }.addOnFailureListener { exception ->
+
+                            }
+                        } else {
+
                         }
+                    } else {
+
                     }
                 }
-            }
+                .addOnFailureListener { e ->
 
-            communityPostDetailBinding.run {
-                communityPostDetailPostTitle.text = postTitle
-                communityPostDateCreated.text = timeAgo
-                communityPostDetailContent.text = postContent
-//                    communityPostDetailUserNickName.text = userNickName
-                communityPostDetailCommentCounter.text = commentCount.toString()
-                communityPostDetailCategoryTextView.text = postCategory.toString()
-            }
+                }
         }
     }
 

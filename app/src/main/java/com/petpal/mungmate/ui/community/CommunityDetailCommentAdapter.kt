@@ -69,11 +69,10 @@ class CommunityDetailCommentAdapter(
 
         val commentList = postCommentList[position]
         val db = FirebaseFirestore.getInstance()
-        val auth = FirebaseAuth.getInstance()
-        val user = auth.currentUser?.uid
+        val user = commentList.commentUid
 
         if (user != null) {
-            val userId = user
+            val userId = commentList.commentUid
 
             db.collection("users")
                 .document(userId)

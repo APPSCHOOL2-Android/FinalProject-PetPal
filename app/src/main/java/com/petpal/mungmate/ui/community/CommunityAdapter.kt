@@ -77,15 +77,18 @@ class CommunityAdapter(
     override fun getItemCount() = postList.size
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+
+        val post = postList[position]
         val db = FirebaseFirestore.getInstance()
         val auth = FirebaseAuth.getInstance()
         val user = auth.currentUser?.uid
+
         if (user != null) {
-            val userId = user
+            val userId = post.authorUid
             val db = FirebaseFirestore.getInstance()
 
             db.collection("users")
-                .document(userId)
+                .document(userId.toString())
                 .get()
                 .addOnSuccessListener { documentSnapshot ->
                     if (documentSnapshot.exists()) {
@@ -121,8 +124,6 @@ class CommunityAdapter(
                 }
 
         }
-
-        val post = postList[position]
 
         if (post.postImages?.isNotEmpty()!!) {
             Glide

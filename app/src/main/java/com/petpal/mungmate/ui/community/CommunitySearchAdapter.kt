@@ -84,11 +84,11 @@ class CommunitySearchAdapter(
         val auth = FirebaseAuth.getInstance()
         val user = auth.currentUser?.uid
         if (user != null) {
-            val userId = user
+            val userId = post.authorUid
             val db = FirebaseFirestore.getInstance()
 
             db.collection("users")
-                .document(userId)
+                .document(userId.toString())
                 .get()
                 .addOnSuccessListener { documentSnapshot ->
                     if (documentSnapshot.exists()) {
