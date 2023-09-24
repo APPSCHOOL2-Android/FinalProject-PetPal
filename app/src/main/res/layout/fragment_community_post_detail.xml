@@ -360,8 +360,9 @@
             <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/replyCloseButton"
                 android:layout_width="0dp"
-                android:layout_weight="0.1"
-                android:layout_height="20dp"
+                android:layout_weight="0.06"
+                android:layout_gravity="center"
+                android:layout_height="10dp"
                 android:background="@drawable/close"/>
         </LinearLayout>
 
