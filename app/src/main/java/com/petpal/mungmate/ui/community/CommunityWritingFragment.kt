@@ -306,6 +306,9 @@ class CommunityWritingFragment : Fragment() {
                                 "게시글 등록 성공",
                                 Snackbar.LENGTH_SHORT
                             ).show()
+
+                                findNavController().popBackStack()
+
                         }
                         .addOnFailureListener {
                             Snackbar.make(
