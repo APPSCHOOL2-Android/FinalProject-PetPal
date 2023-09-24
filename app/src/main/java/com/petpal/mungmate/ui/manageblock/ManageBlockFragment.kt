@@ -14,6 +14,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.petpal.mungmate.MainActivity
 import com.petpal.mungmate.databinding.FragmentManageBlockBinding
 import com.petpal.mungmate.model.BlockUser
+import com.petpal.mungmate.model.FirestoreUserBasicInfoData
 
 class ManageBlockFragment : Fragment() {
 
@@ -53,8 +54,8 @@ class ManageBlockFragment : Fragment() {
                     findNavController().popBackStack()
                 }
             }
-            getFireStoreUserInfo()
 
+            getFireStoreUserInfo()
         }
 
         return fragmentManageBlockBinding.root
@@ -66,39 +67,37 @@ class ManageBlockFragment : Fragment() {
 
             db.collection("users").document(user.uid)
                 .get()
-                .addOnSuccessListener { document ->
-                    if (document != null) {
+                .addOnSuccessListener { documentSnapshot ->
+                    if (documentSnapshot.exists()) {
 
-                        val blockUserList = document.get("blockUserList")
-                        val resultList = blockUserList.toString()
-                            .replace("[", "")  // '[' 제거
-                            .replace("]", "")  // ']' 제거
-                            .replace(" ", "")  // 공백 제거
-                            .split(",")        // 쉼표(,)를 기준으로 문자열을 분리하여 리스트로 변환
-
-                        val blackList = mutableListOf<String>()
-
-                        for (matchResult in resultList) {
-
-                            blackList.add(matchResult)
-                        }
+                        // 현재 사용자가 블락한 사용자 리스트
+                        val blockUserList = documentSnapshot.get("blockUserList") as? List<String>
                         addBlackList.clear()
-                        for (item in blackList) {
-                            Log.d("아이템1", item)
-                            db.collection("users").document(item)
-                                .get()
-                                .addOnSuccessListener { document ->
-                                    if (document != null) {
-                                        val userImage = document.getString("userImage")
-                                        val nickname = document.getString("nickname")
-                                        val blockUser = BlockUser(userImage, nickname)
-                                        Log.d("아이템이요2", nickname.toString())
-                                        addBlackList.add(blockUser)
-                                        blockUserRecyclerAdapter.submitList(addBlackList)
-                                    }
-                                }
-                        }
+                        if (blockUserList != null) {
+                            for (item in blockUserList) {
+                                Log.d("MANAGE_BLOCK", "블락 사용자 : $item")
 
+                                // 블락 사용자 정보 가져오기
+                                db.collection("users").document(item)
+                                    .get()
+                                    .addOnSuccessListener { document ->
+                                        if (document != null) {
+                                            val userImage = document.getString("userImage")
+                                            val nickname = document.getString("nickname")
+                                            val blockUser = BlockUser(userImage, nickname)
+                                            Log.d("MANAGE_BLOCK", "블락 사용자 닉네임 : $nickname")
+                                            addBlackList.add(blockUser)
+                                            blockUserRecyclerAdapter.submitList(addBlackList)
+                                        }
+                                    }
+                            }
+                        } else {
+                            // 차단한 사용자가 없을 경우
+                            Log.d("MANAGE_BLOCK", "차단 사용자가 존재하지 않음")
+                        }
+                    } else {
+                        // 사용자 없을 경우
+                        Log.d("MANAGE_BLOCK", "사용자가 존재하지 않음")
                     }
                 }
         }

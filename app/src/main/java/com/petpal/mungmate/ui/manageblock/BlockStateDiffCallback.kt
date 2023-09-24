@@ -11,6 +11,5 @@ class BlockStateDiffCallback  : DiffUtil.ItemCallback<BlockUser>() {
     override fun areContentsTheSame(oldItem: BlockUser, newItem: BlockUser): Boolean {
         return oldItem == newItem
     }
-
 }
 

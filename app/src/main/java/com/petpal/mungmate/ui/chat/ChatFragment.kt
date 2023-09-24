@@ -50,8 +50,22 @@ class ChatFragment : Fragment() {
 
         chatViewModel.run {
             chatRooms.observe(viewLifecycleOwner) { chatRooms ->
+                // 내가 참여중인 채팅방만 필터링
+                val myChatRooms = chatRooms
+                    .filter { it.senderId == currentUserId || it.receiverId == currentUserId }
+                    .sortedByDescending { it.lastMessageTime }
+
+                // 내가 참여중인 채팅방이 없을 경우 대체 레이아웃 표시
+                if (myChatRooms.isNullOrEmpty()) {
+                    fragmentChatBinding.layoutNoChatRoomList.visibility = View.VISIBLE
+                    fragmentChatBinding.layoutChatRoomList.visibility = View.GONE
+                } else {
+                    fragmentChatBinding.layoutNoChatRoomList.visibility = View.GONE
+                    fragmentChatBinding.layoutChatRoomList.visibility = View.VISIBLE
+                }
+
                 // 채팅방 데이터로 RecyclerView Adapter 데이터 세팅
-                chatAdapter.setChatRooms(chatRooms)
+                chatAdapter.setChatRooms(myChatRooms)
                 fragmentChatBinding.recyclerViewChatRoom.scrollToPosition(0)
             }
         }
