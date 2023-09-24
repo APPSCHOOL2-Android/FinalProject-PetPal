@@ -1,6 +1,7 @@
 package com.petpal.mungmate.ui.chat
 
 import android.util.Log
+import androidx.lifecycle.findViewTreeViewModelStoreOwner
 import com.google.android.gms.tasks.Task
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.DocumentReference
@@ -86,8 +87,16 @@ class ChatRepository {
             if (error != null) {
                 return@addSnapshotListener
             }
+
+            // 초기 상태를 처리 (value가 null 또는 비어있는 경우)
+            if (value == null || value.isEmpty) {
+                // 초기 상태를 처리하는 로직
+                trySend(emptyList())
+                return@addSnapshotListener
+            }
+
             messages.clear()
-            value?.documents?.forEach { document ->
+            value.documents.forEach { document ->
                 val message = document.toObject(Message::class.java)
                 message?.let { messages.add(it) }
             }
@@ -183,7 +192,7 @@ class ChatRepository {
         val chatRoomDocRef = db.collection(CHAT_ROOMS_NAME).document(chatRoomKey)
         val chatRoomDocSnapshot = chatRoomDocRef.get().await()
 
-        if (chatRoomDocSnapshot.exists()) {
+        if (chatRoomDocSnapshot != null && chatRoomDocSnapshot.exists()) {
             // 채팅방이 이미 존재하는 경우, 기존 채팅방의 ID를 반환
             Log.d(TAG, "load chatroom completed")
             return chatRoomDocSnapshot.toObject(ChatRoom::class.java) ?: ChatRoom()

@@ -341,9 +341,7 @@ class CommunityPostDetailFragment : Fragment(), AdapterCallback {
     // UI 업데이트
     private fun updateUI(documentSnapshot: DocumentSnapshot?) {
         if (documentSnapshot != null) {
-            val userImage = documentSnapshot.getString("userImage")
             val postTitle = documentSnapshot.getString("postTitle")
-            val userNickName = documentSnapshot.getString("userNickName")
             val postDateCreated = documentSnapshot.getString("postDateCreated")
             val postCategory = documentSnapshot.getString("postCategory")
 
@@ -372,14 +370,17 @@ class CommunityPostDetailFragment : Fragment(), AdapterCallback {
                 }
 
                 commentViewModel.setCommunityImage(imageUrls)
-                if(postImagesList != null && postImagesList.isNotEmpty()){
-                    communityPostDetailBinding.communityPostDetailPostCardView.visibility=View.VISIBLE
-                    communityPostDetailBinding.communityPostDetailPostCardView.visibility=View.VISIBLE
+                if (postImagesList != null && postImagesList.isNotEmpty()) {
+                    communityPostDetailBinding.communityPostDetailPostCardView.visibility =
+                        View.VISIBLE
+                    communityPostDetailBinding.communityPostDetailPostCardView.visibility =
+                        View.VISIBLE
                     initViewPager2()
                     subscribeObservers()
-                }else{
-                    communityPostDetailBinding.communityPostDetailPostCardView.visibility=View.GONE
-                    communityPostDetailBinding.communityPostDetailViewPager2.visibility=View.GONE
+                } else {
+                    communityPostDetailBinding.communityPostDetailPostCardView.visibility =
+                        View.GONE
+                    communityPostDetailBinding.communityPostDetailViewPager2.visibility = View.GONE
                 }
 
 
@@ -396,8 +397,6 @@ class CommunityPostDetailFragment : Fragment(), AdapterCallback {
                 for (dataMap in postCommentData) {
                     val comment = Comment(
                         commentUid = dataMap["commentUid"] as String?,
-                        commentNickName = dataMap["commentNickName"] as String?,
-                        commentUserImage = dataMap["commentUserImage"] as String?,
                         commentDateCreated = dataMap["commentDateCreated"] as String?,
                         commentContent = dataMap["commentContent"] as String?,
                         commentLike = dataMap["commentLike"] as Long,
@@ -432,26 +431,51 @@ class CommunityPostDetailFragment : Fragment(), AdapterCallback {
                 timeDifferenceMillis < 86_400_000 -> "${timeDifferenceMillis / 3_600_000}시간 전" // 1일 미만
                 else -> "${timeDifferenceMillis / 86_400_000}일 전" // 1일 이상 전
             }
-            val storage = FirebaseStorage.getInstance()
-            val storageRef = storage.reference.child(userImage.toString())
-            storageRef.downloadUrl.addOnSuccessListener { uri ->
-                communityPostDetailBinding.run {
-                    Glide
-                        .with(requireContext())
-                        .load(uri)
-                        .diskCacheStrategy(DiskCacheStrategy.ALL)
-                        .fitCenter()
-                        .into(communityPostDetailProfileImage)
 
-                    communityPostDetailPostTitle.text = postTitle
-                    communityPostDateCreated.text = timeAgo
-                    communityPostDetailContent.text = postContent
-                    communityPostDetailUserNickName.text = userNickName
-                    communityPostDetailCommentCounter.text = commentCount.toString()
-                    communityPostDetailCategoryTextView.text =postCategory.toString()
+            val db = FirebaseFirestore.getInstance()
+            db.collection("users")
+                .document(getAuthorUid)
+                .get()
+                .addOnSuccessListener { documentSnapshot ->
+                    if (documentSnapshot.exists()) {
+
+                        val userImage = documentSnapshot.getString("userImage")
+                        val nickname = documentSnapshot.getString("nickname")
+                        if (userImage != null) {
+
+                            val storage = FirebaseStorage.getInstance()
+                            val storageRef = storage.reference.child(userImage)
+                            storageRef.downloadUrl.addOnSuccessListener { uri ->
+                                communityPostDetailBinding.run {
+                                    Glide
+                                        .with(requireContext())
+                                        .load(uri)
+                                        .diskCacheStrategy(DiskCacheStrategy.ALL)
+                                        .fitCenter()
+                                        .into(communityPostDetailProfileImage)
+
+                                    communityPostDetailPostTitle.text = postTitle
+                                    communityPostDateCreated.text = timeAgo
+                                    communityPostDetailContent.text = postContent
+                                    communityPostDetailUserNickName.text = nickname
+                                    communityPostDetailCommentCounter.text = commentCount.toString()
+                                    communityPostDetailCategoryTextView.text =
+                                        postCategory.toString()
+
+                                }
+                            }.addOnFailureListener { exception ->
+
+                            }
+                        } else {
+
+                        }
+                    } else {
+
+                    }
+                }
+                .addOnFailureListener { e ->
 
                 }
-            }
         }
     }
 
@@ -482,8 +506,6 @@ class CommunityPostDetailFragment : Fragment(), AdapterCallback {
             val newComment = Comment(
                 UUID.randomUUID().toString(),
                 user?.uid,
-                nickname,
-                userImage,
                 formattedDateTime,
                 communityPostDetailBinding.communityPostDetailCommentTextInputEditText.text.toString(),
                 0,
@@ -493,7 +515,8 @@ class CommunityPostDetailFragment : Fragment(), AdapterCallback {
             val documentRef = db.collection("Post").document(postID!!)
             documentRef.get().addOnSuccessListener { documentSnapshot ->
                 if (documentSnapshot.exists()) {
-                    val currentComments = documentSnapshot.get("postComment") as? List<HashMap<String, Any>>
+                    val currentComments =
+                        documentSnapshot.get("postComment") as? List<HashMap<String, Any>>
                     val newPostCommentList: MutableList<Comment> = ArrayList()
 
                     if (currentComments != null) {
@@ -503,8 +526,6 @@ class CommunityPostDetailFragment : Fragment(), AdapterCallback {
                             if (isDeleted == null || !isDeleted) {
                                 val comment = Comment(
                                     commentUid = commentData["commentUid"] as? String,
-                                    commentNickName = commentData["commentNickName"] as? String,
-                                    commentUserImage = commentData["commentUserImage"] as? String,
                                     commentDateCreated = commentData["commentDateCreated"] as? String,
                                     commentContent = commentData["commentContent"] as? String,
                                     commentLike = commentData["commentLike"] as? Long ?: 0,
@@ -671,7 +692,6 @@ class CommunityPostDetailFragment : Fragment(), AdapterCallback {
                                 val documentSnapshot = getFirestoreData(postGetId)
                                 val reply = Comment(
                                     commentUid = "user_id_1",
-                                    commentNickName = "대댓글 작성자",
                                     commentDateCreated = "2023-09-23 14:30:00",
                                     commentContent = communityPostDetailBinding.replyTextInputEditText.text.toString()
                                 )
@@ -706,8 +726,6 @@ class CommunityPostDetailFragment : Fragment(), AdapterCallback {
             val newComment = Comment(
                 UUID.randomUUID().toString(),
                 user?.uid,
-                nickname,
-                userImage,
                 formattedDateTime,
                 communityPostDetailBinding.communityPostDetailCommentTextInputEditText.text.toString(),
                 0,

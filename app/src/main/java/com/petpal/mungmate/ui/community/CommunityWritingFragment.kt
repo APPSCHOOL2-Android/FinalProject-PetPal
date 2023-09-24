@@ -125,9 +125,6 @@ class CommunityWritingFragment : Fragment() {
                         val post = Post(
                             "",
                             user?.uid,
-                            userImage,
-                            nickname,
-                            "",
                             "",
                             "",
                             "",
@@ -236,9 +233,6 @@ class CommunityWritingFragment : Fragment() {
                                     val updatedData = Post(
                                         generatedDocId,
                                         user?.uid,
-                                        userImage,
-                                        nickname,
-                                        "데이터 없음",
                                         communityWritingBinding.communityPostWritingTitleTextInputEditText.text.toString(),
                                         communityWritingBinding.categoryItem.text.toString(),
                                         formattedDateTime,
@@ -286,9 +280,6 @@ class CommunityWritingFragment : Fragment() {
                     val updatedData = Post(
                         generatedDocId,
                         user?.uid,
-                        userImage,
-                        nickname,
-                        "데이터 없음",
                         communityWritingBinding.communityPostWritingTitleTextInputEditText.text.toString(),
                         communityWritingBinding.categoryItem.text.toString(),
                         formattedDateTime,

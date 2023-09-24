@@ -4,6 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -542,17 +543,10 @@
                     android:text="적용" />
             </LinearLayout>
 
-
         </LinearLayout>
+
     </ScrollView>
 
-
-    <View
-        android:id="@+id/progressBackgroundWalk1"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="#66000000"
-        android:visibility="gone" />
 
 
 </androidx.drawerlayout.widget.DrawerLayout>
