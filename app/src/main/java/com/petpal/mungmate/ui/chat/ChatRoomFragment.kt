@@ -73,7 +73,7 @@ class ChatRoomFragment : Fragment() {
                 chatRoom = it
 
                 // 메세지 목록 로드
-                chatRoomViewModel.startObservingMessages(it.id)
+                chatRoomViewModel.startMessagesListener(it.id)
             }
 
             currentUserInfoData.observe(viewLifecycleOwner) { userInfoData ->
@@ -141,7 +141,16 @@ class ChatRoomFragment : Fragment() {
                 setOnMenuItemClickListener { menuItem ->
                     when(menuItem.itemId) {
                         R.id.item_chat_toggle_block -> {
-                            toggleBlockStatus()
+                            // 차단 여부 체크
+                            val userBlockList = currentUserInfo?.blockUserList.orEmpty()
+                            val isBlocked = userBlockList.contains(receiverId)
+                            if (isBlocked) {
+                                // 내가 이미 차단한 경우
+                                showUnblockDialog()
+                            } else {
+                                // 내가 아직 차단하지 않은 경우
+                                showBlockDialog()
+                            }
                             true
                         }
                         R.id.item_chat_report -> {
@@ -253,20 +262,6 @@ class ChatRoomFragment : Fragment() {
             MessageVisibility.ALL.code
         )
         chatRoomViewModel.sendMessage(chatRoom.id, message)
-    }
-    
-    // 차단 상태 반전
-    private fun toggleBlockStatus() {
-        // 차단 여부 체크
-        val userBlockList = currentUserInfo?.blockUserList.orEmpty()
-        val isBlocked = userBlockList.contains(receiverId)
-        if (isBlocked) {
-            // 내가 이미 차단한 경우
-            showUnblockDialog()
-        } else {
-            // 내가 아직 차단하지 않은 경우
-            showBlockDialog()
-        }
     }
     
     // 차단

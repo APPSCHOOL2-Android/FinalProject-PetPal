@@ -22,7 +22,7 @@ private const val TAG = "CHAT_ROOM_VIEW_MODEL"
 
 class ChatRoomViewModel: ViewModel() {
 
-    var chatRepository = ChatRepository()
+    var chatRoomRepository = ChatRoomRepository()
     
     // 현재 채팅방 ID
 //    private val _currentChatRoomId = MutableLiveData<String>()
@@ -49,7 +49,7 @@ class ChatRoomViewModel: ViewModel() {
     fun getOrCreateChatRoom(user1Id: String, user2Id: String) {
         viewModelScope.launch {
             val chatRoom = withContext(Dispatchers.IO) {
-                chatRepository.getOrCreateChatRoom(user1Id, user2Id)
+                chatRoomRepository.getOrCreateChatRoom(user1Id, user2Id)
             }
             _currentChatRoom.value = chatRoom
             Log.d(TAG, "currentChatRoom updated")
@@ -58,13 +58,13 @@ class ChatRoomViewModel: ViewModel() {
 
     // 채팅방 Document에 메시지 저장
     fun sendMessage(chatRoomId: String, message: Message){
-        chatRepository.saveMessage(chatRoomId, message)
+        chatRoomRepository.saveMessage(chatRoomId, message)
     }
 
     // 채팅방 메시지 가져오기
-    fun startObservingMessages(chatRoomId: String) {
+    fun startMessagesListener(chatRoomId: String) {
         viewModelScope.launch {
-            chatRepository.getMessages(chatRoomId)
+            chatRoomRepository.startMessagesListener(chatRoomId)
                 .collect { messageList ->
                     _messages.value = messageList
                     Log.d(TAG, "loadMessages completed")
@@ -74,7 +74,7 @@ class ChatRoomViewModel: ViewModel() {
 
     // 산책 매칭 데이터 저장 후 Key 반환
     fun saveMatch(match: Match): Task<String> {
-        return chatRepository.saveMatch(match)
+        return chatRoomRepository.saveMatch(match)
             .continueWith { task ->
                 if (task.isSuccessful) {
                     task.result?.id ?: throw Exception("Failed to get document key.")
@@ -88,7 +88,7 @@ class ChatRoomViewModel: ViewModel() {
     fun getMatchById(matchKey: String, onComplete: (DocumentSnapshot?) -> Unit) {
         viewModelScope.launch {
             val document = withContext(Dispatchers.IO){
-                chatRepository.getMatchById(matchKey)
+                chatRoomRepository.getMatchById(matchKey)
             }
             onComplete(document)
         }
@@ -97,7 +97,7 @@ class ChatRoomViewModel: ViewModel() {
 //    fun getChatRoomById(chatRoomId: String, onComplete: (DocumentSnapshot?) -> Unit) {
 //        viewModelScope.launch {
 //            val document = withContext(Dispatchers.IO) {
-//                chatRepository.getChatRoomById(chatRoomId)
+//                chatRoomRepository.getChatRoomById(chatRoomId)
 //            }
 //            onComplete(document)
 //        }
@@ -106,7 +106,7 @@ class ChatRoomViewModel: ViewModel() {
     // 채팅 상대 대표 반려견 정보 가져오기
     fun getReceiverPetInfoByUserId(userId: String) {
          viewModelScope.launch {
-             val petData = chatRepository.getMainPetInfoByUserId(userId)
+             val petData = chatRoomRepository.getMainPetInfoByUserId(userId)
              if (petData != null) {
                  _receiverPetInfo.value = petData!!
                  Log.d(TAG, "ReceiverPetInfo updated: ${petData.name}")
@@ -119,7 +119,7 @@ class ChatRoomViewModel: ViewModel() {
 
     // 사용자 신고 데이터 저장
     fun saveReport(userReport: UserReport) {
-        chatRepository.saveUserReport(userReport).addOnSuccessListener {
+        chatRoomRepository.saveUserReport(userReport).addOnSuccessListener {
             Log.d(TAG, "사용자 신고 저장 성공")
         }.addOnFailureListener {
             Log.d(TAG, "사용자 신고 저장 성공")
@@ -129,33 +129,33 @@ class ChatRoomViewModel: ViewModel() {
     // 매칭 데이터 업데이트
     fun updateFieldInMatchDocument(matchId: String, fieldName: String, updatedValue: Any) {
         viewModelScope.launch(Dispatchers.IO) {
-            chatRepository.updateFieldInMatchDocument(matchId, fieldName, updatedValue)
+            chatRoomRepository.updateFieldInMatchDocument(matchId, fieldName, updatedValue)
         }
     }
 
     // 상대 차단 상태 전환 (차단 -> 해제 / 해제 -> 차단)
 //    fun toggleBlockStatus(currentUserId: String, receiverId: String) {
 //        viewModelScope.launch {
-//            chatRepository.toggleBlockStatus(currentUserId, receiverId)
+//            chatRoomRepository.toggleBlockStatus(currentUserId, receiverId)
 //        }
 //    }
 
     fun blockUser(currentUserId: String, receiverId: String) {
         viewModelScope.launch {
-            chatRepository.addUserToBlockList(currentUserId, receiverId)
+            chatRoomRepository.addUserToBlockList(currentUserId, receiverId)
         }
     }
 
     fun unblockUser(currentUserId: String, receiverId: String) {
         viewModelScope.launch {
-            chatRepository.removeUserFromBlockList(currentUserId, receiverId)
+            chatRoomRepository.removeUserFromBlockList(currentUserId, receiverId)
         }
     }
 
     // 실시간 차단 및 프로필 변경 감시용
     fun startObservingReceiverUserInfo(userId: String) {
         viewModelScope.launch {
-            chatRepository.getUserBasicInfo(userId)
+            chatRoomRepository.getUserBasicInfo(userId)
                 .collect { userInfo ->
                    _receiverUserInfo.value = userInfo
                 }
@@ -164,7 +164,7 @@ class ChatRoomViewModel: ViewModel() {
     // 실시간 차단 감시용
     fun startObservingCurrentUserInfo(userId: String) {
         viewModelScope.launch { 
-            chatRepository.getUserBasicInfo(userId)
+            chatRoomRepository.getUserBasicInfo(userId)
                 .collect { userInfo ->
                     _currentUserInfo.value = userInfo
                 }
@@ -173,7 +173,7 @@ class ChatRoomViewModel: ViewModel() {
 
     fun hideMessage(chatRoomId: String, messageId: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            chatRepository.updateFieldInMessageDocument(chatRoomId, messageId, "visible", MessageVisibility.NONE.code)
+            chatRoomRepository.updateFieldInMessageDocument(chatRoomId, messageId, "visible", MessageVisibility.NONE.code)
         }
         
     }

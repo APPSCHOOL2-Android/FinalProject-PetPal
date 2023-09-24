@@ -75,7 +75,7 @@ class ChatAdapter(private val chatViewModel: ChatViewModel, private val activity
 
                 // 오늘의 timestamp 여부를 확인하여 표시 형식 선택
                 val formattedTime = if (daysAgo == 0L) {
-                    SimpleDateFormat("a HH:mm", Locale.getDefault()).format(timestamp.toDate())
+                    SimpleDateFormat("a hh:mm", Locale.getDefault()).format(timestamp.toDate())
                 } else {
                     when(daysAgo) {
                         1L -> "어제"
