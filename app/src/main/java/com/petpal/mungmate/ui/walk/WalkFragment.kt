@@ -107,6 +107,8 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
     // 거리 필터링을 위한 코드
     private var distanceFilterValue:Double?=null
     private var userAgeGroup:String?=null
+    private var userGenderGroupFilter:String?=null
+    private var userGenderGroupUser:String?=null
     private var location123:Location?=null
     private var repeatJob: Job? = null
     val CURRENT_LOCATION_MARKER_TAG = 100
@@ -158,6 +160,7 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
 
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -212,6 +215,7 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
         requestLocationPermissionIfNeeded()
 
     }
+    @RequiresApi(Build.VERSION_CODES.O)
     fun setupAndShowDialog(builder: AlertDialog.Builder) {
         builder.setPositiveButton("확인") { dialogInterface: DialogInterface, i: Int ->
             showProgress()
@@ -229,6 +233,7 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
         val dialog = builder.create()
         dialog.show()
     }
+    @RequiresApi(Build.VERSION_CODES.O)
     private fun setupButtonListeners() {
         fragmentWalkBinding.buttonWalk.setOnClickListener {
 
@@ -288,6 +293,11 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
                     R.id.AgeRange3 -> userAgeGroup="30대"
                     R.id.AgeRange4 -> userAgeGroup="40대"
                     R.id.AgeRange4 -> userAgeGroup="50대"
+                }
+                when(fragmentWalkBinding.filterUserGenderGroup.checkedChipId){
+                    R.id.UserGender1->userGenderGroupFilter="남성"
+                    R.id.UserGender2->userGenderGroupFilter="여성"
+                    R.id.UserGender->userGenderGroupFilter="밝히고 싶지 않음"
                 }
 
 
@@ -430,16 +440,30 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
                                 longitude = user.location?.get("longitude") ?: 0.0
                             }
                             val filterddistance = distanceFilterValue ?: 2000.0
+                            //거리필터
                             val isUserWithinDistance = user.uid != userId && currentLocation.distanceTo(userLocation) <= filterddistance
-                            userAgeGroup?.let { it1 -> Log.d("필터", it1) }
-                            user.birthday?.let { it1 -> calculateAgeGroup(it1) }
-                                ?.let { it2 -> Log.d("필터1", it2) }
+
+                            //나이대필터
                             val isUserWithinAgeGroup = if(userAgeGroup != null) {
                                 user.birthday?.let { calculateAgeGroup(it) } == userAgeGroup
                             } else {
                                 true
                             }
-                            isUserWithinDistance && isUserWithinAgeGroup
+                            userGenderGroupUser=when(user.gender){
+                                0->"남성"
+                                1->"여성"
+                                2->"밝히고 싶지 않음"
+                                else->null
+                            }
+                            //성별필터
+                            val isUserWithinGenderGroup=if(userGenderGroupFilter!=null && userGenderGroupUser!=null){
+                                userGenderGroupFilter==userGenderGroupUser
+                            }else{
+                                true
+                            }
+
+
+                            isUserWithinDistance && isUserWithinAgeGroup &&isUserWithinGenderGroup
                         }
 
 
@@ -931,11 +955,9 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
             (birthDate.month == currentDate.month && birthDate.dayOfMonth > currentDate.dayOfMonth)) {
             age--
         }
-
         if (age < 1) {
             age = 1
         }
-
         return age
     }
     //맵의 마커 클릭시
@@ -1266,7 +1288,10 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
                 val imageViewBottomPetProfileImage=onWalkBottomSheetView.findViewById<ImageView>(R.id.ImageViewBottomPetProfileImage)
                 val buttonBottomWalk=onWalkBottomSheetView.findViewById<Button>(R.id.buttonBottomWalk)
                 val buttonBottomBlock=onWalkBottomSheetView.findViewById<Button>(R.id.buttonBottomBlock)
+                val textViewBottomUserGender=onWalkBottomSheetView.findViewById<TextView>(R.id.textViewBottomUserGender)
                 val userRating= onWalkBottomSheetView.findViewById<RatingBar>(R.id.ratingBarUser2)
+
+
 
                 buttonBottomWalk.setOnClickListener {
                     val bundle=Bundle()
@@ -1348,6 +1373,12 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
                         textViewBottomUserMathcingHistory.text = "매칭 기록: 0회"
                     }
                 })
+                textViewBottomUserGender.text="성별 : ${when(user.gender){
+                    0->"남성"
+                    1->"여성"
+                    2->"밝히고 싶지 않음"
+                    else->""
+                }}"
                 val userImageRef = Firebase.storage.reference.child(user.userImage!!)
                 Log.d("이미지",user.userImage)
                 Log.d("이미지",userImageRef.toString())

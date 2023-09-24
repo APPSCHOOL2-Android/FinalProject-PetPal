@@ -88,15 +88,33 @@
                     android:layout_weight="1"
                     android:text="산책 가능 시간대: 06:00~08:00"
                     android:textAppearance="@style/TextAppearance.AppCompat.Small" />
+
+
             </LinearLayout>
 
-            <TextView
-                android:id="@+id/textViewBottomUserAgeRange"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="8dp"
-                android:layout_marginTop="8dp"
-                android:text="나이대" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/textViewBottomUserAgeRange"
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginTop="8dp"
+                    android:text="나이대" />
+
+                <TextView
+                    android:id="@+id/textViewBottomUserGender"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginTop="8dp"
+                    android:text="성별" />
+
+            </LinearLayout>
+
 
         </LinearLayout>
 
