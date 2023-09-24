@@ -126,7 +126,7 @@ class ChatRoomViewModel: ViewModel() {
         }
     }
 
-    // 매칭 데이터 업데이트
+    // 매칭 데이터 필드 값 업데이트
     fun updateFieldInMatchDocument(matchId: String, fieldName: String, updatedValue: Any) {
         viewModelScope.launch(Dispatchers.IO) {
             chatRoomRepository.updateFieldInMatchDocument(matchId, fieldName, updatedValue)
@@ -140,19 +140,20 @@ class ChatRoomViewModel: ViewModel() {
 //        }
 //    }
 
+    // 사용자 차단
     fun blockUser(currentUserId: String, receiverId: String) {
         viewModelScope.launch {
             chatRoomRepository.addUserToBlockList(currentUserId, receiverId)
         }
     }
-
+    // 사용자 차단 해제
     fun unblockUser(currentUserId: String, receiverId: String) {
         viewModelScope.launch {
             chatRoomRepository.removeUserFromBlockList(currentUserId, receiverId)
         }
     }
 
-    // 실시간 차단 및 프로필 변경 감시용
+    // 상대방 정보 실시간 감시 : 프로필 변경 및 차단 체크용
     fun startObservingReceiverUserInfo(userId: String) {
         viewModelScope.launch {
             chatRoomRepository.getUserBasicInfo(userId)
@@ -161,7 +162,7 @@ class ChatRoomViewModel: ViewModel() {
                 }
         }
     }
-    // 실시간 차단 감시용
+    // 현재 사용자 정보 실시간 감시 : 차단 여부 체크용
     fun startObservingCurrentUserInfo(userId: String) {
         viewModelScope.launch { 
             chatRoomRepository.getUserBasicInfo(userId)
@@ -171,11 +172,19 @@ class ChatRoomViewModel: ViewModel() {
         }
     }
 
+    // 메시지 숨기기
     fun hideMessage(chatRoomId: String, messageId: String) {
         viewModelScope.launch(Dispatchers.IO) {
             chatRoomRepository.updateFieldInMessageDocument(chatRoomId, messageId, "visible", MessageVisibility.NONE.code)
         }
         
+    }
+
+    // 산책 메이트 요청 거절시 해당 매칭 데이터 삭제
+    fun deleteMatchById(matchId: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            chatRoomRepository.deleteMatchById(matchId)
+        }
     }
 }
 

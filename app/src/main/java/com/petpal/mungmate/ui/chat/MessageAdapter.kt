@@ -12,7 +12,6 @@ import com.petpal.mungmate.databinding.RowChatWalkMateAcceptBinding
 import com.petpal.mungmate.databinding.RowChatWalkMateRejectBinding
 import com.petpal.mungmate.databinding.RowChatWalkMateRequestReceiveBinding
 import com.petpal.mungmate.databinding.RowChatWalkMateRequestSendBinding
-import com.petpal.mungmate.model.Match
 import com.petpal.mungmate.model.MatchStatus
 import com.petpal.mungmate.model.Message
 import com.petpal.mungmate.model.MessageType
@@ -247,7 +246,10 @@ class MessageAdapter(private val chatRoomViewModel: ChatRoomViewModel): Recycler
 
                 buttonReject.setOnClickListener {
                     // 매칭 상태 변경 -> 거절
-                    chatRoomViewModel.updateFieldInMatchDocument(matchId, "status", MatchStatus.REJECTED.code)
+                    // chatRoomViewModel.updateFieldInMatchDocument(matchId, "status", MatchStatus.REJECTED.code)
+
+                    // 매칭 삭제 (거절 이후로는 필요가 없는 Match)
+                    chatRoomViewModel.deleteMatchById(matchId)
 
                     // 산책 메이트 요청 메시지 숨기기
                     chatRoomViewModel.hideMessage(chatRoomId, message.id)

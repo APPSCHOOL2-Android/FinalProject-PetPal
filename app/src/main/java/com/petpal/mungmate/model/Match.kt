@@ -22,7 +22,7 @@ data class Match(
 // 산책 매칭 상태
 enum class MatchStatus(val code: Int) {
     REQUESTED(0),  // 산책 요청 상태
-    REJECTED(1),   // 산책 거절 상태
+    REJECTED(1),   // 산책 거절 상태 (삭제 예정)
     ACCEPTED(2),   // 산책 수락 상태
     CANCELED(3),   // 산책 취소 상태
     COMPLETED(4)   // 산책 완료 상태

@@ -339,4 +339,16 @@ class ChatRoomRepository {
             Log.d(TAG, "Error updating field in message document: ${e.message}")
         }
     }
+
+    // 매칭 데이터 삭제
+    suspend fun deleteMatchById(matchId: String): Boolean {
+        val documentRef = db.collection(MATCHES_NAME).document(matchId)
+
+        return try {
+            documentRef.delete().await()
+            true
+        } catch (e: Exception) {
+            false
+        }
+    }
 }

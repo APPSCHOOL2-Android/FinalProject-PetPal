@@ -8,7 +8,7 @@
     tools:context=".ui.chat.ChatFragment" >
 
     <com.google.android.material.appbar.MaterialToolbar
-        android:id="@+id/toolbarPlaceReview"
+        android:id="@+id/toolbarChat"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:minHeight="?attr/actionBarSize"
@@ -61,7 +61,8 @@
         android:id="@+id/chatTestLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:visibility="gone">
 
         <EditText
             android:id="@+id/editTextReceiverId"
