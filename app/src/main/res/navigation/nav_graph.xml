@@ -6,7 +6,7 @@
     app:startDestination="@id/userStartFragment">
     <fragment
         android:id="@+id/managePetFragment"
-        android:name="com.petpal.mungmate.ui.managepet.ManagePetFragment"
+        android:name="com.petpal.mungmate.ui.pet.ManagePetFragment"
         android:label="fragment_manage_pet"
         tools:layout="@layout/fragment_manage_pet" >
         <action

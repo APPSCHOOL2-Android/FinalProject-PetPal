@@ -1,4 +1,4 @@
-package com.petpal.mungmate.ui.managepet
+package com.petpal.mungmate.ui.pet
 
 import androidx.recyclerview.widget.DiffUtil
 

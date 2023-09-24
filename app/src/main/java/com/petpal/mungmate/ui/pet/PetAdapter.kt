@@ -1,7 +1,6 @@
-package com.petpal.mungmate.ui.managepet
+package com.petpal.mungmate.ui.pet
 
 import android.content.Context
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.os.bundleOf
@@ -15,7 +14,7 @@ import com.google.firebase.storage.StorageReference
 import com.petpal.mungmate.R
 import com.petpal.mungmate.databinding.RowPetBinding
 
-class PetAdapter( private val context: Context) :
+class PetAdapter(private val context: Context) :
     ListAdapter<PetUiState, PetAdapter.PetViewHolder>(PetUiStateDiffCallback()) {
 
     inner class PetViewHolder(private val rowPetBinding: RowPetBinding) :
@@ -28,7 +27,7 @@ class PetAdapter( private val context: Context) :
                 val storage = FirebaseStorage.getInstance()
                 val storageRef = storage.reference
 
-                val profileImage: StorageReference = storageRef.child(pet.image)
+                val profileImage: StorageReference = storageRef.child(pet.image!!)
                 profileImage.downloadUrl
                     .addOnSuccessListener { uri ->
                         val imageUrl = uri.toString()
@@ -43,12 +42,17 @@ class PetAdapter( private val context: Context) :
 
 
                 textViewPetName.text = pet.name
+                imageView10.setImageResource(
+                    if (pet.sex == "1") R.drawable.female_20px
+                    else R.drawable.male_20px
+                )
                 textViewPetInfo.text = "${pet.age}살 • ${pet.breed} • ${pet.weigh}kg"
                 textViewPetDesc.text = pet.character
 
                 root.setOnClickListener {
                     val navController = Navigation.findNavController(itemView)
-                    navController.navigate(R.id.action_managePetFragment_to_addPetFragment,
+                    navController.navigate(
+                        R.id.action_managePetFragment_to_addPetFragment,
                         bundleOf("isAdd" to false, "isUserJoin" to false)
                     )
                 }
