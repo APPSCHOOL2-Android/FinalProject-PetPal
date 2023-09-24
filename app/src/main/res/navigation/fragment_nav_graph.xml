@@ -9,11 +9,7 @@
         android:id="@+id/item_community"
         android:name="com.petpal.mungmate.ui.community.CommunityFragment"
         android:label="fragment_community"
-        tools:layout="@layout/fragment_community" >
-        <action
-            android:id="@+id/action_item_community_to_item_shop"
-            app:destination="@id/item_shop" />
-    </fragment>
+        tools:layout="@layout/fragment_community"/>
     <fragment
         android:id="@+id/item_chat"
         android:name="com.petpal.mungmate.ui.chat.ChatFragment"
@@ -28,21 +24,10 @@
         android:id="@+id/item_shop"
         android:name="com.petpal.mungmate.ShopFragment"
         android:label="fragment_shop"
-        tools:layout="@layout/fragment_shop" >
-        <action
-            android:id="@+id/action_item_shop_to_item_community"
-            app:destination="@id/item_community" />
-    </fragment>
+        tools:layout="@layout/fragment_shop" />
     <fragment
         android:id="@+id/item_walk"
         android:name="com.petpal.mungmate.ui.walk.WalkFragment"
         android:label="fragment_walk"
-        tools:layout="@layout/fragment_walk" >
-        <action
-            android:id="@+id/action_item_walk_to_item_shop"
-            app:destination="@id/item_shop" />
-        <action
-            android:id="@+id/action_item_walk_to_item_chat"
-            app:destination="@id/item_chat" />
-    </fragment>
+        tools:layout="@layout/fragment_walk" />
 </navigation>

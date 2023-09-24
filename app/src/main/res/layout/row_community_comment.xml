@@ -9,32 +9,33 @@
 
     <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/communityCommentProfileImage"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
         android:layout_gravity="center"
-        android:layout_marginTop="@dimen/common_margin"
-        android:layout_marginBottom="@dimen/common_margin"
+        android:layout_marginTop="20dp"
         android:background="@android:color/transparent"
         android:scaleType="centerCrop"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
 
-    <androidx.appcompat.widget.AppCompatImageButton
+    <ImageView
         android:id="@+id/communityCommentMenuImageButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:backgroundTint="@android:color/transparent"
+        android:clickable="true"
+        android:focusable="true"
         android:src="@drawable/more_vert"
-        app:layout_constraintBottom_toBottomOf="@id/communityCommentPostDateCreated"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/communityCommentUserNickName" />
 
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/communityCommentUserNickName"
-        android:layout_width="41dp"
-        android:layout_height="23dp"
-        android:layout_marginStart="@dimen/common_margin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="14dp"
         android:text="닉네임"
         android:textAppearance="@style/TextAppearance.AppCompat.Small"
         android:textColor="@color/black"
@@ -48,8 +49,9 @@
         android:id="@+id/communityCommentPostDateCreated"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="30분전"
+        android:layout_marginTop="4dp"
 
+        android:text="30분전"
         android:textAppearance="@style/TextAppearance.AppCompat.Small"
         app:layout_constraintStart_toStartOf="@id/communityCommentUserNickName"
         app:layout_constraintTop_toBottomOf="@id/communityCommentUserNickName" />
@@ -58,7 +60,7 @@
         android:id="@+id/communityCommentContent"
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_marginTop="@dimen/common_small_margin"
+        android:layout_marginTop="12dp"
         android:maxLength="300"
         android:text="rrrrrrrrrrrrrrrrrddddddddddddddddddddddddddddddddddddddddddddddddddddrrrrrrrrrrrrrrrrrrrrrrrr"
         android:textAppearance="@style/TextAppearance.AppCompat.Body2"
@@ -71,8 +73,7 @@
         android:id="@+id/communityCommentBottomLinerLayout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/common_margin"
-        android:layout_marginEnd="@dimen/common_margin"
+        android:layout_marginTop="12dp"
         android:orientation="horizontal"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/communityCommentContent">
@@ -83,7 +84,7 @@
 
             <com.airbnb.lottie.LottieAnimationView
                 android:id="@+id/communityCommentFavoriteLottie"
-                android:layout_width="30dp"
+                android:layout_width="20dp"
                 android:layout_height="0dp"
                 app:layout_constraintBottom_toBottomOf="@id/communityCommentFavoriteTextView"
                 app:layout_constraintStart_toStartOf="parent"
@@ -94,9 +95,10 @@
                 android:id="@+id/communityCommentFavoriteTextView"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
+                android:layout_marginStart="4dp"
                 android:gravity="center"
                 android:text="좋아요"
-                android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1"
+                android:textAppearance="?attr/textAppearanceLabelMedium"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toEndOf="@id/communityCommentFavoriteLottie"
                 app:layout_constraintTop_toTopOf="parent" />
@@ -123,11 +125,11 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_marginStart="@dimen/common_padding"
-            android:drawableStart="@drawable/comment"
+            android:drawableStart="@drawable/comment_20px"
             android:drawablePadding="@dimen/common_small_padding"
             android:gravity="center"
             android:text="@string/reply"
-            android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1" />
+            android:textAppearance="@style/textAppearanceLabelMedium" />
 
 
         <androidx.appcompat.widget.AppCompatTextView
@@ -147,6 +149,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/common_margin"
         android:layout_marginEnd="@dimen/common_margin"
+        android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/communityCommentBottomLinerLayout" />
