@@ -92,7 +92,7 @@ class CommunityPostDetailFragment : Fragment(), AdapterCallback {
     private fun FragmentCommunityPostDetailBinding.comment() {
         commentViewModel.postCommentList.observe(viewLifecycleOwner) { commentList ->
             communityDetailCommentAdapter.updateData(commentList)
-
+            communityPostDetailCommentCounter.text = commentList.size.toString()
             communityPostDetailCommentCount.text = "댓글 ${commentList.size.toString()}"
         }
         val iconColorNotInput =
@@ -449,6 +449,7 @@ class CommunityPostDetailFragment : Fragment(), AdapterCallback {
                     communityPostDetailUserNickName.text = userNickName
                     communityPostDetailCommentCounter.text = commentCount.toString()
                     communityPostDetailCategoryTextView.text =postCategory.toString()
+
                 }
             }
         }
@@ -489,8 +490,7 @@ class CommunityPostDetailFragment : Fragment(), AdapterCallback {
                 "0"
             )
 
-            val newPostCommentList: MutableList<Comment> = mutableListOf()
-            newPostCommentList.addAll(postCommentList)
+            val newPostCommentList: MutableList<Comment> = ArrayList(postCommentList)
             newPostCommentList.add(newComment)
 
             val documentRef = db.collection("Post").document(postID!!)
@@ -498,8 +498,6 @@ class CommunityPostDetailFragment : Fragment(), AdapterCallback {
                 if (documentSnapshot.exists()) {
                     documentRef.update("postComment", newPostCommentList)
                         .addOnSuccessListener {
-                            postCommentList.clear()
-                            postCommentList.addAll(newPostCommentList)
                             commentViewModel.setCommentList(newPostCommentList)
                         }
                         .addOnFailureListener { e ->
@@ -696,7 +694,7 @@ class CommunityPostDetailFragment : Fragment(), AdapterCallback {
             val newPostCommentList: MutableList<Comment> = mutableListOf()
             newPostCommentList.addAll(postCommentList)
             newPostCommentList.add(newComment)
-
+            postCommentList.clear()
             val documentRef = db.collection("Post").document(postID!!)
             documentRef.get().addOnSuccessListener { documentSnapshot ->
                 if (documentSnapshot.exists()) {
