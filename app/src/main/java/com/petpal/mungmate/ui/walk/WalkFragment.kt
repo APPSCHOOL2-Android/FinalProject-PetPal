@@ -107,6 +107,14 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
     // 거리 필터링을 위한 코드
     private var distanceFilterValue:Double?=null
     private var userAgeGroup:String?=null
+    private var userGenderGroupFilter:String?=null
+    private var userGenderGroupUser:String?=null
+    private var petPropensityUser:String?=null
+    private var petPropensityFilter:String?=null
+    private var petNeuteredUser:Boolean?=null
+    private var petNeuteredFilter:Boolean?=null
+    private var petGenderUser:String?=null
+    private var petGenderFilter:String?=null
     private var location123:Location?=null
     private var repeatJob: Job? = null
     val CURRENT_LOCATION_MARKER_TAG = 100
@@ -158,6 +166,7 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
 
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -212,6 +221,7 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
         requestLocationPermissionIfNeeded()
 
     }
+    @RequiresApi(Build.VERSION_CODES.O)
     fun setupAndShowDialog(builder: AlertDialog.Builder) {
         builder.setPositiveButton("확인") { dialogInterface: DialogInterface, i: Int ->
             showProgress()
@@ -229,6 +239,7 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
         val dialog = builder.create()
         dialog.show()
     }
+    @RequiresApi(Build.VERSION_CODES.O)
     private fun setupButtonListeners() {
         fragmentWalkBinding.buttonWalk.setOnClickListener {
 
@@ -289,12 +300,35 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
                     R.id.AgeRange4 -> userAgeGroup="40대"
                     R.id.AgeRange4 -> userAgeGroup="50대"
                 }
+                when(fragmentWalkBinding.filterUserGenderGroup.checkedChipId){
+                    R.id.UserGender1->userGenderGroupFilter="남성"
+                    R.id.UserGender2->userGenderGroupFilter="여성"
+                    R.id.UserGender->userGenderGroupFilter="밝히고 싶지 않음"
+                }
+                when(fragmentWalkBinding.filterPetGenderGroup.checkedChipId){
+                    R.id.PetGender1->petGenderFilter="남아"
+                    R.id.PetGender2->petGenderFilter="여아"
+                }
+                when(fragmentWalkBinding.filterPetPropensityGroup.checkedChipId){
+                    R.id.PetPropensity1->petPropensityFilter="얌전함"
+                    R.id.PetPropensity2->petPropensityFilter="활발함"
+                    R.id.PetPropensity3->petPropensityFilter="동성 불호"
+                    R.id.PetPropensity4->petPropensityFilter="친화적"
+                    R.id.PetPropensity5->petPropensityFilter="호기심 많음"
+                    R.id.PetPropensity6->petPropensityFilter="내성적"
+                }
+                when(fragmentWalkBinding.filterNeuterStatusGroup.checkedChipId){
+                    R.id.NeuterStatus1->petNeuteredFilter=true
+                    R.id.NeuterStatus2->petNeuteredFilter=false
+                }
+
 
 
                 fragmentWalkBinding.drawerLayout.closeDrawer(GravityCompat.END)
             } else {
                 fragmentWalkBinding.chipMapFilter.isChecked = false
                 showSnackbar("필터가 선택되지 않았습니다 기본값으로 적용됩니다.")
+                resetFilters()
                 fragmentWalkBinding.drawerLayout.closeDrawer(GravityCompat.END)
             }
         }
@@ -430,16 +464,66 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
                                 longitude = user.location?.get("longitude") ?: 0.0
                             }
                             val filterddistance = distanceFilterValue ?: 2000.0
+                            //거리필터
                             val isUserWithinDistance = user.uid != userId && currentLocation.distanceTo(userLocation) <= filterddistance
-                            userAgeGroup?.let { it1 -> Log.d("필터", it1) }
-                            user.birthday?.let { it1 -> calculateAgeGroup(it1) }
-                                ?.let { it2 -> Log.d("필터1", it2) }
+
+                            //나이대필터
                             val isUserWithinAgeGroup = if(userAgeGroup != null) {
                                 user.birthday?.let { calculateAgeGroup(it) } == userAgeGroup
                             } else {
                                 true
                             }
-                            isUserWithinDistance && isUserWithinAgeGroup
+                            userGenderGroupUser=when(user.gender){
+                                0->"남성"
+                                1->"여성"
+                                2->"밝히고 싶지 않음"
+                                else->null
+                            }
+                            //성별필터
+                            val isUserWithinGenderGroup=if(userGenderGroupFilter!=null && userGenderGroupUser!=null){
+
+                                userGenderGroupFilter==userGenderGroupUser
+                            }else{
+                                true
+                            }
+                            val firstPet = user.pets.firstOrNull()
+                            Log.d("firstpet",firstPet?.petSex.toString())
+                            firstPet?.character?.let { it1 -> Log.d("firstpet", it1) }
+                            Log.d("firstpet",firstPet?.neutered.toString())
+                           when(firstPet?.petSex){
+                                0.toLong()  ->petGenderUser="남아"
+                                1.toLong() -> petGenderUser="여아"
+                            }
+                            petPropensityUser=firstPet?.character
+                            petNeuteredUser=firstPet?.neutered
+                            if(firstPet?.neutered!=null) {
+                                Log.d("중성화여부", firstPet.neutered.toString())
+                            }
+
+                            val isUserWithinPetGenderGroup=if(petGenderUser!=null && petGenderFilter!=null){
+                                Log.d("펫성별유저", petGenderUser!!)
+                                Log.d("펫성별필터", petGenderFilter!!)
+                                petGenderUser==petGenderFilter
+                            }else{
+                                true
+                            }
+                            val isUserWitninPetPropensityGroup=if(petPropensityUser!=null && petPropensityFilter !=null){
+                                Log.d("펫성향유저", petPropensityUser!!)
+                                Log.d("펫성향필터", petPropensityFilter!!)
+                                petPropensityUser==petPropensityFilter
+                            }else{
+                                true
+                            }
+                            val isUserWithinPetNeuteredGroup=if(petNeuteredFilter !=null && petNeuteredUser!=null){
+                                Log.d("펫중성화유저", petNeuteredFilter!!.toString())
+                                Log.d("펫중성화필터", petNeuteredUser!!.toString())
+                                petNeuteredFilter==petNeuteredUser
+                            }else{
+                                true
+                            }
+
+
+                            isUserWithinDistance && isUserWithinAgeGroup &&isUserWithinGenderGroup&&isUserWithinPetGenderGroup&&isUserWitninPetPropensityGroup&&isUserWithinPetNeuteredGroup
                         }
 
 
@@ -495,6 +579,14 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
                 }
             }
         })
+    }
+    fun resetFilters() {
+        distanceFilterValue = null
+        userAgeGroup = null
+        userGenderGroupFilter = null
+        petGenderFilter = null
+        petPropensityFilter = null
+        petNeuteredFilter = null
     }
     private fun observeViewModel() {
 
@@ -931,11 +1023,9 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
             (birthDate.month == currentDate.month && birthDate.dayOfMonth > currentDate.dayOfMonth)) {
             age--
         }
-
         if (age < 1) {
             age = 1
         }
-
         return age
     }
     //맵의 마커 클릭시
@@ -1266,7 +1356,10 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
                 val imageViewBottomPetProfileImage=onWalkBottomSheetView.findViewById<ImageView>(R.id.ImageViewBottomPetProfileImage)
                 val buttonBottomWalk=onWalkBottomSheetView.findViewById<Button>(R.id.buttonBottomWalk)
                 val buttonBottomBlock=onWalkBottomSheetView.findViewById<Button>(R.id.buttonBottomBlock)
+                val textViewBottomUserGender=onWalkBottomSheetView.findViewById<TextView>(R.id.textViewBottomUserGender)
                 val userRating= onWalkBottomSheetView.findViewById<RatingBar>(R.id.ratingBarUser2)
+
+
 
                 buttonBottomWalk.setOnClickListener {
                     val bundle=Bundle()
@@ -1348,6 +1441,12 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
                         textViewBottomUserMathcingHistory.text = "매칭 기록: 0회"
                     }
                 })
+                textViewBottomUserGender.text="성별 : ${when(user.gender){
+                    0->"남성"
+                    1->"여성"
+                    2->"밝히고 싶지 않음"
+                    else->""
+                }}"
                 val userImageRef = Firebase.storage.reference.child(user.userImage!!)
                 Log.d("이미지",user.userImage)
                 Log.d("이미지",userImageRef.toString())
