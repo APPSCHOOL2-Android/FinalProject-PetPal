@@ -99,6 +99,7 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
     private val viewModel: WalkViewModel by activityViewModels {
         WalkViewModelFactory(WalkRepository(), requireActivity().application)
     }
+    private var location123:Location?=null
     private var repeatJob: Job? = null
     val CURRENT_LOCATION_MARKER_TAG = 100
     private lateinit var kakaoSearchResponse: KakaoSearchResponse
@@ -142,8 +143,6 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
             handler.postDelayed(this, delayMillis)
         }
     }
-
-
 
 
     companion object {
@@ -287,9 +286,10 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
                 showProgress()
                 startCountdown()
                 onWalk=true
+                startLocationUpdates()
                 observeViewModelonWalk()
-                observeViewModelOnWalkLocationChanges()
-                viewModel.observeUsersOnWalkLocation()
+                //observeViewModelOnWalkLocationChanges()
+                //viewModel.observeUsersOnWalkLocation()
                 viewModel.observeUsersOnWalk()
 
                 fragmentWalkBinding.mapView.removeAllPOIItems()
@@ -382,11 +382,13 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
 
 
         fragmentWalkBinding.imageViewMylocation.setOnClickListener {
-            if(onWalk==true) {
-                getCurrentLocationOnWalk()
-            }else {
-                getCurrentLocation()
-            }
+            updateCurrentLocationOnce()
+
+//            if(onWalk==true) {
+//                getCurrentLocationOnWalk()
+//            }else {
+//                getCurrentLocation()
+//            }
             LastKnownLocation.latitude = null
             LastKnownLocation.longitude= null
         }
@@ -499,7 +501,7 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
                     tag = place.id.hashCode() //id로 태그
                     this.mapPoint = mapPoint
                     markerType = MapPOIItem.MarkerType.CustomImage
-                    customImageResourceId = R.drawable.pet_shop
+                    customImageResourceId = R.drawable.paw
                     //마커 크기 자동조정
                     isCustomImageAutoscale = true
                     //마커 위치 조정
@@ -575,21 +577,23 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
                     LastKnownLocation.longitude=it.longitude
                     viewModel.observeUsersOnWalk()
                     val mapPoint = MapPoint.mapPointWithGeoCoord(it.latitude, it.longitude)
-                    showUserLocationOnMap(it)
+                    //showUserLocationOnMap(it)
                     fragmentWalkBinding.mapView.setMapCenterPoint(mapPoint, true)
                 }
             }
         }
     }
-    private fun getCurrentLocationOnWalk2() {
+    private fun getCurrentLocationOnWalk2(){
         if (checkPermission(Manifest.permission.ACCESS_FINE_LOCATION)
         ) {
             fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
                 location?.let {
                     LastKnownLocation.latitude=it.latitude
                     LastKnownLocation.longitude=it.longitude
+                    location123?.latitude=it.latitude
+                    location123?.longitude=it.longitude
                     viewModel.observeUsersOnWalk()
-                    val mapPoint = MapPoint.mapPointWithGeoCoord(it.latitude, it.longitude)
+                    //val mapPoint = MapPoint.mapPointWithGeoCoord(it.latitude, it.longitude)
                     showUserLocationOnMap(it)
                 }
             }
@@ -605,7 +609,7 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
                     LastKnownLocation.latitude=it.latitude
                     LastKnownLocation.longitude=it.longitude
                     viewModel.searchPlacesByKeyword(it.latitude, it.longitude, "동물")
-                    showUserLocationOnMap1(location)
+                    //showUserLocationOnMap1(location)
                     val mapPoint = MapPoint.mapPointWithGeoCoord(it.latitude, it.longitude)
                     fragmentWalkBinding.mapView.setMapCenterPoint(mapPoint, true)
                 }
@@ -629,7 +633,7 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
                 val location = Location("providerName")
                 location.latitude = LastKnownLocation.latitude!!
                 location.longitude = LastKnownLocation.longitude!!
-                showUserLocationOnMap(location)
+                //showUserLocationOnMap(location)
                 fragmentWalkBinding.mapView.setMapCenterPoint(mapPoint, true)
 
                 for (marker in currentMarkers) {
@@ -697,12 +701,12 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
             for (location in p0.locations) {
                 // 정확도 체크
                 if (location.accuracy <= 5) {
-                    showUserLocationOnMap(location)
+                    //showUserLocationOnMap(location)
                     locationList.add(location)
                     lastLocation = location
                     lastLocation?.let { location ->
                         viewModel.updateUserLocation(userId, location.latitude, location.longitude)
-                        viewModel.updateLocationIfOnWalk(userId,location.latitude,location.longitude, onWalk!!)
+                        //viewModel.updateLocationIfOnWalk(userId,location.latitude,location.longitude)
                     }
                     Log.d("infooooo1",lastLocation.toString())
                 }
@@ -828,6 +832,13 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
                 viewModel.distanceMoved.value=0.0f
                 viewModel.startTimer()
                 viewModel.setOnWalkStatusTrue(userId)
+                location123?.latitude?.let {
+                    location123?.longitude?.let { it1 ->
+                        viewModel.updateUserLocation(userId,
+                            it, it1
+                        )
+                    }
+                }
                 //requestLocationPermissionIfNeededOnWalk()
                 //startLocationUpdates()
                 hideProgress()
@@ -1398,6 +1409,7 @@ class WalkFragment : Fragment(), net.daum.mf.map.api.MapView.POIItemEventListene
 
         viewModel.stopLocationUpdates()
         viewModel.startLocationUpdates()
+        //updateCurrentLocationOnce()
         if(onWalk == true) {
             observeViewModelonWalk()
             requestLocationPermissionIfNeededOnWalk()

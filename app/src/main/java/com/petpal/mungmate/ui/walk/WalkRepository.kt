@@ -18,6 +18,7 @@ import com.petpal.mungmate.model.Pet
 import com.petpal.mungmate.model.ReceiveUser
 import com.petpal.mungmate.model.Review
 import com.petpal.mungmate.model.UserBasicInfoData
+import com.petpal.mungmate.utils.onWalk.onWalk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -189,8 +190,9 @@ class WalkRepository {
         ).await()
     }
 
-    suspend fun updateLocationIfOnWalk(userId: String, latitude: Double, longitude: Double, onWalk: Boolean) {
-        if (onWalk) {
+
+    suspend fun updateLocationIfOnWalk(userId: String, latitude: Double, longitude: Double) {
+        if (onWalk == true) {
             try {
                 val userRef = db.collection("users").document(userId)
                 val locationData = mapOf(

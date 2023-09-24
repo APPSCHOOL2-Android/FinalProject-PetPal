@@ -23,6 +23,7 @@ import com.petpal.mungmate.model.Match
 import com.petpal.mungmate.model.PlaceData
 import com.petpal.mungmate.model.ReceiveUser
 import com.petpal.mungmate.model.Review
+import com.petpal.mungmate.utils.onWalk.onWalk
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -308,11 +309,11 @@ class WalkViewModel(private val repository: WalkRepository,application: Applicat
             }
         }
     }
-    fun updateLocationIfOnWalk(userId: String, latitude: Double, longitude: Double, onWalk: Boolean) {
-        if (onWalk) {
+    fun updateLocationIfOnWalk(userId: String, latitude: Double, longitude: Double) {
+        if (onWalk == true) {
             viewModelScope.launch {
                 try {
-                    repository.updateLocationIfOnWalk(userId, latitude, longitude,onWalk)
+                    repository.updateLocationIfOnWalk(userId, latitude, longitude)
                     // 업데이트 성공
                 } catch (e: Exception) {
                     // 업데이트 실패: 예외 처리
