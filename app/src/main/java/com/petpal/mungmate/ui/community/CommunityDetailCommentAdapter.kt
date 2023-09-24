@@ -22,6 +22,7 @@ import com.google.firebase.storage.FirebaseStorage
 import com.petpal.mungmate.R
 import com.petpal.mungmate.databinding.RowCommunityCommentBinding
 import com.petpal.mungmate.model.Comment
+import com.petpal.mungmate.model.Post
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.TimeZone
@@ -72,10 +73,10 @@ class CommunityDetailCommentAdapter(
         val user = commentList.commentUid
 
         if (user != null) {
-            val userId = commentList.commentUid
+
 
             db.collection("users")
-                .document(userId)
+                .document(user)
                 .get()
                 .addOnSuccessListener { documentSnapshot ->
                     if (documentSnapshot.exists()) {
@@ -88,7 +89,6 @@ class CommunityDetailCommentAdapter(
                             val storageRef = storage.reference.child(userImage)
                             holder.communityUserNickName.text = nickname
                             storageRef.downloadUrl.addOnSuccessListener { uri ->
-                                // Glide를 사용하여 이미지를 로드하고 ImageView에 표시
                                 Glide.with(context)
                                     .load(uri)
                                     .diskCacheStrategy(DiskCacheStrategy.ALL)
@@ -137,14 +137,31 @@ class CommunityDetailCommentAdapter(
         }
 
         holder.communityCommentCommentCounter.text = commentList.replyList.size.toString()
-        if (commentList.replyList.isNotEmpty()) {
-            val replyAdapter = ReplyAdapter(commentList.replyList)
-            holder.replyRecyclerView.layoutManager = LinearLayoutManager(context)
-            holder.replyRecyclerView.adapter = replyAdapter
-            holder.replyRecyclerView.visibility = View.VISIBLE
-        } else {
-            holder.replyRecyclerView.visibility = View.GONE
-        }
+
+
+        val postID = postGetId
+
+        db.collection("Post").document(postID).get()
+            .addOnSuccessListener { documentSnapshot ->
+                if (documentSnapshot.exists()) {
+                    val post = documentSnapshot.toObject(Post::class.java)
+                    val commentToDisplay = post?.postComment!![position]
+
+
+                    commentToDisplay?.replyList?.let { replyList ->
+
+                        val replyAdapter = ReplyAdapter(replyList,context)
+                        holder.communityCommentCommentCounter.text = replyList.size.toString()
+
+                        holder.replyRecyclerView.layoutManager = LinearLayoutManager(context)
+                        holder.replyRecyclerView.adapter = replyAdapter
+                    }
+                }
+            }
+            .addOnFailureListener { e ->
+
+                Log.e("대댓글 가져오기 오류", e.toString())
+            }
 
 
         holder.communityCommentMenuImageButton.setOnClickListener { view ->
@@ -222,9 +239,4 @@ class CommunityDetailCommentAdapter(
         notifyDataSetChanged()
     }
 
-    fun addReply(newReply: Comment, position: Int) {
-        postCommentList[position].replyList.add(newReply)
-
-        notifyItemChanged(position)
-    }
 }

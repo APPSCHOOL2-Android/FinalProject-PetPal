@@ -20,7 +20,7 @@ data class Comment(
     val commentContent: String? = null,//댓글 내용
     val commentLike: Long = 0,//댓글 좋아요 수
     val parentID: String? = null,//부모 ID(최상위인 경우 "root")
-    val replyList: MutableList<Comment> = mutableListOf() // 대댓글 리스트
+    var replyList: MutableList<Comment> = mutableListOf() // 대댓글 리스트
 )
 
 data class PostImage(

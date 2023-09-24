@@ -79,6 +79,7 @@
         app:layout_constraintTop_toBottomOf="@id/communityCommentContent">
 
         <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/communityFavoriteConstraintLayout"
             android:layout_width="wrap_content"
             android:layout_height="match_parent">
 
@@ -160,7 +161,7 @@
         android:layout_width="match_parent"
         android:layout_marginStart="@dimen/common_small_margin"
         android:layout_height="wrap_content"
-        android:background="#FBFBFB"
+        android:background="#EDEDED"
         app:layout_constraintTop_toBottomOf="@id/communityCommentDivider" />
 </androidx.constraintlayout.widget.ConstraintLayout>
 
