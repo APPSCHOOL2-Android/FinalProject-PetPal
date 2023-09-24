@@ -9,6 +9,7 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.PopupMenu
 import android.widget.TextView
+import androidx.core.view.drawToBitmap
 import androidx.recyclerview.widget.RecyclerView
 import com.airbnb.lottie.LottieAnimationView
 import com.bumptech.glide.Glide
@@ -17,6 +18,8 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.ktx.storage
 import com.google.firebase.storage.FirebaseStorage
 import com.petpal.mungmate.R
 import com.petpal.mungmate.databinding.RowCommunityCommentBinding
@@ -36,7 +39,7 @@ class CommunityDetailCommentAdapter(
 
     inner class ViewHolder(item: RowCommunityCommentBinding) :
         RecyclerView.ViewHolder(item.root) {
-        val communityCommentMenuImageButton: ImageButton = item.communityCommentMenuImageButton
+        val communityCommentMenuImageButton = item.communityCommentMenuImageButton
         val communityProfileImage: ImageView = item.communityCommentProfileImage
         val communityUserNickName: TextView = item.communityCommentUserNickName
 
@@ -63,28 +66,40 @@ class CommunityDetailCommentAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
 
-        val commentList = postCommentList[position]
+        val comment = postCommentList[position]
 
-        val storage = FirebaseStorage.getInstance()
-        val storageRef = storage.reference.child(commentList.commentUserImage.toString())
-        storageRef.downloadUrl.addOnSuccessListener { uri ->
+        Log.w("commentUserImage", comment.commentUserImage.toString())
+        if (comment.commentUserImage?.startsWith('/') == true) {
+            val storageRef = Firebase.storage.reference
+            val userImageReference = storageRef.child(comment.commentUserImage)
+
+            //storage 경로라면 storage에서 이미지 넣어주기
+            Log.w("commentUserImage", "storage, ${userImageReference.path}")
+            userImageReference.downloadUrl.addOnSuccessListener {
+                Glide.with(context)
+                    .load(it)
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .fitCenter()
+                    .into(holder.communityProfileImage)
+            }
+        } else {
+            Log.w("commentUserImage", "url")
             Glide
                 .with(context)
-                .load(uri)
+                .load(comment.commentUserImage)
                 .diskCacheStrategy(DiskCacheStrategy.ALL)
                 .fitCenter()
-                .error(R.drawable.main_image)
-                .fallback(R.drawable.main_image)
                 .into(holder.communityProfileImage)
-
         }
-        holder.communityUserNickName.text = commentList.commentNickName.toString()
+
+        holder.communityUserNickName.text = comment.commentNickName.toString()
+
 
 
         val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
         dateFormat.timeZone = TimeZone.getTimeZone("Asia/Seoul")
 
-        val snapshotTime = dateFormat.parse(commentList.commentDateCreated)
+        val snapshotTime = dateFormat.parse(comment.commentDateCreated)
 
         val currentTime = Date()
         val timeDifferenceMillis = currentTime.time - snapshotTime.time  // Firestore 시간에서 현재 시간을 뺌
@@ -97,12 +112,12 @@ class CommunityDetailCommentAdapter(
         }
 
         holder.communityPostDateCreated.text = timeAgo
-        holder.communityContent.text = commentList.commentContent
+        holder.communityContent.text = comment.commentContent
         holder.communityCommentFavoriteCounter.text = "0"
         holder.communityCommentCommentCounter.text = "0"
 
         holder.communityCommentReplyTextView.setOnClickListener {
-            callback.onReplyButtonClicked(commentList)
+            callback.onReplyButtonClicked(comment)
 
         }
 
@@ -123,6 +138,9 @@ class CommunityDetailCommentAdapter(
                     when (it.itemId) {
                         R.id.item_comment_delete -> {
                             val commentToDelete = postCommentList[holder.adapterPosition]
+
+                            Log.d("이건 뭐죠?", commentToDelete.commentUid.toString())
+                            Log.d("이건 뭐죠?", currentUserId.toString())
 
                             if (commentToDelete.commentUid.toString() == currentUserId.toString()) {
                                 val db = FirebaseFirestore.getInstance()
@@ -175,6 +193,7 @@ class CommunityDetailCommentAdapter(
         }
 
     }
+
 
     fun updateData(newData: MutableList<Comment>) {
         postCommentList.clear()

@@ -65,7 +65,7 @@ class CommunityPostDetailFragment : Fragment(),AdapterCallback {
     var getAuthorUid = ""
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View? {
 
         communityPostDetailBinding = FragmentCommunityPostDetailBinding.inflate(inflater)
@@ -78,8 +78,8 @@ class CommunityPostDetailFragment : Fragment(),AdapterCallback {
         communityPostDetailBinding.run {
             toolbar()
             lottie()
-            getDataFirebasFirestore()
-            communityDetailRecyclerView()
+            getPostData(postGetId)
+            communityDetailCommentRecyclerView()
             getFireStoreUserInfo()
             comment()
 
@@ -119,7 +119,7 @@ class CommunityPostDetailFragment : Fragment(),AdapterCallback {
                 s: CharSequence?,
                 start: Int,
                 count: Int,
-                after: Int
+                after: Int,
             ) {
             }
 
@@ -139,7 +139,7 @@ class CommunityPostDetailFragment : Fragment(),AdapterCallback {
                     )
                     communityPostDetailCommentTextInputLayout.setEndIconOnClickListener {
                         coroutineScope.launch(Dispatchers.IO) {
-                            val documentSnapshot = getFirestoreData(postGetId)
+                            val documentSnapshot = getPostSnapshotFromFirestore(postGetId)
                             withContext(Dispatchers.Main) {
 
                                 updateComment(documentSnapshot)
@@ -158,10 +158,10 @@ class CommunityPostDetailFragment : Fragment(),AdapterCallback {
         })
     }
 
-    private fun getDataFirebasFirestore() {
+    private fun getPostData(postGetId: String) {
         coroutineScope.launch(Dispatchers.IO) {
             skeleton = communityPostDetailBinding.skeletonLayout.apply { showSkeleton() }
-            val documentSnapshot = getFirestoreData(postGetId)
+            val documentSnapshot = getPostSnapshotFromFirestore(postGetId)
             withContext(Dispatchers.Main) {
                 updateUI(documentSnapshot)
                 skeleton.showOriginal()
@@ -273,58 +273,62 @@ class CommunityPostDetailFragment : Fragment(),AdapterCallback {
                     .popBackStack()
             }
             setOnMenuItemClickListener {
-            if (getAuthorUid==user?.uid.toString()) {
-                when (it?.itemId) {
-                    R.id.item_modify -> {
-                        val bundle = Bundle().apply {
-                            putString("positionPostId", postGetId)
-                        }
-                        findNavController().navigate(
-                            R.id.action_communityPostDetailFragment_to_communityDetailModifyFragment,
-                            bundle
-                        )
-
-                    }
-
-                    R.id.item_delete -> {
-                        val dlg = CommunityDeleteDialog(requireContext())
-                        dlg.listener =
-                            object : CommunityDeleteDialog.LessonDeleteDialogClickedListener {
-                                override fun onDeleteClicked() {
-                                    val db = FirebaseFirestore.getInstance()
-                                    val postRef = db.collection("Post")
-                                    postGetId?.let { id ->
-                                        postRef.document(id)
-                                            .delete()
-                                            .addOnFailureListener {
-                                                Snackbar.make(
-                                                    rootView,
-                                                    "데이터를 삭제 하는데 실패했습니다.",
-                                                    Snackbar.LENGTH_SHORT
-                                                ).show()
-                                            }
-                                    }
-
-                                    Snackbar.make(rootView, "게시글이 삭제 되었습니다.", Snackbar.LENGTH_SHORT)
-                                        .show()
-                                    val navController = findNavController()
-                                    navController.popBackStack()
-                                }
+                if (getAuthorUid == user?.uid.toString()) {
+                    when (it?.itemId) {
+                        R.id.item_modify -> {
+                            val bundle = Bundle().apply {
+                                putString("positionPostId", postGetId)
                             }
-                        dlg.start()
+                            findNavController().navigate(
+                                R.id.action_communityPostDetailFragment_to_communityDetailModifyFragment,
+                                bundle
+                            )
+
+                        }
+
+                        R.id.item_delete -> {
+                            val dlg = CommunityDeleteDialog(requireContext())
+                            dlg.listener =
+                                object : CommunityDeleteDialog.LessonDeleteDialogClickedListener {
+                                    override fun onDeleteClicked() {
+                                        val db = FirebaseFirestore.getInstance()
+                                        val postRef = db.collection("Post")
+                                        postGetId?.let { id ->
+                                            postRef.document(id)
+                                                .delete()
+                                                .addOnFailureListener {
+                                                    Snackbar.make(
+                                                        rootView,
+                                                        "데이터를 삭제 하는데 실패했습니다.",
+                                                        Snackbar.LENGTH_SHORT
+                                                    ).show()
+                                                }
+                                        }
+
+                                        Snackbar.make(
+                                            rootView,
+                                            "게시글이 삭제 되었습니다.",
+                                            Snackbar.LENGTH_SHORT
+                                        )
+                                            .show()
+                                        val navController = findNavController()
+                                        navController.popBackStack()
+                                    }
+                                }
+                            dlg.start()
+                        }
                     }
+                } else {
+                    Snackbar.make(rootView, "권한이 없습니다.", Snackbar.LENGTH_SHORT)
+                        .show()
                 }
-            }else{
-                Snackbar.make(rootView, "권한이 없습니다.", Snackbar.LENGTH_SHORT)
-                    .show()
-            }
                 false
             }
         }
     }
 
     // Firestore에서 데이터 가져오기
-    private suspend fun getFirestoreData(id: String): DocumentSnapshot? {
+    private suspend fun getPostSnapshotFromFirestore(id: String): DocumentSnapshot? {
         val db = FirebaseFirestore.getInstance()
         val postRef = db.collection("Post").document(id).get().await()
         return if (postRef.exists()) postRef else null
@@ -337,7 +341,7 @@ class CommunityPostDetailFragment : Fragment(),AdapterCallback {
             val postTitle = documentSnapshot.getString("postTitle")
             val userNickName = documentSnapshot.getString("userNickName")
             val postDateCreated = documentSnapshot.getString("postDateCreated")
-
+            val postCategory = documentSnapshot.getString("postCategory")
             val postImagesList = documentSnapshot.get("postImages") as? List<*>
 
             var postImagesGetList = mutableListOf<PostImage>()
@@ -410,30 +414,82 @@ class CommunityPostDetailFragment : Fragment(),AdapterCallback {
                 timeDifferenceMillis < 86_400_000 -> "${timeDifferenceMillis / 3_600_000}시간 전" // 1일 미만
                 else -> "${timeDifferenceMillis / 86_400_000}일 전" // 1일 이상 전
             }
+
             val storage = FirebaseStorage.getInstance()
             val storageRef = storage.reference.child(userImage.toString())
             storageRef.downloadUrl.addOnSuccessListener { uri ->
-                communityPostDetailBinding.run {
-                    Glide
-                        .with(requireContext())
-                        .load(uri)
-                        .diskCacheStrategy(DiskCacheStrategy.ALL)
-                        .fitCenter()
-                        .into(communityPostDetailProfileImage)
+                Glide
+                    .with(requireContext())
+                    .load(uri)
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .fitCenter()
+                    .into(communityPostDetailBinding.communityPostDetailProfileImage)
+            }
+            
+            communityPostDetailBinding.run {
+
+                communityPostDetailPostTitle.text = postTitle
+                communityPostDateCreated.text = timeAgo
+                communityPostDetailFavoriteCounter.text = postLike.toString()
+                communityPostDetailCommentCounter.text = postCommentList.size.toString()
+                communityPostDetailContent.text = postContent
+                communityPostDetailUserNickName.text = userNickName
+                communityPostDetailCategoryTextView.text = postCategory
+
+                communityPostDetailCategoryTextView.setCompoundDrawablesWithIntrinsicBounds(
+                    getCategoryDrawable(postCategory), 0, 0, 0
+                )
+
+//             val storage = FirebaseStorage.getInstance()
+//             val storageRef = storage.reference.child(userImage.toString())
+//             storageRef.downloadUrl.addOnSuccessListener { uri ->
+//                 communityPostDetailBinding.run {
+//                     Glide
+//                         .with(requireContext())
+//                         .load(uri)
+//                         .diskCacheStrategy(DiskCacheStrategy.ALL)
+//                         .fitCenter()
+//                         .into(communityPostDetailProfileImage)
 
 
-                    communityPostDetailPostTitle.text = postTitle
-                    communityPostDateCreated.text = timeAgo
-                    communityPostDetailContent.text = postContent
-                    communityPostDetailUserNickName.text = userNickName
-                }
+//                     communityPostDetailPostTitle.text = postTitle
+//                     communityPostDateCreated.text = timeAgo
+//                     communityPostDetailContent.text = postContent
+//                     communityPostDetailUserNickName.text = userNickName
+//                 }
             }
         }
         initViewPager2()
         subscribeObservers()
     }
 
-    private fun FragmentCommunityPostDetailBinding.communityDetailRecyclerView() {
+    private fun getCategoryDrawable(postCategory: String?) = when (postCategory) {
+        "일상" -> {
+            R.drawable.tag_20px
+        }
+
+        "산책일지" -> {
+            R.drawable.floor_lamp_20px
+        }
+
+        "산책 메이트 구해요" -> {
+            R.drawable.forum_20px
+        }
+
+        "장소 후기" -> {
+            R.drawable.map_20px
+        }
+
+        "애견용품 후기" -> {
+            R.drawable.pet_supplies_20px
+        }
+
+        else -> {
+            R.drawable.dog
+        }
+    }
+
+    private fun FragmentCommunityPostDetailBinding.communityDetailCommentRecyclerView() {
         communityPostDetailCommentRecyclerView.run {
             communityDetailCommentAdapter =
                 CommunityDetailCommentAdapter(
@@ -526,6 +582,7 @@ class CommunityPostDetailFragment : Fragment(),AdapterCallback {
                 }
         }
     }
+
     private fun initViewPager2() {
         communityPostDetailBinding.communityPostDetailViewPager2.run {
             viewPagerAdapter = CommunityDetailViewPager2Adapter(mainActivity)

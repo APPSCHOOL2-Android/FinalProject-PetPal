@@ -5,7 +5,6 @@ import com.google.android.gms.tasks.Task
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
-import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.petpal.mungmate.model.ChatRoom
@@ -24,9 +23,11 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+private const val TAG = "CHAT_REPOSITORY"
+
 class ChatRepository {
     companion object {
-        // collection 이름
+        // collection 이름 : 오타 방지, 재사용
         const val CHAT_ROOMS_NAME = "chatRooms"
         const val MESSAGES_NAME = "messages"
         const val MATCHES_NAME = "matches"
@@ -34,20 +35,41 @@ class ChatRepository {
         const val USERS_NAME = "users"
         const val PETS_NAME = "pets"
 
+        const val BLOCK_USER_LIST = "blockUserList"
+
         const val TIMESTAMP = "timestamp"
         const val CHAT_PAGE_SIZE = 100L
     }
-
-    val TAG = "CHAT_REPOSITORY"
     var db = Firebase.firestore
 
     // todo await() 추가해서 리턴값들 DocumentReference로 통일하기
     // 채팅방에 메시지 추가 = 메시지 전송
-    fun saveMessage(chatRoomId: String, message: Message): Task<DocumentReference> {
-        var messagesCollection = db.collection(CHAT_ROOMS_NAME)
+    fun saveMessage(chatRoomId: String, message: Message) {
+        var messageDocRef = db.collection(CHAT_ROOMS_NAME)
             .document(chatRoomId)
             .collection(MESSAGES_NAME)
-        return messagesCollection.add(message)
+            .document()
+
+        message.id = messageDocRef.id
+
+        messageDocRef.set(message)
+            .addOnSuccessListener {
+                Log.d(TAG, "Success add message")
+                // 메시지가 성공적으로 저장되면 해당 채팅방 마지막 메시지, 마지막 시간 갱신
+                val chatRoomRef = db.collection(CHAT_ROOMS_NAME).document(chatRoomId)
+                val updateData: HashMap<String, Any> = hashMapOf(
+                    "lastMessage" to message.content,
+                    "lastMessageTime" to message.timestamp
+                )
+                chatRoomRef.update(updateData)
+                    .addOnSuccessListener {
+                        Log.d(TAG, "Success updating chatRoom")
+                    }.addOnFailureListener { e ->
+                        Log.d(TAG, "Error updating chatRoom: $e")
+                    }
+            }.addOnFailureListener { e ->
+                Log.d(TAG, "Error add message: $e")
+            }
     }
 
     // 메시지 목록 실시간 로드
@@ -103,25 +125,7 @@ class ChatRepository {
         awaitClose { listenerRegistration.remove() }
     }
 
-
-    // 산책 매칭 저장
-    fun saveMatch(match: Match): Task<DocumentReference> {
-        val matchesCollection = db.collection(MATCHES_NAME)
-        return matchesCollection.add(match)
-    }
-
-    // Document Key 값으로 산책 매칭 데이터 가져오기
-    suspend fun getMatchById(matchId: String): DocumentSnapshot? {
-        return try {
-            db.collection(MATCHES_NAME)
-                .document(matchId)
-                .get()
-                .await()
-        } catch (e: Exception) {
-            null
-        }
-    }
-
+    // 사용자 id로 정보 객체 가져오기
     suspend fun getUserInfoById(userId: String): DocumentSnapshot? {
         return try {
             db.collection(USERS_NAME)
@@ -133,14 +137,24 @@ class ChatRepository {
         }
     }
 
-    // 사용자 id로 사용자 Document 가져오기
-    suspend fun getUserBasicInfoById(userId: String): FirestoreUserBasicInfoData? {
-        return try {
-            db.collection(USERS_NAME).document(userId).get().await().toObject(FirestoreUserBasicInfoData::class.java)
-        } catch (e: Exception) {
-            Log.d(TAG, "getUserBasicInfo failed : ${e.printStackTrace()}")
-            null
+    // 사용자 정보 실시간 감시 리스너 등록
+    fun getUserBasicInfo(userId: String): Flow<FirestoreUserBasicInfoData> = callbackFlow {
+        val userDocRef = db.collection(USERS_NAME).document(userId)
+
+        val listenerRegistration = userDocRef.addSnapshotListener { snapshot, error ->
+            if (error != null) {
+                return@addSnapshotListener
+            }
+
+            if (snapshot != null && snapshot.exists()) {
+                val userBasicInfo = snapshot.toObject(FirestoreUserBasicInfoData::class.java)
+                if (userBasicInfo != null) {
+                    trySend(userBasicInfo)
+                }
+            }
         }
+
+        awaitClose { listenerRegistration.remove() }
     }
 
     suspend fun getMainPetInfoByUserId(userId: String): PetData? {
@@ -161,22 +175,9 @@ class ChatRepository {
         return userReportsCollection.add(userReport)
     }
 
-    // matches 컬렉션 내 문서의 특정 필드 업데이트
-    suspend fun updateFieldInMatchDocument(matchKey: String, fieldName: String, updateValue: Any) {
-        val matchDocumentRef = db.collection(MATCHES_NAME).document(matchKey)
-        val updateData = hashMapOf<String, Any>()
-        updateData[fieldName] = updateValue
-
-        try {
-            matchDocumentRef.update(updateData).await()
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-    }
-
-    suspend fun getOrCreateChatRoom(user1Id: String, user2Id: String): String {
+    suspend fun getOrCreateChatRoom(myUserId: String, receiverId: String): ChatRoom {
         // 사용자 ID 조합으로 chatroom Key 생성
-        val chatRoomKey = listOf(user1Id, user2Id).sorted().joinToString("_")
+        val chatRoomKey = listOf(myUserId, receiverId).sorted().joinToString("_")
 
         // chatroom 존재 확인
         val chatRoomDocRef = db.collection(CHAT_ROOMS_NAME).document(chatRoomKey)
@@ -185,12 +186,13 @@ class ChatRepository {
         if (chatRoomDocSnapshot.exists()) {
             // 채팅방이 이미 존재하는 경우, 기존 채팅방의 ID를 반환
             Log.d(TAG, "load chatroom completed")
-            return chatRoomKey
+            return chatRoomDocSnapshot.toObject(ChatRoom::class.java) ?: ChatRoom()
         } else {
             // 채팅방이 존재하지 않는 경우, 새로운 채팅방을 생성하고 ID를 반환
             val newChatRoom = ChatRoom(
-                user1Id,
-                user2Id,
+                chatRoomKey,
+                myUserId,
+                receiverId,
                 "",
                 Timestamp.now(),
                 false,
@@ -205,9 +207,10 @@ class ChatRepository {
             // TODO 채팅 보낼 때 lastMessageTime이 오늘이 아닐 경우 보내는 걸로 나중에 수정하기
             val dateContent = SimpleDateFormat("yyyy년 MM월 dd일", Locale.getDefault())
                 .format(Date())
-            
+
             val message = Message(
-                user1Id,
+                "",
+                myUserId,
                 dateContent,
                 Timestamp.now(),
                 true,
@@ -217,33 +220,146 @@ class ChatRepository {
             saveMessage(chatRoomKey, message)
             Log.d(TAG, "send date message completed")
 
-            return chatRoomKey
+            return newChatRoom
         }
     }
 
-    // 채팅방의 모든 메시지 로드
-//    fun getSavedMessages(chatRoomId: String): CollectionReference {
-//        val messagesCollection = db.collection("${CHAT_ROOMS_NAME}/${chatRoomId}/${MESSAGES_NAME}")
-//        return messagesCollection
-//    }
+    // 상대방 차단 상태 반전
+    suspend fun toggleBlockStatus(currentUserId: String, receiverId: String) {
+        val userRef = db.collection(USERS_NAME).document(currentUserId)
+        val blockedUserList = mutableListOf<String>()
 
-    // 현재 시간보다 이전 메시지를 N개 가져오는데 사용, Paging으로 자르기
-//    suspend fun receiveMessages(chatRoomId: String, lastTime: Timestamp): List<Message> {
-//        return db.collection(CHAT_ROOMS_NAME)
-//            .document(chatRoomId)
-//            .collection(MESSAGES_NAME)
-//            .whereLessThan(TIMESTAMP, lastTime)
-//            .orderBy(TIMESTAMP, Query.Direction.DESCENDING)
-//            .limit(CHAT_PAGE_SIZE)
-//            .get()
-//            .await()
-//            .documents
-//            .map { document ->
-//                document.let {
-//                    document.toObject(Message::class.java)
-//                }?: kotlin.run {
-//                    Message()
-//                }
-//            }
-//    }
+        // 현재 차단 목록 가져오기
+        val snapshot = userRef.get().await()
+        if (snapshot.exists()) {
+            val existBlockList = snapshot.get(BLOCK_USER_LIST) as? List<String>
+            if (existBlockList != null) {
+                blockedUserList.addAll(existBlockList)
+            }
+        }
+
+        // 이미 차단되어 있는 사용자인지 확인
+        if (blockedUserList.contains(receiverId)) {
+            // 차단 목록에 추가
+            blockedUserList.add(receiverId)
+        } else {
+            // 차단 목록에서 제거
+            blockedUserList.remove(receiverId)
+        }
+
+        // 업데이트된 차단 목록을 DB에 저장
+        userRef.update(BLOCK_USER_LIST, blockedUserList).await()
+    }
+
+    suspend fun addUserToBlockList(currentUserId: String, blockUserId: String) {
+        val userRef = db.collection(USERS_NAME).document(currentUserId)
+        val blockedUserList = mutableListOf<String>()
+
+        // 현재 차단 목록 가져오기
+        val snapshot = userRef.get().await()
+        if (snapshot.exists()) {
+            val existBlockList = snapshot.get(BLOCK_USER_LIST) as? List<String>
+            if (existBlockList != null) {
+                blockedUserList.addAll(existBlockList)
+            }
+        }
+
+        // 이미 차단되어 있는 사용자인지 확인
+        if (!blockedUserList.contains(blockUserId)) {
+            // 차단 목록에 추가
+            blockedUserList.add(blockUserId)
+            // 업데이트된 차단 목록을 DB에 저장
+            userRef.update(BLOCK_USER_LIST, blockedUserList).await()
+        }
+    }
+
+    suspend fun removeUserFromBlockList(currentUserId: String, blockUserId: String) {
+        val userRef = db.collection(USERS_NAME).document(currentUserId)
+        val blockedUserList = mutableListOf<String>()
+
+        // 현재 차단 목록 가져오기
+        val snapshot = userRef.get().await()
+        if (snapshot.exists()) {
+            val existBlockList = snapshot.get(BLOCK_USER_LIST) as? List<String>
+            if (existBlockList != null) {
+                blockedUserList.addAll(existBlockList)
+            }
+        }
+
+        // 차단 목록에서 제거
+        blockedUserList.remove(blockUserId)
+
+        // 업데이트된 차단 목록을 DB에 저장
+        userRef.update(BLOCK_USER_LIST, blockedUserList).await()
+    }
+
+    // 산책 매칭 저장
+    fun saveMatch(match: Match): Task<DocumentReference> {
+        val matchesCollection = db.collection(MATCHES_NAME)
+        return matchesCollection.add(match)
+    }
+
+    // Document Key 값으로 산책 매칭 데이터 가져오기
+    suspend fun getMatchById(matchId: String): DocumentSnapshot? {
+        return try {
+            db.collection(MATCHES_NAME)
+                .document(matchId)
+                .get()
+                .await()
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    // matches 컬렉션 내 문서의 특정 필드 업데이트
+    suspend fun updateFieldInMatchDocument(matchId: String, fieldName: String, updateValue: Any) {
+        val matchDocRef = db.collection(MATCHES_NAME).document(matchId)
+        val updateData = hashMapOf<String, Any>()
+        updateData[fieldName] = updateValue
+
+        try {
+            matchDocRef.update(updateData).await()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    suspend fun getChatRoomById(chatRoomId: String): DocumentSnapshot? {
+        return try {
+            db.collection(CHAT_ROOMS_NAME)
+                .document(chatRoomId)
+                .get()
+                .await()
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    suspend fun updateFieldInMessageDocument(chatRoomId: String, messageId: String, fieldName: String, updateValue: Any) {
+        val messageDocRef = db.collection(CHAT_ROOMS_NAME)
+            .document(chatRoomId)
+            .collection(MESSAGES_NAME)
+            .document(messageId)
+        val updateData = hashMapOf<String, Any>()
+        updateData[fieldName] = updateValue
+
+        try {
+            val snapshot = messageDocRef.get().await()
+            if (snapshot.exists()) {
+                val existingData = snapshot.data
+                Log.d(TAG, "Existing Data : $existingData")
+            }
+
+            messageDocRef.update(updateData).await()
+
+            val updatedSnapshot = messageDocRef.get().await()
+            if (updatedSnapshot.exists()) {
+                val updatedData = updatedSnapshot.data
+                Log.d(TAG, "Updated Data : $updatedData")
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Log.d(TAG, "Error updating field in message document: ${e.message}")
+        }
+    }
 }
