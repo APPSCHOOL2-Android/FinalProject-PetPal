@@ -1,13 +1,13 @@
-package com.petpal.mungmate.ui.managepet
+package com.petpal.mungmate.ui.pet
 
 data class PetUiState(
-    val name: String,
-    val breed: String,
-    val sex: String,
-    val age: Long,
-    val character: String,
-    val weigh: String,
-    val image:String
+    val name: String? = null,
+    val breed: String? = null,
+    val sex: String? = null,
+    val age: Long? = null,
+    val character: String? = null,
+    val weigh: String? = null,
+    val image: String? = null,
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

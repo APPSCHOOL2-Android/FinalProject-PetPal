@@ -4,7 +4,6 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -20,7 +19,6 @@ import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
-import com.google.firebase.storage.StorageReference
 import com.google.firebase.storage.ktx.storage
 import com.petpal.mungmate.R
 import com.petpal.mungmate.databinding.FragmentAddPetBinding
@@ -41,7 +39,8 @@ class AddPetFragment : Fragment() {
     private lateinit var _fragmentAddPetBinding: FragmentAddPetBinding
     private val fragmentAddPetBinding get() = _fragmentAddPetBinding
     private var userUid = ""
-    private lateinit var userBasicInfoData: UserBasicInfoData
+    //회원가입시에만 유효한 값
+    private var userBasicInfoData: UserBasicInfoData? = null
 
     // 갤러리 실행
     lateinit var galleryLauncher: ActivityResultLauncher<Intent>
@@ -51,6 +50,12 @@ class AddPetFragment : Fragment() {
         savedInstanceState: Bundle?,
     ): View? {
         _fragmentAddPetBinding = FragmentAddPetBinding.inflate(layoutInflater)
+
+        //추가(true)인지 수정(false)인지 식별
+        val isAdd = requireArguments().getBoolean("isAdd")
+        //회원가입인지 아닌지 식별
+        val isUserJoin = requireArguments().getBoolean("isUserJoin")
+
         userViewModel = ViewModelProvider(requireActivity())[UserViewModel::class.java]
         galleryLauncher = gallerySetting() { bitmap ->
             fragmentAddPetBinding.imageViewAddPet.setImageBitmap(bitmap)
@@ -78,8 +83,7 @@ class AddPetFragment : Fragment() {
         }
 
         val dogBreeds = resources.getStringArray(R.array.dog_breeds)
-        //추가(true)인지 수정(false)인지 식별
-        val isAdd = requireArguments().getBoolean("isAdd")
+
 
         fragmentAddPetBinding.run {
 
@@ -132,87 +136,99 @@ class AddPetFragment : Fragment() {
             }
 
             buttonPetComplete.setOnClickListener {
-                saveUserDataAndPetData()
+                if(isUserJoin) {
+                    //회원가입 시
+                    saveUserData()
+                    savePetData()
+                } else {
+                    //회원가입 아닐 시
+                    savePetData()
+                }
                 Snackbar.make(requireView(), "정보가 저장됐습니다.", Snackbar.LENGTH_SHORT).show()
+                findNavController().navigate(R.id.action_addPetFragment_to_mainFragment)
             }
         }
         return fragmentAddPetBinding.root
     }
 
-    private fun FragmentAddPetBinding.saveUserDataAndPetData() {
-
-        val storage = Firebase.storage
-        val userImageRef = storage.getReference("userImage").child(userUid)
-        val petImageRef = storage.getReference("petImage")
-            .child("${userUid}${fragmentAddPetBinding.textInputEditTextAddPetName.text.toString()}")
-
-        //storage에 사진 저장
-        uploadImage(userImageRef, petImageRef)
+    private fun savePetData() {
+        uploadPetImage()
 
         val db = Firebase.firestore
-        Log.d("user", userUid)
 
         val userRef = db.collection("users").document(userUid)
         val petRef = userRef.collection("pets").document()
 
-        db.runBatch { transaction ->
-            //사용자 정보 저장
-            transaction.set(
-                userRef, FirestoreUserBasicInfoData(
-                    userImageRef.path,
-                    userBasicInfoData.nickname,
-                    userBasicInfoData.birthday,
-                    userBasicInfoData.ageVisible,
-                    userBasicInfoData.gender,
-                    userBasicInfoData.availability,
-                    userBasicInfoData.walkHoursStart,
-                    userBasicInfoData.walkHoursEnd
-                )
+        val storage = Firebase.storage
+        val petImageRef = storage.getReference("petImage")
+            .child("${userUid}${fragmentAddPetBinding.textInputEditTextAddPetName.text.toString()}")
+
+        petRef.set(
+            PetData(
+                petImageRef.path,
+                fragmentAddPetBinding.textInputEditTextAddPetName.text.toString(),
+                fragmentAddPetBinding.autoCompleteTextViewPetBreed.text.toString(),
+                fragmentAddPetBinding.textInputPetBirthText.text.toString(),
+                getPetSex(fragmentAddPetBinding.toggleButtonPetGender.checkedButtonId).ordinal,
+                isPetNeutered(fragmentAddPetBinding.toggleButtonNeuter.checkedButtonId),
+                fragmentAddPetBinding.textInputEditTextPetWeight.text.toString().toDouble(),
+                fragmentAddPetBinding.textInputEditTextPetCharacter.text.toString()
             )
-            //반려견 정보 저장
-            transaction.set(
-                petRef, PetData(
-                    petImageRef.path,
-                    textInputEditTextAddPetName.text.toString(),
-                    autoCompleteTextViewPetBreed.text.toString(),
-                    textInputPetBirthText.text.toString(),
-                    getPetSex(toggleButtonPetGender.checkedButtonId).ordinal,
-                    isPetNeutered(toggleButtonNeuter.checkedButtonId),
-                    textInputEditTextPetWeight.text.toString().toDouble(),
-                    textInputEditTextPetCharacter.text.toString()
-                )
-            )
-        }.addOnSuccessListener {
-            Snackbar.make(requireView(), "정보가 저장됐습니다.", Snackbar.LENGTH_SHORT).show()
-            findNavController().navigate(R.id.action_addPetFragment_to_mainFragment)
-        }.addOnFailureListener { e ->
-            Log.w("saveUser", "Error writing document", e)
-        }
+        )
+
 
     }
 
-    private fun uploadImage(userImageRef: StorageReference, petImageRef: StorageReference) {
-        val userImage = userBasicInfoData.userImage
-        val petImage = (fragmentAddPetBinding.imageViewAddPet.drawable as BitmapDrawable).bitmap
+    private fun uploadPetImage() {
+        val storage = Firebase.storage
+        val petImageRef = storage.getReference("petImage")
+            .child("${userUid}${fragmentAddPetBinding.textInputEditTextAddPetName.text.toString()}")
 
-        //image 압축하기
-        val userBaos = ByteArrayOutputStream()
-        userImage.compress(Bitmap.CompressFormat.JPEG, 100, userBaos)
-        val userImageData = userBaos.toByteArray()
+        val petImage = (fragmentAddPetBinding.imageViewAddPet.drawable as BitmapDrawable).bitmap
 
         val petBaos = ByteArrayOutputStream()
         petImage.compress(Bitmap.CompressFormat.JPEG, 100, petBaos)
         val petImageData = petBaos.toByteArray()
 
-        //userImage/userUid
-        userImageRef.putBytes(userImageData)
-            .addOnSuccessListener { }
-            .addOnFailureListener { }
-
         //petImage/userUid초롱이
         petImageRef.putBytes(petImageData)
-            .addOnSuccessListener { }
-            .addOnFailureListener { }
+    }
+
+    private fun saveUserData() {
+        uploadUserImage()
+
+        val db = Firebase.firestore
+        val userRef = db.collection("users").document(userUid)
+
+        val storage = Firebase.storage
+        val userImageRef = storage.getReference("userImage").child(userUid)
+
+        userRef.set(
+            FirestoreUserBasicInfoData(
+                userImageRef.path,
+                userBasicInfoData!!.nickname,
+                userBasicInfoData!!.birthday,
+                userBasicInfoData!!.ageVisible,
+                userBasicInfoData!!.gender,
+                userBasicInfoData!!.availability,
+                userBasicInfoData!!.walkHoursStart,
+                userBasicInfoData!!.walkHoursEnd
+            )
+        )
+
+    }
+
+    private fun uploadUserImage() {
+
+        //image 압축하기
+        val userBaos = ByteArrayOutputStream()
+        userBasicInfoData?.userImage?.compress(Bitmap.CompressFormat.JPEG, 100, userBaos)
+        val userImageData = userBaos.toByteArray()
+
+        val storage = Firebase.storage
+        val userImageRef = storage.getReference("userImage").child(userUid)
+        //userImage/userUid
+        userImageRef.putBytes(userImageData)
     }
 
     private fun isPetNeutered(checkedButtonId: Int): Boolean {
